@@ -38,4 +38,3 @@ A goal for this project is to limit drastically the dependencies, to facilitate 
 3. node static_server
 4. point your WebGL enabled web browser to http://127.0.0.1:8000
 
-
