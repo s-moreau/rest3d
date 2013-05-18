@@ -1,0 +1,147 @@
+
+    <!-- shaders -->
+    <script id="shader-vs" type="x-shader/x-vertex">
+        attribute vec3 aVertex;
+        attribute vec3 aNormal;
+        attribute vec2 aTexCoord0;
+        uniform mat4 uPMatrix;
+        uniform mat4 uMVMatrix;
+        uniform vec3 uViewPosition;
+        varying vec3 vNormal;
+        varying vec3 vViewVec;
+        varying vec2 vTexCoord0;
+        void main(void) {
+            gl_Position = uPMatrix * uMVMatrix * vec4(aVertex, 1.0);
+            vNormal = aNormal;
+            vViewVec = uViewPosition.xyz - aVertex.xyz;
+            vTexCoord0 = aTexCoord0;
+        }
+    </script>
+    <script id="shader-fs" type="x-shader/x-fragment">
+        precision mediump float;
+        varying vec3 vNormal;
+        varying vec3 vViewVec;
+        varying vec2 vTexCoord0;
+        uniform vec4 uColor;
+        uniform sampler2D uTexture0;
+        void main(void) {
+            float v = 0.5 * (1.0 + dot(normalize(vViewVec), vNormal));
+            gl_FragColor = texture2D(uTexture0, vTexCoord0.st);
+        }
+    </script>
+    <script id="shader-vs-A" type="x-shader/x-fragment">
+      attribute vec3 position;
+      attribute vec3 normal;
+      attribute vec4 color;
+      attribute vec2 texcoord;
+
+      uniform mat4 world;
+      uniform mat4 worldn;
+      uniform mat4 viewProj;
+      uniform vec3 lightDir;
+      uniform float pointSize;
+      uniform float alphaScale;
+
+      varying vec3 worldPos;
+      varying vec3 worldNormal;
+      varying vec4 worldColor;
+      varying vec2 worldTexcoord;
+
+      void main() {
+        worldColor = vec4(color.xyz,color.w*alphaScale);
+        worldTexcoord = texcoord;
+        worldNormal = (worldn * vec4(normal, 0.0)).xyz;
+        vec4 wpos = world * vec4(position, 1.0);
+        worldPos = wpos.xyz;
+        gl_PointSize = pointSize;
+        gl_Position = viewProj * wpos;
+      }
+    </script>
+    <script id="shader-fs-A" type="x-shader/x-fragment">
+       #ifdef GL_ES
+          precision highp float;
+      #endif
+
+      varying vec3 worldPos;
+      varying vec3 worldNormal;
+      varying vec4 worldColor;
+      varying vec2 worldTexcoord;
+
+      uniform vec3 lightDir;
+      uniform vec4 lightCol0;
+      uniform vec4 lightCol1;
+      uniform vec4 hilightPlane;
+      uniform vec4 hilightCol;
+      uniform sampler2D tex;
+
+      void main() {
+        float dist = dot(vec4(worldPos,1.0), hilightPlane);
+        float backWeight = (1.0 - clamp(dist / 0.25, 0.0, 1.0));
+        float surfaceWeight = 1.0 - clamp(abs(dist) / 0.25, 0.0, 1.0);
+        float hilightWeight = max(backWeight*0.5,surfaceWeight);
+        vec3 normal = normalize(worldNormal);
+        vec4 light = mix(lightCol0,lightCol1, (1.0 + dot(normal, -lightDir))/2.0);
+        vec4 litCol = light * worldColor;
+        vec4 surfaceCol = litCol * texture2D(tex,worldTexcoord);
+        vec4 col = vec4(mix(surfaceCol.xyz,hilightCol.xyz, hilightWeight*hilightCol.w), worldColor.w);
+        gl_FragColor = col;
+      }
+      </script>
+      <script id="shader-fs-B" type="x-shader/x-fragment">
+      #ifdef GL_ES
+          precision highp float;
+      #endif
+
+      uniform float alphaScale;
+
+      void main() {
+        gl_FragColor = vec4(alphaScale,alphaScale,alphaScale,1);
+      }
+      </script>
+      <script id="shader-fs-C" type="x-shader/x-fragment">
+      #ifdef GL_ES
+          precision highp float;
+      #endif
+
+      varying vec3 worldPos;
+      varying vec3 worldNormal;
+      varying vec4 worldColor;
+      varying vec2 worldTexcoord;
+
+      uniform vec3 lightDir;
+      uniform vec4 lightCol0;
+      uniform vec4 lightCol1;
+
+      void main() {
+        vec3 normal = normalize(worldNormal);
+        vec4 light = mix(lightCol0,lightCol1, (1.0 + dot(normal, -lightDir))/2.0);
+        vec4 surfaceCol = light * worldColor;
+        gl_FragColor = vec4(surfaceCol.xyz, worldColor.w);
+    }
+    </script>
+    <script id="shader-fs-D" type="x-shader/x-fragment">
+      #ifdef GL_ES
+          precision highp float;
+      #endif
+      varying vec3 worldPos;
+      varying vec3 worldNormal;
+      varying vec4 worldColor;
+
+      uniform vec3 lightDir;
+      uniform vec4 lightCol0;
+      uniform vec4 lightCol1;
+      uniform vec4 hilightPlane;
+      uniform vec4 hilightCol;
+
+      void main() {
+        vec3 normal = normalize(worldNormal);
+        vec4 light = mix(lightCol0,lightCol1, (1.0 + dot(normal, -lightDir))/2.0);
+        vec4 surfaceCol = vec4((light * worldColor).xyz, worldColor.w);
+        float dist = dot(vec4(worldPos,1.0), hilightPlane);
+        float backWeight = (1.0 - clamp(-dist/4.0, 0.0, 1.0)) * (1.0 - clamp(dist / 0.25, 0.0, 1.0));
+        float surfaceWeight = 1.0 - clamp(abs(dist) / 0.25, 0.0, 1.0);
+        float hilightWeight = max(backWeight*0.5,surfaceWeight);
+        gl_FragColor = vec4(mix(surfaceCol.xyz,hilightCol.xyz, hilightWeight*hilightCol.w), surfaceCol.w);
+      }
+      </script>
+      

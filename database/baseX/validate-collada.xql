@@ -1,0 +1,1 @@
+try {  let $doc := doc('assets/duck/duck.dae')  let $dtd := doc('assets/collada_schema_1_4.xsd')  return validate:xsd($doc, $dtd)} catch BXVA0001 {  'DTD Validation failed.'}

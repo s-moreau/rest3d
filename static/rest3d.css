@@ -1,0 +1,46 @@
+a {text-decoration:none;}
+
+#sitename h1, #sitename h2 {
+font-weight: 400;
+margin: 0;
+
+}
+#sitename h1 {
+font-size: 2.4em;
+padding-top: 20px;
+}
+#sitename h2 {
+-webkit-margin-start: 10px;
+}
+h1 {
+display: block;
+font-size: 2em;
+-webkit-margin-before: 0.67em;
+-webkit-margin-after: 0.67em;
+-webkit-margin-start: 0px;
+-webkit-margin-end: 0px;
+font-weight: bold;
+}
+#sitename {
+color: rgb(45, 26, 119);
+text-align: left;
+}
+#container {
+color: rgb(45, 26, 139);
+text-align: left;
+}
+body {
+color: #303030;
+font: 76% Verdana,Tahoma,Arial,sans-serif;
+text-align: center;
+}
+ul, menu, dir {
+display: block;
+list-style-type: disc;
+-webkit-margin-before: 1em;
+-webkit-margin-after: 1em;
+-webkit-margin-start: 0px;
+-webkit-margin-end: 0px;
+-webkit-padding-start: 30px;
+line-height:150%;
+}

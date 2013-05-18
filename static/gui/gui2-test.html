@@ -1,0 +1,144 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<!-- saved from url=http://layout.jquery-dev.net/demos/tabs.html -->
+<html>
+	
+	<link rel="stylesheet" type="text/css" href="themes/vader/jquery-ui.css">
+
+
+	<style type="text/css">
+	.ui-widget {
+		font-size:10px;
+	}
+
+	.ui-widget-content {
+		border: 0 !important;
+	}
+
+	.ui-widget-header {
+		font-weight: normal;
+	}
+	.ui-resizable-helper { 
+		border: 2px dotted #00F; 
+	}
+	
+	.ui-tabs .ui-tabs-panel {
+		padding: 0;
+	}
+	
+	.ui-layout-content {
+		overflow:		auto; /* add scrolling to content-divs (panel-wrappers) */
+		border-top:		0 !important; /* tab-buttons above this DIV already has a border-bottom */
+	}
+	/*
+	 *	TAB-THEME ADJUSTMENTS
+	 */
+	.ui-tabs-nav li {
+		white-space:	nowrap;
+	}
+	.ui-tabs-nav li a {
+		font-size:		1em !important;
+		padding:		4px 1.5ex 3px !important;
+	}
+	.ui-tabs-panel {
+		font-size:		1em !important;
+		/*padding:		0 1em !important; -- this moves content to the right */
+	}
+	/*
+	 *	WEST-PANE TABS
+	 *
+	 *	These tabs 'fill' the pane,
+	 *	so the pane-border acts as the tab-border
+	 */
+	.ui-layout-pane {
+		padding:	0;
+		overflow:	hidden;
+		border-width: 0;
+	}
+	.ui-layout-pane .ui-tabs-nav {
+		/* don't need border or rounded corners - tabs 'fill' the pane */
+		border-top:		0;
+		border-left:	0;
+		border-right:	0;
+		padding-bottom:	0 !important;
+		-moz-border-radius:		0;
+		-webkit-border-radius:	0;
+	}
+
+	/* .ui-layout-pane { background: #EEE; border-width: 0;} */
+	/*.ui-layout-west { background: #CFC;} */
+	/*.ui-layout-center { background: #FFC; padding: 0;} */
+	/*.ui-layout-center > .wrapper { padding: 10px;} */
+	.ui-layout-north { border-bottom-width: 1px; text-align:center;}
+	.ui-layout-south { border-top-width: 1px;}
+	.ui-layout-resizer-west { border-width: 0 1px;}
+	.ui-layout-resizer-west-dragging ,
+	.ui-layout-resizer-west:hover	{ background: url(/gui/img/resizable-w.gif) repeat-y center; }
+	/* .ui-layout-toggler-west { border-width: 0;} */
+	/* .ui-layout-toggler-west div { width: 8px; height: 35px;} */
+	/* .ui-layout-toggler-west .btnCenter	{ background: #00C; } */
+
+
+
+
+  </style>
+
+  <script src="/deps/jquery.js"></script>
+  <script src="/deps/jquery-ui.js"></script>
+  <script type="text/javascript" src="/deps/jquery.layout.js"></script>
+  <script type="text/javascript" src="/gui/gui2.js"> </script>
+  <script type="text/javascript" src="/deps/webgl-utils.js"></script>
+
+
+	<script type="text/javascript">
+
+		$(function() {
+
+			// PAGE LAYOUT
+			var layout=GUI.layout();
+
+			GUI.window('Nunc tincidunt','west');
+			myLayout.initContent("west");
+
+
+			// TABS-CENTER - sortable
+			$(".ui-layout-center")
+				.tabs({
+					change: function () {  }
+				})
+				.find(".ui-tabs-nav")
+					.sortable({ axis: 'x', zIndex: 2 })
+			;
+			
+
+			GUI.label('Mauris eleifend est et turpis. Duis id erat. Suspendisse potenti. Aliquam vulputate, pede vel vehicula accumsan, mi neque rutrum erat, eu congue orci lorem eget lorem. Vestibulum non ante. Class aptent taciti sociosqu ad litora torquent per conubia nostra, per inceptos himenaeos. Fusce sodales. Quisque eu urna vel enim commodo pellentesque. Praesent eu risus hendrerit ligula tempus pretium. Curabitur lorem enim, pretium nec, feugiat nec, luctus a, lacus.',$('#tabs-center-2'));
+			GUI.label('Duis cursus. Maecenas ligula eros, blandit nec, pharetra at, semper at, magna. Nullam ac lacus. Nulla facilisi. Praesent viverra justo vitae neque. Praesent blandit adipiscing velit. Suspendisse potenti. Donec mattis, pede vel pharetra blandit, magna ligula faucibus eros, id euismod lacus dolor eget odio. Nam scelerisque. Donec non libero sed nulla mattis commodo. Ut sagittis. Donec nisi lectus, feugiat porttitor, tempor ac, tempor vitae, pede. Aenean vehicula velit eu tellus interdum rutrum. Maecenas commodo. Pellentesque nec elit. Fusce in lacus. Vivamus a libero vitae lectus hendrerit hendrerit.',$('#tabs-center-2'));
+			GUI.label('Mauris eleifend est et turpis. Duis id erat. Suspendisse potenti. Aliquam vulputate, pede vel vehicula accumsan, mi neque rutrum erat, eu congue orci lorem eget lorem. Vestibulum non ante. Class aptent taciti sociosqu ad litora torquent per conubia nostra, per inceptos himenaeos. Fusce sodales. Quisque eu urna vel enim commodo pellentesque. Praesent eu risus hendrerit ligula tempus pretium. Curabitur lorem enim, pretium nec, feugiat nec, luctus a, lacus.',$('#tabs-west-1'));
+			GUI.label('uis cursus. Maecenas ligula eros, blandit nec, pharetra at, semper at, magna. Nullam ac lacus. Nulla facilisi. Praesent viverra justo vitae neque. Praesent blandit adipiscing velit. Suspendisse potenti. Donec mattis, pede vel pharetra blandit, magna ligula faucibus eros, id euismod lacus dolor eget odio. Nam scelerisque. Donec non libero sed nulla mattis commodo. Ut sagittis. Donec nisi lectus, feugiat porttitor, tempor ac, tempor vitae, pede. Aenean vehicula velit eu tellus interdum rutrum. Maecenas commodo. Pellentesque nec elit. Fusce in lacus. Vivamus a libero vitae lectus hendrerit hendrerit.',$('#tabs-west-1'));
+			GUI.label('Morbi tincidunt, dui sit amet facilisis feugiat, odio metus gravida ante, ut pharetra massa metus id nunc. Duis scelerisque molestie turpis. Sed fringilla, massa eget luctus malesuada, metus eros molestie lectus, ut tempus eros massa ut dolor. Aenean aliquet fringilla sem. Suspendisse sed ligula in ligula suscipit aliquam. Praesent in eros vestibulum mi adipiscing adipiscing. Morbi facilisis. Curabitur ornare consequat nunc. Aenean vel metus. Ut posuere viverra nulla. Aliquam erat volutpat. Pellentesque convallis. Maecenas feugiat, tellus pellentesque pretium posuere, felis lorem euismod felis, eu ornare leo nisi vel felis. Mauris consectetur tortor et purus.',$('#tabs-west-1'));
+			GUI.label('Morbi tincidunt, dui sit amet facilisis feugiat, odio metus gravida ante, ut pharetra massa metus id nunc. Duis scelerisque molestie turpis. Sed fringilla, massa eget luctus malesuada, metus eros molestie lectus, ut tempus eros massa ut dolor. Aenean aliquet fringilla sem. Suspendisse sed ligula in ligula suscipit aliquam. Praesent in eros vestibulum mi adipiscing adipiscing. Morbi facilisis. Curabitur ornare consequat nunc. Aenean vel metus. Ut posuere viverra nulla. Aliquam erat volutpat. Pellentesque convallis. Maecenas feugiat, tellus pellentesque pretium posuere, felis lorem euismod felis, eu ornare leo nisi vel felis. Mauris consectetur tortor et purus.',$('#tabs-west-1'));
+			GUI.label('Morbi tincidunt, dui sit amet facilisis feugiat, odio metus gravida ante, ut pharetra massa metus id nunc. Duis scelerisque molestie turpis. Sed fringilla, massa eget luctus malesuada, metus eros molestie lectus, ut tempus eros massa ut dolor. Aenean aliquet fringilla sem. Suspendisse sed ligula in ligula suscipit aliquam. Praesent in eros vestibulum mi adipiscing adipiscing. Morbi facilisis. Curabitur ornare consequat nunc. Aenean vel metus. Ut posuere viverra nulla. Aliquam erat volutpat. Pellentesque convallis. Maecenas feugiat, tellus pellentesque pretium posuere, felis lorem euismod felis, eu ornare leo nisi vel felis. Mauris consectetur tortor et purus.',$('#tabs-center-2'));
+			GUI.button('my button',$('#tabs-west-1'));
+			var canvas=GUI.canvas($('#tabs-center-1'));
+			init(canvas);
+
+			layout.resizeAll();
+		});
+
+
+
+    init = function (canvas){
+	 	var gl = WebGLUtils.setupWebGL(canvas);
+
+	    gl.clearColor(1.0, 0.0, 0.0, 1.0);                      // Set clear color to black, fully opaque
+	    gl.enable(gl.DEPTH_TEST);                               // Enable depth testing
+	    gl.depthFunc(gl.LEQUAL);                                // Near things obscure far things
+	    gl.clear(gl.COLOR_BUFFER_BIT|gl.DEPTH_BUFFER_BIT);      // Clear the color as well as the depth buffer.
+
+	};
+	</script>
+
+</head>
+
+	<body>
+
+</body></html>
