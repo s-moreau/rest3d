@@ -1,14 +1,41 @@
-rest3d
-======
+# rest3D project
 
-REST3D PROJECT 
+see www.rest3d.org
 
-see www.rest3d.org 
+## Description
 
-SETUP
+This is a MIT licensed open source work-in-progress implementation of a rest3D client/server system.
+A goal for this project is to limit drastically the dependencies, to facilitate re-use of the code.
 
-git clone https://github.com/amd/rest3d.git
+* static/  
+  This contains all the files that will be served by a static http server
+  * loaders  
+    Contains a collada.js loader, a gltf.js loader. Those loaders are written to be usable in as-is in other projects
+  * gui/  
+    Contains a simple Graphical User Interface API based on jquery-ui / jquery-layout. img/ contains the GUI images, themes/ contain the themes used by jquery-ui
+  * deps/  
+    Contans all the external dependences used by all the scripts in static, in source and min. 
+    gl-matrix.js, jquery.js, jquery-ui.js, jquery.layout.js, webgl-debug.js, webgl-utils.js
+  * models/  
+    Sample models in COLLADA and glTF format
+  * spore/  
+    The spore creature viewer modified to use collada.js loader
+  * viewer/  
+    A simple viewer that evolves to be a rest3D interface
 
-git submodule update --init --recursive
+* server/  
+  This contains a choice of node.js servers
+  * A simple static_server that can be used to http serve the static/ folder
+  * A rest3d_server 
+  * A rest3d_database_server 
 
-git submodule foreach git pull origin master
+* database/  
+  This will contains a XML database server
+
+## Setup
+1. git clone https://bitbucket.org/rarnaud/rest3d.git
+2. cd server; npm install
+3. node static_server
+4. point your WebGL enabled web browser to http://127.0.0.1:8000
+
+

@@ -1,0 +1,16 @@
+create database assets
+set autoflush false
+set createfilter *.dae
+set parser xml
+add assets
+add assets.xml
+add collada_schema_1_4.xsd
+set createfilter  *.bin,*.json,*.png,*.jpg,*.glsl
+set parser raw
+add assets
+flush
+optimize
+close
+create user guest 084e0343a0486ff05530df6c705c8bb4
+grant read to guest
+exit

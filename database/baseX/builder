@@ -1,0 +1,9 @@
+#!/bin/bash
+
+echo 'THIS IS builder script'
+cd ${SERVICE_APPROOT:=.}
+
+# Copy code to $HOME.
+rsync -aH ./ $HOME/
+
+cd $HOME

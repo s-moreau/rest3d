@@ -1,0 +1,11 @@
+++ prerequisite
+ npm install node-inspector
+
+++ using inspectorsdA
+need 2 cmd window
+[1] node --debug-brk server.js
+[2] cd node_modules/.bin
+    node-inspector &
+
+then open chrome with: http://127.0.0.1:8080/debug?port=5858
+

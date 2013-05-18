@@ -1,0 +1,423 @@
+<!DOCTYPE HTML PUBLIC "-//IETF//DTD HTML//EN">
+<!--
+ Copyright (c) 2013 Rémi Arnaud -- remi (at) acm (dot) org
+
+ Permission is hereby granted, free of charge, to any person
+ obtaining a copy of this software and associated documentation
+ files (the "Software"), to deal in the Software without
+ restriction, including without limitation the rights to use,
+ copy, modify, merge, publish, distribute, sublicense, and/or sell
+ copies of the Software, and to permit persons to whom the
+ Software is furnished to do so, subject to the following
+ conditions:
+
+ The above copyright notice and this permission notice shall be
+ included in all copies or substantial portions of the Software.
+
+ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
+ EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES
+ OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
+ NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT
+ HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY,
+ WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
+ FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
+ OTHER DEALINGS IN THE SOFTWARE.
+-->
+<head>
+    <script type="text/javascript" src="/gui/gui3.js"></script>
+    <script type="text/javascript" src="/deps/webgl-utils.js"></script>
+    <script type="text/javascript" src="/loaders/collada.js"></script>
+    <script type="text/javascript" src="/spore/sporefile.js"></script>
+    <style type="text/css">
+        .ui-widget {
+            font-size:10px;
+        }
+        .ui-widget-content {
+            border: 0 !important;
+        }
+        .ui-widget-header {
+            font-weight: normal;
+        }
+        .ui-resizable-helper {
+            border: 2px dotted #00F;
+        }
+        .ui-tabs .ui-tabs-panel {
+            padding: 0;
+        }
+        .ui-layout-content {
+            overflow: auto;
+            /* add scrolling to content-divs (panel-wrappers) */
+            border-top: 0 !important;
+            /* tab-buttons above this DIV already has a border-bottom */
+        }
+        /*
+	 *	TAB-THEME ADJUSTMENTS
+	 */
+        .ui-tabs-nav li {
+            white-space: nowrap;
+        }
+        .ui-tabs-nav li a {
+            font-size: 1em !important;
+            padding: 4px 1.5ex 3px !important;
+        }
+        .ui-tabs-panel {
+            font-size: 1em !important;
+            /*padding:		0 1em !important; -- this moves content to the right */
+        }
+        /*
+	 *	WEST-PANE TABS
+	 *
+	 *	These tabs 'fill' the pane,
+	 *	so the pane-border acts as the tab-border
+	 */
+        .ui-layout-pane {
+            padding: 0;
+            overflow: hidden;
+            border-width: 0;
+        }
+        .ui-layout-pane .ui-tabs-nav {
+            /* don't need border or rounded corners - tabs 'fill' the pane */
+            border-top: 0;
+            border-left: 0;
+            border-right: 0;
+            padding-bottom: 0 !important;
+            -moz-border-radius: 0;
+            -webkit-border-radius: 0;
+        }
+        .ui-layout-north {
+            border-bottom-width: 1px;
+            text-align:center;
+        }
+        .ui-layout-south {
+            border-top-width: px;
+        }
+        .ui-layout-resizer-west {
+            border-width: 0 1px;
+        }
+        .ui-layout-resizer-west-dragging, .ui-layout-resizer-west:hover {
+            background: url(img/resizable-w.gif) repeat-y center;
+        }
+    </style>
+    <!-- shaders -->
+    <script id="shader-vs" type="x-shader/x-vertex">
+        attribute vec3 aVertex;
+        attribute vec3 aNormal;
+        attribute vec2 aTexCoord0;
+        uniform mat4 uPMatrix;
+        uniform mat4 uMVMatrix;
+        uniform vec3 uViewPosition;
+        varying vec3 vNormal;
+        varying vec3 vViewVec;
+        varying vec2 vTexCoord0;
+        void main(void) {
+            gl_Position = uPMatrix * uMVMatrix * vec4(aVertex, 1.0);
+            vNormal = aNormal;
+            vViewVec = uViewPosition.xyz - aVertex.xyz;
+            vTexCoord0 = aTexCoord0;
+        }
+    </script>
+    <script id="shader-fs" type="x-shader/x-fragment">
+        precision mediump float;
+        varying vec3 vNormal;
+        varying vec3 vViewVec;
+        varying vec2 vTexCoord0;
+        uniform vec4 uColor;
+        uniform sampler2D uTexture0;
+        void main(void) {
+            float v = 0.5 * (1.0 + dot(normalize(vViewVec), vNormal));
+            gl_FragColor = texture2D(uTexture0, vTexCoord0.st);
+        }
+    </script>
+    <script type="text/javascript">
+        var shaders = {};
+
+        function getShader(gl, id) {
+            var shaderScript = document.getElementById(id);
+            if (!shaderScript) return null;
+            var str = "";
+            var k = shaderScript.firstChild;
+            while (k) {
+                if (k.nodeType == 3) str += k.textContent;
+                k = k.nextSibling;
+            }
+            var shader;
+            if (shaderScript.type == "x-shader/x-fragment") {
+                shader = gl.createShader(gl.FRAGMENT_SHADER);
+            } else if (shaderScript.type == "x-shader/x-vertex") {
+                shader = gl.createShader(gl.VERTEX_SHADER);
+            } else {
+                return null;
+            }
+            gl.shaderSource(shader, str);
+            gl.compileShader(shader);
+            if (!gl.getShaderParameter(shader, gl.COMPILE_STATUS) && !gl.isContextLost()) {
+                alert(gl.getShaderInfoLog(shader));
+                return null;
+            }
+            return shader;
+        };
+        var pmMatrix = mat4.create();
+        var vpos = vec3.create();
+        var mvMatrixStack = [];
+        var mvMatrix = mat4.create();
+        var deg2rad = 0.0174532925; // constant
+        var currentRotationX = 0;
+        var currentRotationY = 0;
+        var currentScale = 0;
+
+        function pushMatrix(m) {
+            if (m) {
+                mvMatrixStack.push(mat4.clone(m));
+                mvMatrix = mat4.clone(m);
+            } else {
+                mvMatrixStack.push(mat4.clone(mvMatrix));
+            }
+        }
+
+        function popMatrix() {
+            if (mvMatrixStack.length == 0) throw "Invalid popMatrix!";
+            mvMatrix = mvMatrixStack.pop();
+            return mvMatrix;
+        }
+
+        var gl=null;
+        function init(canvas) {
+            gl = WebGLUtils.setupWebGL(canvas);
+            gl.clearColor(1.0, 0.0, 0.0, 1.0); // Set clear color to black, fully opaque
+            gl.enable(gl.DEPTH_TEST); // Enable depth testing
+            gl.depthFunc(gl.LESS); // Near things obscure far things
+            gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT); // Clear the color as well as the depth buffer.
+        };
+
+        function renderStart() {
+        	 GUI.label('model is loaded', win);
+            // create program
+            shaders.fs = getShader(gl, "shader-fs");
+            shaders.vs = getShader(gl, "shader-vs");
+            shaders.sp = gl.createProgram();
+            gl.attachShader(shaders.sp, shaders.vs);
+            gl.attachShader(shaders.sp, shaders.fs);
+            gl.linkProgram(shaders.sp);
+            if (!gl.getProgramParameter(shaders.sp, gl.LINK_STATUS) && !gl.isContextLost()) {
+                alert(gl.getProgramInfoLog(shader));
+            }
+            gl.useProgram(shaders.sp);
+            // create attributes and uniforms
+            var sp = shaders.sp;
+            var va = gl.getAttribLocation(sp, "aVertex");
+            var na = gl.getAttribLocation(sp, "aNormal");
+            var ta = gl.getAttribLocation(sp, "aTexCoord0");
+            var mvUniform = gl.getUniformLocation(sp, "uMVMatrix");
+            var pmUniform = gl.getUniformLocation(sp, "uPMatrix");
+            var tex0Uniform = gl.getUniformLocation(sp, "uTexture0");
+            var viewPositionUniform = gl.getUniformLocation(sp, "uViewPosition");
+            var colorUniform = gl.getUniformLocation(sp, "uColor");
+            if (colorUniform) 
+                gl.uniform4fv(colorUniform, vec4.fromValues(0.1, 0.2, 0.4, 1.0));
+            //var pmMatrix = makePerspective(60, 1, 0.1, 100);
+            mat4.perspective(pmMatrix, 60 * deg2rad, 1, 0.1, 100);
+            //var pmMatrix = makePerspective(90, 1, 0.01, 10000);
+            //var pmMatrix = makeOrtho(-20,20,-20,20, 0.01, 10000);
+            // set up the vbos
+            var buffers = {};
+            buffers.position = gl.createBuffer();
+            gl.bindBuffer(gl.ARRAY_BUFFER, buffers.position);
+            gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(sf.mesh.position), gl.STATIC_DRAW);
+            gl.bindBuffer(gl.ARRAY_BUFFER, buffers.position);
+            gl.vertexAttribPointer(va, 3, gl.FLOAT, false, 0, 0);
+            gl.enableVertexAttribArray(va);
+            if (na != -1) {
+                buffers.normal = gl.createBuffer();
+                gl.bindBuffer(gl.ARRAY_BUFFER, buffers.normal);
+                gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(sf.mesh.normal), gl.STATIC_DRAW);
+                gl.bindBuffer(gl.ARRAY_BUFFER, buffers.normal);
+                gl.vertexAttribPointer(na, 3, gl.FLOAT, false, 0, 0);
+                gl.enableVertexAttribArray(na);
+            }
+            if (ta != -1) {
+                buffers.texcoord = gl.createBuffer();
+                gl.bindBuffer(gl.ARRAY_BUFFER, buffers.texcoord);
+                gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(sf.mesh.texcoord), gl.STATIC_DRAW);
+                gl.bindBuffer(gl.ARRAY_BUFFER, buffers.texcoord);
+                gl.vertexAttribPointer(ta, 2, gl.FLOAT, false, 0, 0);
+                gl.enableVertexAttribArray(ta);
+            }
+            var numVertexPoints = sf.mesh.position.length / 3;
+
+            // get bounding box and set camera
+            var bbox = sf.mesh.bbox;
+            var midx = (bbox.min.x + bbox.max.x) / 2;
+            var midy = (bbox.min.y + bbox.max.y) / 2;
+            var midz = (bbox.min.z + bbox.max.z) / 2;
+            var maxdim = bbox.max.x - bbox.min.x;
+            maxdim = Math.max(maxdim, bbox.max.y - bbox.min.y);
+            maxdim = Math.max(maxdim, bbox.max.z - bbox.min.z);
+            var m = mat4.create();
+            mat4.lookAt(m, 
+            	vec3.fromValues(midx, midz, midy - (maxdim * 1.5)), 
+            	vec3.fromValues(midx, midz, midy),
+                vec4.fromValues(0, 1, 0));
+            //multMatrix(m);
+            mat4.multiply(mvMatrix, mvMatrix, m);
+            //mvRotate(90,[1,0,0]);
+            mat4.rotate(mvMatrix, mvMatrix, 90 * deg2rad, vec3.fromValues(1, 0, 0));
+            //mvScale([1,1,-1]);
+            mat4.scale(mvMatrix, mvMatrix, vec3.fromValues(1, 1, -1));
+
+            GUI.label('Initializing canvas mouse events', win);
+            var mouseDown = false;
+            var lastX, lastY = 0;
+            // attach mouse events to canvas
+
+            function mouseDownHandler(ev) {
+                mouseDown = true;
+                lastX = ev.screenX;
+                lastY = ev.screenY;
+                return true;
+            }
+
+            function mouseMoveHandler(ev) {
+                if (!mouseDown) return false;
+                
+                var mdelta = ev.screenX - lastX;
+                lastX = ev.screenX;
+                currentRotationX -= mdelta;
+                while (currentRotationX < 0) currentRotationX += 360;
+                if (currentRotationX >= 360) currentRotationX = currentRotationX % 360;
+
+                var mdelta = ev.screenY - lastY;
+                lastY = ev.screenY;
+                currentRotationY -= mdelta;
+                while (currentRotationY < 0) currentRotationY += 360;
+                if (currentRotationY >= 360) currentRotationY = currentRotationY % 360;
+                
+                draw();
+                return true;
+            }
+
+            function mouseUpHandler(ev) {
+                mouseDown = false;
+            }
+
+            function mouseWheelHandler(ev) {
+
+            	var mdelta = ev.wheelDelta;
+            	currentScale += mdelta/1000;
+
+                draw();
+                return true;
+            }
+            
+            canvas.removeEventListener("mousedown", mouseDownHandler, false);
+            canvas.removeEventListener("mousemove", mouseMoveHandler, false);
+            canvas.removeEventListener("mouseup", mouseUpHandler, false);
+            canvas.removeEventListener("mousewheel", mouseWheelHandler, false);
+            canvas.addEventListener("mousedown", mouseDownHandler, false);
+            canvas.addEventListener("mousemove", mouseMoveHandler, false);
+            canvas.addEventListener("mouseup", mouseUpHandler, false);
+            canvas.addEventListener("mousewheel", mouseWheelHandler, false);
+
+            GUI.label('Use left mouse click to rotate',win);
+            GUI.label('Use mouse wheel to zoom',win);
+            // redraw on resize
+            $(canvas).bind('resize',draw);
+
+            // and then draw?
+            draw();
+            if (!sf.textures.diffuse.complete) {
+                sf.textures.diffuse.onload = draw;
+            };
+        
+	        var texturesBound = false;
+	        
+	        function draw() {
+	   
+	            pushMatrix();
+	            //mvRotate(currentRotation,[0,0,1]);
+	            mat4.translate(mvMatrix, mvMatrix, vec3.fromValues(0,currentScale,0));
+	            mat4.rotate(mvMatrix, mvMatrix, currentRotationX * deg2rad, vec3.fromValues(0, 0, 1));
+	            mat4.rotate(mvMatrix, mvMatrix, currentRotationY * deg2rad, vec3.fromValues(0, 1, 0));
+
+	            gl.uniformMatrix4fv(mvUniform, false, mvMatrix);
+	            gl.uniformMatrix4fv(pmUniform, false, pmMatrix);
+	            gl.uniform3fv(viewPositionUniform, vpos);
+
+	            // the texture might still be loading
+	            if (!texturesBound) {
+	                if (sf.textures.diffuse) {
+	                    if (sf.textures.diffuse.complete) {
+	                        if (sf.textures.diffuse.width > 0 && sf.textures.diffuse.height > 0) {
+	                            // the texture is ready for binding
+	                            var texid = gl.createTexture();
+	                            gl.activeTexture(gl.TEXTURE0);
+	                            gl.bindTexture(gl.TEXTURE_2D, texid);
+	                            gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, true);
+	                            gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, sf.textures.diffuse);
+	                            gl.generateMipmap(gl.TEXTURE_2D);
+	                            gl.uniform1i(tex0Uniform, 0);
+	                        }
+	                        texturesBound = true;
+	                    }
+	                } else {
+	                    texturesBound = true;
+	                }
+	            }
+	            var width=$(canvas).width();
+	            var height=$(canvas).height()
+
+	            // todo - var aspect = gl.canvas.clientWidth / gl.canvas.clientHeight; 
+	            // .perspective(fieldOfView, aspect, zNear, zFar);
+
+	            gl.viewport(0,0, width, height);
+	            //gl.viewport(0, 0, canvas.width, canvas.width);
+	            gl.clearColor(1, 0, 0, 1);  // red
+				  gl.disable(gl.SCISSOR_TEST);
+				  gl.clearDepth(1.0);
+	            gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
+	            gl.enable(gl.DEPTH_TEST);
+				
+				    
+				  gl.enable(gl.SCISSOR_TEST);
+				  gl.scissor(1, 1, width - 2, height - 2);
+				  gl.clearColor(0, 1, 0, 1);  // green
+				  gl.clear(gl.COLOR_BUFFER_BIT);
+
+	            
+	            gl.drawArrays(gl.TRIANGLES, 0, numVertexPoints);
+	            popMatrix();
+	        }
+	    };
+
+	    var win=null;
+	    var canvas=null;
+        $(function () {
+            var layout = GUI.layout();
+            win = GUI.window('UI', 'center');
+            var viewer = GUI.window('Canvas', 'west');
+            layout.initContent('center');
+            layout.initContent('west');
+            GUI.label('Initializing webGL', win);
+            var button1 = GUI.button('button 1', win);
+            //var button2 = GUI.button('button 2', win);
+
+            canvas = GUI.canvas(viewer);
+            layout.resetOverflow('west');
+            $canvas.bind('webglcontextlost', function (e) {
+                e.preventDefault();
+            });
+            $canvas.bind('webglcontextrestored', function () {
+                init(canvas);
+            });
+            // initialize webGL
+            init(canvas);
+            // load model
+             GUI.label('loading model', win);
+            sf = new SporeFile();
+            sf._loadHandler = renderStart;
+            sf.load("/models/amahani/Amahani.dae");
+
+
+        });
+    </script>
+</head>
+<body><p id="info"/></body>
