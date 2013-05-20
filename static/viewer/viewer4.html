@@ -508,10 +508,7 @@ THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. -->
             }
         });
         GUI.label("", win);
-        var button2 = GUI.button('load duck dae rest3d', win, function () {
-            sf = new window.daeFile();
-            COLLADA.load("/rest3d/assets/duck/duck.dae", sf.parse.bind(sf));
-        });
+
         var button3 = GUI.button('load duck DAE', win, function () {
             sf = new window.daeFile();
             COLLADA.load("/models/duck/duck.dae", sf.parse.bind(sf));

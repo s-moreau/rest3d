@@ -1097,11 +1097,11 @@ if (window.TextureUtil === undefined)
           "uniform float uAlphaScale;"+
           "varying vec2 vTexCoord0;"+
           "varying vec4 vColor;"+
-          "varying vec3 v_normal;"+
+          "varying vec3 vNormal;"+
           "void main(void) {"+
           "    gl_Position = uPMatrix * uMVMatrix * vec4(aVertex, 1.0);"+
           "    vColor = vec4(aColor.xyz,aColor.w*uAlphaScale);"+
-          "    v_normal = normalize(uNMatrix * aNormal);"+
+          "    vNormal = normalize(uNMatrix * aNormal);"+
           "    vTexCoord0 = aTexCoord0;"+
           "}";
 
@@ -1110,11 +1110,13 @@ if (window.TextureUtil === undefined)
           //"precision highp float;"+
           "varying vec2 vTexCoord0;"+
           "varying vec4 vColor;"+
-          "varying vec3 v_normal;"+
+          "varying vec3 vNormal;"+
           "uniform vec4 uColor;"+
           "uniform sampler2D uTexture0;"+
           "void main(void) {"+
-          "    gl_FragColor = vColor * texture2D(uTexture0, vTexCoord0.st) * max(dot(v_normal,vec3(0.,0.,1.)), 0.);;"+
+            "float lambert = max(dot(vNormal,vec3(0.,0.,1.)), 0.2);"+
+            "vec4 color = vColor * texture2D(uTexture0, vTexCoord0) * vec4(lambert,lambert,lambert,1.);"+
+            "gl_FragColor = vec4(color.rgb * color.a, color.a);"+
           "}";
 
 
