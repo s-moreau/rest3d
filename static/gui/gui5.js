@@ -1,7 +1,7 @@
 /*
  GUI.js 0.0.1
 
- Copyright (c) 2013 Rémi Arnaud -- remi (at) acm (dot) org
+Copyright (c) 2013 Rémi Arnaud - Advanced Micro Devices, Inc.
 
  Permission is hereby granted, free of charge, to any person
  obtaining a copy of this software and associated documentation
