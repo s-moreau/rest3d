@@ -1,9 +1,9 @@
 /*
- GUI.js 0.0.1
+ GUI.js 
 
 The MIT License (MIT)
 
-Copyright (c) 2013 Advanced Micro Devices, Inc.
+Copyright (c) 2013 Rémi Arnaud - Advanced Micro Devices, Inc.
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -162,7 +162,7 @@ if (window.$ === undefined) {
     		'<div class="ui-layout-north ui-widget-header" >GUI test</div>'+
 			'<div class="ui-layout-west ui-widget-content ui-corner-all ui-layout-pane ui-layout-pane-west"></div>'+
 			'<div class="ui-layout-center ui-widget-content"></div>'+
-			'<div class="ui-layout-south ui-widget-header">&copy; R&eacute;mi Arnaud, Advanced Micro Devices, Inc. 2013</div>'+
+			'<div class="ui-layout-south ui-widget-header">&copy; R&eacute;mi Arnaud - Advanced Micro Devices, Inc. 2013</div>'+
 			'<div class="ui-layout-resizer ui-layout-resizer-west ui-layout-resizer-open ui-layout-resizer-west-open" ></div>');
     	$('body').append($layout);
 
