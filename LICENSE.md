@@ -1,6 +1,4 @@
 The MIT License (MIT)
-[OSI Approved License]
-The MIT License (MIT)
 
 Copyright (c) 2013 Advanced Micro Devices, Inc.
 
