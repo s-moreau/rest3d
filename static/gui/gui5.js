@@ -46,7 +46,7 @@ if (window.$ === undefined) {
     document.write('<script type="text/javascript" src="/deps/jquery.jstree.js"><\/' + 'script>');
     //document.write('<link href="/gui/themes/vader/ui.dynatree.css" rel="stylesheet" type="text/css" />');
 
-    document.write('<link rel="stylesheet" href="/gui/GUI4.css" />');
+    document.write('<link rel="stylesheet" href="/gui/GUI5.css" />');
 }
 
 
@@ -103,7 +103,7 @@ if (window.$ === undefined) {
 			$('body').append($button);
 		else 
 			$(_parent).append($button);
-        return $button[0];
+        return $button
     };
     GUI.label = function(_txt, _parent, _id) {
         var label = '<p';
@@ -115,9 +115,10 @@ if (window.$ === undefined) {
 			$('body').append($label);
 		else 
 			$(_parent).append($label);
-        return $label[0];
+        return $label;
     };
-    GUI.tree = function(_tree, _parent, _id) {
+    GUI.tree = function(_tree, _parent, _callback, _id) {
+        var cb = _callback;
         var tree = '<div';
         if (_id) tree += ' id='+_id;
         tree += '> </div>';
@@ -130,6 +131,7 @@ if (window.$ === undefined) {
 
         $tree.jstree({
           plugins : [ "dnd" , "ui", "themeroller", "json_data", "crrm", "types"],
+          animation : 0,
           /* ONLY FOR FOREIGN NODES
           dnd : {
             drag_target : ".jstree-draggable",
@@ -183,14 +185,14 @@ if (window.$ === undefined) {
                     valid_children: [ "collection" ],
 
                     hover_node : false,
-                    select_node : function () {return false;}
+                    //select_node : function () {return false;}
                 },
                 scene : {
                     icon : {
                         image : "/gui/img/scene-root22.png"
                     },
                     valid_children: ["model"],
-                    select_node : function () {return false;}
+                    //select_node : function () {return false;}
                 },
                 collection: {
                     icon : {
@@ -225,13 +227,36 @@ if (window.$ === undefined) {
             }
           },
           json_data:  { data: [_tree] }
-        }).bind("select_node.jstree", function (event, data) {
+        }).bind("select_node.jstree", function (e, data) {  // requires ui plugin
            // `data.rslt.obj` is the jquery extended node that was clicked
-           console.log(event.target.id);
-           console.log(data.rslt.obj.attr("class"));
+           if (cb) cb.call(data.inst,e,data.rslt);
+           data.inst.deselect_node(data.rslt.obj);
+        }).bind("move_node.jstree", function (e, data) { // requires crrm plugin
+            if (cb) cb.call(data.inst,e,data.rslt);
+        }).bind("dblclick.jstree", function (e, data) {
+            //var node = $(e.target).closest("li");
+            //var id = node[0].id; //id of the selected node
+            if (cb) cb.call(data.inst,e,data.rslt);
+        }).bind("create_node.jstree", function (e, data) {
+            if (cb) cb.call(data.inst,e,data.rslt);
+        }).bind("open_node.jstree", function (e, data) {
+            if (cb) cb.call(data.inst,e,data.rslt);
         });
-
-        return $tree[0];
+        /* data
+            .o - the node being moved
+            .r - the reference node in the move
+            .ot - the origin tree instance
+            .rt - the reference tree instance
+            .p - the position to move to (may be a string - "last", "first", etc)
+            .cp - the calculated position to move to (always a number)
+            .np - the new parent
+            .oc - the original node (if there was a copy)
+            .cy - boolen indicating if the move was a copy
+            .cr - same as np, but if a root node is created this is -1
+            .op - the former parent
+            .or - the node that was previously in the position of the moved node 
+        */
+        return $tree;
     };
 
     GUI.canvas = function(_parent) {
@@ -270,14 +295,13 @@ if (window.$ === undefined) {
 
     	// TODO - rename fragment-1 to something more useful
     	var code=
-
-	'<ul>'+
-	'	<li><a href="#tabs-'+_pane+'-1" >'+_txt+'</a></li>'+
-	'</ul>'+
-	
-	'<div class="ui-layout-content ui-widget-content" >'+
-	'	<div id="tabs-'+_pane+'-1" class=" ui-widget-content" ></div>'+
-	'</div>';
+        	'<ul>'+
+        	'	<li><a href="#tabs-'+_pane+'-1" >'+_txt+'</a></li>'+
+        	'</ul>'+
+        	
+        	'<div class="ui-layout-content ui-widget-content" >'+
+        	'	<div id="tabs-'+_pane+'-1" class=" ui-widget-content" ></div>'+
+        	'</div>';
     	var $window;
 
     	if (!_pane || _float){
@@ -304,24 +328,18 @@ if (window.$ === undefined) {
     	//$window.uniqueId();
 		//var id=$window.attr('id');
 
-        return $window.find('.ui-widget-content')[0];
+        return $window.find('.ui-widget-content');
     };
     GUI.layout = function (){
     	var that=this;
     	var $layout = $(
-'<div class="ui-layout-north ui-widget-header" >Simple webGL Viewer</div>'+
-
-'<div class="ui-layout-west ui-widget-header" >'+
-
-'</div>'+
-
-	
-'<div class="ui-layout-center ui-widget-header" >'+
-	
-'</div>'+
-
-'<div class="ui-layout-south ui-widget-header">&copy; R&eacute;mi Arnaud - Advanced Micro Devices, Inc. 2013</div>'
-    		);
+            '<div class="ui-layout-north ui-widget-header" >Simple webGL Viewer</div>'+
+            '<div class="ui-layout-west ui-widget-header" >'+
+            '</div>'+
+            '<div class="ui-layout-center ui-widget-header" >'+
+            '</div>'+
+            '<div class="ui-layout-south ui-widget-header">&copy; R&eacute;mi Arnaud - Advanced Micro Devices, Inc. 2013</div>'
+    	);
 
     	$('body').append($layout);
 

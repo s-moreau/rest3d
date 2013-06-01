@@ -28,6 +28,16 @@ THE SOFTWARE.
     <link rel="stylesheet" type="text/css" href="rest3d.css">
 	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
 	<title> rest3d</title>
+
+	<script>
+		function rest(url,q) {
+
+			var a = document.getElementById(q).value;
+			if (!a) return false;
+			window.location.href = url+a; 
+	       		return false;	};
+	</script>
+
 </head>
 
 <body>
@@ -55,6 +65,13 @@ THE SOFTWARE.
 	  <ul>
 	  	<li><a href="/rest3d/info"> /rest3d/info </a></li>
 	  	<li><a href="/rest3d/assets"> /rest3d/assets </a></li>
+	  </ul>
+
+	  <h3> rest3d api warhouse proxy samples </h3>
+	  <ul>
+	  	<li><a href="http://127.0.0.1:8000/rest3d/warehouse"> /rest3d/warehouse </a></li>
+	  	<li> <a href="javascript:rest('/rest3d/warehouse/search/','q1');"> /rest3d/warehouse/search/</a>
+	  		<input type="text" id="q1" onkeydown="if (event.keyCode == 13) rest('/rest3d/warehouse/search/','q1');"/> </li>
 	  </ul>
 	</div>
 

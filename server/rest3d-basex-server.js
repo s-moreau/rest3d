@@ -347,7 +347,7 @@ server.get(/^\/rest3d\/warehouse.*/,function(req, res, next) {
 		var search = $('span[class="itemtitle"]'); //use your CSS selector here
 		result.name = $(search).text();
 		result.uri = '46f3f70fe38d801af6dcb9e43126f21d';
-		result.children = []
+		result.assets = []
 		search = $('div[class="resulttitle"] a');
 		result.loaded = true;
 		result.type = 'root'
@@ -356,9 +356,9 @@ server.get(/^\/rest3d\/warehouse.*/,function(req, res, next) {
 			item.name = $(link).attr('title')
 			item.uri = $(link).attr('href').split("mid=")[1];
 			item.type="collection"
-			item.children=[]; // indicates there are children, to be discovered...
+			item.assets=[]; // indicates there are assets, to be discovered...
 			item.loaded = false;
-			result.children.push(item);
+			result.assets.push(item);
 		});
 		return result;
 	};	
@@ -368,7 +368,7 @@ server.get(/^\/rest3d\/warehouse.*/,function(req, res, next) {
 		var search = $('span[class="itemtitle"]'); //use your CSS selector here
 		result.name = $(search).text();
 		result.uri = uid;
-		result.children = []
+		result.assets = []
 		search = $('div[class="resulttitle"] a');
 		//result.loaded = true;
 		result.type = 'collection'
@@ -379,10 +379,10 @@ server.get(/^\/rest3d\/warehouse.*/,function(req, res, next) {
 				item.name = $(link).attr('title')
 				item.uri = $(link).attr('href').split("mid=")[1];
 				item.type="model"
-				item.children=null; // this element has no children
+				item.assets=null; // this element has no assets
 				item.source = 'http://sketchup.google.com/3dwarehouse/download?mid='+item.uri+'&rtyp=zs';
 				//item.loaded = true;
-				result.children.push(item);
+				result.assets.push(item);
 
 			} else if ($(link).attr('href').startsWith('/3dwarehouse/cldetails'))
 			{			
@@ -390,9 +390,9 @@ server.get(/^\/rest3d\/warehouse.*/,function(req, res, next) {
 				item.name = $(link).attr('title')
 				item.uri = $(link).attr('href').split("mid=")[1];
 				item.type="collection"
-				item.children=[]; // indicates there are children, to be discovered...
+				item.assets=[]; // indicates there are assets, to be discovered...
 				//item.loaded = false;
-				result.children.push(item);
+				result.assets.push(item);
 			}
 
 		});
@@ -403,7 +403,7 @@ server.get(/^\/rest3d\/warehouse.*/,function(req, res, next) {
 		$ = cheerio.load(body);
 		result.name = 'Search results for '+str;
 		result.uri = uid;
-		result.children = []
+		result.assets = []
 
 		var search = $('div[class="resulttitle"] a'); //use your CSS selector here
 		
@@ -414,10 +414,10 @@ server.get(/^\/rest3d\/warehouse.*/,function(req, res, next) {
 				item.name = $(link).attr('title')
 				item.uri = $(link).attr('href').split("mid=")[1];
 				item.type="model"
-				item.children=null; // this element has no children
+				item.assets=null; // this element has no assets
 				item.source = 'http://sketchup.google.com/3dwarehouse/download?mid='+item.uri+'&rtyp=zs';
 				//item.loaded = true;
-				result.children.push(item);
+				result.assets.push(item);
 			}
 		});
 		return result;
@@ -577,7 +577,7 @@ server.put(/^\/rest3d\/assets.*/,function(req, res, next) {
 
 				try {
 				    var tmpfilename = 'tmp/'+asset+'/'+filename;
-			    	if (tmpfilename.endsWith('/')) {`
+			    	if (tmpfilename.endsWith('/')) {
 			    	} else
 			    	{
 			    		// make sure folder exists

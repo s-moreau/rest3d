@@ -51,272 +51,268 @@ THE SOFTWARE.
         return bounds;
     };
 
-    function daeFile(dae) {};
+    function parse_dae (dae) {
 
-    daeFile.prototype = {
+        // set the image load callback to redraw
+        dae.onload = draw;
 
-        parse: function (dae) {
+        var starttime =  window.performance.now();
+        // get the scene
+        var scene = dae.parse_visual_scene(dae.sceneID);
 
-            this.starttime =  window.performance.now();
-            // set the image load callback to redraw
-            dae.onload = draw;
+        // pull out the Z-up flag
+        scene.upAxis = dae.up_axis;
+        if (!scene.upAxis) scene.upAxis = "Y_UP";
 
-            // get the scene
-            this.scene = dae.parse_visual_scene(dae.sceneID);
+        // traverse the scene, collect the geometry and make webGL objects out of those
 
-            // pull out the Z-up flag
-            this.scene.upAxis = dae.up_axis;
-            if (!this.scene.upAxis) this.scene.upAxis = "Y_UP";
+        function buildMe() {
 
-            // traverse the scene, collect the geometry and make webGL objects out of those
+            // this is the bounding box for all geometries instanced in this node
+            var bounds = aabb.empty();
 
-            function buildMe() {
+            if (!this.geometries || this.geometries.length === 0) return bounds;
 
-                // this is the bounding box for all geometries instanced in this node
-                var bounds = aabb.empty();
-
-                if (!this.geometries || this.geometries.length === 0) return bounds;
-
-                var geometries = this.geometries;
-                // there can be several instance_geom per node
-                // each instance is a single mesh
-                // each mesh has several primitives
+            var geometries = this.geometries;
+            // there can be several instance_geom per node
+            // each instance is a single mesh
+            // each mesh has several primitives
 
 
-                for (var j = 0; j < geometries.length; j++) {
-                    var geometry = geometries[j];
+            for (var j = 0; j < geometries.length; j++) {
+                var geometry = geometries[j];
 
-                    // each geometry has a mesh : an array of primitives
-                    // and a glprimitives - whcih contains the webGL primitives for each primitives in the mesh
-                    if (geometry.glprimitives) continue;
-                    geometry.glprimitives = [];
+                // each geometry has a mesh : an array of primitives
+                // and a glprimitives - whcih contains the webGL primitives for each primitives in the mesh
+                if (geometry.glprimitives) continue;
+                geometry.glprimitives = [];
 
-                    // let's store the Type Arrays in each primitives
+                // let's store the Type Arrays in each primitives
 
-                    var primitives = geometry.mesh;
+                var primitives = geometry.mesh;
 
-                    for (var p = 0; p < primitives.length; p++) {
+                for (var p = 0; p < primitives.length; p++) {
 
-                        var triangles = primitives[p];
-                        // fill up my primitive structure
-                        var primitive = {};
-                        var position = null;
-                        var normal = null;
-                        var texcoord = null;
-                        var color = null;
+                    var triangles = primitives[p];
+                    // fill up my primitive structure
+                    var primitive = {};
+                    var position = null;
+                    var normal = null;
+                    var texcoord = null;
+                    var color = null;
 
-                        // speed-up function call
+                    // speed-up function call
 
-                        if (triangles.VERTEX) {
-                            position = [];
-                            var ppush = position.push;
-                            var vget = triangles.VERTEX;
-                            for (var i = 0; i < triangles.count * 3; ++i)
-                                ppush.apply(position, vget.call(triangles, i));
-                            primitive.position = new Float32Array(position);
+                    if (triangles.VERTEX) {
+                        position = [];
+                        var ppush = position.push;
+                        var vget = triangles.VERTEX;
+                        for (var i = 0; i < triangles.count * 3; ++i)
+                            ppush.apply(position, vget.call(triangles, i));
+                        primitive.position = new Float32Array(position);
+                    }
+                    if (triangles.NORMAL) {
+                        normal = []
+                        var npush = normal.push;
+                        var nget = triangles.NORMAL;
+                        for (var i = 0; i < triangles.count * 3; ++i)
+                            npush.apply(normal, nget.call(triangles, i));
+                        primitive.normal = new Float32Array(normal);
+                    }
+                    if (triangles.TEXCOORD_0) {
+                        texcoord = [];
+                        var tpush = texcoord.push;
+                        var tget = triangles.TEXCOORD_0;
+                        for (var i = 0; i < triangles.count * 3; ++i)
+                            tpush.apply(texcoord, tget.call(triangles, i))
+                        primitive.texcoord = new Float32Array(texcoord);
+                    }
+
+                    if (triangles.COLOR) {
+                        color = [];
+                        var cpush = color.push;
+                        var cget = triangles.COLOR;
+                        for (var i = 0; i < triangles.count * 3; ++i)
+                            cpush.apply(color, cget.call(triangles, i))
+                        primitive.color = new Float32Array(color);
+                    }
+
+                    primitive.index = null;
+
+                    var state = State.createBasic();
+                    var material = geometry.materials[p];
+
+                    // check for a bind_vertex_input - this is for warning only
+                    if (material.bind_vertex_input && material.bind_vertex_input.length !== 0) {
+                        var param = null;
+                        var bind_vertex_input = material.bind_vertex_input[0]
+                        var set = bind_vertex_input.input_set || 0;
+                        var input_semantic = bind_vertex_input.input_semantic + '_' + set;
+                        var search = null;
+                        for (var j = 0; j < state.program.attributes.length; j++) {
+                            if (state.program.attributes[j].semantic === input_semantic) {
+                                search = bind_vertex_input.semantic;
+                                break;
+                            }
                         }
-                        if (triangles.NORMAL) {
-                            normal = []
-                            var npush = normal.push;
-                            var nget = triangles.NORMAL;
-                            for (var i = 0; i < triangles.count * 3; ++i)
-                                npush.apply(normal, nget.call(triangles, i));
-                            primitive.normal = new Float32Array(normal);
-                        }
-                        if (triangles.TEXCOORD_0) {
-                            texcoord = [];
-                            var tpush = texcoord.push;
-                            var tget = triangles.TEXCOORD_0;
-                            for (var i = 0; i < triangles.count * 3; ++i)
-                                tpush.apply(texcoord, tget.call(triangles, i))
-                            primitive.texcoord = new Float32Array(texcoord);
-                        }
+                        // if not found, try with set = 0 
+                        input_semantic = bind_vertex_input.input_semantic + '_0';
 
-                        if (triangles.COLOR) {
-                            color = [];
-                            var cpush = color.push;
-                            var cget = triangles.COLOR;
-                            for (var i = 0; i < triangles.count * 3; ++i)
-                                cpush.apply(color, cget.call(triangles, i))
-                            primitive.color = new Float32Array(color);
-                        }
-
-                        primitive.index = null;
-
-                        var state = State.createBasic();
-                        var material = geometry.materials[p];
-
-                        // check for a bind_vertex_input - this is for warning only
-                        if (material.bind_vertex_input && material.bind_vertex_input.length !== 0) {
-                            var param = null;
-                            var bind_vertex_input = material.bind_vertex_input[0]
-                            var set = bind_vertex_input.input_set || 0;
-                            var input_semantic = bind_vertex_input.input_semantic + '_' + set;
-                            var search = null;
+                        if (!search) {
                             for (var j = 0; j < state.program.attributes.length; j++) {
                                 if (state.program.attributes[j].semantic === input_semantic) {
                                     search = bind_vertex_input.semantic;
                                     break;
                                 }
                             }
-                            // if not found, try with set = 0 
-                            input_semantic = bind_vertex_input.input_semantic + '_0';
-
-                            if (!search) {
-                                for (var j = 0; j < state.program.attributes.length; j++) {
-                                    if (state.program.attributes[j].semantic === input_semantic) {
-                                        search = bind_vertex_input.semantic;
-                                        break;
-                                    }
-                                }
-                            }
-                            if (!search) {
-                                console.log('could not find attribute ' + bind_vertex_input.input_semantic + '_' + set +
-                                    ' in primitive');
-                            }
                         }
-
-                        // only intersting paramter for that simple shader is the diffuse texture
-                        if (material.parameters && typeof material.parameters.diffuse === 'object') {
-                            var diffuse = material.parameters.diffuse;
-                            if (!diffuse.texcoord) {
-                                search = null;
-                                for (var j = 0; j < state.program.attributes.length; j++) {
-                                    if (state.program.attributes[j].semantic === 'COLOR') {
-                                        search = state.program.attributes[j];
-                                        break;
-                                    }
-                                }
-                                if (diffuse.color) {
-                                    search.value = diffuse.color;
-                                } else {
-                                    search.value = [1, 1, 1, 0.5];
-                                }
-                            } else if (search !== diffuse.texcoord) {
-                                console.log('semantic ' + search + ' does not match diffuse semantic of ' + diffuse.texcoord);
-                            } else if (diffuse && diffuse.image) {
-                                state.program.uniforms['diffuse'].value = {
-                                    "path": diffuse.path,
-                                    "image": diffuse.image,
-                                    "magFilter": diffuse.magFilter,
-                                    "minFilter": diffuse.minFilter,
-                                    "wrapS": diffuse.wrapS,
-                                    "wrapT": diffuse.wrapT,
-                                    "flipY": true,
-                                    "textureUnit": 0
-                                };
-                            }
+                        if (!search) {
+                            console.log('could not find attribute ' + bind_vertex_input.input_semantic + '_' + set +
+                                ' in primitive');
                         }
-                        geometry.glprimitives.push(new RENDERER.primitive(primitive.position, primitive.color,
-                            primitive.normal, null, primitive.texcoord, primitive.index, state));
-
                     }
-                    // a mesh has a bounding box
-                    aabb.add(bounds, bounds, triangles.bounds);
+
+                    // only intersting paramter for that simple shader is the diffuse texture
+                    if (material.parameters && typeof material.parameters.diffuse === 'object') {
+                        var diffuse = material.parameters.diffuse;
+                        if (!diffuse.texcoord) {
+                            search = null;
+                            for (var j = 0; j < state.program.attributes.length; j++) {
+                                if (state.program.attributes[j].semantic === 'COLOR') {
+                                    search = state.program.attributes[j];
+                                    break;
+                                }
+                            }
+                            if (diffuse.color) {
+                                search.value = diffuse.color;
+                            } else {
+                                search.value = [1, 1, 1, 0.5];
+                            }
+                        } else if (search !== diffuse.texcoord) {
+                            console.log('semantic ' + search + ' does not match diffuse semantic of ' + diffuse.texcoord);
+                        } else if (diffuse && diffuse.image) {
+                            state.program.uniforms['diffuse'].value = {
+                                "path": diffuse.path,
+                                "image": diffuse.image,
+                                "magFilter": diffuse.magFilter,
+                                "minFilter": diffuse.minFilter,
+                                "wrapS": diffuse.wrapS,
+                                "wrapT": diffuse.wrapT,
+                                "flipY": true,
+                                "textureUnit": 0
+                            };
+                        }
+                    }
+                    geometry.glprimitives.push(new RENDERER.primitive(primitive.position, primitive.color,
+                        primitive.normal, null, primitive.texcoord, primitive.index, state));
+
                 }
-                // we're done, return the calculated bounding box
-                return bounds;
-            };
+                // a mesh has a bounding box
+                aabb.add(bounds, bounds, triangles.bounds);
+            }
+            // we're done, return the calculated bounding box
+            return bounds;
+        };
 
-            // depth first traversal, create primitives and bounding boxes
+        // depth first traversal, create primitives and bounding boxes
 
-            this.bounds = build_scene(this.scene, buildMe);
+        scene.bounds = build_scene(scene, buildMe);
 
-            mainCamera = Camera.create();
-            Camera.lookAtAabb(mainCamera, this.bounds, sf.scene.upAxis);
+        mainCamera = Camera.create();
+        Camera.lookAtAabb(mainCamera, scene.bounds, scene.upAxis);
 
-            currentRotationX = currentRotationY = 0;
-            clearStack();
-            this.endtime = window.performance.now();
-            $('#loadtimer').text('load time='+(this.endtime-this.starttime));
-            draw();
+        currentRotationX = currentRotationY = 0;
+        clearStack();
+        scene.starttime = starttime;
+        scene.endtime = window.performance.now();
 
-        }
+        scenes.push(scene);
+        $('#loadtimer').text('load time='+(scene.endtime-scene.starttime));
+        draw();
+
     };
 
-    function gltfFile() {};
+    function parse_gltf (gltf) {
 
-    gltfFile.prototype = {
+        var starttime = window.performance.now();
 
-        parse: function (gltf) {
+        // set the image load callback to redraw
+        gltf.onload = draw;
+        // traverse the scene, collect the geometry and make webGL objects out of those
+        function buildMe() {
+            // this is the bounding box for all geometries instanced in this node
+            var bounds = aabb.empty();
+            if (!this.geometries || this.geometries.length === 0) return bounds;
 
-            this.starttime = window.performance.now();
-
-            // set the image load callback to redraw
-            gltf.onload = draw;
-            // traverse the scene, collect the geometry and make webGL objects out of those
-            function buildMe() {
-                // this is the bounding box for all geometries instanced in this node
-                var bounds = aabb.empty();
-                if (!this.geometries || this.geometries.length === 0) return bounds;
-
-                var geometries = this.geometries;
-                // there can be several instance_geom per node
-                // each instance is a single mesh
-                // each mesh has several primitives
+            var geometries = this.geometries;
+            // there can be several instance_geom per node
+            // each instance is a single mesh
+            // each mesh has several primitives
 
 
 
 
-                for (var j = 0; j < geometries.length; j++) {
-                    var geometry = geometries[j];
+            for (var j = 0; j < geometries.length; j++) {
+                var geometry = geometries[j];
 
-                    // each geometry has a mesh : an array of primitives
-                    // and a glprimitives - whcih contains the webGL primitives for each primitives in the mesh
-                    if (geometry.glprimitives) continue;
-                    geometry.glprimitives = [];
+                // each geometry has a mesh : an array of primitives
+                // and a glprimitives - whcih contains the webGL primitives for each primitives in the mesh
+                if (geometry.glprimitives) continue;
+                geometry.glprimitives = [];
 
-                    // let's store the Type Arrays in each primitives
+                // let's store the Type Arrays in each primitives
 
-                    var primitives = geometry.mesh;
-                    var materials = geometry.materials;
+                var primitives = geometry.mesh;
+                var materials = geometry.materials;
 
-                    for (var i = 0; i < primitives.length; i++) {
+                for (var i = 0; i < primitives.length; i++) {
 
-                        var triangles = primitives[i];
-                        var material = materials[i];
-                        var pass = material.technique.defaultPass;
-                        // create a new state with this material override
-                        var state = State.fromPassAndOverrides(pass, material.overrides);
-                        // fill up my primitive structure
-                        var primitive = {};
+                    var triangles = primitives[i];
+                    var material = materials[i];
+                    var pass = material.technique.defaultPass;
+                    // create a new state with this material override
+                    var state = State.fromPassAndOverrides(pass, material.overrides);
+                    // fill up my primitive structure
+                    var primitive = {};
 
-                        primitive.position = triangles.POSITION;
-                        primitive.normal = triangles.NORMAL;
-                        primitive.texcoord = triangles.TEXCOORD_0;
-                        primitive.index = triangles.INDEX;
+                    primitive.position = triangles.POSITION;
+                    primitive.normal = triangles.NORMAL;
+                    primitive.texcoord = triangles.TEXCOORD_0;
+                    primitive.index = triangles.INDEX;
 
-                        geometry.glprimitives.push(new RENDERER.primitive(primitive.position, null, primitive.normal,
-                            null, primitive.texcoord, primitive.index, state));
+                    geometry.glprimitives.push(new RENDERER.primitive(primitive.position, null, primitive.normal,
+                        null, primitive.texcoord, primitive.index, state));
 
-                    }
-                    // a gltf mesh has a bounding box
-                    aabb.add(bounds, bounds, primitives.bounds);
                 }
-                // we're done, return the calculated bounding box
-                return bounds;
-            };
+                // a gltf mesh has a bounding box
+                aabb.add(bounds, bounds, primitives.bounds);
+            }
+            // we're done, return the calculated bounding box
+            return bounds;
+        };
 
 
-            // get the scene
-            this.scene = gltf.parse_visual_scene(gltf.sceneID);
-            this.scene.upAxis = "Y_UP";
+        // get the scene
+        var scene = gltf.parse_visual_scene(gltf.sceneID);
+        scene.upAxis = "Y_UP";
 
-            // depth first traversal, create primitives, states and bounding boxes
+        // depth first traversal, create primitives, states and bounding boxes
 
-            this.bounds = build_scene(this.scene, buildMe);
+        scene.bounds = build_scene(scene, buildMe);
 
 
-            mainCamera = Camera.create();
-            Camera.lookAtAabb(mainCamera, this.bounds, sf.scene.upAxis);
+        mainCamera = Camera.create();
+        Camera.lookAtAabb(mainCamera, scene.bounds, scene.upAxis);
 
-            currentRotationX = currentRotationY = 0;
-            clearStack();
+        currentRotationX = currentRotationY = 0;
+        clearStack();
 
-            this.endtime = window.performance.now();
-            $('#loadtimer').text('load time='+(this.endtime-this.starttime));
-            draw();
-        }
+        scene.starttime = starttime;
+        scene.endtime = window.performance.now();
+        $('#loadtimer').text('load time='+(scene.endtime-scene.starttime));
+        scenes.push(scene);
+        draw();
+
     };
 
 
@@ -328,7 +324,7 @@ THE SOFTWARE.
     var currentRotationY = 0;
     var currentZoom = 1;
     var mainCamera = null;
-    var sf=null;
+    var scenes=[];
 
 
     var win = null;
@@ -336,6 +332,8 @@ THE SOFTWARE.
     var channel = null;
 
     var tree = null;
+    var scene_tree = null;
+    var warehouse_tree = null;
 
     function pushMatrix(m) {
         if (m) {
@@ -471,24 +469,12 @@ THE SOFTWARE.
 
     function draw() {
 
-        if (!sf || !sf.scene) return;
-        pushMatrix();
+        if (!scenes || scenes.length < 1) return;
 
-        Camera.rotateAround(mainCamera, currentZoom, currentRotationX, currentRotationY);
-
-        mat4.multiply(pmMatrix, mainCamera.projection, mainCamera.lookAt);
-
-        if (sf.scene.upAxis === 'Z_UP') {
-            mat4.rotate(mvMatrix, mvMatrix, -90 * deg2rad, vec3.fromValues(1, 0, 0));
-        };
 
 
         $('#zoom').text('currentZoom is ' + currentZoom);
         $('#rot').text('currentRotation is ' + currentRotationX + ',' + currentRotationY);
-
-        var state = channel.state;
-        //State.setModelView(state,mvMatrix);
-        State.setViewProj(state, pmMatrix);
 
         var devicePixelRatio = window.devicePixelRatio || 1;
 
@@ -500,12 +486,34 @@ THE SOFTWARE.
 
 
         channel.viewport(0, 0, width, height);
-
         channel.clear();
 
-        // depth first scene drawing
-        render_scene.call(channel, sf.scene, drawnode);
-        popMatrix();
+
+
+        Camera.rotateAround(mainCamera, currentZoom, currentRotationX, currentRotationY);
+
+        mat4.multiply(pmMatrix, mainCamera.projection, mainCamera.lookAt);
+
+        var state = channel.state;
+
+        for (var i=0; i<scenes.length;i++)
+        {
+            pushMatrix();
+
+            if (scenes[i].upAxis === 'Z_UP') {
+                mat4.rotate(mvMatrix, mvMatrix, -90 * deg2rad, vec3.fromValues(1, 0, 0));
+            };
+
+            //State.setModelView(state,mvMatrix);
+            State.setViewProj(state, pmMatrix);
+
+            // depth first scene drawing
+            render_scene.call(channel, scenes[i], drawnode);
+
+            popMatrix();
+
+        }
+
     };
 
 
@@ -529,52 +537,41 @@ THE SOFTWARE.
         });
         GUI.label("", win);
         var button2 = GUI.button('load duck dae rest3d', win, function () {
-            sf = new window.daeFile();
-            COLLADA.load("/rest3d/assets/duck/duck.dae", sf.parse.bind(sf));
+            COLLADA.load("/rest3d/assets/duck/duck.dae", parse_dae);
         });
         var button3 = GUI.button('load duck DAE', win, function () {
-            sf = new window.daeFile();
-            COLLADA.load("/models/duck/duck.dae", sf.parse.bind(sf));
+            COLLADA.load("/models/duck/duck.dae", parse_dae);
         });
         var button4 = GUI.button('load creature DAE', win, function () {
-            sf = new window.daeFile();
-            COLLADA.load("/models/amahani/Amahani.dae", sf.parse.bind(sf));
+            COLLADA.load("/models/amahani/Amahani.dae", parse_dae);
         });
         GUI.label("", win);
         var button2 = GUI.button('load duck glTF', win, function () {
-            sf = new window.gltfFile();
-            glTF.load("/models/duck/duck.json", sf.parse.bind(sf));
+            glTF.load("/models/duck/duck.json", parse_gltf);
         });
 
         GUI.label("", win);
         var button2 = GUI.button('load rambler glTF', win, function () {
-            sf = new window.gltfFile();
-            glTF.load("/models/rambler/Rambler.json", sf.parse.bind(sf));
+            glTF.load("/models/rambler/Rambler.json", parse_gltf);
         });
         var button2 = GUI.button('load rambler-min DAE', win, function () {
-            sf = new window.daeFile();
-            COLLADA.load("/models/rambler/Rambler-min.dae", sf.parse.bind(sf));
+            COLLADA.load("/models/rambler/Rambler-min.dae", parse_gltf);
         });
         var button3 = GUI.button('load ramblerDAE', win, function () {
-            sf = new window.daeFile();
-            COLLADA.load("/models/rambler/Rambler.dae", sf.parse.bind(sf));
+            COLLADA.load("/models/rambler/Rambler.dae", parse_dae);
         });
         var button4 = GUI.button('load supermurdoch.dae', win, function () {
-            sf = new window.daeFile();
-            COLLADA.load("/models/SuperMurdoch/SuperMurdoch.dae", sf.parse.bind(sf));
+            COLLADA.load("/models/SuperMurdoch/SuperMurdoch.dae", parse_dae);
         });
         var button4 = GUI.button('load wine.dae', win, function () {
-            sf = new window.daeFile();
-            COLLADA.load("/models/wine/wine.dae", sf.parse.bind(sf));
+            COLLADA.load("/models/wine/wine.dae", parse_dae);
         });
         var button4 = GUI.button('load wine.json', win, function () {
-            sf = new window.gltfFile();
-            glTF.load("/models/wine/wine.json", sf.parse.bind(sf));
+            glTF.load("/models/wine/wine.json", parse_dae);
         });
 
         var button5 = GUI.button('load uh-n1', win, function () {
-            sf = new window.daeFile();
-            COLLADA.load("/models/uh-1n/uh-1n.dae", sf.parse.bind(sf));
+            COLLADA.load("/models/uh-1n/uh-1n.dae", parse_dae);
         });
 
 
@@ -585,10 +582,22 @@ THE SOFTWARE.
             attr: {rel: 'scene'},
         };
 
-        tree = GUI.tree(scene_tree, win, 'tree_0');
+        GUI.tree(scene_tree, win, tree_event, 'tree_0');
 
         // this will update the display  when ready
         rest3d.dir(displayTree);
+
+
+        warehouse_tree = {
+            data: "Warehouse",
+            state: "closed",
+            attr: {rel: 'root', loaded: 'false'},
+        };
+        tree =  GUI.tree(warehouse_tree, win, tree_event, 'warehouse');
+
+
+
+        //rest3d.warehouse(displayTree);
 
         canvas = GUI.canvas(viewer);
         layout.resetOverflow('west');
@@ -613,6 +622,7 @@ THE SOFTWARE.
                             console.log("Error loading "+document.url+" [most likely a cross origin issue]")
                     }
                     cb(JSON.parse(xhr.responseText));
+
                 }
                 else {
                     console.log("Error Loading "+document.url+" [http request status="+xhr.status+"]");
@@ -621,6 +631,36 @@ THE SOFTWARE.
         };
 
         xhr.open("GET", '/rest3d/assets', true);
+        //send a finish signal
+        xhr.overrideMimeType("text/xml");
+        xhr.setRequestHeader("Content-Type", "text/xml");
+        xhr.send(null);
+        return;
+    }
+    rest3d.warehouse = function(_id,_cb) {
+                // need to create a long pull ...
+        var xhr = new XMLHttpRequest();
+        var cb = _cb;
+        xhr.onreadystatechange = function (aEvt){
+            
+            if (xhr.readyState == 4) {
+                if (xhr.status == 200 || xhr.status == 0) {
+                    if (xhr.responseText == null) {
+                            console.log("Error loading "+document.url+" [most likely a cross origin issue]")
+                    }
+                    cb(JSON.parse(xhr.responseText));
+                    //var asset_tree = convertTree(JSON.parse(xhr.responseText));
+                    //GUI.tree(asset_tree, win, tree_event, 'tree_1');
+                }
+                else {
+                    console.log("Error Loading "+document.url+" [http request status="+xhr.status+"]");
+                }
+            }
+        };
+
+        var what = '/rest3d/warehouse';
+        if (_id) what += '/'+_id;
+        xhr.open("GET", what, true);
         //send a finish signal
         xhr.overrideMimeType("text/xml");
         xhr.setRequestHeader("Content-Type", "text/xml");
@@ -639,16 +679,66 @@ THE SOFTWARE.
         ret.data = _in.name;
         ret.attr = {};
         ret.attr.rel= _in.type;
+        for (var att in _in) {
+            if (att === 'type') {
+                ret.attr.rel = _in[att];
+                if (ret.attr.rel === 'collection' || ret.attr.rel === 'root')
+                    ret.state = 'closed';
+            } else if (att !== 'name' && att !== 'assets')
+                ret.attr[att] = _in[att];
+        }
+        if (!ret.attr.loaded) ret.attr.loaded=true;
         if (kids.length)
             ret.children = kids;
 
         return ret;
 
+    }
+    // this is the callback function tree will call
+    function update_warehouse(_in, _o)
+    {
+        var asset_tree = convertTree(_in);
 
+         //this.delete_node($("> li", _o.jstree("get_container_ul")));
+    //var retDom = this._parse_json( asset_tree , -1 , true);
+    //this.move_node(_o, retDom , -1 , "after", false,  false, true);
+        //this.create( _o , "inside",  {data: 'racine', state: 'closed', children: [{data: 'child1'},{data:'child2'}]}, function() { alert("added"); }, true);
+        //this.create( _o , "inside",  {data: asset_tree.data, children: asset_tree.children}, null, true);
+      for (var i=0;i<asset_tree.children.length;i++)
+        this.create_node(_o, "inside", {data: asset_tree.children[i].data, attr: asset_tree.children[i].attr, state: asset_tree.children[i].state, children:asset_tree.children[i].children}, false,false);
+       // var new_tree = GUI.tree(asset_tree, win, tree_event, null);
+        _o.attr('loaded','true');
+    }
+    function tree_event(_event, _obj)
+    {
+        var that=this;
+        switch (_event.type) {
+            case 'move_node':
+                console.log('move node:',_obj);
+                break;
+            case 'select_node':
+                break;
+            case 'dblclick':
+                break;
+            case 'open_node':
+             var $o = _obj.obj;
+             var test=$o.attr('loaded');
+             if (test !== 'true'){
+
+                rest3d.warehouse($o.attr('uri'),function(_in) { var i=_in; update_warehouse.call(that, i, $o);});
+             }
+             
+                break;
+            default:
+                console.log('event '+_event.type+' not understood by tree_event()');
+                break;
+        }
+
+        //$("#tree").jstree("create", $("#child1\\.id"), "inside",  { "data" : "child2" }, function() { alert("added"); }, true);
     }
     function displayTree(_in){
         var asset_tree = convertTree(_in);
-        tree = GUI.tree(asset_tree, win, 'tree_1');
+        return GUI.tree(asset_tree, win, tree_event, 'tree_1');
     }
     </script>
 </head>
