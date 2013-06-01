@@ -59,7 +59,7 @@
             text-align:center;
         }
         .ui-layout-south {
-            border-top-width: px;
+            border-top-width: 1px;
         }
         .ui-layout-resizer-west {
             border-width: 0 1px;
