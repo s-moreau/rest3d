@@ -32,6 +32,7 @@ THE SOFTWARE.
     // traverse the scene, building primitives
     // collect bounding boxes and merge up
 
+    if (!window.performance) { window.performance = {}; window.performance.now = $.now};
     function build_scene(_nodes, _callback) {
         var bounds = aabb.empty();
         for (var j = 0; j < _nodes.length; j++) {
@@ -595,8 +596,6 @@ THE SOFTWARE.
         };
         tree =  GUI.tree(warehouse_tree, win, tree_event, 'warehouse');
 
-
-
         //rest3d.warehouse(displayTree);
 
         canvas = GUI.canvas(viewer);
@@ -704,9 +703,10 @@ THE SOFTWARE.
     //this.move_node(_o, retDom , -1 , "after", false,  false, true);
         //this.create( _o , "inside",  {data: 'racine', state: 'closed', children: [{data: 'child1'},{data:'child2'}]}, function() { alert("added"); }, true);
         //this.create( _o , "inside",  {data: asset_tree.data, children: asset_tree.children}, null, true);
-      for (var i=0;i<asset_tree.children.length;i++)
-        this.create_node(_o, "inside", {data: asset_tree.children[i].data, attr: asset_tree.children[i].attr, state: asset_tree.children[i].state, children:asset_tree.children[i].children}, false,false);
-       // var new_tree = GUI.tree(asset_tree, win, tree_event, null);
+        if (asset_tree.children)
+          for (var i=0;i<asset_tree.children.length;i++)
+            this.create_node(_o, "inside", {data: asset_tree.children[i].data, attr: asset_tree.children[i].attr, state: asset_tree.children[i].state, children:asset_tree.children[i].children}, false,false);
+            // var new_tree = GUI.tree(asset_tree, win, tree_event, null);
         _o.attr('loaded','true');
     }
     function tree_event(_event, _obj)
@@ -714,6 +714,27 @@ THE SOFTWARE.
         var that=this;
         switch (_event.type) {
             case 'move_node':
+              /* data
+                .o - the node being moved
+                .r - the reference node in the move
+                .ot - the origin tree instance
+                .rt - the reference tree instance
+                .p - the position to move to (may be a string - "last", "first", etc)
+                .cp - the calculated position to move to (always a number)
+                .np - the new parent
+                .oc - the original node (if there was a copy)
+                .cy - boolen indicating if the move was a copy
+                .cr - same as np, but if a root node is created this is -1
+                .op - the former parent
+                .or - the node that was previously in the position of the moved node 
+            */
+
+            var where = _obj.cp; 
+            var parent = _obj.np;
+            var the_node = _obj.o;
+            var uri = '/rest3d/'+the_node.attr('uri')+the_node.attr('source');
+            COLLADA.load(uri, parse_dae);
+
                 console.log('move node:',_obj);
                 break;
             case 'select_node':
