@@ -99,7 +99,8 @@ function toJSON(o) {
 //
 var basex_system = "";
 
-var listenToPort = 8000;
+var listenToPort = process.env.OPENSHIFT_NODEJS_PORT || 8000;
+var ip_address = process.env.OPENSHIFT_NODEJS_IP || '127.0.0.1';
 var basex_port = process.env['DOTCLOUD_DATABASE_SERVERPORT_PORT'];
 var basex_port_server = process.env['DOTCLOUD_DATABASE_SERVERPORT_HOST'];
 var basex_rest_server = process.env['DOTCLOUD_DATABASE_HTTP_HOST'];
@@ -980,6 +981,6 @@ function sigterm_handler() {
 process.on('SIGTERM', sigterm_handler);
 
 // run server
-server.listen(listenToPort);
+server.listen( listenToPort, ip_address);
 
 

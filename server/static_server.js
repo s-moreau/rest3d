@@ -28,9 +28,10 @@ var http = require("http"),
     url = require("url"),
     path = require("path"),
     fs = require("fs"),
-    mime = require("mime")
-    port = process.argv[2] || 8000
-    static = path.join(process.cwd(), '../static');
+    mime = require("mime");
+var port = process.argv[2] || process.env.OPENSHIFT_NODEJS_PORT || 8000;
+var ip_address = process.env.OPENSHIFT_NODEJS_IP || '127.0.0.1';
+var static = path.join(process.cwd(), '../static');
  
 http.createServer(function(request, response) {
  
@@ -60,7 +61,7 @@ http.createServer(function(request, response) {
       response.end();
     });
   });
-}).listen(parseInt(port, 10));
+}).listen(parseInt(port, 10), ip_address);
  
 console.log("Static file server ["+static+"] running at\n  => http://localhost:" + port + "/\nCTRL + C to shutdown");
 
