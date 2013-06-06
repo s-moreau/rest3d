@@ -46,7 +46,7 @@ if (window.$ === undefined) {
     document.write('<script type="text/javascript" src="/deps/jquery.jstree.js"><\/' + 'script>');
     //document.write('<link href="/gui/themes/vader/ui.dynatree.css" rel="stylesheet" type="text/css" />');
 
-    document.write('<link rel="stylesheet" href="/gui/GUI5.css" />');
+    document.write('<link rel="stylesheet" href="/gui/gui5.css" />');
 }
 
 
@@ -242,20 +242,7 @@ if (window.$ === undefined) {
         }).bind("open_node.jstree", function (e, data) {
             if (cb) cb.call(data.inst,e,data.rslt);
         });
-        /* data
-            .o - the node being moved
-            .r - the reference node in the move
-            .ot - the origin tree instance
-            .rt - the reference tree instance
-            .p - the position to move to (may be a string - "last", "first", etc)
-            .cp - the calculated position to move to (always a number)
-            .np - the new parent
-            .oc - the original node (if there was a copy)
-            .cy - boolen indicating if the move was a copy
-            .cr - same as np, but if a root node is created this is -1
-            .op - the former parent
-            .or - the node that was previously in the position of the moved node 
-        */
+      
         return $tree;
     };
 

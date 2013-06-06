@@ -38,7 +38,7 @@ if (window.$ === undefined) {
     document.write('<script src="/deps/jquery.js"><\/' + 'script>');
     document.write('<script src="/deps/jquery-ui.js"><\/' + 'script>');
     document.write('<script src="/deps/jquery.layout.min.js"><\/' + 'script>');
-    document.write('<link rel="stylesheet" href="/gui/GUI4.css" />');
+    document.write('<link rel="stylesheet" href="/gui/gui4.css" />');
 }
 
 
