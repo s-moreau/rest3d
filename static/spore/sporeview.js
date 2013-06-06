@@ -347,7 +347,7 @@ function init() {
 function handleLoad() {
   sf = new SporeFile();
   sf._loadHandler = renderStart;
-  sf.load("/models/amahani/Amahani.dae");
+  sf.load("/models/Amahani/Amahani.dae");
 }
 
 window.onload = handleLoad;
