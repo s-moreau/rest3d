@@ -65,5 +65,5 @@
             border-width: 0 1px;
         }
         .ui-layout-resizer-west-dragging, .ui-layout-resizer-west:hover {
-            background: url(img/resizable-w.gif) repeat-y center;
+            background: url(/gui/img/resizable-w.gif) repeat-y center;
         }
