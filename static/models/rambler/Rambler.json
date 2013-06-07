@@ -1,22 +1,22 @@
 {
     "bufferViews": {
         "bufferView_13025": {
-            "buffer": "rambler.bin",
+            "buffer": "Rambler.bin",
             "byteLength": 10344480,
             "byteOffset": 0,
             "target": "ARRAY_BUFFER"
         },
         "bufferView_13026": {
-            "buffer": "rambler.bin",
+            "buffer": "Rambler.bin",
             "byteLength": 1197492,
             "byteOffset": 10344480,
             "target": "ELEMENT_ARRAY_BUFFER"
         }
     },
     "buffers": {
-        "rambler.bin": {
+        "Rambler.bin": {
             "byteLength": 11541972,
-            "path": "rambler.bin"
+            "path": "Rambler.bin"
         }
     },
     "materials": {
