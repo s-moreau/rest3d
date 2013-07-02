@@ -18,4 +18,14 @@ ensure_node_is_installed
 #  npm version to install the dependencies.
 mv  "${OPENSHIFT_REPO_DIR}/package.json"  "$(get_node_tmp_dir)"
 
+# Install CMake
+cd $OPENSHIFT_TMP_DIR
+wget http://www.cmake.org/files/v2.8/cmake-2.8.10.2.tar.gz
+tar xvf cmake-2.8.10.2.tar.gz
+cd cmake-2.8.10.2
+./configure --prefix=$OPENSHIFT_DATA_DIR
+gmake
+gmake install
 
+#add cmake to path
+export PATH="$OPENSHIFT_DATA_DIR/bin/:${PATH}"
