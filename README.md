@@ -33,11 +33,11 @@ A goal for this project is to limit drastically the dependencies, to facilitate 
   This will contains a XML database server
 
 ## Setup
-1. git clone https://bitbucket.org/rarnaud/rest3d.git
+1. git clone https://github.com/amd/rest3d.git
 2. cd server; npm install
 3. node static_server
 4. point your WebGL enabled web browser to http://127.0.0.1:8000
 
 ## Openshift (Redhat) deployement
- the package.json at the root and .openshift folder are ready for the nodejs server to be deployed on openshift. TODO: database server deployement
-
+ The package.json at the root and .openshift folder are ready for the nodejs server to be deployed on openshift. TODO: database server deployement
+ Note: there is a server of this rest3d github instanced at http://rest3d-remi.rhcloud.com/ 
