@@ -13,6 +13,7 @@
     "rimraf":"",
     "request":"",
     "cheerio":"",
-    "zip":""
+    "zip":"",
+    "glTF" : "git://github.com/RemiArnaud/glTF.git"
   }
 }
