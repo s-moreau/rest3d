@@ -906,7 +906,7 @@ if (window.mat4 === undefined)
                 vertices[vinputsXML[i].getAttribute('semantic')] = vinputsXML[i].getAttribute('source').substring(1);
 
             // get mesh bounding box
-            var bounds = null;
+            var bounds = aabb.empty();
 
             // get all the primitives
             var primitives=[];
@@ -1022,13 +1022,12 @@ if (window.mat4 === undefined)
                     primitives.push(triangle);
 
                     // create bounding box
-                    if (!bounds)
-                        bounds=aabb.fromPositions(this.sources[triangle.inputs.VERTEX.source].values);
-
-                    triangle.bounds = bounds;
+                    triangle.bounds =aabb.fromPositions(this.sources[triangle.inputs.VERTEX.source].values);
+                    aabb.add(bounds,bounds,triangle.bounds);
                 }
                 
             }
+            primitives.bounds = bounds; // weird, but one can add a field to an array
             this.meshes[_geoID]=primitives;
             return primitives;
         }
