@@ -76,7 +76,7 @@ else
   gzip -dc < zlib-1.2.8.tar.gz | tar -xf -
   cd zlib-1.2.8
   ./configure -s --prefix=${OPENSHIFT_DATA_DIR}
-  make
+  make -j4
   make install 
   cd $OPENSHIFT_TMP_DIR
   rm -rf zlib*
@@ -92,7 +92,7 @@ else
   gzip -dc < libxml2-2.7.3.tar.gz | tar -xf -
   cd libxml2-2.7.3
   ./configure --prefix=${OPENSHIFT_DATA_DIR}
-  make
+  make -j4
   make install 
   cd $OPENSHIFT_TMP_DIR
   rm -rf libxml*
@@ -109,7 +109,7 @@ else
   cd pcre-8.02
   ./configure --enable-utf8 --enable-unicode-properties --prefix=${OPENSHIFT_DATA_DIR}
   #make CPPFLAGS=-I/usr/kerberos/include
-  make
+  make -j4
   make install
   cd $OPENSHIFT_TMP_DIR
   rm -rf pcre*
