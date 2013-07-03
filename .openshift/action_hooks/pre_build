@@ -23,6 +23,8 @@ mv  "${OPENSHIFT_REPO_DIR}/package.json"  "$(get_node_tmp_dir)"
 # Install CMake
 if [ -f "${OPENSHIFT_DATA_DIR}/bin/cmake" ]; 
 then 
+  echo "cmake already installed"
+else
   cd $OPENSHIFT_TMP_DIR
   wget http://www.cmake.org/files/v2.8/cmake-2.8.10.2.tar.gz
   tar xvf cmake-2.8.10.2.tar.gz
@@ -30,8 +32,7 @@ then
   ./configure --prefix=$OPENSHIFT_DATA_DIR
   gmake
   gmake install
-else
-  echo "cmake already installed"
+  rm -rf cmake*
 fi
 
 #add cmake to path through the .bash_profile
