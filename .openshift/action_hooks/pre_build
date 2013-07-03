@@ -55,21 +55,23 @@ if [ -f "${OPENSHIFT_DATA_DIR}include/png.h" ];
 then 
   echo "libpng already installed"
 else
-cd $OPENSHIFT_TMP_DIR
-wget http://prdownloads.sourceforge.net/libpng/libpng-1.5.4.tar.gz?download
-tar xzf libpng-1.5.4.tar.gz
-cd libpng-1.5.4
-./configure --prefix=${OPENSHIFT_DATA_DIR}
-make
-make install
-rm -rf $OPENSHIFT_TMP_DIR/libpng*
+  cd $OPENSHIFT_TMP_DIR
+  wget http://prdownloads.sourceforge.net/libpng/libpng-1.5.4.tar.gz?download
+  tar xzf libpng-1.5.4.tar.gz
+  cd libpng-1.5.4
+  ./configure --prefix=${OPENSHIFT_DATA_DIR}
+  make
+  make install
+  rm -rf $OPENSHIFT_TMP_DIR/libpng*
+fi
 
 # Install ZLIB 
-wget http://www.zlib.net/zlib-1.2.3.tar.gz
-gzip -dc < zlib-1.2.3.tar.gz | tar -xf -
-cd zlib-1.2.3
+wget http://zlib.net/zlib-1.2.8.tar.gz
+gzip -dc < zlib-1.2.8.tar.gz | tar -xf -
+cd zlib-1.2.8
 ./configure -s --prefix=${OPENSHIFT_DATA_DIR}/lib
 make
+make install 
 
 echo "EXPORT path for cmake"
 source "$OPENSHIFT_REPO_DIR/.openshift/lib/add_local_bin_to_path"
