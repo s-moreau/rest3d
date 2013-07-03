@@ -66,12 +66,17 @@ else
 fi
 
 # Install ZLIB 
-wget http://zlib.net/zlib-1.2.8.tar.gz
-gzip -dc < zlib-1.2.8.tar.gz | tar -xf -
-cd zlib-1.2.8
-./configure -s --prefix=${OPENSHIFT_DATA_DIR}/lib
-make
-make install 
+if [ -f "${OPENSHIFT_DATA_DIR}lib/libz.so" ]; 
+then 
+  echo "lib zlib already installed"
+else
+  wget http://zlib.net/zlib-1.2.8.tar.gz
+  gzip -dc < zlib-1.2.8.tar.gz | tar -xf -
+  cd zlib-1.2.8
+  ./configure -s --prefix=${OPENSHIFT_DATA_DIR}
+  make
+  make install 
+fi
 
 echo "EXPORT path for cmake"
 source "$OPENSHIFT_REPO_DIR/.openshift/lib/add_local_bin_to_path"
