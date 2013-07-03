@@ -32,6 +32,7 @@ else
   ./configure --prefix=$OPENSHIFT_DATA_DIR
   gmake
   gmake install
+  cd $OPENSHIFT_TMP_DIR
   rm -rf cmake*
 fi
 #add cmake to path through the .bash_profile
@@ -62,7 +63,8 @@ else
   ./configure --prefix=${OPENSHIFT_DATA_DIR}
   make
   make install
-  rm -rf $OPENSHIFT_TMP_DIR/libpng*
+  cd $OPENSHIFT_TMP_DIR
+  rm -rf libpng*
 fi
 
 # Install ZLIB 
@@ -70,13 +72,50 @@ if [ -f "${OPENSHIFT_DATA_DIR}lib/libz.so" ];
 then 
   echo "lib zlib already installed"
 else
+  cd $OPENSHIFT_TMP_DIR
   wget http://zlib.net/zlib-1.2.8.tar.gz
   gzip -dc < zlib-1.2.8.tar.gz | tar -xf -
   cd zlib-1.2.8
   ./configure -s --prefix=${OPENSHIFT_DATA_DIR}
   make
   make install 
+  cd $OPENSHIFT_TMP_DIR
+  rm -rf zlib*
 fi
+
+# Install libxml2 
+if [ -f "${OPENSHIFT_DATA_DIR}lib/xmlxml.so" ]; 
+then 
+  echo "lib libxml2 already installed"
+else
+  cd $OPENSHIFT_TMP_DIR
+  wget ftp://xmlsoft.org/libxml2/libxml2-2.7.3.tar.gz
+  gzip -dc < libxml2-2.7.3.tar.gz | tar -xf -
+  cd libxml2-2.7.3
+  ./configure --prefix=${OPENSHIFT_DATA_DIR}
+  make
+  make install 
+  cd $OPENSHIFT_TMP_DIR
+  rm -rf libxml*
+fi
+
+# Install PCRE 
+if [ -f "${OPENSHIFT_DATA_DIR}lib/pcrepce.so" ]; 
+then 
+  echo "lib PCRE already installed"
+else
+  cd $OPENSHIFT_TMP_DIR
+  wget http://files.directadmin.com/services/custombuild/pcre-8.02.tar.gz
+  tar xvzf pcre-8.02.tar.gz
+  cd pcre-8.02
+  ./configure --enable-utf8 --enable-unicode-properties --prefix=${OPENSHIFT_DATA_DIR}
+  #make CPPFLAGS=-I/usr/kerberos/include
+  make
+  make install
+  cd $OPENSHIFT_TMP_DIR
+  rm -rf pcre*
+fi
+
 
 echo "EXPORT path for cmake"
 source "$OPENSHIFT_REPO_DIR/.openshift/lib/add_local_bin_to_path"
