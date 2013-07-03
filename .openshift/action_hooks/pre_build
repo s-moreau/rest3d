@@ -27,5 +27,18 @@ cd cmake-2.8.10.2
 gmake
 gmake install
 
-#add cmake to path
-export PATH="$OPENSHIFT_DATA_DIR/bin/:${PATH}"
+#add cmake to path through the .bash_profile
+
+   dot_bash_profile=$OPENSHIFT_DATA_DIR/.bash_profile
+   pattern='\s*source(.*)\.openshift/lib/add_local_bin_to_path\s*(.*)\s*'
+   if ! egrep "$pattern" $dot_bash_profile > /dev/null 2>&1 ; then
+
+      cat >> $dot_bash_profile  <<SRCEOF
+
+#  Setup shell env for cmake
+source "\$OPENSHIFT_REPO_DIR/.openshift/lib/add_local_bin_to_path"
+SRCEOF
+
+      echo "  - Added source add_local_bin_to_path to .bash_profile"
+   fi
+

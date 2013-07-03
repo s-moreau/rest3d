@@ -1,0 +1,2 @@
+export PATH="$OPENSHIFT_DATA_DIR/bin:${PATH}"
+
