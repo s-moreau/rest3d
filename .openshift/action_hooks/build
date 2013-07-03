@@ -11,6 +11,10 @@ source "$OPENSHIFT_REPO_DIR/.openshift/lib/utils"
 #  Setup path to include the custom Node[.js] version.
 _SHOW_SETUP_PATH_MESSAGES="true" setup_path_for_custom_node_version
 
+# Setup path to include cmake and other utils
+source "$OPENSHIFT_REPO_DIR/.openshift/lib/add_local_bin_to_path"
+
+
 
 #  So we we moved the package.json file out of the way in pre_build,
 #  so that the OpenShift git post-receive hook doesn't try and use the
