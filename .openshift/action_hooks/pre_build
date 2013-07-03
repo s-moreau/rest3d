@@ -50,3 +50,6 @@ SRCEOF
    echo "  - Added source add_local_bin_to_path to .bash_profile"
 fi
 
+echo "EXPORT path for cmake"
+source "$OPENSHIFT_REPO_DIR/.openshift/lib/add_local_bin_to_path"
+echo ${PATH}
