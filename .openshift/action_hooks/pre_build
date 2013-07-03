@@ -49,17 +49,20 @@ SRCEOF
    echo "  - Added source add_local_bin_to_path to .bash_profile"
 fi
 
-echo "EXPORT path for cmake"
-source "$OPENSHIFT_REPO_DIR/.openshift/lib/add_local_bin_to_path"
-echo ${PATH}
-
 # Install PNG LIB
+
+if [ -f "${OPENSHIFT_DATA_DIR}include/png.h" ]; 
+then 
+  echo "libpng already installed"
+else
 cd $OPENSHIFT_TMP_DIR
 wget http://prdownloads.sourceforge.net/libpng/libpng-1.5.4.tar.gz?download
 tar xzf libpng-1.5.4.tar.gz
 cd libpng-1.5.4
-./configure --prefix=${OPENSHIFT_DATA_DIR}/lib
+./configure --prefix=${OPENSHIFT_DATA_DIR}
 make
+make install
+rm -rf $OPENSHIFT_TMP_DIR/libpng*
 
 # Install ZLIB 
 wget http://www.zlib.net/zlib-1.2.3.tar.gz
@@ -68,4 +71,7 @@ cd zlib-1.2.3
 ./configure -s --prefix=${OPENSHIFT_DATA_DIR}/lib
 make
 
+echo "EXPORT path for cmake"
+source "$OPENSHIFT_REPO_DIR/.openshift/lib/add_local_bin_to_path"
+echo ${PATH}
 

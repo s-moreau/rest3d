@@ -2,4 +2,5 @@ export PATH="$OPENSHIFT_DATA_DIR/bin:${PATH}"
 echo "PATH for local bin exported"
 echo ${PATH}
 
-
+export PNG_LIBRARY=="$OPENSHIFT_DATA_DIR/lib/libpng.so}"
+export PNG_INCLUDE_DIR="$OPENSHIFT_DATA_DIR/include}"
