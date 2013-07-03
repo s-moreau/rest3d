@@ -5,7 +5,7 @@
 # could be python, php, ruby, etc.
 
 # make room
-rm -rf "$OPENSHIFT_TMP_DIR/*"
+rm -rf "$OPENSHIFT_TMP_DIR"/*
 
 #  Source utility functions.
 source "$OPENSHIFT_REPO_DIR/.openshift/lib/utils"
