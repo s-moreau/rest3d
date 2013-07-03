@@ -14,7 +14,6 @@ source "$OPENSHIFT_REPO_DIR/.openshift/lib/utils"
 echo ""
 ensure_node_is_installed
 
-
 #  We need to move the package.json file out of the way in pre_build, so
 #  that the OpenShift git post-receive hook doesn't try and use the old
 #  npm version to install the dependencies.
@@ -84,7 +83,7 @@ else
 fi
 
 # Install libxml2 
-if [ -f "${OPENSHIFT_DATA_DIR}lib/xmlxml.so" ]; 
+if [ -f "${OPENSHIFT_DATA_DIR}lib/libxml2.so" ]; 
 then 
   echo "lib libxml2 already installed"
 else
@@ -100,7 +99,7 @@ else
 fi
 
 # Install PCRE 
-if [ -f "${OPENSHIFT_DATA_DIR}lib/pcrepce.so" ]; 
+if [ -f "${OPENSHIFT_DATA_DIR}lib/libpcrecpp.so" ]; 
 then 
   echo "lib PCRE already installed"
 else
