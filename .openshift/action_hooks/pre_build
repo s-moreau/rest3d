@@ -105,24 +105,22 @@ fi
 # fi
 
 # Install PCRE 
-#### No need, instead use the dynamic libraries already installed
-# if [ -f "${OPENSHIFT_DATA_DIR}lib/libpcrecpp.so" ]; 
-# then 
-  # echo "lib PCRE already installed"
-# else
-  # cd $OPENSHIFT_TMP_DIR
-  # wget http://files.directadmin.com/services/custombuild/pcre-8.02.tar.gz
-  # tar xvzf pcre-8.02.tar.gz
-  # rm pcre-8.02.tar.gz
-  # cd pcre-8.02
-  # ./configure --enable-utf8 --enable-unicode-properties --prefix=${OPENSHIFT_DATA_DIR}
-  # #make CPPFLAGS=-I${OPENSHIFT_DATA_DIR}include
-  # make -j2
-  # make install
-  # cd $OPENSHIFT_TMP_DIR
-  # rm -rf pcre*
-# fi
-
+ if [ -f "${OPENSHIFT_DATA_DIR}lib/libpcrecpp.so" ]; 
+ then 
+   echo "lib PCRE already installed"
+ else
+   cd $OPENSHIFT_TMP_DIR
+   wget http://files.directadmin.com/services/custombuild/pcre-8.02.tar.gz
+   tar xvzf pcre-8.02.tar.gz
+   rm pcre-8.02.tar.gz
+   cd pcre-8.02
+   ./configure --enable-utf8 --enable-unicode-properties --prefix=${OPENSHIFT_DATA_DIR}
+   make CPPFLAGS=-I${OPENSHIFT_DATA_DIR}include
+   make -j2
+   make install
+   cd $OPENSHIFT_TMP_DIR
+   rm -rf pcre*
+ fi
 
 echo "EXPORT path for cmake"
 source "$OPENSHIFT_REPO_DIR/.openshift/lib/add_local_bin_to_path"
