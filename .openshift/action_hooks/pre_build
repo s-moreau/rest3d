@@ -126,3 +126,4 @@ echo "EXPORT path for cmake"
 source "$OPENSHIFT_REPO_DIR/.openshift/lib/add_local_bin_to_path"
 echo ${PATH}
 
+
