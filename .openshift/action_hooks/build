@@ -4,7 +4,6 @@
 # before the deploy step.  This script gets executed directly, so it
 # could be python, php, ruby, etc.
 
-
 #  Source utility functions.
 source "$OPENSHIFT_REPO_DIR/.openshift/lib/utils"
 
