@@ -35,8 +35,7 @@
     "rimraf":"",
     "request":"",
     "cheerio":"",
-    "zip":"",
-    "glTF" : "git://github.com/RemiArnaud/glTF.git"
+    "zip":""
   },
   "devDependencies": {},
   "bundleDependencies": [],
