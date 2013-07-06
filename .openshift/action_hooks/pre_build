@@ -122,8 +122,23 @@ fi
    rm -rf pcre*
  fi
 
+#install collada converter
+ 
+ if [ -f "${OPENSHIFT_DATA_DIR}bin/collada2gltf" ]; 
+ then 
+   cd $OPENSHIFT_TMP_DIR
+   git clone --recurse-submoduleshttps://github.com/RemiArnaud/glTF.git
+   cd glTF/converter/COLLADA2GLTF
+   cmake -f CMakeLists.txt
+   make -j1 collada2gltf
+   cp bin/collada2gltf ${OPENSHIFT_DATA_DIR}bin/
+   cd $OPENSHIFT_TMP_DIR
+   #rm -rf glTF
+ fi
+
 echo "EXPORT path for cmake"
 source "$OPENSHIFT_REPO_DIR/.openshift/lib/add_local_bin_to_path"
 echo ${PATH}
+
 
 
