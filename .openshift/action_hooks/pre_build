@@ -126,6 +126,8 @@ fi
  
  if [ -f "${OPENSHIFT_DATA_DIR}bin/collada2gltf" ]; 
  then 
+   echo "collada2gltf is already installed"
+ else
    cd $OPENSHIFT_TMP_DIR
    git clone --recurse-submoduleshttps://github.com/RemiArnaud/glTF.git
    cd glTF/converter/COLLADA2GLTF
