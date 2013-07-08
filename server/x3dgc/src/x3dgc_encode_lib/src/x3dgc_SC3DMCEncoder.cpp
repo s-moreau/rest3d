@@ -20,7 +20,7 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 */
 
-#include <x3dgc_SC3DMCEncoder.h>
+#include "x3dgc_SC3DMCEncoder.h"
 
 //#define DEBUG_VERBOSE
 

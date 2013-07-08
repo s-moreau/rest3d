@@ -25,9 +25,9 @@ THE SOFTWARE.
 #ifndef X3DGC_TRIANGLE_FANS_H
 #define X3DGC_TRIANGLE_FANS_H
 
-#include <x3dgc_Common.h>
-#include <x3dgc_Vector.h>
-#include <x3dgc_BinaryStream.h>
+#include "x3dgc_Common.h"
+#include "x3dgc_Vector.h"
+#include "x3dgc_BinaryStream.h"
 
 
 namespace x3dgc

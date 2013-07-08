@@ -24,7 +24,7 @@ THE SOFTWARE.
 #ifndef X3DGC_VECTOR_H
 #define X3DGC_VECTOR_H
 
-#include <x3dgc_Common.h>
+#include "x3dgc_Common.h"
 
 namespace x3dgc
 {

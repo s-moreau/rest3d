@@ -20,8 +20,8 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 */
 
-#include <x3dgc_IndexedFaceSet.h>
 #include <math.h>
+#include "x3dgc_IndexedFaceSet.h"
 
 namespace x3dgc
 {

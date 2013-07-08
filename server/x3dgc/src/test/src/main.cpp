@@ -28,11 +28,11 @@ THE SOFTWARE.
 #include <map>
 #include <string>
 #include <vector>
-#include <x3dgc_Vector.h>
-#include <x3dgc_SC3DMCEncodeParams.h>
-#include <x3dgc_IndexedFaceSet.h>
-#include <x3dgc_SC3DMCEncoder.h>
-#include <x3dgc_SC3DMCDecoder.h>
+#include "x3dgc_Vector.h"
+#include "x3dgc_SC3DMCEncodeParams.h"
+#include "x3dgc_IndexedFaceSet.h"
+#include "x3dgc_SC3DMCEncoder.h"
+#include "x3dgc_SC3DMCDecoder.h"
 
 
 using namespace x3dgc;

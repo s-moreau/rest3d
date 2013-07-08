@@ -25,8 +25,8 @@ THE SOFTWARE.
 #ifndef X3DGC_BINARY_STREAM_H
 #define X3DGC_BINARY_STREAM_H
 
-#include <x3dgc_Common.h>
-#include <x3dgc_Vector.h>
+#include "x3dgc_Common.h"
+#include "x3dgc_Vector.h"
 
 namespace x3dgc
 {
