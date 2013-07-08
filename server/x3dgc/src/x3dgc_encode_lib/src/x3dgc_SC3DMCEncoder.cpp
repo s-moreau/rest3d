@@ -33,9 +33,9 @@ namespace x3dgc
         // Encode header
         unsigned long start = bstream.GetSize();        
         EncodeHeader(params, ifs, bstream);
-        bstream.WriteUInt32(4, bstream.GetSize() - start);	    
         // Encode payload
         EncodePayload(params, ifs, bstream);
+        bstream.WriteUInt32(4, bstream.GetSize() - start);	    
         return X3DGC_OK;
     }
     X3DGCErrorCode SC3DMCEncoder::EncodeHeader(const SC3DMCEncodeParams & params, 
@@ -84,29 +84,29 @@ namespace x3dgc
 	    }
 	    if (ifs.GetNNormal() > 0)
 	    {
-            bstream.WriteUInt32(ifs.GetNNormalIndex());
+            bstream.WriteUInt32(0);
          	for(int j=0 ; j<3 ; ++j)
 		    {
                 bstream.WriteFloat32((float) ifs.GetNormalMin(j));                
                 bstream.WriteFloat32((float) ifs.GetNormalMax(j));                
             }            
-            bstream.WriteUChar8((unsigned char) ifs.GetNormalPerVertex());
+            bstream.WriteUChar8(true); //(unsigned char) ifs.GetNormalPerVertex()
             bstream.WriteUChar8((unsigned char) params.GetNormalQuantBits());
 	    }
 	    if (ifs.GetNColor() > 0)
 	    {
-            bstream.WriteUInt32(ifs.GetNColorIndex());
+            bstream.WriteUInt32(0);
          	for(int j=0 ; j<3 ; ++j)
 		    {
                 bstream.WriteFloat32((float) ifs.GetColorMin(j));                
                 bstream.WriteFloat32((float) ifs.GetColorMax(j));                
             }
-            bstream.WriteUChar8((unsigned char) ifs.GetColorPerVertex());
+            bstream.WriteUChar8(true); // (unsigned char) ifs.GetColorPerVertex()
             bstream.WriteUChar8((unsigned char) params.GetColorQuantBits());
 	    }
 	    if (ifs.GetNTexCoord() > 0)
 	    {
-            bstream.WriteUInt32(ifs.GetNTexCoordIndex());
+            bstream.WriteUInt32(0);
          	for(int j=0 ; j<2 ; ++j)
 		    {
                 bstream.WriteFloat32((float) ifs.GetTexCoordMin(j));                
@@ -119,8 +119,8 @@ namespace x3dgc
 			bstream.WriteUInt32(ifs.GetNFloatAttribute(a));
 			if (ifs.GetNFloatAttribute(a) > 0)
 			{
-				assert(ifs.GetFloatAttributeDim(a) < X3DGC_MAX_UCHAR8);
-				bstream.WriteUInt32(ifs.GetNFloatAttributeIndex(a));
+				assert(ifs.GetFloatAttributeDim(a) < (unsigned long) X3DGC_MAX_UCHAR8);
+				bstream.WriteUInt32(0);
 				unsigned char d = (unsigned char) ifs.GetFloatAttributeDim(a);
 				bstream.WriteUChar8(d);
 				for(unsigned char j = 0 ; j < d ; ++j)
@@ -128,7 +128,7 @@ namespace x3dgc
 					bstream.WriteFloat32((float) ifs.GetFloatAttributeMin(a, j));                
 					bstream.WriteFloat32((float) ifs.GetFloatAttributeMax(a, j));                
 				}
-				bstream.WriteUChar8((unsigned char) ifs.GetFloatAttributePerVertex(a));
+				bstream.WriteUChar8(true); //(unsigned char) ifs.GetFloatAttributePerVertex(a)
 				bstream.WriteUChar8((unsigned char) params.GetFloatAttributeQuantBits(a));
 			}
 	    }
@@ -137,10 +137,10 @@ namespace x3dgc
 			bstream.WriteUInt32(ifs.GetNIntAttribute(a));
 			if (ifs.GetNIntAttribute(a) > 0)
 			{
-				assert(ifs.GetFloatAttributeDim(a) < X3DGC_MAX_UCHAR8);
-				bstream.WriteUInt32(ifs.GetNIntAttributeIndex(a));
+				assert(ifs.GetFloatAttributeDim(a) < (unsigned long) X3DGC_MAX_UCHAR8);
+				bstream.WriteUInt32(0);
 				bstream.WriteUChar8((unsigned char) ifs.GetIntAttributeDim(a));
-				bstream.WriteUChar8((unsigned char) ifs.GetIntAttributePerVertex(a));
+				bstream.WriteUChar8(true); // (unsigned char) ifs.GetIntAttributePerVertex(a)
 			}
 	    }	
         return X3DGC_OK;
