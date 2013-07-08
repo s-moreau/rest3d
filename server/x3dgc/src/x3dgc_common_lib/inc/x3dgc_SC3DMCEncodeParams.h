@@ -156,3 +156,4 @@ namespace x3dgc
 
 }
 #endif // X3DGC_SC3DMC_ENCODE_PARAMS_H
+
