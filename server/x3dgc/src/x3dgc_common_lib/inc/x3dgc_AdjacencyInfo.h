@@ -69,6 +69,7 @@ namespace x3dgc
 																	    m_numNeighborsSize = numNeighborsSize;																	
 																	    m_neighbors		   = new long [m_neighborsSize];
                                                                     }
+																	return X3DGC_OK;
                                                                 }
 		X3DGCErrorCode											AllocateNumNeighborsArray(long numElements)
 																{

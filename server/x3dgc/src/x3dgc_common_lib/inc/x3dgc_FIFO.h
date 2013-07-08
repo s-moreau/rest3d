@@ -34,13 +34,14 @@ namespace x3dgc
 	{
     public:	
 		//! Constructor.
-																FIFO():
-																	m_allocated(0),
-																	m_size(0),
-																	m_start(0),
-																	m_end(0),
-																	m_buffer(0)
-																{};
+																FIFO()
+																{
+																	m_buffer    = 0;
+																	m_allocated = 0;
+																	m_size      = 0;
+																	m_start     = 0;
+																	m_end       = 0;
+																};
 		//! Destructor.
 																~FIFO(void)
 																{
