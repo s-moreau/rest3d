@@ -204,3 +204,4 @@ namespace x3dgc
 
 }
 #endif // X3DGC_BINARY_STREAM_H
+

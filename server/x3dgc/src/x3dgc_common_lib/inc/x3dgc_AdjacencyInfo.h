@@ -158,3 +158,4 @@ namespace x3dgc
 	};
 }
 #endif // X3DGC_ADJACENCY_INFO_H
+

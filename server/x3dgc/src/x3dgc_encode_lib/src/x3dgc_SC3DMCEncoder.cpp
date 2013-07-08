@@ -360,7 +360,6 @@ namespace x3dgc
 		bstream.WriteUInt32(start, bstream.GetSize() - start);
         return X3DGC_OK;
     }
-
     X3DGCErrorCode SC3DMCEncoder::EncodeIntArray(const long * const intArray, 
                                                  unsigned long numIntArraySize,
                                                  unsigned long dimIntArraySize,
@@ -384,9 +383,6 @@ namespace x3dgc
 		bstream.WriteUInt32(start, bstream.GetSize() - start);
         return X3DGC_OK;
     }
-
-
-
     X3DGCErrorCode SC3DMCEncoder::EncodePayload(const SC3DMCEncodeParams & params, 
                                                 const IndexedFaceSet & ifs, 
                                                 BinaryStream & bstream)
@@ -402,7 +398,6 @@ namespace x3dgc
 			EncodeFloatArray(ifs.GetCoord(), ifs.GetNCoord(), 3, ifs.GetCoordMin(), ifs.GetCoordMax(), 
 								params.GetCoordQuantBits(), ifs, params.GetCoordPredMode(), bstream);
 		}
-
 		// encode Normal
 		if (ifs.GetNNormal() > 0)
 		{
@@ -421,7 +416,6 @@ namespace x3dgc
 			EncodeFloatArray(ifs.GetTexCoord(), ifs.GetNTexCoord(), 2, ifs.GetTexCoordMin(), ifs.GetTexCoordMax(), 
 								params.GetTexCoordQuantBits(), ifs, params.GetTexCoordPredMode(), bstream);
 		}
-
         for(unsigned long a = 0; a < ifs.GetNumFloatAttributes(); ++a)
         {
 			EncodeFloatArray(ifs.GetFloatAttribute(a), ifs.GetNFloatAttribute(a), ifs.GetFloatAttributeDim(a), ifs.GetFloatAttributeMin(a), ifs.GetFloatAttributeMax(a), 
@@ -431,10 +425,8 @@ namespace x3dgc
         {
 			EncodeIntArray(ifs.GetIntAttribute(a), ifs.GetNIntAttribute(a), ifs.GetIntAttributeDim(a), bstream);
 		}
-
-
         return X3DGC_OK;
     }
-
-
 }
+
+

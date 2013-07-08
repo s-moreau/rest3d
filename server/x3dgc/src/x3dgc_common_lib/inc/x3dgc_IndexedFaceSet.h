@@ -281,3 +281,4 @@ namespace x3dgc
 
 }
 #endif // X3DGC_INDEXED_FACE_SET_H
+
