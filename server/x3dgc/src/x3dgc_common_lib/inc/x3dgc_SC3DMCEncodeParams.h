@@ -25,7 +25,7 @@ THE SOFTWARE.
 #ifndef X3DGC_SC3DMC_ENCODE_PARAMS_H
 #define X3DGC_SC3DMC_ENCODE_PARAMS_H
 
-#include <x3dgc_Common.h>
+#include "x3dgc_Common.h"
 
 namespace x3dgc
 {

@@ -25,7 +25,7 @@ THE SOFTWARE.
 #ifndef X3DGC_INDEXED_FACE_SET_H
 #define X3DGC_INDEXED_FACE_SET_H
 
-#include <x3dgc_Common.h>
+#include "x3dgc_Common.h"
 
 namespace x3dgc
 {

@@ -25,11 +25,11 @@ THE SOFTWARE.
 #ifndef X3DGC_SC3DMC_H
 #define X3DGC_SC3DMC_H
 
-#include <x3dgc_Common.h>
-#include <x3dgc_BinaryStream.h>
-#include <x3dgc_IndexedFaceSet.h>
-#include <x3dgc_SC3DMCEncodeParams.h>
-#include <x3dgc_TriangleListDecoder.h>
+#include "x3dgc_Common.h"
+#include "x3dgc_BinaryStream.h"
+#include "x3dgc_IndexedFaceSet.h"
+#include "x3dgc_SC3DMCEncodeParams.h"
+#include "x3dgc_TriangleListDecoder.h"
 
 namespace x3dgc
 {	

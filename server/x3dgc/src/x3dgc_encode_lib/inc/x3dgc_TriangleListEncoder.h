@@ -25,11 +25,11 @@ THE SOFTWARE.
 #ifndef X3DGC_TRIANGLE_LIST_ENCODER_H
 #define X3DGC_TRIANGLE_LIST_ENCODER_H
 
-#include <x3dgc_Common.h>
-#include <x3dgc_AdjacencyInfo.h>
-#include <x3dgc_BinaryStream.h>
-#include <x3dgc_FIFO.h>
-#include <x3dgc_TriangleFans.h>
+#include "x3dgc_Common.h"
+#include "x3dgc_AdjacencyInfo.h"
+#include "x3dgc_BinaryStream.h"
+#include "x3dgc_FIFO.h"
+#include "x3dgc_TriangleFans.h"
 
 namespace x3dgc
 {
