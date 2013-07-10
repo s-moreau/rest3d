@@ -31,7 +31,6 @@ var http = require('http');
 var basex  = require('basex');
 var utils = require('./utils');
 
-//var collada2json = require('./collada2json');
 var os= require('os');
 require('shelljs/global');
 
@@ -99,19 +98,17 @@ function toJSON(o) {
 //
 var basex_system = "";
 
-var listenToPort = process.env.OPENSHIFT_NODEJS_PORT || 8000;
-var ip_address = process.env.OPENSHIFT_NODEJS_IP || '127.0.0.1';
-var basex_port = process.env['DOTCLOUD_DATABASE_SERVERPORT_PORT'];
+var listenToPort = process.env['OPENSHIFT_NODEJS_PORT'] || 8000;
+var ip_address = process.env['OPENSHIFT_NODEJS_IP'] || '127.0.0.1';
+
+var basex_port = process.env['DOTCLOUD_DATABASE_SERVERPORT_PORT'] || 1984;
 var basex_port_server = process.env['DOTCLOUD_DATABASE_SERVERPORT_HOST'];
 var basex_rest_server = process.env['DOTCLOUD_DATABASE_HTTP_HOST'];
 var basex_rest = 80;
 var basex_rest_user = 'admin';
 var basex_rest_pass = 'admin';
 
-if (basex_port === undefined)
-	basex_port = 1984;
-else
-	listenToPort = 8080;
+
 if (basex_port_server === undefined)
 {
 	basex_port_server = basex_rest_server = 'localhost';
@@ -178,7 +175,7 @@ var check_basex = function () {
 		    res.on('end', function() {
 		    	if (didthiswork) {
 	      			console.log('Database REST API and connection tested');
-	      			console.log("rest3d baseX server running at\n  => http://localhost:" + listenToPort + "/\nCTRL + C to shutdown");
+	      			console.log("rest3d baseX server running at\n  => http://localhost:" + basex_rest + "/\nCTRL + C to shutdown");
 	      		}
 	      		else
 	      		{
@@ -623,12 +620,7 @@ server.put(/^\/rest3d\/assets.*/,function(req, res, next) {
 			{
 				console.log('now converting collada')
 
-				//output = collada2json.convert(daefilename,daefilename.replace('.dae','.json'))
-				var prgm="./collada2json"
-				if (platform==='win') 
-					prgm="collada2json.exe"
-				
-				exec(prgm+" "+daefilename+" "+daefilename.replace('.dae','.json'), function(code, output){
+				exec("collada2gltf "+daefilename+" "+daefilename.replace('.dae','.json'), function(code, output){
 
 				console.log('Exit code:', code);
   				console.log('Program output:', output);
@@ -982,5 +974,6 @@ process.on('SIGTERM', sigterm_handler);
 
 // run server
 server.listen( listenToPort, ip_address);
+console.log ('rest3d server running on port '+listenToPort);
 
 
