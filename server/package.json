@@ -13,6 +13,9 @@
     "rimraf":"",
     "request":"",
     "cheerio":"",
-    "zip":""
+    "zip":"",
+    "blueimp-file-upload":"",
+    "formidable":"",
+    "imagemagick":""
   }
 }

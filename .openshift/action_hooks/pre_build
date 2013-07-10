@@ -134,7 +134,8 @@ echo ${PATH}
    echo "collada2gltf is already installed"
  else
    cd $OPENSHIFT_TMP_DIR
-   git clone --recurse-submodules https://github.com/RemiArnaud/glTF.git
+   #git clone --recurse-submodules https://github.com/RemiArnaud/glTF.git
+   git clone --recurse-submodules https://github.com/KhronosGroup/glTF.git
    cd glTF/converter/COLLADA2GLTF
    cmake -f CMakeLists.txt
    make -j1 collada2gltf
