@@ -1,6 +1,6 @@
-node_modules
-cache
-tmp
-upload
+node_modules/
+cache/
+tmp/
+upload/
 
 
