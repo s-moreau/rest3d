@@ -112,6 +112,8 @@ $(function () {
           if (cb) cb(params);
         }).fail(function(data) {
             console.log("Error Converting "+params.file.name);
+            params.error = JSON.parse(data.error().responseText);
+            if (cb) cb(params);
         });
     };
     // Change this to the location of your server-side upload handler:
@@ -153,12 +155,17 @@ $(function () {
                 // user rest to convert dae into glTF
                 var callback = function(data) {
                     $this.remove();
-                    // ennumerate all resulting files
-                    $.each(data.result.files, function (index, file) {
-
-                        var span = $('<a href="'+decodeURIComponent(file.url)+'" target="_blank"><p><span>'+formatName(data,file)+'</span></p></a>');
+                    if (data.error){
+                        var span = $('<p><span><b>Error code='+data.error.code+' :: '+data.error.message+'</b></span></p>');
                         data.context.append(span);
-                    });
+                    } else {
+                        // ennumerate all resulting files
+                        $.each(data.result.files, function (index, file) {
+
+                            var span = $('<a href="'+decodeURIComponent(file.url)+'" target="_blank"><p><span>'+formatName(data,file)+'</span></p></a>');
+                            data.context.append(span);
+                        });
+                    }
                 }
 
                 rest3d.convert(data,callback);
