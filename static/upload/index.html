@@ -20,11 +20,11 @@
 <meta name="description" content="File Upload widget with multiple file selection, drag&amp;drop support, progress bar, validation and preview images for jQuery. Supports cross-domain, chunked and resumable file uploads. Works with any server-side platform (Google App Engine, PHP, Python, Ruby on Rails, Java, etc.) that supports standard HTML form file uploads.">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <!-- Bootstrap CSS Toolkit styles -->
-<link rel="stylesheet" href="http://blueimp.github.com/cdn/css/bootstrap.min.css">
+<link rel="stylesheet" href="css/bootstrap.min.css">
 <!-- Generic page styles -->
 <link rel="stylesheet" href="css/style.css">
 <!-- Bootstrap styles for responsive website layout, supporting different screen sizes -->
-<link rel="stylesheet" href="http://blueimp.github.com/cdn/css/bootstrap-responsive.min.css">
+<link rel="stylesheet" href="css/bootstrap-responsive.min.css">
 <!-- Bootstrap CSS fixes for IE6 -->
 <!--[if lt IE 7]><link rel="stylesheet" href="http://blueimp.github.com/cdn/css/bootstrap-ie6.min.css"><![endif]-->
 <!-- CSS to style the file input field as button and adjust the Bootstrap progress bars -->
@@ -34,12 +34,12 @@
 
 <div class="container">
     <div class="page-header">
-        <h1>jQuery File Upload Demo</h1>
+        <h1>rest3d collada2gltf demo</h1>
 
         <blockquote>
-            <p>File Upload widget with multiple file selection, drag&amp;drop support, progress bar, validation and preview images for jQuery.<br>
-            Supports cross-domain, chunked and resumable file uploads and client-side image resizing.<br>
-            Works with any server-side platform (PHP, Python, Ruby on Rails, Java, Node.js, Go etc.) that supports standard HTML form file uploads.</p>
+            <p>This is a sample from the <a href="https://github.com/amd/rest3d">rest3d</a> project implementing a COLLADA to glTF converter<br>
+                Add files using the button below or using drag-and-drop, then push upload and then convert. Click on the file once uploaded and/or converted to download the file.<br>
+                For more information see <a href="http://rest3d.org">rest3d main page</a> , <a href="http://collada.org">COLLADA wiki</a> and <a href="https://github.com/KhronosGroup/glTF">Khronos glTF</a>. </p>
         </blockquote>
     </div>
     <!-- The fileinput-button span is used to style the file input field as button -->
@@ -61,16 +61,15 @@
     <div class="well">
         <h3>Demo Notes</h3>
         <ul>
-            <li>The maximum file size for uploads in this demo is <strong>5 MB</strong> (default file size is unlimited).</li>
-            <li>Only image files (<strong>JPG, GIF, PNG</strong>) are allowed in this demo (by default there is no file type restriction).</li>
+            <li>The maximum file size for uploads in this demo is <strong>100 MB</strong>.</li>
+            <li>Only collada files (<strong>DAE</strong>) are allowed in this demo .</li>
             <li>Uploaded files will be deleted automatically after <strong>5 minutes</strong> (demo setting).</li>
             <li>You can <strong>drag &amp; drop</strong> files from your desktop on this webpage with Google Chrome, Mozilla Firefox and Apple Safari.</li>
-            <li>Please refer to the <a href="https://github.com/blueimp/jQuery-File-Upload">project website</a> and <a href="https://github.com/blueimp/jQuery-File-Upload/wiki">documentation</a> for more information.</li>
-            <li>Built with Twitter's <a href="http://twitter.github.com/bootstrap/">Bootstrap</a> toolkit and Icons from <a href="http://glyphicons.com/">Glyphicons</a>.</li>
+            <li>This demo is using <a href="https://github.com/blueimp/jQuery-File-Upload">jQuery File Upload</a></li>
         </ul>
     </div>
 </div>
-<script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
+<script src="/deps/jquery.min.js"></script>
 <!-- The jQuery UI widget factory, can be omitted if jQuery UI is already included -->
 
 <script src="js/vendor/jquery.ui.widget.js"></script>
@@ -100,14 +99,27 @@
 /*global window, $ */
 $(function () {
     'use strict';
+    // rest3d convert API
+    // this is draft -> should create a convert request, and then do a long pull for query status
+    var rest3d={};
+    rest3d.convert = function(_params, _cb) {
+        var params=_params || {};
+        var cb=_cb;
+
+        $.post('/rest3d/convert', params.file)
+        .done(function(data) {
+          if (data) params.result = JSON.parse(data); 
+          if (cb) cb(params);
+        }).fail(function(data) {
+            console.log("Error Converting "+params.file.name);
+        });
+    };
     // Change this to the location of your server-side upload handler:
-    var url = (window.location.hostname === 'blueimp.github.com' ||
-                window.location.hostname === 'blueimp.github.io') ?
-                '//jquery-file-upload.appspot.com/' : 'http://127.0.0.1:8880/',
+    var url = '/rest3d/upload',
         uploadButton = $('<button/>')
             .addClass('btn')
             .prop('disabled', true)
-            .text('Processing...')
+            .text('Uploading...')
             .on('click', function () {
                 var $this = $(this),
                     data = $this.data();
@@ -121,9 +133,39 @@ $(function () {
                 data.submit().always(function () {
                     $this.remove();
                 });
+        }),
+        // show the name of the file nicely
+        formatName = function(data,file){
+            return file.name;
+        },
+        convertButton = $('<button/>')
+            .addClass('btn')
+            .prop('disabled', true)
+            .text('Converting...')
+            .on('click', function () {
+                var $this = $(this),
+                    data = $this.data();
+                $this
+                    .off('click')
+                    .text('Converting...')
+                    .prop('disabled',true)
+                // user rest to convert dae into glTF
+                var callback = function(data) {
+                    $this.remove();
+                    // ennumerate all resulting files
+                    $.each(data.result.files, function (index, file) {
+
+                        var span = $('<a href="'+file.url+'" target="_blank"><p><span>'+formatName(data,file)+'</span></p></a>');
+                        data.context.append(span);
+                    });
+                }
+
+                rest3d.convert(data,callback);
             });
 
-    url = '/rest3d/upload';
+ 
+
+    
     $('#fileupload').fileupload({
         url: url,
         dataType: 'json',
@@ -177,24 +219,27 @@ $(function () {
             var link = $('<a>')
                 .attr('target', '_blank')
                 .prop('href', file.url);
-            var $tmp=$(data.context.children()[index])
+            $(data.context.children()[index])
                 .wrap(link);
-                $tmp
-                .append('<br>')
-                .append('conversion started');
-
+            var $node = convertButton.clone(true).data({file: file, context: data.context})
+                .text('Convert')
+                .prop('disabled', !/dae$/i.test(file.url));
+            $(data.context.children()[index]).parent() // the <a>
+                .append($node);
         });
     }).on('fileuploadfail', function (e, data) {
         if (!data.result) {
             $(data.context.children()[0])
                 .append('<br>')
-                .append('error communicating with server');
+                .append('error communicating with server')
+                .find('button').remove();
         } else
         $.each(data.result.files, function (index, file) {
             var error = $('<span/>').text(file.error);
             $(data.context.children()[index])
                 .append('<br>')
-                .append(error);
+                .append(error)
+                .find('button').remove();
         });
     });
 });

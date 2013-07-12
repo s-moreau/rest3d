@@ -55,7 +55,6 @@ var _existsSync = fs.existsSync || path.existsSync;
 
 // create/delete tmp upload dirs
 
-var mkdirsSync = require('mkdir').mkdirsSync;
 var rimraf = require('rimraf');
 
 function delTmp(callback) {
@@ -69,7 +68,7 @@ function delTmp(callback) {
 		{
 			console.log('tmp/ deleted succesfully')
 		}
-		mkdirsSync('tmp');
+		fs.mkdirSync('tmp');
 
 	   if (cb) callback();
 	});
@@ -84,7 +83,8 @@ function delUpload() {
 		{
 			console.log('upload/ deleted succesfully')
 		}
-		mkdirsSync('upload');
+		fs.mkdirSync('upload');
+		fs.mkdirSync('upload/thumbnail');
 	});
 }
 
@@ -144,11 +144,11 @@ var session = new basex.Session(basex_port_server,basex_port);
 
 var server = restify.createServer();
 
-//server.use(restify.acceptParser(server.acceptable));
+server.use(restify.acceptParser(server.acceptable));
 //server.use(restify.authorizationParser());
-//server.use(restify.dateParser());
-//server.use(restify.queryParser());
-//server.use(restify.bodyParser());
+server.use(restify.dateParser());
+server.use(restify.queryParser());
+//server.use(restify.bodyParser()); -> use formidable instead
 restify.defaultResponseHeaders = false;
 
 function unknownMethodHandler(req, res) {
@@ -867,6 +867,7 @@ server.get(/^\/rest3d\/assets.*/,function(req, res, next) {
 
 		    var query_doc=session.query("doc(\"assets/"+asset+"\")");
 		    var query_doc_type=session.query("db:content-type('assets','"+asset+"')");
+		    console.log('xquery='+"db:content-type('assets','"+asset+"')");
 		    //var query_binary=session.query("declare option output:method 'raw';  db:retrieve('assets', '"+asset+"')");
 
 
@@ -995,7 +996,7 @@ var UploadHandler = function (req, res, callback) {
     options = {
         tmpDir: __dirname + '/tmp',
         uploadDir: __dirname + '/upload',
-        uploadUrl: '/files/',
+        uploadUrl: '/rest3d/upload/',
         maxPostSize: 11000000000, // 11 GB
         minFileSize: 1,
         maxFileSize: 10000000000, // 10 GB
@@ -1052,6 +1053,15 @@ var UploadHandler = function (req, res, callback) {
             res.end(JSON.stringify(result));
         }
     },
+    handleError = function (req, res, error) {
+    	console('returning error ='+JSON.stringify(error))
+		res.writeHead(500, {
+            'Content-Type': req.headers.accept
+            .indexOf('application/json') !== -1 ?
+                'application/json' : 'text/plain'
+        });
+        res.end(JSON.stringify(error));
+    },
     setNoCacheHeaders = function (res) {
         res.setHeader('Pragma', 'no-cache');
         res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate');
@@ -1099,6 +1109,14 @@ FileInfo.prototype.initUrls = function (req) {
         });
     }
 };
+FileInfo.prototype.delete = function(){
+	var fileName = this.name;
+	fs.unlink(options.uploadDir + '/' + fileName, function (ex) {
+		Object.keys(options.imageVersions).forEach(function (version) {
+			fs.unlink(options.uploadDir + '/' + version + '/' + fileName);
+		});
+	});
+};
 
 var UploadHandler = function (req, res, callback) {
     this.req = req;
@@ -1119,7 +1137,16 @@ UploadHandler.prototype.post = function () {
             counter -= 1;
             if (!counter) {
                 files.forEach(function (fileInfo) {
+
+    			    console.log ('file '+fileInfo.name+' was uploaded succesfully');
+
                     fileInfo.initUrls(handler.req);
+
+                    var timeout = function() {
+                    	fileInfo.delete();
+                    	console.log('timeout !! '+fileInfo.name+' was deleted');
+                    }
+                    setTimeout(function() { timeout()},5 * 60 * 1000);
                 });
                 handler.callback(handler.req, handler.res, {files: files}, redirect);
             }
@@ -1170,7 +1197,6 @@ UploadHandler.prototype.post = function () {
     }).on('end', finish);
 
     form.parse(handler.req);
-    return 'files upload succesfully';
 };
 
 UploadHandler.prototype.get = function () {
@@ -1213,7 +1239,7 @@ UploadHandler.prototype.destroy = function () {
 
 server.post(/^\/rest3d\/upload.*/, function(req,res,next){
 
-	console.log('in post upload');
+
     res.setHeader(
         'Access-Control-Allow-Origin',
         options.accessControl.allowOrigin
@@ -1229,12 +1255,7 @@ server.post(/^\/rest3d\/upload.*/, function(req,res,next){
     var handler = new UploadHandler(req, res, handleResult);
     setNoCacheHeaders(res);
     var result = handler.post();
-    // say something ?
-    /*
-    res.writeHead(200, {'Content-Type': 'application/json' });
-	res.write(toJSON(result));
-	res.end();
-*/
+
     return next();
 });
 
@@ -1281,7 +1302,70 @@ server.get(/^\/.*/, function (req, res, next) {
 	return next();
 });
 
+// convert
 
+server.post(/^\/rest3d\/convert.*/,function(_req,_res,_next){
+	 console.log('post -> convert');
+
+	 var form = new formidable.IncomingForm(),
+         url = '',
+         res = _res,
+         req = _req,
+         next = _next,
+         params = {};
+
+     form.on('field', function (name, data) {
+     	params[name] = data;
+     }).on('error', function (e) {
+     	handleError(res,req,e);
+        return next();
+     }).on('end', function(){
+     	console.log('now converting collada')
+
+     	if (!params.name || !params.name.endsWith('dae')) { 
+     		handleError({error: 'invalid file '+params.name+' in convert'});
+     		return next();
+     	}
+     	var output_dir = params.name.split('\.')[0]+'_gltf';
+     	var output_file = params.name.replace('.dae','.json');
+     	fs.mkdirSync('upload/'+output_dir);
+
+     	var cmd = "collada2gltf -p -f \"upload/" + params.name+"\" -o \""+'upload/'+output_dir+'/'+output_file+"\"";
+     	console.log('exec '+cmd);
+     	// todo -> manage progress !!!
+		exec(cmd, function(code, output){
+
+			if (code !== 0){
+				handleError({error: 'collada2gltf returned an error='+code+'\n'+output});
+				return next();
+			}
+			console.log('Exit code:', code);
+	  		console.log('Program output:', output);
+					
+			var files = [];
+			fs.readdir('upload/'+output_dir, function (err, list) {
+                list.forEach(function (name) {
+		            var stats = fs.statSync('upload/'+output_dir + '/' + name),
+		                fileInfo;
+		            if (stats.isFile() && name[0] !== '.') {
+		                fileInfo = new FileInfo({
+		                    name: output_dir+'/'+name,
+		                    size: stats.size
+		                });
+		                fileInfo.initUrls(req);
+		                files.push(fileInfo);
+		            }
+		        });
+		        handleResult(req, res, {files: files});
+		    });
+						
+		     return next();
+	     });
+	});
+
+    form.parse(req);
+
+});
 //post
 server.post(/^\/rest3d.*/,function(req,res,next){
 
