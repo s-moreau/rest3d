@@ -37,7 +37,7 @@
     "zip":"",
     "blueimp-file-upload":"",
     "formidable":"",
-    "imageMagick":""
+    "imagemagick":""
   },
   "devDependencies": {},
   "bundleDependencies": [],

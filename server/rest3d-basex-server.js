@@ -49,7 +49,7 @@ var zip = require("zip");
 var diskcache = new cache('cache',true,false,false); 
 
 var formidable = require('formidable');
-var imageMagick = require('imageMagick');
+var imageMagick = require('imagemagick');
 
 
 // create/delete tmp upload dirs
