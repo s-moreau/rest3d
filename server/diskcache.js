@@ -50,10 +50,26 @@ var _ = require('underscore');
 var async = require('async');
 var dandy = require('dandy/errors');
 var abind = require('dandy/errors').abind;
-var mkdirsSync = require('mkdir').mkdirsSync;
-var rimraf = require('rimraf');
 var compress = null; // can't get npm to install compress on windows.
 
+// create/delete tmp upload dirs
+var rmdirSync = function(dir) {
+	if (!fs.existsSync(dir)) return;
+	var list = fs.readdirSync(dir);
+	for(var i = 0; i < list.length; i++) {
+		var filename = path.join(dir, list[i]);
+		var stat = fs.statSync(filename);
+		
+        if(stat.isDirectory()) {
+			// rmdir recursively
+			rmdirSync(filename);
+		} else {
+			// rm fiilename
+			fs.unlinkSync(filename);
+		}
+	}
+	fs.rmdirSync(dir);
+};
 
 // *************************************************************************************************
 
@@ -75,14 +91,8 @@ function Cache(cachePath, useDisk, useMem, useGzip) {
 	this.locks = {};
 	this.monitors = {};
 	if (cachePath) {
-		rimraf(cachePath,function(err){
-			if (err)
-			{
-				console.log('Could not delete cache'); console.log(err);
-			} else
-				console.log('Cache deleted succesfully')
-		});
-		mkdirsSync(cachePath);
+		rmdirSync(cachePath);
+		fd.mkdirsSync(cachePath);
 	}
 }
 exports.Cache = Cache;
@@ -242,10 +252,11 @@ subclass(Cache, events.EventEmitter, {
 		}
 
 		if (this.useDisk) {
-			D&&D('Remove', path.dirname(keys.path), 'for', URL);			
-			rimraf(path.dirname(keys.path), function(err) {
-				if (cb) cb(err);
-			});
+			D&&D('Remove', path.dirname(keys.path), 'for', URL);	
+			rmdirSync(path.dirname(keys.path));
+
+			if (cb) cb(err);
+
 		}
 	},
 	
@@ -258,9 +269,10 @@ subclass(Cache, events.EventEmitter, {
 			var keys = this._keysForURL(URL, true);
 			try {
 				if (this.useDisk) {
-					rimraf(keys.path, function(err) {
+					rmdirSync(keys.path);
+
 						if (cb) cb(err);
-					});
+
 				}
 
 				if (this.useMem) {
@@ -271,9 +283,10 @@ subclass(Cache, events.EventEmitter, {
 			}
 		} else {
 			if (this.useDisk && this.cachePath) {
-				rimraf(this.cachePath, {gently: true}, function(err) {
+				rmdirSync(this.cachePath);
+
 					if (cb) cb(err);
-				});
+
 			}
 
 			if (this.useMem) {
@@ -372,7 +385,7 @@ subclass(Cache, events.EventEmitter, {
 		var cachePath = path.join(this.cachePath, U.pathname);
 
 		if (this.useDisk && this.cachePath) {
-			mkdirsSync(cachePath);
+			fs.mkdirsSync(cachePath);
 		}
 
 		if (this.useMem) {
