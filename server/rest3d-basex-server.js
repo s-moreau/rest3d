@@ -50,46 +50,34 @@ var diskcache = new cache('cache',true,false,false);
 
 var formidable = require('formidable');
 var imageMagick = require('imageMagick');
-// Since Node 0.8, .existsSync() moved from path to fs:
-var _existsSync = fs.existsSync || path.existsSync;
+
 
 // create/delete tmp upload dirs
-
-var rimraf = require('rimraf');
-
-function delTmp(callback) {
-
-	var cb=callback;
-	rimraf('tmp/',function(err){
-		if (err)
-		{
-			console.log('Could not delete tmp/'); console.log(err);
-		} else
-		{
-			console.log('tmp/ deleted succesfully')
+var rmdirSync = function(dir) {
+	if (!fs.existsSync(dir)) return;
+	var list = fs.readdirSync(dir);
+	for(var i = 0; i < list.length; i++) {
+		var filename = path.join(dir, list[i]);
+		var stat = fs.statSync(filename);
+		
+        if(stat.isDirectory()) {
+			// rmdir recursively
+			rmdirSync(filename);
+		} else {
+			// rm fiilename
+			fs.unlinkSync(filename);
 		}
-		fs.mkdirSync('tmp');
-
-	   if (cb) callback();
-	});
-
+	}
+	fs.rmdirSync(dir);
 };
-function delUpload() {
-	rimraf('upload/',function(err){
-		if (err)
-		{
-			console.log('Could not delete upload/'); console.log(err);
-		} else
-		{
-			console.log('upload/ deleted succesfully')
-		}
-		fs.mkdirSync('upload');
-		fs.mkdirSync('upload/thumbnail');
-	});
-}
 
-delTmp();
-delUpload();
+
+rmdirSync('tmp');
+rmdirSync('upload');
+
+fs.mkdirSync('tmp');
+fs.mkdirSync('upload');
+//fs.mkdirSync('upload/thumbnail');
 
 var platform = os.type().match(/^Win/) ? 'win' : 
 				(os.type().match(/^Dar/) ? 'mac' : 'unix');
@@ -559,7 +547,6 @@ var databaseStore = function(asset,filename) {
 		if (err){
 			console.log('Database Upload (Put) ERROR')
 			console.log(err)
-			delTmp();
 			return next(err);
 		}	
 		
@@ -593,200 +580,165 @@ server.put(/^\/rest3d\/assets.*/,function(req, res, next) {
 	console.log('put asset='+asset)
 	console.log('body=',req.body)
 
-	delTmp(function(){
+	rmdirSync('tmp');
+	fs.mkdirSync('tmp');
 
+	var zipfile = fs.createWriteStream('tmp/zip.zip')
 
-		var zipfile = fs.createWriteStream('tmp/zip.zip')
+	var daefilename = '';
 
-		var daefilename = '';
+	request.get(req.body).pipe(zipfile)
 
-		request.get(req.body).pipe(zipfile)
+	zipfile.on('close', function () {
 
-		zipfile.on('close', function () {
+		zipfile = fs.createReadStream('tmp/zip.zip')
+		
+		var data = fs.readFileSync('tmp/zip.zip')
+		try {
+		//fs.open("tmp/zip.zip", "r", "0666", function(err, fd) {
+			//	var reader = zip.Reader(fd);
 
-			zipfile = fs.createReadStream('tmp/zip.zip')
-			
-			var data = fs.readFileSync('tmp/zip.zip')
+			var reader = zip.Reader(data);
+		
+		    reader.forEach(function (entry) {
+		    	var filename = entry.getName();
+		    	console.log('****** entry *********')
+			    console.log('filename=',filename);
+
 			try {
-			//fs.open("tmp/zip.zip", "r", "0666", function(err, fd) {
-  			//	var reader = zip.Reader(fd);
-
-				var reader = zip.Reader(data);
-			
-			    reader.forEach(function (entry) {
-			    	var filename = entry.getName();
-			    	console.log('****** entry *********')
-				    console.log('filename=',filename);
-
-				try {
-				    var tmpfilename = 'tmp/'+asset+'/'+filename;
-			    	if (tmpfilename.endsWith('/')) {
-			    	} else
-			    	{
-			    		// make sure folder exists
-			    		var folder = tmpfilename.substring(0,tmpfilename.lastIndexOf('/'));
-			    		console.log('folder='+folder)
-			    		mkdirsSync(folder); 
-			    		
-			    		fs.writeFileSync(tmpfilename, entry.getData(), function (err) {
-						  if (err) throw err;
-						  console.log('It\'s saved!');
-						});
+			    var tmpfilename = 'tmp/'+asset+'/'+filename;
+		    	if (tmpfilename.endsWith('/')) {
+		    	} else
+		    	{
+		    		// make sure folder exists
+		    		var folder = tmpfilename.substring(0,tmpfilename.lastIndexOf('/'));
+		    		console.log('folder='+folder)
+		    		mkdirsSync(folder); 
+		    		
+		    		fs.writeFileSync(tmpfilename, entry.getData(), function (err) {
+					  if (err) throw err;
+					  console.log('It\'s saved!');
+					});
+		    	
+		    		if (filename.endsWith('.dae'))
+		    			daefilename = tmpfilename;
 			    	
-			    		if (filename.endsWith('.dae'))
-			    			daefilename = tmpfilename;
-				    	
-					}
-				} catch (e)
-				{
-					console.log("problem writing entry")
-					console.log(e)
 				}
-				
-		    	//});
-			});
 			} catch (e)
 			{
-				console.log('counld not unzip zip file')
-				console.log(e);
-				res.writeHead(500);
-				res.write('counld not unzip zip file');
-				res.end();
-				return next();
+				console.log("problem writing entry")
+				console.log(e)
 			}
-			if (daefilename == '')
-			{
-				console.log('counld not find .dae file in zip')
-				res.writeHead(400);
-				res.write('counld not find .dae file in zip');
-				res.end();
-				return next();
-			} else
-			{
-				console.log('now converting collada')
+			
+	    	//});
+		});
+		} catch (e)
+		{
+			console.log('counld not unzip zip file')
+			console.log(e);
+			res.writeHead(500);
+			res.write('counld not unzip zip file');
+			res.end();
+			return next();
+		}
+		if (daefilename == '')
+		{
+			console.log('counld not find .dae file in zip')
+			res.writeHead(400);
+			res.write('counld not find .dae file in zip');
+			res.end();
+			return next();
+		} else
+		{
+			console.log('now converting collada')
 
-				exec("collada2gltf "+daefilename+" "+daefilename.replace('.dae','.json'), function(code, output){
+			exec("collada2gltf "+daefilename+" "+daefilename.replace('.dae','.json'), function(code, output){
 
-				console.log('Exit code:', code);
-  				console.log('Program output:', output);
-				
+			console.log('Exit code:', code);
+				console.log('Program output:', output);
+			
 
-				daefilename = daefilename.substring(daefilename.lastIndexOf('/')+1);
-				
-				console.log('filename = '+daefilename)
-				
-				console.log('pushing converted files to database')
+			daefilename = daefilename.substring(daefilename.lastIndexOf('/')+1);
+			
+			console.log('filename = '+daefilename)
+			
+			console.log('pushing converted files to database')
 
-				var xml = '<asset  xmlns=""> '+
-   							 '<type>collection</type> '+
-    						 '<name>'+asset+'</name> '+
-    						 '<uri>assets/</uri> '+
-    						   '<assets> '+
-    						    '<asset> '+
-									 '<type>collection</type> '+
-									 '<name>models</name> '+
-									 '<uri>assets/'+asset+'/</uri> '+
-									 '<assets> '+
-										 '<asset> '+
-										 '<type>model</type> '+
-										 '<name>'+asset+'</name> '+
-										 '<uri>assets/'+asset+'/models/</uri> '+
-										 '<source>'+daefilename+'</source> '+
-										 '<builds> '+
-										 '<build> '+
-										 '<target>COLLADA2json</target> '+
-										 '<script>builtin</script> '+
-										 '<outputs> '+
-										    '<output>'+daefilename.replace('.dae','.json')+'</output> '+
-										    '<output>'+daefilename.replace('.dae','.bin')+'</output> '+
-										 '</outputs> '+
-										 '</build> '+
-										 '</builds> '+
-										 '</asset> '+
-									 '</assets> '+
-							    '</asset> '+
-							    '<asset> '+
-									 '<type>collection</type> '+
-									 '<name>images</name> '+
-									 '<uri>assets/'+asset+'/</uri> '+
-									 '<assets> '+
-									 '</assets> '+
-							    '</asset> '+
-    						   '</assets> '+
-    						 '</asset> '
-
-
-				var xql = 'let $a := doc("assets/assets.xml")/json/assets '+
-				              'let $b := '+xml+
-				              'return '+
-				              'insert node $b as first into $a '
-
-				var query=session.query(xql);
-
-				console.log('xql='+xql)
-				query.execute(function(err,r){
-					if (err)
-					{
-						console.log('query error'+err);
-					} else {
-						console.log('query OK');
-					}	
-				}); 
+			var xml = '<asset  xmlns=""> '+
+							 '<type>collection</type> '+
+						 '<name>'+asset+'</name> '+
+						 '<uri>assets/</uri> '+
+						   '<assets> '+
+						    '<asset> '+
+								 '<type>collection</type> '+
+								 '<name>models</name> '+
+								 '<uri>assets/'+asset+'/</uri> '+
+								 '<assets> '+
+									 '<asset> '+
+									 '<type>model</type> '+
+									 '<name>'+asset+'</name> '+
+									 '<uri>assets/'+asset+'/models/</uri> '+
+									 '<source>'+daefilename+'</source> '+
+									 '<builds> '+
+									 '<build> '+
+									 '<target>COLLADA2json</target> '+
+									 '<script>builtin</script> '+
+									 '<outputs> '+
+									    '<output>'+daefilename.replace('.dae','.json')+'</output> '+
+									    '<output>'+daefilename.replace('.dae','.bin')+'</output> '+
+									 '</outputs> '+
+									 '</build> '+
+									 '</builds> '+
+									 '</asset> '+
+								 '</assets> '+
+						    '</asset> '+
+						    '<asset> '+
+								 '<type>collection</type> '+
+								 '<name>images</name> '+
+								 '<uri>assets/'+asset+'/</uri> '+
+								 '<assets> '+
+								 '</assets> '+
+						    '</asset> '+
+						   '</assets> '+
+						 '</asset> '
 
 
+			var xql = 'let $a := doc("assets/assets.xml")/json/assets '+
+			              'let $b := '+xml+
+			              'return '+
+			              'insert node $b as first into $a '
 
-				fs.readdir('tmp/'+asset+'/models', function(err, files) {
-					if (err) {
-						console.log('cannot readdir '+'tmp/'+asset+'/models')
-					} else
-					{
-						files.forEach(function (filename) {
-							databaseStore(asset,'models/'+filename);
-							if (filename.endsWith('glsl'))
-							{
-								var xml = '<asset  xmlns=""> '+
-											'<type>shader</type> '+
-											'<name>'+filename.split('.')[0]+'</name> '+
-											'<uri>assets/'+asset+'/models/</uri> '+
-											'<source>'+filename+'</source> '+
-										'</asset> '
+			var query=session.query(xql);
 
-								var xql = 'let $a := doc("assets/assets.xml")/json/assets/asset[name="'+asset+'"]/assets/asset[name="models"]/assets '+
-						              'let $b := '+xml+
-						              'return '+
-						              'insert node $b into $a '
-								var query=session.query(xql);
-								console.log('xql='+xql)
-								query.execute(function(err,r){
-									if (err)
-									{
-										console.log('query error'+err);
-									} else {
-										console.log('query OK');
-									}	
-								}); 
-							}
-						});
-					}
-				});
+			console.log('xql='+xql)
+			query.execute(function(err,r){
+				if (err)
+				{
+					console.log('query error'+err);
+				} else {
+					console.log('query OK');
+				}	
+			}); 
 
 
-				fs.readdir('tmp/'+asset+'/images', function(err, files) {
-					if (err) {
-						console.log('cannot readdir '+'tmp/'+asset+'/images')
-					} else
-					{
-						files.forEach(function (filename) {
-							databaseStore(asset,'images/'+filename);
-					
+
+			fs.readdir('tmp/'+asset+'/models', function(err, files) {
+				if (err) {
+					console.log('cannot readdir '+'tmp/'+asset+'/models')
+				} else
+				{
+					files.forEach(function (filename) {
+						databaseStore(asset,'models/'+filename);
+						if (filename.endsWith('glsl'))
+						{
 							var xml = '<asset  xmlns=""> '+
-											'<type>image</type> '+
-											'<name>'+filename.split('.')[0]+'</name> '+
-											'<uri>assets/'+asset+'/images/</uri> '+
-											'<source>'+filename+'</source> '+
-										'</asset> '
+										'<type>shader</type> '+
+										'<name>'+filename.split('.')[0]+'</name> '+
+										'<uri>assets/'+asset+'/models/</uri> '+
+										'<source>'+filename+'</source> '+
+									'</asset> '
 
-							var xql = 'let $a := doc("assets/assets.xml")/json/assets/asset[name="'+asset+'"]/assets/asset[name="images"]/assets '+
+							var xql = 'let $a := doc("assets/assets.xml")/json/assets/asset[name="'+asset+'"]/assets/asset[name="models"]/assets '+
 					              'let $b := '+xml+
 					              'return '+
 					              'insert node $b into $a '
@@ -800,20 +752,54 @@ server.put(/^\/rest3d\/assets.*/,function(req, res, next) {
 									console.log('query OK');
 								}	
 							}); 
-						});
-					}
-				});
+						}
+					});
+				}
+			});
 
-				res.writeHead(200)
-				res.write(output)
-				res.end()
 
+			fs.readdir('tmp/'+asset+'/images', function(err, files) {
+				if (err) {
+					console.log('cannot readdir '+'tmp/'+asset+'/images')
+				} else
+				{
+					files.forEach(function (filename) {
+						databaseStore(asset,'images/'+filename);
 				
-				return next();
-		           });
-			}
-		})
-	}); // delTmp
+						var xml = '<asset  xmlns=""> '+
+										'<type>image</type> '+
+										'<name>'+filename.split('.')[0]+'</name> '+
+										'<uri>assets/'+asset+'/images/</uri> '+
+										'<source>'+filename+'</source> '+
+									'</asset> '
+
+						var xql = 'let $a := doc("assets/assets.xml")/json/assets/asset[name="'+asset+'"]/assets/asset[name="images"]/assets '+
+				              'let $b := '+xml+
+				              'return '+
+				              'insert node $b into $a '
+						var query=session.query(xql);
+						console.log('xql='+xql)
+						query.execute(function(err,r){
+							if (err)
+							{
+								console.log('query error'+err);
+							} else {
+								console.log('query OK');
+							}	
+						}); 
+					});
+				}
+			});
+
+			res.writeHead(200)
+			res.write(output)
+			res.end()
+
+			
+			return next();
+	           });
+		}
+	})
 
 		
 });
@@ -1089,7 +1075,7 @@ FileInfo.prototype.safeName = function () {
     // Prevent directory traversal and creating hidden system files:
     this.name = path.basename(this.name).replace(/^\.+/, '');
     // Prevent overwriting existing files:
-    while (_existsSync(options.uploadDir + '/' + this.name)) {
+    while (fs.existsSync(options.uploadDir + '/' + this.name)) {
         this.name = this.name.replace(nameCountRegexp, nameCountFunc);
     }
 };
@@ -1100,7 +1086,7 @@ FileInfo.prototype.initUrls = function (req) {
                 '//' + req.headers.host + options.uploadUrl;
         this.url = this.delete_url = baseUrl + encodeURIComponent(this.name);
         Object.keys(options.imageVersions).forEach(function (version) {
-            if (_existsSync(
+            if (fs.existsSync(
                     options.uploadDir + '/' + version + '/' + that.name
                 )) {
                 that[version + '_url'] = baseUrl + version + '/' +
@@ -1356,6 +1342,11 @@ server.post(/^\/rest3d\/convert.*/,function(_req,_res,_next){
 		                files.push(fileInfo);
 		            }
 		        });
+		        var timeout = function() {
+                    	rmdirSync('upload/'+output.dir);
+                    	console.log('timeout !! upload/'+output.dir+'/ was deleted');
+                    }
+                    setTimeout(function() { timeout()},5 * 60 * 1000);
 		        handleResult(req, res, {files: files});
 		    });
 						
