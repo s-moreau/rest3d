@@ -534,11 +534,11 @@ var databaseStore = function(asset,filename) {
 
 	console.log('databaseStore'+opts['path'])
 
-	if (filename.endsWith('.xml') || filename.endsWith('.dae') || filename.endsWith('.kml'))
+	if (filename.toLowerCase().endsWith('.xml') || filename.toLowerCase().endsWith('.dae') || filename.toLowerCase().endsWith('.kml'))
 		opts['headers'] = {'content-type': 'application/xml'}
-	else if (filename.endsWith('.jpg') || filename.endsWith('.jpeg'))
+	else if (filename.toLowerCase().endsWith('.jpg') || filename.toLowerCase().endsWith('.jpeg'))
 		opts['headers'] = {'content-type': 'image/jpeg'}
-	else if (filename.endsWith('.png'))
+	else if (filename.toLowerCase().endsWith('.png'))
 		opts['headers'] = {'content-type': 'image/png'}
 
 	console.log('pusing to database = '+ opts['path'])
@@ -620,7 +620,7 @@ server.put(/^\/rest3d\/assets.*/,function(req, res, next) {
 					  console.log('It\'s saved!');
 					});
 		    	
-		    		if (filename.endsWith('.dae'))
+		    		if (filename.toLowerCase().endsWith('.dae'))
 		    			daefilename = tmpfilename;
 			    	
 				}
@@ -729,7 +729,7 @@ server.put(/^\/rest3d\/assets.*/,function(req, res, next) {
 				{
 					files.forEach(function (filename) {
 						databaseStore(asset,'models/'+filename);
-						if (filename.endsWith('glsl'))
+						if (filename.toLowerCase().endsWith('glsl'))
 						{
 							var xml = '<asset  xmlns=""> '+
 										'<type>shader</type> '+
@@ -1303,13 +1303,13 @@ server.post(/^\/rest3d\/convert.*/,function(_req,_res,_next){
      form.on('field', function (name, data) {
      	params[name] = data;
      }).on('error', function (e) {
-     	handleError(res,req,e);
+     	handleError(req,res,e);
         return next();
      }).on('end', function(){
      	console.log('now converting collada')
 
-     	if (!params.name || !params.name.endsWith('dae')) { 
-     		handleError({error: 'invalid file '+params.name+' in convert'});
+     	if (!params.name || !params.name.toLowerCase().endsWith('dae')) { 
+     		handleError(req,res,{error: 'invalid file '+params.name+' in convert'});
      		return next();
      	}
      	var output_dir = params.name.split('\.')[0]+'_gltf';
@@ -1322,7 +1322,7 @@ server.post(/^\/rest3d\/convert.*/,function(_req,_res,_next){
 		exec(cmd, function(code, output){
 
 			if (code !== 0){
-				handleError({error: 'collada2gltf returned an error='+code+'\n'+output});
+				handleError(req,res,{error: 'collada2gltf returned an error='+code+'\n'+output});
 				return next();
 			}
 			console.log('Exit code:', code);
