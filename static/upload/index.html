@@ -156,7 +156,7 @@ $(function () {
                     // ennumerate all resulting files
                     $.each(data.result.files, function (index, file) {
 
-                        var span = $('<a href="'+file.url+'" target="_blank"><p><span>'+formatName(data,file)+'</span></p></a>');
+                        var span = $('<a href="'+decodeURIComponent(file.url)+'" target="_blank"><p><span>'+formatName(data,file)+'</span></p></a>');
                         data.context.append(span);
                     });
                 }
