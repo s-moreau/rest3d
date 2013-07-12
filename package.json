@@ -32,10 +32,12 @@
     "async":"",
     "dandy":"",
     "mkdir":"",
-    "rimraf":"",
     "request":"",
     "cheerio":"",
-    "zip":""
+    "zip":"",
+    "blueimp-file-upload":"",
+    "formidable":"",
+    "imageMagick":""
   },
   "devDependencies": {},
   "bundleDependencies": [],
