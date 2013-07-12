@@ -92,7 +92,7 @@ function Cache(cachePath, useDisk, useMem, useGzip) {
 	this.monitors = {};
 	if (cachePath) {
 		rmdirSync(cachePath);
-		fd.mkdirsSync(cachePath);
+		fs.mkdirSync(cachePath);
 	}
 }
 exports.Cache = Cache;
@@ -385,7 +385,7 @@ subclass(Cache, events.EventEmitter, {
 		var cachePath = path.join(this.cachePath, U.pathname);
 
 		if (this.useDisk && this.cachePath) {
-			fs.mkdirsSync(cachePath);
+			fs.mkdirSync(cachePath);
 		}
 
 		if (this.useMem) {
