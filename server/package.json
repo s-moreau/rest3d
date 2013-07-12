@@ -9,12 +9,11 @@
     "underscore":"",
     "async":"",
     "dandy":"",
-    "rimraf":"",
     "request":"",
     "cheerio":"",
     "zip":"",
     "blueimp-file-upload":"",
     "formidable":"",
-    "imagemagick":""
+    "imageMagick":""
   }
 }
