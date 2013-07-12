@@ -119,6 +119,11 @@ var basex_rest = 80;
 var basex_rest_user = 'admin';
 var basex_rest_pass = 'admin';
 
+// see where collada2gltf is located
+var openshift = process.env('OPENSHIFT_DATA_DIR');
+var collada2gltf = 'collada2gltf';
+if (openshift) 
+	collada2gltf = openshift + 'bin/collada2gltf';
 
 if (basex_port_server === undefined)
 {
@@ -652,7 +657,7 @@ server.put(/^\/rest3d\/assets.*/,function(req, res, next) {
 		{
 			console.log('now converting collada')
 
-			exec("collada2gltf "+daefilename+" "+daefilename.replace('.dae','.json'), function(code, output){
+			exec(collada2gltf+' '+daefilename+" "+daefilename.replace('.dae','.json'), function(code, output){
 
 			console.log('Exit code:', code);
 				console.log('Program output:', output);
