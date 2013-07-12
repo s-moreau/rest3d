@@ -68,7 +68,7 @@ namespace x3dgc
                 symbol += (data[i] << h);
                 ++i;
             }
-            bstream.WriteUCharASCII((unsigned char) symbol);
+            bstream.WriteUChar7ASCII((unsigned char) symbol);
         }
         bstream.WriteUInt32ASCII(start, bstream.GetSize() - start);
         return X3DGC_OK;
