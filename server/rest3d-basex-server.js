@@ -1040,7 +1040,7 @@ var UploadHandler = function (req, res, callback) {
         }
     },
     handleError = function (req, res, error) {
-    	console('returning error ='+JSON.stringify(error))
+    	console.log('returning error ='+JSON.stringify(error));
 		res.writeHead(500, {
             'Content-Type': req.headers.accept
             .indexOf('application/json') !== -1 ?
