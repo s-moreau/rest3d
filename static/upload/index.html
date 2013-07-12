@@ -136,7 +136,8 @@ $(function () {
         }),
         // show the name of the file nicely
         formatName = function(data,file){
-            return file.name;
+            var i = file.name.lastIndexOf('/');
+            return file.name.substring(i+1);
         },
         convertButton = $('<button/>')
             .addClass('btn')
@@ -220,7 +221,11 @@ $(function () {
                 .attr('target', '_blank')
                 .prop('href', file.url);
             $(data.context.children()[index])
+                .find('span').text(file.name);
+
+            $(data.context.children()[index])  
                 .wrap(link);
+            file.assetName = data.result.files[index].name;
             var $node = convertButton.clone(true).data({file: file, context: data.context})
                 .text('Convert')
                 .prop('disabled', !/dae$/i.test(file.url));
