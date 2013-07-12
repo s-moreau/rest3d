@@ -120,7 +120,7 @@ var basex_rest_user = 'admin';
 var basex_rest_pass = 'admin';
 
 // see where collada2gltf is located
-var openshift = process.env('OPENSHIFT_DATA_DIR');
+var openshift = process.env['OPENSHIFT_DATA_DIR'];
 var collada2gltf = 'collada2gltf';
 if (openshift) 
 	collada2gltf = openshift + 'bin/collada2gltf';
@@ -1321,7 +1321,7 @@ server.post(/^\/rest3d\/convert.*/,function(_req,_res,_next){
      	var output_file = params.name.replace('.dae','.json');
      	fs.mkdirSync('upload/'+output_dir);
 
-     	var cmd = "collada2gltf -p -f \"upload/" + params.name+"\" -o \""+'upload/'+output_dir+'/'+output_file+"\"";
+     	var cmd = collada2gltf+" -p -f \"upload/" + params.name+"\" -o \""+'upload/'+output_dir+'/'+output_file+"\"";
      	console.log('exec '+cmd);
      	// todo -> manage progress !!!
 		exec(cmd, function(code, output){
