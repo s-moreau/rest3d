@@ -66,7 +66,7 @@ THE SOFTWARE.
 // - - Inclusion - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 #include <stdlib.h>
-#include "x3dgc_arithmetic_codec.h"
+#include "x3dgc_ArithmeticCodec.h"
 
 namespace x3dgc
 {
