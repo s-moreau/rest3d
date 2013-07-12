@@ -46,15 +46,15 @@ namespace x3dgc
                                 {
                                     delete [] m_buffer;
                                 };
-        T &                     operator[](unsigned long i)
+        T &                     operator[](size_t i)
                                 { 
                                     return m_buffer[i];
                                 }
-        const T &               operator[](unsigned long i) const
+        const T &               operator[](size_t i) const
                                 { 
                                     return m_buffer[i];
                                 }
-        void                    Allocate(unsigned long size)
+        void                    Allocate(size_t size)
                                 {
                                     if (size > m_allocated)
                                     {
