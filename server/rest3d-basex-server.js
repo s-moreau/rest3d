@@ -1348,7 +1348,7 @@ server.post(/^\/rest3d\/convert.*/,function(_req,_res,_next){
 		            }
 		        });
 		        var timeout = function() {
-                    	rmdirSync('upload/'+output.dir);
+                    	rmdirSync('upload/'+output_dir);
                     	console.log('timeout !! upload/'+output_dir+'/ was deleted');
                     }
                     setTimeout(function() { timeout()},5 * 60 * 1000);
