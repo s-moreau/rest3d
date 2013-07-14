@@ -92,6 +92,7 @@ namespace x3dgc
       fprintf(stderr, "\n\n -> Arithmetic coding error: ");
       fputs(msg, stderr);
       fputs("\n Execution terminated!\n", stderr);
+      getchar();
       exit(1);
     }
 
@@ -383,7 +384,10 @@ namespace x3dgc
     {
     #ifdef _DEBUG
       if (mode != 1) AC_Error("encoder not initialized");
-      if (data >= M.data_symbols) AC_Error("invalid data symbol");
+      if (data >= M.data_symbols) 
+      {
+          AC_Error("invalid data symbol");
+      }
     #endif
 
       unsigned x, init_base = base;
@@ -493,8 +497,11 @@ namespace x3dgc
                                       unsigned char * user_buffer)
     {
                                                       // test for reasonable sizes
-      if ((max_code_bytes < 16) || (max_code_bytes > 0x1000000U))
+//      if ((max_code_bytes < 16) || (max_code_bytes > 0x1000000U))
+      if ((max_code_bytes < 1) || (max_code_bytes > 0x1000000U)) // updated by K. Mammou
+      {
         AC_Error("invalid codec buffer size");
+      }
       if (mode != 0) AC_Error("cannot set buffer while encoding or decoding");
 
       if (user_buffer != 0) {                       // user provides memory buffer
