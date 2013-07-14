@@ -200,6 +200,59 @@ namespace x3dgc
                       Adaptive_Data_Model &);
       unsigned decode(Adaptive_Data_Model &);
 
+//   This section was added by K. Mammou
+      void     ExpGolombEncode(unsigned int symbol, 
+                               int k,
+                               Static_Bit_Model & bModel0,
+                               Adaptive_Bit_Model & bModel1)
+               {
+                   while(1)
+                   {
+                       if (symbol >= (unsigned int)(1<<k))
+                       {
+                           encode(1, bModel1);
+                           symbol = symbol - (1<<k);
+                           k++;
+                       }
+                       else
+                       {
+                           encode(0, bModel1); // now terminated zero of unary part
+                           while (k--) // next binary part
+                           {
+                               encode((signed short)((symbol>>k)&1), bModel0);
+                           }
+                           break;
+                       }
+                   }
+               }
+
+
+    unsigned   ExpGolombDecode(int k,
+                               Static_Bit_Model & bModel0,
+                               Adaptive_Bit_Model & bModel1)
+               {
+                   unsigned int l;
+                   int symbol = 0;
+                   int binary_symbol = 0;
+                   do
+                   {
+                       l=decode(bModel1);
+                       if (l==1)
+                       {
+                           symbol += (1<<k);
+                           k++;
+                        }
+                   }
+                   while (l!=0);
+                   while (k--)                             //next binary part
+                   if (decode(bModel0)==1)
+                   {
+                       binary_symbol |= (1<<k);
+                   }
+                   return (unsigned int) (symbol+binary_symbol);
+                }
+//----------------------------------------------------------
+
     private:  //  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .
       void propagate_carry(void);
       void renorm_enc_interval(void);
@@ -212,3 +265,4 @@ namespace x3dgc
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 #endif
+

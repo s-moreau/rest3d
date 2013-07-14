@@ -45,13 +45,108 @@ namespace x3dgc
         //! Constructor.
                                 BinaryStream(size_t size = X3DGC_BINARY_STREAM_DEFAULT_SIZE)
                                 {
-                                    m_endianness = SystemEndianness();
+                                    m_endianness   = SystemEndianness();
                                     m_stream.Allocate(size);
                                 };
         //! Destructor.
                                 ~BinaryStream(void){};
 
-        void                    WriteFloat32(unsigned long position, float value) 
+        void                    WriteFloat32(float value, X3DGCSC3DMCStreamType streamType)
+                                {
+                                    if (streamType == X3DGC_SC3DMC_STREAM_TYPE_ASCII)
+                                    {
+                                        WriteFloat32ASCII(value);
+                                    }
+                                    else
+                                    {
+                                        WriteFloat32Bin(value);
+                                    }
+                                }
+        void                    WriteUInt32(unsigned long position, unsigned long value, X3DGCSC3DMCStreamType streamType)
+                                {
+                                    if (streamType == X3DGC_SC3DMC_STREAM_TYPE_ASCII)
+                                    {
+                                        WriteUInt32ASCII(position, value);
+                                    }
+                                    else
+                                    {
+                                        WriteUInt32Bin(position, value);
+                                    }
+                                }
+        void                    WriteUInt32(unsigned long value, X3DGCSC3DMCStreamType streamType)
+                                {
+                                    if (streamType == X3DGC_SC3DMC_STREAM_TYPE_ASCII)
+                                    {
+                                        WriteUInt32ASCII(value);
+                                    }
+                                    else
+                                    {
+                                        WriteUInt32Bin(value);
+                                    }
+                                }
+        void                    WriteUChar(unsigned int position, unsigned char value, X3DGCSC3DMCStreamType streamType)
+                                {
+                                    if (streamType == X3DGC_SC3DMC_STREAM_TYPE_ASCII)
+                                    {
+                                        WriteUInt32ASCII(position, value);
+                                    }
+                                    else
+                                    {
+                                        WriteUInt32Bin(position, value);
+                                    }
+                                }
+        void                    WriteUChar(unsigned char value, X3DGCSC3DMCStreamType streamType)
+                                {
+                                    if (streamType == X3DGC_SC3DMC_STREAM_TYPE_ASCII)
+                                    {
+                                        WriteUCharASCII(value);
+                                    }
+                                    else
+                                    {
+                                        WriteUChar8Bin(value);
+                                    }
+                                }
+        float                   ReadFloat32(unsigned long & position, X3DGCSC3DMCStreamType streamType) const
+                                {
+                                    float value;
+                                    if (streamType == X3DGC_SC3DMC_STREAM_TYPE_ASCII)
+                                    {
+                                        value = ReadFloat32ASCII(position);
+                                    }
+                                    else
+                                    {
+                                        value = ReadFloat32Bin(position);
+                                    }
+                                    return value;
+                                }
+        unsigned long           ReadUInt32(unsigned long & position, X3DGCSC3DMCStreamType streamType) const
+                                {
+                                    unsigned long value;
+                                    if (streamType == X3DGC_SC3DMC_STREAM_TYPE_ASCII)
+                                    {
+                                        value = ReadUInt32ASCII(position);
+                                    }
+                                    else
+                                    {
+                                        value = ReadUInt32Bin(position);
+                                    }
+                                    return value;
+                                }
+        unsigned char           ReadUChar(unsigned long & position, X3DGCSC3DMCStreamType streamType) const
+                                {
+                                    unsigned char value;
+                                    if (streamType == X3DGC_SC3DMC_STREAM_TYPE_ASCII)
+                                    {
+                                        value = ReadUCharASCII(position);
+                                    }
+                                    else
+                                    {
+                                        value = ReadUChar8Bin(position);
+                                    }
+                                    return value;
+                                }
+
+        void                    WriteFloat32Bin(unsigned long position, float value) 
                                 {
                                     assert(position < m_stream.GetSize() - 4);
                                     unsigned char * ptr = (unsigned char *) (&value);
@@ -70,8 +165,7 @@ namespace x3dgc
                                         m_stream[position  ] = ptr[3];
                                     }
                                 }
-
-        void                    WriteFloat32(float value) 
+        void                    WriteFloat32Bin(float value) 
                                 {
                                     unsigned char * ptr = (unsigned char *) (&value);
                                     if (m_endianness == X3DGC_BIG_ENDIAN)
@@ -89,7 +183,7 @@ namespace x3dgc
                                         m_stream.PushBack(ptr[3]);
                                     }
                                 }
-        void                    WriteUInt32(unsigned long position, unsigned long value) 
+        void                    WriteUInt32Bin(unsigned long position, unsigned long value) 
                                 {
                                     assert(position < m_stream.GetSize() - 4);
                                     unsigned char * ptr = (unsigned char *) (&value);
@@ -108,8 +202,7 @@ namespace x3dgc
                                         m_stream[position  ] = ptr[3];
                                     }
                                 }
-
-        void                    WriteUInt32(unsigned long value) 
+        void                    WriteUInt32Bin(unsigned long value) 
                                 {
                                     unsigned char * ptr = (unsigned char *) (&value);
                                     if (m_endianness == X3DGC_BIG_ENDIAN)
@@ -127,21 +220,21 @@ namespace x3dgc
                                         m_stream.PushBack(ptr[3]);
                                     }
                                 }
-        void                    WriteUChar8(unsigned int position, unsigned char value) 
+        void                    WriteUChar8Bin(unsigned int position, unsigned char value) 
                                 {
                                     m_stream[position] = value;
                                 }
-        void                    WriteUChar8(unsigned char value) 
+        void                    WriteUChar8Bin(unsigned char value) 
                                 {
                                     m_stream.PushBack(value);
                                 }
-        float                   ReadFloat32(unsigned long & position) const
+        float                   ReadFloat32Bin(unsigned long & position) const
                                 {
-                                    unsigned long value = ReadUInt32(position);
+                                    unsigned long value = ReadUInt32Bin(position);
                                     float fvalue = *((float *)(&value));
                                     return fvalue;
                                 }
-        unsigned long           ReadUInt32(unsigned long & position)  const
+        unsigned long           ReadUInt32Bin(unsigned long & position)  const
                                 {
                                     assert(position < m_stream.GetSize() - 4);
                                     unsigned long value = 0;
@@ -161,10 +254,12 @@ namespace x3dgc
                                     }
                                     return value;
                                 }
-        unsigned char           ReadUChar8(unsigned long & position) const
+        unsigned char           ReadUChar8Bin(unsigned long & position) const
                                 {
                                     return m_stream[position++];
                                 }
+
+
         void                    WriteFloat32ASCII(float value) 
                                 {
                                     unsigned long uiValue = *((unsigned long *)(&value));
@@ -220,7 +315,7 @@ namespace x3dgc
                                         m_stream.PushBack((unsigned char) value);
                                     }
                                 }
-        void                    WriteUChar7ASCII(unsigned char value) 
+        void                    WriteUCharASCII(unsigned char value) 
                                 {
                                     assert(value <= X3DGC_BINARY_STREAM_MAX_SYMBOL0);
                                     m_stream.PushBack(value);
@@ -310,6 +405,16 @@ namespace x3dgc
                                 {
                                     return m_stream.GetSize();
                                 }
+    const unsigned char * const GetBuffer(unsigned long position) const
+                                {
+                                    return m_stream.GetBuffer() + position;
+                                }
+                                
+    void                        GetBuffer(unsigned long position, unsigned char * & buffer) const
+                                {
+                                    buffer = (unsigned char *) (m_stream.GetBuffer() + position); // fix me: ugly!
+                                }
+
     private:
         Vector<unsigned char>   m_stream;
         X3DGCEndianness         m_endianness;
