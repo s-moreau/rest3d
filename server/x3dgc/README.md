@@ -4,7 +4,7 @@
   Provide an efficient implementation of patent free MPEG tools for 3D graphics compression
 
 ## License
-  The code is published under a MIT License [1]
+  x3DGC is released under the MIT License [1]
 
 ## Codecs
   * Mesh compression [2]
