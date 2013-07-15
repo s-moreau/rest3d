@@ -10,7 +10,6 @@
   * Mesh compression [2]
   * Bone-based Animation Compression (coming soon)
 
-## rest3d_database_server
   [1]: http://opensource.org/licenses/MIT "MIT License"
   [2]: http://onlinelibrary.wiley.com/doi/10.1002/cav.319/abstract "TFAN: A low complexity 3D mesh compression algorithm"
   
