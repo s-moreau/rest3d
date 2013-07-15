@@ -74,8 +74,6 @@ bool SaveOBJ(const char * fileName,
              const std::vector< Vec3<Real> > & normals,
              const std::vector< Vec3<long> > & triangles);
 
-bool GenerateRandomFloatVector(std::vector< Real > & tab, size_t size, Real scale);
-bool GenerateRandomIntVector  (std::vector< long > & tab, size_t size);
 int testEncode(const std::string fileName, int qcoord, int qtexCoord, int qnormal, OGCSC3DMCStreamType streamType)
 {
     std::string folder;
@@ -93,10 +91,6 @@ int testEncode(const std::string fileName, int qcoord, int qtexCoord, int qnorma
     std::vector< Vec3<Real> > points;
     std::vector< Vec3<Real> > normals;
     std::vector< Vec2<Real> > texCoords;
-    std::vector< Real > tangent;
-    std::vector< Real > bitangent;
-    std::vector< Real > weights;
-    std::vector< long > bones;
     std::vector< Vec3<long> > triangles;
     bool ret = LoadOBJ(fileName, points, texCoords, normals, triangles);
     if (!ret)
@@ -104,14 +98,6 @@ int testEncode(const std::string fileName, int qcoord, int qtexCoord, int qnorma
         std::cout << "Error: LoadOBJ()\n" << std::endl;
         return -1;
     }
-/*
-    ret = SaveOBJ("debug_mesh.obj", points, texCoords, normals, triangles);
-    if (!ret)
-    {
-        std::cout << "Error: SaveOBJ()\n" << std::endl;
-        return -1;
-    }
-*/
     if (points.size() == 0 || triangles.size() == 0)
     {
         std::cout <<  "Error: points.size() == 0 || triangles.size() == 0 \n" << std::endl;
@@ -139,46 +125,6 @@ int testEncode(const std::string fileName, int qcoord, int qtexCoord, int qnorma
     if (texCoords.size() > 0)
     {
         ifs.SetTexCoord((Real * const ) & (texCoords[0]));
-    }
-
-    bool testAttributeEncoding = false;
-    if (testAttributeEncoding)
-    {
-        // add fake attributes
-        ifs.SetNumFloatAttributes(3);
-        ifs.SetNumIntAttributes(1);
-
-        // tangent (attribute 0)
-        GenerateRandomFloatVector(tangent, 3 * points.size(), 1.0);
-        ifs.SetNFloatAttribute  (0, points.size());
-        ifs.SetFloatAttributeDim(0, 3);
-        ifs.SetFloatAttribute   (0, (Real * const) & (tangent[0]));
-        params.SetFloatAttributeQuantBits(0, 11);
-        params.SetFloatAttributePredMode(0, OGC_SC3DMC_DIFFERENTIAL_PREDICTION);
-
-        
-        // bitangent (attribute 1)
-        GenerateRandomFloatVector(bitangent, 3 * points.size(), 2.0);
-        ifs.SetNFloatAttribute  (1, points.size());
-        ifs.SetFloatAttributeDim(1, 3);
-        ifs.SetFloatAttribute   (1, (Real * const ) & (bitangent[0]));
-        params.SetFloatAttributeQuantBits(1, 12);
-        params.SetFloatAttributePredMode(1, OGC_SC3DMC_DIFFERENTIAL_PREDICTION);
-
-        // animation weights (attribute 2)
-        GenerateRandomFloatVector(weights, 4 * points.size(), 3.0);
-        ifs.SetNFloatAttribute  (2, points.size());
-        ifs.SetFloatAttributeDim(2, 4);
-        ifs.SetFloatAttribute   (2, (Real * const) & (weights[0]));
-        params.SetFloatAttributeQuantBits(2, 13);
-        params.SetFloatAttributePredMode(2, OGC_SC3DMC_DIFFERENTIAL_PREDICTION);
-
-        // bones IDs
-        GenerateRandomIntVector(bones, 4 * points.size());
-        ifs.SetNIntAttribute  (0, points.size());
-        ifs.SetIntAttributeDim(0, 4);
-        ifs.SetIntAttribute   (0, (long * const) & (bones[0]));
-        params.SetIntAttributePredMode(0, OGC_SC3DMC_NO_PREDICTION);
     }
 
     // compute min/max
@@ -211,11 +157,6 @@ int testDecode(std::string fileName)
     std::vector< Vec2<Real> > colors;
     std::vector< Vec2<Real> > texCoords;
     std::vector< Vec3<long> > triangles;
-    std::vector< Real > tangent;
-    std::vector< Real > bitangent;
-    std::vector< Real > weights;
-    std::vector< long > bones;
-
 
     BinaryStream bstream;
     IndexedFaceSet ifs;
@@ -248,30 +189,6 @@ int testDecode(std::string fileName)
     {
         texCoords.resize(ifs.GetNTexCoord());
         ifs.SetTexCoord((Real * const ) &(texCoords[0]));
-    }
-
-    if (ifs.GetNFloatAttribute(0) > 0)
-    {
-        tangent.resize(ifs.GetNFloatAttribute(0)* ifs.GetFloatAttributeDim(0));
-        ifs.SetFloatAttribute(0, (Real * const ) &(tangent[0]));
-    }
-
-    if (ifs.GetNFloatAttribute(1) > 0)
-    {
-        bitangent.resize(ifs.GetNFloatAttribute(1)* ifs.GetFloatAttributeDim(1));
-        ifs.SetFloatAttribute(1, (Real * const ) &(bitangent[0]));
-    }
-    
-    if (ifs.GetNFloatAttribute(2) > 0)
-    {
-        weights.resize(ifs.GetNFloatAttribute(2) * ifs.GetFloatAttributeDim(2));
-        ifs.SetFloatAttribute(2, (Real * const ) &(weights[0]));
-    }
-
-    if (ifs.GetNIntAttribute(0) > 0)
-    {
-        bones.resize(ifs.GetNIntAttribute(0) * ifs.GetIntAttributeDim(0));
-        ifs.SetIntAttribute(0, (long * const ) &(bones[0]));
     }
 
     // decode mesh
@@ -365,9 +282,9 @@ int main(int argc, char * argv[])
         std::cout << "\t -qt \t Quantization bits for texture coordinates (default=10, range = {8,...,15})"<< std::endl;
         std::cout << "\t -st \t Stream type (default=Bin, range = {binary, ascii})"<< std::endl;
         std::cout << "Examples:"<< std::endl;
-        std::cout << "\t Encode binary: test_opengc -c -st binary -i fileName.obj"<< std::endl;
-        std::cout << "\t Encode ascii:  test_opengc -c -st ascii -i fileName.obj"<< std::endl;
-        std::cout << "\t Decode:        test_opengc -d fileName.s3d"<< std::endl;
+        std::cout << "\t Encode binary: test_opengc -c -i fileName.obj -st binary"<< std::endl;
+        std::cout << "\t Encode ascii:  test_opengc -c -i fileName.obj -st ascii "<< std::endl;
+        std::cout << "\t Decode:        test_opengc -d -i fileName.s3d"<< std::endl;
         return -1;
     }
 
@@ -395,29 +312,6 @@ int main(int argc, char * argv[])
     }
     return 0;
 }
-bool GenerateRandomFloatVector(std::vector< Real > & tab, size_t size, Real scale)
-{
-    tab.resize(size);
-    srand (0);
-    for(size_t i = 0; i < size; ++i)
-    {
-        tab[i] = scale * ((Real)(rand() % 1000) / 500.0f - 1.0f);
-    }
-    return true;
-}
-
-bool GenerateRandomIntVector(std::vector< long > & tab, size_t size)
-{
-    tab.resize(size);
-    srand (0);
-    for(size_t i = 0; i < size; ++i)
-    {
-        tab[i] = rand() % 10;
-    }
-    return true;
-}
-
-
 bool LoadOBJ(const std::string & fileName, 
              std::vector< Vec3<Real> > & upoints,
              std::vector< Vec2<Real> > & utexCoords,
