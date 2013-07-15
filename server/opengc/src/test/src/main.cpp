@@ -299,7 +299,7 @@ int main(int argc, char * argv[])
     int qcoord    = 12;
     int qtexCoord = 10;
     int qnormal   = 10;
-    OGCSC3DMCStreamType streamType = OGC_SC3DMC_STREAM_TYPE_ASCII;
+    OGCSC3DMCStreamType streamType = OGC_SC3DMC_STREAM_TYPE_BINARY;
     for(int i = 1; i < argc; ++i)
     {
         if ( !strcmp(argv[i], "-c"))
@@ -365,7 +365,8 @@ int main(int argc, char * argv[])
         std::cout << "\t -qt \t Quantization bits for texture coordinates (default=10, range = {8,...,15})"<< std::endl;
         std::cout << "\t -st \t Stream type (default=Bin, range = {binary, ascii})"<< std::endl;
         std::cout << "Examples:"<< std::endl;
-        std::cout << "\t Encode: test_x3dgc -c fileName.obj"<< std::endl;
+        std::cout << "\t Encode binary stream: test_x3dgc -st binary -c fileName.obj"<< std::endl;
+        std::cout << "\t Encode ascii stream:  test_x3dgc -st ascii -c fileName.obj"<< std::endl;
         std::cout << "\t Decode: test_x3dgc -d fileName.s3d"<< std::endl;
         return -1;
     }
@@ -646,3 +647,6 @@ bool SaveOBJ(const char * fileName,
     }
     return true;
 }
+
+
+
