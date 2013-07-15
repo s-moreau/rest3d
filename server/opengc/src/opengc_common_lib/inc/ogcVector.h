@@ -89,7 +89,7 @@ namespace ogc
                                     m_buffer[m_size++] = value;
                                 }
         const T * const         GetBuffer() const { return m_buffer;};
-        const T *               GetBuffer()       { return m_buffer;};
+        T * const               GetBuffer()       { return m_buffer;};
         size_t                  GetSize()   const { return m_size;};
         void                    SetSize(size_t size)
                                 { 

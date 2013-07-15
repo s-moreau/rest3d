@@ -134,7 +134,14 @@ int testEncode(const std::string fileName, int qcoord, int qtexCoord, int qnorma
 
     SC3DMCEncoder encoder;
     encoder.Encode(params, ifs, bstream);
-    bstream.Save(outFileName.c_str());
+
+    FILE * fout = fopen(outFileName.c_str(), "wb");
+    if (!fout)
+    {
+        return -1;
+    }
+    fwrite(bstream.GetBuffer(), 1, bstream.GetSize(), fout);
+    fclose(fout);
     return 0;
 }
 int testDecode(std::string fileName)
@@ -161,7 +168,25 @@ int testDecode(std::string fileName)
     BinaryStream bstream;
     IndexedFaceSet ifs;
 
-    bstream.Load(fileName.c_str());
+
+    FILE * fin = fopen(fileName.c_str(), "rb");
+    if (!fin)
+    {
+        return -1;
+    }
+    fseek(fin, 0, SEEK_END);
+    unsigned long size = ftell(fin);
+    bstream.Allocate(size);
+    rewind(fin);
+    unsigned long nread = fread((void *) bstream.GetBuffer(), 1, size, fin);
+    bstream.SetSize(size);
+    if (nread != size)
+    {
+        return -1;
+    }
+    fclose(fin);
+
+//    bstream.Load(fileName.c_str());
 
     SC3DMCDecoder decoder;
     

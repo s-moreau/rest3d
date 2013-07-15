@@ -370,6 +370,7 @@ namespace ogc
                                 {
                                     return m_stream[position++];
                                 }
+/*
         OGCErrorCode            Save(const char * const fileName) 
                                 {
                                     FILE * fout = fopen(fileName, "wb");
@@ -381,6 +382,7 @@ namespace ogc
                                     fclose(fout);
                                     return OGC_OK;
                                 }
+*/
         OGCErrorCode            Load(const char * const fileName) 
                                 {
                                     FILE * fin = fopen(fileName, "rb");
@@ -401,6 +403,13 @@ namespace ogc
                                     fclose(fin);
                                     return OGC_OK;
                                 }
+        OGCErrorCode            LoadFromBuffer(unsigned char * buffer, unsigned long bufferSize)
+                                {
+                                    m_stream.Allocate(bufferSize);
+                                    memcpy(m_stream.GetBuffer(), buffer, bufferSize);
+                                    m_stream.SetSize(bufferSize);
+                                    return OGC_OK;
+                                }
         size_t                  GetSize() const
                                 {
                                     return m_stream.GetSize();
@@ -409,10 +418,25 @@ namespace ogc
                                 {
                                     return m_stream.GetBuffer() + position;
                                 }
-                                
+    unsigned char * const       GetBuffer(unsigned long position)
+                                {
+                                    return (m_stream.GetBuffer() + position);
+                                }                                
+    unsigned char * const       GetBuffer()
+                                {
+                                    return m_stream.GetBuffer();
+                                }                                
     void                        GetBuffer(unsigned long position, unsigned char * & buffer) const
                                 {
                                     buffer = (unsigned char *) (m_stream.GetBuffer() + position); // fix me: ugly!
+                                }
+    void                        SetSize(size_t size)
+                                { 
+                                    m_stream.SetSize(size);
+                                };
+    void                        Allocate(size_t size)
+                                {
+                                    m_stream.Allocate(size);
                                 }
 
     private:
