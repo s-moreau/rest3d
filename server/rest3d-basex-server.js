@@ -123,7 +123,7 @@ var basex_rest_pass = 'admin';
 var openshift = process.env['OPENSHIFT_DATA_DIR'];
 var collada2gltf = 'collada2gltf';
 if (openshift) 
-	collada2gltf = openshift + 'bin/collada2gltf';
+	collada2gltf = openshift + 'bin/collada2gltf-latest';
 
 if (basex_port_server === undefined)
 {
