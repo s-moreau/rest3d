@@ -8,6 +8,7 @@
 
 ## Codecs
   * Mesh compression [2]
+  * Bone-based Animation Compression (coming soon)
 
 ## rest3d_database_server
   [1]: http://opensource.org/licenses/MIT "MIT License"
