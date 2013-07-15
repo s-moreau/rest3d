@@ -365,8 +365,8 @@ int main(int argc, char * argv[])
         std::cout << "\t -qt \t Quantization bits for texture coordinates (default=10, range = {8,...,15})"<< std::endl;
         std::cout << "\t -st \t Stream type (default=Bin, range = {binary, ascii})"<< std::endl;
         std::cout << "Examples:"<< std::endl;
-        std::cout << "\t Encode binary stream: test_x3dgc -st binary -c fileName.obj"<< std::endl;
-        std::cout << "\t Encode ascii stream:  test_x3dgc -st ascii -c fileName.obj"<< std::endl;
+        std::cout << "\t Encode binary stream: test_x3dgc -c -st binary -i fileName.obj"<< std::endl;
+        std::cout << "\t Encode ascii stream:  test_x3dgc -c -st ascii -i fileName.obj"<< std::endl;
         std::cout << "\t Decode: test_x3dgc -d fileName.s3d"<< std::endl;
         return -1;
     }
