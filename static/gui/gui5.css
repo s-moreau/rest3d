@@ -67,3 +67,4 @@
         .ui-layout-resizer-west-dragging, .ui-layout-resizer-west:hover {
             background: url(/gui/img/resizable-w.gif) repeat-y center;
         }
+        .ui-menu { width: 150px; z-index:10;}

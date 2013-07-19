@@ -320,7 +320,7 @@ if (window.$ === undefined) {
     GUI.layout = function (){
     	var that=this;
     	var $layout = $(
-            '<div class="ui-layout-north ui-widget-header" >Simple webGL Viewer</div>'+
+            '<div class="ui-layout-north ui-layout-pane ui-layout-pane-north" onmouseover="myLayout.allowOverflow(\'north\')" onmouseout="myLayout.resetOverflow(this)" style="overflow:auto; visibility:vible" ><ul id="layout-menu"/> </div>'+
             '<div class="ui-layout-west ui-widget-header" >'+
             '</div>'+
             '<div class="ui-layout-center ui-widget-header" >'+
@@ -342,11 +342,13 @@ if (window.$ === undefined) {
             	spacing_closed: 0,
         	},
         	south: {
-        		resizable: false,
+        		resizable: true,
         		closable: false,
         		slidable: false,
         		spacing_open: 0,
             	spacing_closed: 0,
+                resizerCursor:"move",
+                onresize: GUI.resize,
         	},
         	west: {
         		size: "70%",
@@ -363,6 +365,20 @@ if (window.$ === undefined) {
         myLayout.options.west.minSize='10%';
         myLayout.options.west.maxSize='90%';
 
+        myLayout.$menu = $( "#layout-menu" );
+
+        //myLayout.$menu.menu();
+        myLayout.$menu.append('\
+        <li>\
+            <ul>\
+                <li>one</li>\
+                <li>two</li>\
+                <li>three</li>\
+                <li>four</li>\
+                <li>five</li>\
+            </ul> \
+             menu<!-- put this below so IE and FF render the same! -->\
+        </li>');
 
         return myLayout;
     };
