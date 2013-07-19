@@ -7,6 +7,10 @@
 # make room
 rm -rf "$OPENSHIFT_TMP_DIR"/*
 
+<<<<<<< HEAD
+=======
+
+>>>>>>> eed4f212e93f096aa3c1130ba4dadb947a493d98
 #  Source utility functions.
 source "$OPENSHIFT_REPO_DIR/.openshift/lib/utils"
 
