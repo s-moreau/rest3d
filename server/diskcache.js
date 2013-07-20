@@ -51,6 +51,7 @@ var async = require('async');
 var dandy = require('dandy/errors');
 var abind = require('dandy/errors').abind;
 var compress = null; // can't get npm to install compress on windows.
+var mkdirp = require('mkdirp');
 
 // create/delete tmp upload dirs
 var rmdirSync = function(dir) {
@@ -92,7 +93,8 @@ function Cache(cachePath, useDisk, useMem, useGzip) {
 	this.monitors = {};
 	if (cachePath) {
 		rmdirSync(cachePath);
-		fs.mkdirSync(cachePath);
+		//fs.mkdirSync(cachePath);
+		mkdirp.sync(cachePath);
 	}
 }
 exports.Cache = Cache;
@@ -385,7 +387,8 @@ subclass(Cache, events.EventEmitter, {
 		var cachePath = path.join(this.cachePath, U.pathname);
 
 		if (this.useDisk && this.cachePath) {
-			fs.mkdirSync(cachePath);
+			//fs.mkdirSync(cachePath);
+			mkdirp.sync(cachePath);
 		}
 
 		if (this.useMem) {

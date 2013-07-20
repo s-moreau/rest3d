@@ -4,6 +4,7 @@
     "mime":"",
     "restify":"",
     "send":"",
+    "mkdirp":"",
     "basex":"",
     "shelljs":"",
     "underscore":"",

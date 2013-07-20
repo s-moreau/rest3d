@@ -190,9 +190,11 @@ var check_basex = function () {
 	// start the rest session
 	basex_client.get('/rest', function(err, req) {
 		var didthiswork=true;
+		var test_count = 3;
 		if (err){
-			console.log('intial DB REST ERROR')
-			console.log(err)
+			console.log('intial DB REST ERROR\n'+err);
+			console.log('running without database');
+			session=null;
 			return
 		}
 		req.on('result', function(err, res) {
@@ -216,8 +218,15 @@ var check_basex = function () {
 	      		else
 	      		{
 	      			console.log('ERROR: cannot get result from database');
-	      			console.log('trying again in 15 seconds')
-	      			setTimeout('check_basex',15000)
+	      			test_count --;
+	      			if (test_count) {
+		      			console.log('trying again in 15 seconds')
+		      			setTimeout('check_basex',15000)
+		      		} else
+		      		{
+		      			console.log('running without database');
+		      			session=null;
+		      		}
 	      		}
 
 		    });
@@ -319,7 +328,7 @@ session.execute("xquery json:serialize-ml(db:system())", function (err,r){
 		basex_system=eval(r.result);
 
 		// this will fail, but return only after a long timeout. 
-		// seems like this will enable other calls to repond fast. but in node-basex most likely
+		// seems like this will enable other calls to repond fast. bug in node-basex most likely
 		var query_doc_type=session.query("db:content-type('assets','truc')");
 		query_doc_type.execute(function(err,r) {
 		
@@ -356,22 +365,29 @@ console.log('sendFile dir='+ p);
 };
 
 // rest3d API
-server.get(/^\/rest3d\/info/,function(req, res, next) {
+server.get(/^\/rest3d\/info/,function(_req, _res, _next) {
+	var res=_res;
+	var req=_req;
+	var next=_next;
 	console.log('[rest3d]'+req.url);
 	    res.writeHead(200, {"Content-Type": "text/ascii"});  
 
-		session.execute("info", function(err, r) {
-			if (err)
-			{
-				console.log('database INFO error'+err);
-			} else {		
-				res.write("<pre>");
-				res.write(r.result);
-				res.write("</pre>");
-				res.end();
-			}	
-
-		})
+	    if (session) {
+	    	session.execute("info", function(err, r) {
+				if (err)
+				{
+					console.log('database INFO error'+err);
+				} else {		
+					res.write(r.result);
+					res.end();
+				}	
+			})
+	    } else // database is not running
+	    {
+	    	res.write("Database NOT running \nusing read only file system instead");
+	    	res.end();
+	    }
+		
 	return next();
 });
 
@@ -809,7 +825,11 @@ server.put(/^\/rest3d\/assets.*/,function(req, res, next) {
 		
 });
 
-server.get(/^\/rest3d\/assets.*/,function(req, res, next) {
+server.get(/^\/rest3d\/assets.*/,function(_req, _res, _next) {
+	var req=_req;
+	var res=_res;
+	var next=_next;
+
 	var asset = req.url.split("/assets/")[1];
 	//if (asset !== undefined) asset = asset.toLowerCase()
 	console.log('[assets] =['+asset+']');
@@ -817,28 +837,36 @@ server.get(/^\/rest3d\/assets.*/,function(req, res, next) {
 	if (asset === undefined || asset=='') {
 		console.log('get assets');
 
-		var query='<query xmlns="http://basex.org/rest"><text><![CDATA['+
+		if (session) {
+			var query='<query xmlns="http://basex.org/rest"><text><![CDATA['+
 		          'declare option output:method "json";'+
 		          'doc("assets/assets.xml")'+
 		          ']]></text></query>';
 
-		basexPost('/assets',query,function(err,req2,res2){
-			if (err)
-			{
-				console.log('got ERROR from REST QUERY')
-				console.log(err)
-				res.send(new restify.InternalError(err))
-			}
-			else {
-				console.log('got RESULT from REST QUERY')
-				res.writeHead(200, {'Content-Type': 'application/json' });
+			basexPost('/assets',query,function(err,req2,res2){
+				if (err)
+				{
+					console.log('got ERROR from REST QUERY')
+					console.log(err)
+					res.send(new restify.InternalError(err))
+				}
+				else {
+					console.log('got RESULT from REST QUERY')
+					res.writeHead(200, {'Content-Type': 'application/json' });
 
-				res.write(res2.body);
-				res.end();
+					res.write(res2.body);
+					res.end();
 
-			}
+				}
+				return next();
+			});
+		} else { // database not running, return a directory listing
+			res.writeHead(404);
+			res.write('database not runing - TODO: return directory listing');
+			res.end();
 			return next();
-		});
+		}
+
 
 	} else
 	{
@@ -854,124 +882,84 @@ server.get(/^\/rest3d\/assets.*/,function(req, res, next) {
 	    		console.log('set content-type to ['+entry.headers['content-type']+']')
 				sendFile(req,res,entry.filename);
 				return next();
-	    	} // else
+	    	}
+	    	// not in the cache - query database for asset
 
-		    var query_doc=session.query("doc(\"assets/"+asset+"\")");
-		    var query_doc_type=session.query("db:content-type('assets','"+asset+"')");
-		    console.log('xquery='+"db:content-type('assets','"+asset+"')");
-		    //var query_binary=session.query("declare option output:method 'raw';  db:retrieve('assets', '"+asset+"')");
+	    	if (session) {
+
+		    	// Using Socket interface to baseX
+			    var query_doc=session.query("doc(\"assets/"+asset+"\")");
+			    var query_doc_type=session.query("db:content-type('assets','"+asset+"')");
+			    console.log('xquery='+"db:content-type('assets','"+asset+"')");
+			    //var query_binary=session.query("declare option output:method 'raw';  db:retrieve('assets', '"+asset+"')");
 
 
-		 	query_doc_type.execute(function(err,r) {
-		 		if (r.ok) {
-		 			if (r.result == 'application/xml') {
+			 	query_doc_type.execute(function(err,r) {
+			 		if (r.ok) {
+			 			if (r.result == 'application/xml') {
 
-		 				console.log('query_xml');
-		 			    query_doc.execute(function(err, r) {
-							console.log('second query');
-							if (err) {
-								
-								res.end(err);
-								console.log('err'+err)
-								return next(404);
-							} else
-							{
-								console.log('writing query results');
-								res.write(r.result);
-								res.end();
-								return next();
-							}
-						});
-
-		 			} else {
-
-		 				console.log('query_binary');
-					  
-		    			// did not find document in cache before
-		    			// get data from database
-		    			basexGet(redirect,function(err,req2,res2){
-		    				if (err)
-		    				{
-								res.end(err);
-								console.log('err'+err)
-								return next(404);
-		    				} else
- 							diskcache.store(redirect,res2,function(err,entry){
-							      	if (err){
-				    					console.log('DISK CACHE ERROR')
-				    					console.log(err)
-				    					return next(err);
-				    				}
-				    				console.log('SERVE CONTENT NOW!!='+entry.filename)
-				    				res.setHeader('Content-Type', entry.headers['content-type']);
-						    		console.log('set content-type to ['+entry.headers['content-type']+']')
-									sendFile(req,res,entry.filename);
+			 				console.log('query_xml');
+			 			    query_doc.execute(function(err, r) {
+								console.log('second query');
+								if (err) {
+									
+									res.end(err);
+									console.log('err'+err)
+									return next(404);
+								} else
+								{
+									console.log('writing query results');
+									res.write(r.result);
+									res.end();
 									return next();
-								});
-		    			});
-		    			/*
-		    			basex_client.get(redirect, function(err, req2) {
-		    				console.log('in redirect client.get = '+ redirect)
-		    				if (err){
-		    					console.log('CLIENT ERROR')
-		    					console.log(err)
-		    					return next(err);
-		    				}
+								}
+							});
 
-						  req2.on('result', function(err, res2) {
-						  	console.log('in result')
-						  	if (err){
-		    					console.log('CLIENT RESULT ERROR')
-		    					console.log(err)
-		    					console.log('***')
-		    					console.log(res2)
-		    					return next(err);
-		    				}
-		    				console.log('getting result from database query')
-		    				res2.body=''
-						    res2.setEncoding('binary')
-						    res2.on('data', function(chunk) {
-						      res2.body += chunk;
-						    });
+			 			} else {
 
-						    console.log('res2 header='); console.log(res2.headers)
+			 				console.log('query_binary');
+						  
+			    			// node_basex soket i/o does not work for binary files
+			    			// this may have been fixed now
+			    			// but for the time being - use the rest http API
+			    			basexGet(redirect,function(err,req2,res2){
+			    				if (err)
+			    				{
+									res.end(err);
+									console.log('err'+err)
+									return next(404);
+			    				} else
+	 							diskcache.store(redirect,res2,function(err,entry){
+								      	if (err){
+					    					console.log('DISK CACHE ERROR')
+					    					console.log(err)
+					    					return next(err);
+					    				}
+					    				console.log('SERVE CONTENT NOW!!='+entry.filename)
+					    				res.setHeader('Content-Type', entry.headers['content-type']);
+							    		console.log('set content-type to ['+entry.headers['content-type']+']')
+										sendFile(req,res,entry.filename);
+										return next();
+									});
+			    			});
+			    			
+			     		}
 
-						    res2.on('end', function() {
-						      console.log('GOT BODY');
-						      diskcache.store(redirect,res2,function(err,entry){
-							      	if (err){
-				    					console.log('DISK CACHE ERROR')
-				    					console.log(err)
-				    					return next(err);
-				    				}
-				    				console.log('SERVE CONTENT NOW!!='+entry.filename)
-				    				res.setHeader('Content-Type', entry.headers['content-type']);
-						    		console.log('set content-type to ['+entry.headers['content-type']+']')
-									sendFile(req,res,entry.filename);
-									return next();
-								});
+			 		} else 
+			 		{
+			 			console.log('error 404!')
+			 			console.log(err);
+						return next(new restify.ResourceNotFoundError(err));
 
-						    });
-						  });
-					    	
-					    });
-						*/
+			 		}
+			 	});
+	    	} else { // Database is not running, so get from static filesystem directly	
+				res.writeHead(404)
+				res.write("Database is not running, TODO - get files from filesystem")
+				res.end()
+				return next();
+	    	}
 
-					    
-		     		}
-
-		 		} else 
-		 		{
-		 			console.log('error 404!')
-		 			console.log(err);
-		 			
-					//res.writeHead(404);
-					//res.end(404,err);
-
-					return next(new restify.ResourceNotFoundError(err));
-					//return next(err);
-		 		}
-		 	});
 	    });
 
  	}
