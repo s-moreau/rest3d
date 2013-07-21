@@ -270,9 +270,9 @@ THE SOFTWARE.
 
                     var triangles = primitives[i];
                     var material = materials[i];
-                    var pass = material.technique.defaultPass;
+
                     // create a new state with this material override
-                    var state = State.fromPassAndOverrides(pass, material.overrides);
+                    var state = State.fromPassAndOverrides(material.pass, material.overrides);
                     // fill up my primitive structure
                     var primitive = {};
 
@@ -537,44 +537,57 @@ THE SOFTWARE.
             }
         });
         GUI.label("", win);
-        var button2 = GUI.button('load duck dae rest3d', win, function () {
+        GUI.button('load duck dae rest3d', win, function () {
             COLLADA.load("/rest3d/assets/duck/duck.dae", parse_dae);
         });
-        var button3 = GUI.button('load duck DAE', win, function () {
+        GUI.button('load duck DAE', win, function () {
             COLLADA.load("/models/duck/duck.dae", parse_dae);
         });
-        var button4 = GUI.button('load creature DAE', win, function () {
+        GUI.button('load creature DAE', win, function () {
             COLLADA.load("/models/Amahani/Amahani.dae", parse_dae);
         });
         GUI.label("", win);
-        var button2 = GUI.button('load duck glTF', win, function () {
+        GUI.button('load duck glTF', win, function () {
             glTF.load("/models/duck/duck.json", parse_gltf);
         });
 
         GUI.label("", win);
-        var button2 = GUI.button('load rambler glTF', win, function () {
+        GUI.button('load rambler glTF', win, function () {
             glTF.load("/models/rambler/Rambler.json", parse_gltf);
         });
-        var button2 = GUI.button('load rambler-min DAE', win, function () {
+        GUI.button('load rambler-min DAE', win, function () {
             COLLADA.load("/models/rambler/Rambler-min.dae", parse_gltf);
         });
-        var button3 = GUI.button('load ramblerDAE', win, function () {
+        GUI.button('load ramblerDAE', win, function () {
             COLLADA.load("/models/rambler/Rambler.dae", parse_dae);
         });
-        var button4 = GUI.button('load supermurdoch.dae', win, function () {
+        GUI.button('load supermurdoch.dae', win, function () {
             COLLADA.load("/models/SuperMurdoch/SuperMurdoch.dae", parse_dae);
         });
-        var button4 = GUI.button('load wine.dae', win, function () {
+        GUI.button('load supermurdoch.gltf', win, function () {
+            glTF.load("/models/SuperMurdoch/SuperMurdoch.json", parse_gltf);
+        });
+        GUI.button('load wine.dae', win, function () {
             COLLADA.load("/models/wine/wine.dae", parse_dae);
         });
-        var button4 = GUI.button('load wine.json', win, function () {
-            glTF.load("/models/wine/wine.json", parse_dae);
+        GUI.button('load wine.json', win, function () {
+            glTF.load("/models/wine/wine.json", parse_gltf);
         });
 
-        var button5 = GUI.button('load uh-n1', win, function () {
+        GUI.button('load uh-1n', win, function () {
             COLLADA.load("/models/uh-1n/uh-1n.dae", parse_dae);
         });
+        GUI.button('load uh-1n.gltf', win, function () {
+            glTF.load("/models/uh-1n/uh-1n.json", parse_gltf);
+        });
 
+        GUI.button('load cow.dae', win, function () {
+            COLLADA.load("/models/cow/cow.dae", parse_dae);
+        });
+
+        GUI.button('load cow.gltf', win, function () {
+            glTF.load("/models/cow/cow.json", parse_gltf);
+        });
 
 
         scene_tree = {

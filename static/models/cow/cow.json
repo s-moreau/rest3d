@@ -1,0 +1,247 @@
+{
+    "animations": {},
+    "asset": {
+        "generator": "collada2gltf@8ae8287733692262ba19fe32cd5da48fd1732473"
+    },
+    "attributes": {
+        "attribute_23": {
+            "bufferView": "bufferView_29",
+            "byteOffset": 0,
+            "byteStride": 12,
+            "count": 368,
+            "max": [
+                1.7009,
+                0.564566,
+                1.82985
+            ],
+            "min": [
+                -1.14419,
+                -0.606159,
+                -0.0156466
+            ],
+            "type": "FLOAT_VEC3"
+        },
+        "attribute_25": {
+            "bufferView": "bufferView_29",
+            "byteOffset": 4416,
+            "byteStride": 12,
+            "count": 368,
+            "max": [
+                0.999785,
+                0.999208,
+                0.999963
+            ],
+            "min": [
+                -0.999836,
+                -0.998498,
+                -0.999914
+            ],
+            "type": "FLOAT_VEC3"
+        },
+        "attribute_27": {
+            "bufferView": "bufferView_29",
+            "byteOffset": 8832,
+            "byteStride": 8,
+            "count": 368,
+            "max": [
+                0.998068,
+                0.994669
+            ],
+            "min": [
+                0.003906,
+                0.00120699
+            ],
+            "type": "FLOAT_VEC2"
+        }
+    },
+    "bufferViews": {
+        "bufferView_29": {
+            "buffer": "cow.bin",
+            "byteLength": 11776,
+            "byteOffset": 0,
+            "target": "ARRAY_BUFFER"
+        },
+        "bufferView_30": {
+            "buffer": "cow.bin",
+            "byteLength": 3228,
+            "byteOffset": 11776,
+            "target": "ELEMENT_ARRAY_BUFFER"
+        }
+    },
+    "buffers": {
+        "cow.bin": {
+            "byteLength": 15004,
+            "path": "cow.bin"
+        }
+    },
+    "images": {
+        "image_0": {
+            "path": "Cow.png"
+        }
+    },
+    "indices": {
+        "indices_21": {
+            "bufferView": "bufferView_30",
+            "byteOffset": 0,
+            "count": 1614,
+            "type": "UNSIGNED_SHORT"
+        }
+    },
+    "materials": {
+        "material.0": {
+            "instanceTechnique": {
+                "technique": "technique1",
+                "values": [
+                    {
+                        "parameter": "diffuse",
+                        "value": "texture_image_0"
+                    }
+                ]
+            },
+            "name": "material0"
+        }
+    },
+    "meshes": {
+        "geom": {
+            "name": "geom",
+            "primitives": [
+                {
+                    "indices": "indices_21",
+                    "material": "material.0",
+                    "primitive": "TRIANGLES",
+                    "semantics": {
+                        "NORMAL": "attribute_25",
+                        "POSITION": "attribute_23",
+                        "TEXCOORD_0": "attribute_27"
+                    }
+                }
+            ]
+        }
+    },
+    "nodes": {
+        "vsn-mats": {
+            "children": [],
+            "matrix": [
+                1,
+                0,
+                0,
+                0,
+                0,
+                1,
+                0,
+                0,
+                0,
+                0,
+                1,
+                0,
+                0,
+                0,
+                0,
+                1
+            ],
+            "meshes": [
+                "geom"
+            ],
+            "name": "vsn-mats"
+        }
+    },
+    "profile": "WebGL 1.0",
+    "programs": {
+        "program_0": {
+            "fragmentShader": "cow0FS",
+            "vertexShader": "cow0VS"
+        }
+    },
+    "samplers": {
+        "sampler_0": {
+            "magFilter": "LINEAR",
+            "minFilter": "LINEAR_MIPMAP_LINEAR",
+            "wrapS": "REPEAT",
+            "wrapT": "REPEAT"
+        }
+    },
+    "scene": "defaultScene",
+    "scenes": {
+        "defaultScene": {
+            "nodes": [
+                "vsn-mats"
+            ]
+        }
+    },
+    "shaders": {
+        "cow0FS": {
+            "path": "cow0FS.glsl"
+        },
+        "cow0VS": {
+            "path": "cow0VS.glsl"
+        }
+    },
+    "skins": {},
+    "techniques": {
+        "technique1": {
+            "parameters": {
+                "diffuse": {
+                    "type": "SAMPLER_2D"
+                },
+                "normal": {
+                    "semantic": "NORMAL",
+                    "type": "FLOAT_VEC3"
+                },
+                "normalMatrix": {
+                    "semantic": "WORLDVIEWINVERSETRANSPOSE",
+                    "type": "FLOAT_MAT3"
+                },
+                "position": {
+                    "semantic": "POSITION",
+                    "type": "FLOAT_VEC3"
+                },
+                "projectionMatrix": {
+                    "semantic": "PROJECTION",
+                    "type": "FLOAT_MAT4"
+                },
+                "texcoord0": {
+                    "semantic": "TEXCOORD_0",
+                    "type": "FLOAT_VEC2"
+                },
+                "worldViewMatrix": {
+                    "semantic": "WORLDVIEW",
+                    "type": "FLOAT_MAT4"
+                }
+            },
+            "pass": "defaultPass",
+            "passes": {
+                "defaultPass": {
+                    "instanceProgram": {
+                        "attributes": {
+                            "a_normal": "normal",
+                            "a_position": "position",
+                            "a_texcoord0": "texcoord0"
+                        },
+                        "program": "program_0",
+                        "uniforms": {
+                            "u_diffuse": "diffuse",
+                            "u_normalMatrix": "normalMatrix",
+                            "u_projectionMatrix": "projectionMatrix",
+                            "u_worldViewMatrix": "worldViewMatrix"
+                        }
+                    },
+                    "states": {
+                        "blendEnable": false,
+                        "cullFaceEnable": true,
+                        "depthMask": true,
+                        "depthTestEnable": true
+                    }
+                }
+            }
+        }
+    },
+    "textures": {
+        "texture_image_0": {
+            "format": "RGBA",
+            "internalFormat": "RGBA",
+            "sampler": "sampler_0",
+            "source": "image_0",
+            "target": "TEXTURE_2D"
+        }
+    }
+}

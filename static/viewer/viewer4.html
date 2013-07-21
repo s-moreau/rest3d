@@ -275,9 +275,9 @@ THE SOFTWARE.
 
                         var triangles = primitives[i];
                         var material = materials[i];
-                        var pass = material.technique.defaultPass;
+
                         // create a new state with this material override
-                        var state = State.fromPassAndOverrides(pass, material.overrides);
+                        var state = State.fromPassAndOverrides(material.pass, material.overrides);
                         // fill up my primitive structure
                         var primitive = {};
 

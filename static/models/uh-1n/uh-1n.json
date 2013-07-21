@@ -1,0 +1,637 @@
+{
+    "animations": {},
+    "asset": {
+        "generator": "collada2gltf@8ae8287733692262ba19fe32cd5da48fd1732473"
+    },
+    "attributes": {
+        "attribute_110": {
+            "bufferView": "bufferView_145",
+            "byteOffset": 599552,
+            "byteStride": 12,
+            "count": 96,
+            "max": [
+                0.352566,
+                1.63267,
+                0.116465
+            ],
+            "min": [
+                0.314518,
+                -1.62811,
+                -0.120642
+            ],
+            "type": "FLOAT_VEC3"
+        },
+        "attribute_112": {
+            "bufferView": "bufferView_145",
+            "byteOffset": 600704,
+            "byteStride": 12,
+            "count": 96,
+            "max": [
+                0.999887,
+                1,
+                0.99998
+            ],
+            "min": [
+                -0.999051,
+                -1,
+                -0.99998
+            ],
+            "type": "FLOAT_VEC3"
+        },
+        "attribute_114": {
+            "bufferView": "bufferView_145",
+            "byteOffset": 601856,
+            "byteStride": 8,
+            "count": 96,
+            "max": [
+                0.315714,
+                0.979768
+            ],
+            "min": [
+                0.100446,
+                0.91231
+            ],
+            "type": "FLOAT_VEC2"
+        },
+        "attribute_137": {
+            "bufferView": "bufferView_145",
+            "byteOffset": 602624,
+            "byteStride": 12,
+            "count": 932,
+            "max": [
+                7.66897,
+                0.913144,
+                0.752831
+            ],
+            "min": [
+                -7.66897,
+                -0.916656,
+                -0.752971
+            ],
+            "type": "FLOAT_VEC3"
+        },
+        "attribute_139": {
+            "bufferView": "bufferView_145",
+            "byteOffset": 613808,
+            "byteStride": 12,
+            "count": 932,
+            "max": [
+                1,
+                1,
+                1
+            ],
+            "min": [
+                -1,
+                -1,
+                -1
+            ],
+            "type": "FLOAT_VEC3"
+        },
+        "attribute_141": {
+            "bufferView": "bufferView_145",
+            "byteOffset": 624992,
+            "byteStride": 8,
+            "count": 932,
+            "max": [
+                0.997862,
+                0.998738
+            ],
+            "min": [
+                0.000971,
+                0.00214303
+            ],
+            "type": "FLOAT_VEC2"
+        },
+        "attribute_83": {
+            "bufferView": "bufferView_145",
+            "byteOffset": 0,
+            "byteStride": 12,
+            "count": 18736,
+            "max": [
+                1.50566,
+                7.17701,
+                2.31943
+            ],
+            "min": [
+                -1.50566,
+                -7.60073,
+                -2.31858
+            ],
+            "type": "FLOAT_VEC3"
+        },
+        "attribute_85": {
+            "bufferView": "bufferView_145",
+            "byteOffset": 224832,
+            "byteStride": 12,
+            "count": 18736,
+            "max": [
+                1,
+                1,
+                1
+            ],
+            "min": [
+                -1,
+                -1,
+                -1
+            ],
+            "type": "FLOAT_VEC3"
+        },
+        "attribute_87": {
+            "bufferView": "bufferView_145",
+            "byteOffset": 449664,
+            "byteStride": 8,
+            "count": 18736,
+            "max": [
+                1.20164,
+                2.58606
+            ],
+            "min": [
+                -4.50356,
+                -2.09118
+            ],
+            "type": "FLOAT_VEC2"
+        }
+    },
+    "bufferViews": {
+        "bufferView_145": {
+            "buffer": "uh-1n.bin",
+            "byteLength": 632448,
+            "byteOffset": 0,
+            "target": "ARRAY_BUFFER"
+        },
+        "bufferView_146": {
+            "buffer": "uh-1n.bin",
+            "byteLength": 114534,
+            "byteOffset": 632448,
+            "target": "ELEMENT_ARRAY_BUFFER"
+        }
+    },
+    "buffers": {
+        "uh-1n.bin": {
+            "byteLength": 746982,
+            "path": "uh-1n.bin"
+        }
+    },
+    "images": {
+        "image_0": {
+            "path": "uh-in/Textures/vehicles/uh-1n/uh-1n_body_dif.png"
+        },
+        "image_1": {
+            "path": "uh-in/Textures/Cubemaps/ambient_cube-face-0.png"
+        },
+        "image_10": {
+            "path": "uh-in/Textures/vehicles/uh-1n/uh-1n_steel_dif.png"
+        },
+        "image_11": {
+            "path": "uh-in/Textures/vehicles/uh-1n/uh-1n_steel_nor.png"
+        },
+        "image_12": {
+            "path": "uh-in/Textures/vehicles/uh-1n/uh-1n_glass.png"
+        },
+        "image_2": {
+            "path": "uh-in/Textures/Cubemaps/ambient_cube-face-1.png"
+        },
+        "image_3": {
+            "path": "uh-in/Textures/Cubemaps/ambient_cube-face-2.png"
+        },
+        "image_4": {
+            "path": "uh-in/Textures/Cubemaps/ambient_cube-face-3.png"
+        },
+        "image_5": {
+            "path": "uh-in/Textures/Cubemaps/ambient_cube-face-4.png"
+        },
+        "image_6": {
+            "path": "uh-in/Textures/Cubemaps/ambient_cube-face-5.png"
+        },
+        "image_7": {
+            "path": "uh-in/Textures/vehicles/uh-1n/uh-1n_body_nor.png"
+        },
+        "image_8": {
+            "path": "uh-in/Textures/vehicles/uh-1n/uh-1n_inside_dif.png"
+        },
+        "image_9": {
+            "path": "uh-in/Textures/vehicles/uh-1n/uh-1n_inside_nor.png"
+        }
+    },
+    "indices": {
+        "indices_108": {
+            "bufferView": "bufferView_146",
+            "byteOffset": 109530,
+            "count": 324,
+            "type": "UNSIGNED_SHORT"
+        },
+        "indices_135": {
+            "bufferView": "bufferView_146",
+            "byteOffset": 110178,
+            "count": 2178,
+            "type": "UNSIGNED_SHORT"
+        },
+        "indices_72": {
+            "bufferView": "bufferView_146",
+            "byteOffset": 0,
+            "count": 18027,
+            "type": "UNSIGNED_SHORT"
+        },
+        "indices_75": {
+            "bufferView": "bufferView_146",
+            "byteOffset": 36054,
+            "count": 30954,
+            "type": "UNSIGNED_SHORT"
+        },
+        "indices_78": {
+            "bufferView": "bufferView_146",
+            "byteOffset": 97962,
+            "count": 3396,
+            "type": "UNSIGNED_SHORT"
+        },
+        "indices_81": {
+            "bufferView": "bufferView_146",
+            "byteOffset": 104754,
+            "count": 2388,
+            "type": "UNSIGNED_SHORT"
+        }
+    },
+    "materials": {
+        "material.0": {
+            "instanceTechnique": {
+                "technique": "technique1",
+                "values": [
+                    {
+                        "parameter": "diffuse",
+                        "value": "texture_image_0"
+                    },
+                    {
+                        "parameter": "shininess",
+                        "value": 100
+                    },
+                    {
+                        "parameter": "specular",
+                        "value": [
+                            1,
+                            1,
+                            1,
+                            1
+                        ]
+                    }
+                ]
+            },
+            "name": "uh-1n-body_dif"
+        },
+        "material.1": {
+            "instanceTechnique": {
+                "technique": "technique1",
+                "values": [
+                    {
+                        "parameter": "diffuse",
+                        "value": "texture_image_8"
+                    },
+                    {
+                        "parameter": "shininess",
+                        "value": 100
+                    },
+                    {
+                        "parameter": "specular",
+                        "value": [
+                            1,
+                            1,
+                            1,
+                            1
+                        ]
+                    }
+                ]
+            },
+            "name": "uh-1n-inside_dif"
+        },
+        "material.2": {
+            "instanceTechnique": {
+                "technique": "technique1",
+                "values": [
+                    {
+                        "parameter": "diffuse",
+                        "value": "texture_image_10"
+                    },
+                    {
+                        "parameter": "shininess",
+                        "value": 100
+                    },
+                    {
+                        "parameter": "specular",
+                        "value": [
+                            1,
+                            1,
+                            1,
+                            1
+                        ]
+                    }
+                ]
+            },
+            "name": "uh-1n-inside_steel_dif"
+        },
+        "material.3": {
+            "instanceTechnique": {
+                "technique": "technique1",
+                "values": [
+                    {
+                        "parameter": "diffuse",
+                        "value": "texture_image_12"
+                    },
+                    {
+                        "parameter": "shininess",
+                        "value": 100
+                    },
+                    {
+                        "parameter": "specular",
+                        "value": [
+                            1,
+                            1,
+                            1,
+                            0
+                        ]
+                    }
+                ]
+            },
+            "name": "uh-1n-glass"
+        }
+    },
+    "meshes": {
+        "_1528": {
+            "name": "UH-1N",
+            "primitives": [
+                {
+                    "indices": "indices_72",
+                    "material": "material.0",
+                    "primitive": "TRIANGLES",
+                    "semantics": {
+                        "NORMAL": "attribute_85",
+                        "POSITION": "attribute_83",
+                        "TEXCOORD_0": "attribute_87"
+                    }
+                },
+                {
+                    "indices": "indices_75",
+                    "material": "material.1",
+                    "primitive": "TRIANGLES",
+                    "semantics": {
+                        "NORMAL": "attribute_85",
+                        "POSITION": "attribute_83",
+                        "TEXCOORD_0": "attribute_87"
+                    }
+                },
+                {
+                    "indices": "indices_78",
+                    "material": "material.2",
+                    "primitive": "TRIANGLES",
+                    "semantics": {
+                        "NORMAL": "attribute_85",
+                        "POSITION": "attribute_83",
+                        "TEXCOORD_0": "attribute_87"
+                    }
+                },
+                {
+                    "indices": "indices_81",
+                    "material": "material.3",
+                    "primitive": "TRIANGLES",
+                    "semantics": {
+                        "NORMAL": "attribute_85",
+                        "POSITION": "attribute_83",
+                        "TEXCOORD_0": "attribute_87"
+                    }
+                }
+            ]
+        },
+        "_1530": {
+            "name": "helix",
+            "primitives": [
+                {
+                    "indices": "indices_135",
+                    "material": "material.0",
+                    "primitive": "TRIANGLES",
+                    "semantics": {
+                        "NORMAL": "attribute_139",
+                        "POSITION": "attribute_137",
+                        "TEXCOORD_0": "attribute_141"
+                    }
+                }
+            ]
+        },
+        "_1532": {
+            "name": "back_helix",
+            "primitives": [
+                {
+                    "indices": "indices_108",
+                    "material": "material.0",
+                    "primitive": "TRIANGLES",
+                    "semantics": {
+                        "NORMAL": "attribute_112",
+                        "POSITION": "attribute_110",
+                        "TEXCOORD_0": "attribute_114"
+                    }
+                }
+            ]
+        }
+    },
+    "nodes": {
+        "_-2036": {
+            "children": [
+                "_-2044",
+                "_-2046"
+            ],
+            "matrix": [
+                1,
+                0,
+                0,
+                0,
+                0,
+                0,
+                -1,
+                0,
+                0,
+                1,
+                0,
+                0,
+                -0.430995,
+                3.37088,
+                1.09406,
+                1
+            ],
+            "meshes": [
+                "_1528"
+            ],
+            "name": "UH-1N"
+        },
+        "_-2044": {
+            "children": [],
+            "matrix": [
+                1,
+                0,
+                0,
+                0,
+                0,
+                1,
+                0,
+                0,
+                0,
+                0,
+                1,
+                0,
+                -0.085561,
+                5.96806,
+                1.30382,
+                1
+            ],
+            "meshes": [
+                "_1532"
+            ],
+            "name": "back_helix"
+        },
+        "_-2046": {
+            "children": [],
+            "matrix": [
+                1,
+                0,
+                0,
+                0,
+                0,
+                1,
+                0,
+                0,
+                0,
+                0,
+                1,
+                0,
+                -0.00732,
+                -3.27915,
+                1.13984,
+                1
+            ],
+            "meshes": [
+                "_1530"
+            ],
+            "name": "helix"
+        }
+    },
+    "profile": "WebGL 1.0",
+    "programs": {
+        "program_0": {
+            "fragmentShader": "uh-1n0FS",
+            "vertexShader": "uh-1n0VS"
+        }
+    },
+    "samplers": {
+        "sampler_0": {
+            "magFilter": "LINEAR",
+            "minFilter": "LINEAR_MIPMAP_NEAREST",
+            "wrapS": "REPEAT",
+            "wrapT": "REPEAT"
+        }
+    },
+    "scene": "defaultScene",
+    "scenes": {
+        "defaultScene": {
+            "nodes": [
+                "_-2036"
+            ]
+        }
+    },
+    "shaders": {
+        "uh-1n0FS": {
+            "path": "uh-1n0FS.glsl"
+        },
+        "uh-1n0VS": {
+            "path": "uh-1n0VS.glsl"
+        }
+    },
+    "skins": {},
+    "techniques": {
+        "technique1": {
+            "parameters": {
+                "diffuse": {
+                    "type": "SAMPLER_2D"
+                },
+                "normal": {
+                    "semantic": "NORMAL",
+                    "type": "FLOAT_VEC3"
+                },
+                "normalMatrix": {
+                    "semantic": "WORLDVIEWINVERSETRANSPOSE",
+                    "type": "FLOAT_MAT3"
+                },
+                "position": {
+                    "semantic": "POSITION",
+                    "type": "FLOAT_VEC3"
+                },
+                "projectionMatrix": {
+                    "semantic": "PROJECTION",
+                    "type": "FLOAT_MAT4"
+                },
+                "specular": {
+                    "type": "FLOAT_VEC4"
+                },
+                "texcoord0": {
+                    "semantic": "TEXCOORD_0",
+                    "type": "FLOAT_VEC2"
+                },
+                "worldViewMatrix": {
+                    "semantic": "WORLDVIEW",
+                    "type": "FLOAT_MAT4"
+                }
+            },
+            "pass": "defaultPass",
+            "passes": {
+                "defaultPass": {
+                    "instanceProgram": {
+                        "attributes": {
+                            "a_normal": "normal",
+                            "a_position": "position",
+                            "a_texcoord0": "texcoord0"
+                        },
+                        "program": "program_0",
+                        "uniforms": {
+                            "u_diffuse": "diffuse",
+                            "u_normalMatrix": "normalMatrix",
+                            "u_projectionMatrix": "projectionMatrix",
+                            "u_specular": "specular",
+                            "u_worldViewMatrix": "worldViewMatrix"
+                        }
+                    },
+                    "states": {
+                        "blendEnable": false,
+                        "cullFaceEnable": true,
+                        "depthMask": true,
+                        "depthTestEnable": true
+                    }
+                }
+            }
+        }
+    },
+    "textures": {
+        "texture_image_0": {
+            "format": "RGBA",
+            "internalFormat": "RGBA",
+            "sampler": "sampler_0",
+            "source": "image_0",
+            "target": "TEXTURE_2D"
+        },
+        "texture_image_10": {
+            "format": "RGBA",
+            "internalFormat": "RGBA",
+            "sampler": "sampler_0",
+            "source": "image_10",
+            "target": "TEXTURE_2D"
+        },
+        "texture_image_12": {
+            "format": "RGBA",
+            "internalFormat": "RGBA",
+            "sampler": "sampler_0",
+            "source": "image_12",
+            "target": "TEXTURE_2D"
+        },
+        "texture_image_8": {
+            "format": "RGBA",
+            "internalFormat": "RGBA",
+            "sampler": "sampler_0",
+            "source": "image_8",
+            "target": "TEXTURE_2D"
+        }
+    }
+}

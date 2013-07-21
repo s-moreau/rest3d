@@ -1,12 +1,67 @@
 {
+    "animations": {},
+    "asset": {
+        "generator": "collada2gltf@8ae8287733692262ba19fe32cd5da48fd1732473"
+    },
+    "attributes": {
+        "attribute_23": {
+            "bufferView": "bufferView_29",
+            "byteOffset": 0,
+            "byteStride": 12,
+            "count": 2399,
+            "max": [
+                96.1799,
+                163.97,
+                53.9252
+            ],
+            "min": [
+                -69.2985,
+                9.92937,
+                -61.3282
+            ],
+            "type": "FLOAT_VEC3"
+        },
+        "attribute_25": {
+            "bufferView": "bufferView_29",
+            "byteOffset": 28788,
+            "byteStride": 12,
+            "count": 2399,
+            "max": [
+                0.999599,
+                0.999581,
+                0.998436
+            ],
+            "min": [
+                -0.999084,
+                -1,
+                -0.999832
+            ],
+            "type": "FLOAT_VEC3"
+        },
+        "attribute_27": {
+            "bufferView": "bufferView_29",
+            "byteOffset": 57576,
+            "byteStride": 8,
+            "count": 2399,
+            "max": [
+                0.983346,
+                0.980037
+            ],
+            "min": [
+                0.026409,
+                0.019963
+            ],
+            "type": "FLOAT_VEC2"
+        }
+    },
     "bufferViews": {
-        "bufferView_24": {
+        "bufferView_29": {
             "buffer": "duck.bin",
             "byteLength": 76768,
             "byteOffset": 0,
             "target": "ARRAY_BUFFER"
         },
-        "bufferView_25": {
+        "bufferView_30": {
             "buffer": "duck.bin",
             "byteLength": 25272,
             "byteOffset": 76768,
@@ -33,132 +88,87 @@
             "path": "duckCM.png"
         }
     },
+    "indices": {
+        "indices_21": {
+            "bufferView": "bufferView_30",
+            "byteOffset": 0,
+            "count": 12636,
+            "type": "UNSIGNED_SHORT"
+        }
+    },
     "materials": {
         "material.0": {
-            "name": "blinn3",
-            "technique": "technique1",
-            "techniques": {
-                "technique1": {
-                    "parameters": {
-                        "ambient": {
-                            "type": "FLOAT_VEC3",
-                            "value": [
-                                0,
-                                0,
-                                0
-                            ]
-                        },
-                        "diffuse": {
-                            "image": "image_0",
-                            "magFilter": "LINEAR",
-                            "minFilter": "LINEAR_MIPMAP_LINEAR",
-                            "type": "SAMPLER_2D",
-                            "wrapS": "REPEAT",
-                            "wrapT": "REPEAT"
-                        },
-                        "emission": {
-                            "type": "FLOAT_VEC3",
-                            "value": [
-                                0,
-                                0,
-                                0
-                            ]
-                        },
-                        "shininess": {
-                            "type": "FLOAT",
-                            "value": 0.3
-                        },
-                        "specular": {
-                            "type": "FLOAT_VEC3",
-                            "value": [
-                                0,
-                                0,
-                                0
-                            ]
-                        }
+            "instanceTechnique": {
+                "technique": "technique1",
+                "values": [
+                    {
+                        "parameter": "ambient",
+                        "value": [
+                            0,
+                            0,
+                            0,
+                            1
+                        ]
+                    },
+                    {
+                        "parameter": "diffuse",
+                        "value": "texture_image_0"
+                    },
+                    {
+                        "parameter": "emission",
+                        "value": [
+                            0,
+                            0,
+                            0,
+                            1
+                        ]
+                    },
+                    {
+                        "parameter": "reflective",
+                        "value": [
+                            0,
+                            0,
+                            0,
+                            1
+                        ]
+                    },
+                    {
+                        "parameter": "shininess",
+                        "value": 38.4
+                    },
+                    {
+                        "parameter": "specular",
+                        "value": [
+                            0,
+                            0,
+                            0,
+                            1
+                        ]
                     }
-                }
-            }
+                ]
+            },
+            "name": "blinn3"
         }
     },
     "meshes": {
         "LOD3spShape-lib": {
-            "attributes": {
-                "attribute_18": {
-                    "bufferView": "bufferView_24",
-                    "byteOffset": 0,
-                    "byteStride": 12,
-                    "componentType": "FLOAT",
-                    "componentsPerAttribute": 3,
-                    "count": 2399,
-                    "max": [
-                        96.1799,
-                        163.97,
-                        53.9252
-                    ],
-                    "min": [
-                        -69.2985,
-                        9.92937,
-                        -61.3282
-                    ]
-                },
-                "attribute_20": {
-                    "bufferView": "bufferView_24",
-                    "byteOffset": 28788,
-                    "byteStride": 12,
-                    "componentType": "FLOAT",
-                    "componentsPerAttribute": 3,
-                    "count": 2399,
-                    "max": [
-                        0.999599,
-                        0.999581,
-                        0.998436
-                    ],
-                    "min": [
-                        -0.999084,
-                        -1,
-                        -0.999832
-                    ]
-                },
-                "attribute_22": {
-                    "bufferView": "bufferView_24",
-                    "byteOffset": 57576,
-                    "byteStride": 8,
-                    "componentType": "FLOAT",
-                    "componentsPerAttribute": 2,
-                    "count": 2399,
-                    "max": [
-                        0.983346,
-                        0.980037
-                    ],
-                    "min": [
-                        0.026409,
-                        0.019963
-                    ]
-                }
-            },
             "name": "LOD3spShape",
             "primitives": [
                 {
-                    "indices": {
-                        "bufferView": "bufferView_25",
-                        "byteOffset": 0,
-                        "count": 12636,
-                        "type": "UNSIGNED_SHORT"
-                    },
+                    "indices": "indices_21",
                     "material": "material.0",
                     "primitive": "TRIANGLES",
                     "semantics": {
-                        "NORMAL": "attribute_20",
-                        "POSITION": "attribute_18",
-                        "TEXCOORD_0": "attribute_22"
+                        "NORMAL": "attribute_25",
+                        "POSITION": "attribute_23",
+                        "TEXCOORD_0": "attribute_27"
                     }
                 }
             ]
         }
     },
     "nodes": {
-        "node_0": {
+        "LOD3sp": {
             "children": [],
             "matrix": [
                 1,
@@ -183,7 +193,7 @@
             ],
             "name": "LOD3sp"
         },
-        "node_1": {
+        "camera1": {
             "camera": "camera_0",
             "children": [],
             "matrix": [
@@ -205,110 +215,122 @@
                 1
             ],
             "name": "camera1"
-        },
-        "node_2": {
-            "children": [],
-            "matrix": [
-                -0.954692,
-                0.218143,
-                -0.202428,
-                0,
-                0.0146721,
-                0.713885,
-                0.700109,
-                0,
-                0.297235,
-                0.665418,
-                -0.684741,
-                0,
-                148.654,
-                183.672,
-                -292.179,
-                1
-            ],
-            "name": "directionalLight1"
-        },
-        "root": {
-            "children": [
-                "node_0",
-                "node_1",
-                "node_2"
-            ]
         }
     },
     "profile": "WebGL 1.0",
+    "programs": {
+        "program_0": {
+            "fragmentShader": "duck0FS",
+            "vertexShader": "duck0VS"
+        }
+    },
+    "samplers": {
+        "sampler_0": {
+            "magFilter": "LINEAR",
+            "minFilter": "LINEAR_MIPMAP_LINEAR",
+            "wrapS": "REPEAT",
+            "wrapT": "REPEAT"
+        }
+    },
     "scene": "defaultScene",
     "scenes": {
         "defaultScene": {
-            "node": "root"
+            "nodes": [
+                "LOD3sp",
+                "camera1"
+            ]
         }
     },
     "shaders": {
-        "technique1Fs": {
-            "path": "technique1Fs.glsl"
+        "duck0FS": {
+            "path": "duck0FS.glsl"
         },
-        "technique1Vs": {
-            "path": "technique1Vs.glsl"
+        "duck0VS": {
+            "path": "duck0VS.glsl"
         }
     },
+    "skins": {},
     "techniques": {
         "technique1": {
-            "parameters": {},
+            "parameters": {
+                "ambient": {
+                    "type": "FLOAT_VEC4"
+                },
+                "diffuse": {
+                    "type": "SAMPLER_2D"
+                },
+                "emission": {
+                    "type": "FLOAT_VEC4"
+                },
+                "normal": {
+                    "semantic": "NORMAL",
+                    "type": "FLOAT_VEC3"
+                },
+                "normalMatrix": {
+                    "semantic": "WORLDVIEWINVERSETRANSPOSE",
+                    "type": "FLOAT_MAT3"
+                },
+                "position": {
+                    "semantic": "POSITION",
+                    "type": "FLOAT_VEC3"
+                },
+                "projectionMatrix": {
+                    "semantic": "PROJECTION",
+                    "type": "FLOAT_MAT4"
+                },
+                "reflective": {
+                    "type": "FLOAT_VEC4"
+                },
+                "specular": {
+                    "type": "FLOAT_VEC4"
+                },
+                "texcoord0": {
+                    "semantic": "TEXCOORD_0",
+                    "type": "FLOAT_VEC2"
+                },
+                "worldViewMatrix": {
+                    "semantic": "WORLDVIEW",
+                    "type": "FLOAT_MAT4"
+                }
+            },
             "pass": "defaultPass",
             "passes": {
                 "defaultPass": {
-                    "program": {
-                        "FRAGMENT_SHADER": "technique1Fs",
-                        "VERTEX_SHADER": "technique1Vs",
-                        "attributes": [
-                            {
-                                "semantic": "NORMAL",
-                                "symbol": "a_normal",
-                                "type": "FLOAT_VEC3"
-                            },
-                            {
-                                "semantic": "TEXCOORD_0",
-                                "symbol": "a_texcoord0",
-                                "type": "FLOAT_VEC2"
-                            },
-                            {
-                                "semantic": "POSITION",
-                                "symbol": "a_position",
-                                "type": "FLOAT_VEC3"
-                            }
-                        ],
-                        "uniforms": [
-                            {
-                                "semantic": "WORLDVIEWINVERSETRANSPOSE",
-                                "symbol": "u_normalMatrix",
-                                "type": "FLOAT_MAT3"
-                            },
-                            {
-                                "parameter": "diffuse",
-                                "symbol": "u_diffuseTexture",
-                                "type": "SAMPLER_2D"
-                            },
-                            {
-                                "semantic": "WORLDVIEW",
-                                "symbol": "u_worldviewMatrix",
-                                "type": "FLOAT_MAT4"
-                            },
-                            {
-                                "semantic": "PROJECTION",
-                                "symbol": "u_projectionMatrix",
-                                "type": "FLOAT_MAT4"
-                            }
-                        ]
+                    "instanceProgram": {
+                        "attributes": {
+                            "a_normal": "normal",
+                            "a_position": "position",
+                            "a_texcoord0": "texcoord0"
+                        },
+                        "program": "program_0",
+                        "uniforms": {
+                            "u_ambient": "ambient",
+                            "u_diffuse": "diffuse",
+                            "u_emission": "emission",
+                            "u_normalMatrix": "normalMatrix",
+                            "u_projectionMatrix": "projectionMatrix",
+                            "u_reflective": "reflective",
+                            "u_specular": "specular",
+                            "u_worldViewMatrix": "worldViewMatrix"
+                        }
                     },
                     "states": {
                         "blendEnable": false,
+                        "cullFaceEnable": true,
                         "depthMask": true,
                         "depthTestEnable": true
-                    },
-                    "type": "program"
+                    }
                 }
             }
         }
     },
-    "version": "0.2"
+    "textures": {
+        "texture_image_0": {
+            "format": "RGBA",
+            "internalFormat": "RGBA",
+            "sampler": "sampler_0",
+            "source": "image_0",
+            "target": "TEXTURE_2D"
+        }
+    }
 }

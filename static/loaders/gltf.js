@@ -143,6 +143,7 @@ if (window.mat4 === undefined)
 			// ok, now let's load the techniques
 			var techniques = this.json.techniques;
 			this.techniques = {};
+			this.materials={};
             for (var techniqueID in techniques) {
                 var technique_json = techniques[techniqueID];
                 var technique = {};
@@ -150,47 +151,46 @@ if (window.mat4 === undefined)
                 for (var passID in technique_json.passes) {
                 	var pass_json = technique_json.passes[passID];
                 	var pass={};
-                	pass.vertexShader = this.shaders[pass_json.program.VERTEX_SHADER];
-  					pass.fragmentShader = this.shaders[pass_json.program.FRAGMENT_SHADER];
+                	var instance_program = pass_json.instanceProgram;
+                	pass.vertexShader = this.shaders[this.json.programs[instance_program.program].vertexShader];
+  					pass.fragmentShader = this.shaders[this.json.programs[instance_program.program].fragmentShader];
   					if (!pass.vertexShader)
   						glTF.logError('Could not find vertex shader = '+pass_json.program["VERTEX_SHADER"]);
   					if (!pass.fragmentShader)
   						glTF.logError('Could not find fragment shader = '+pass_json.program["FRAGMENT_SHADER"]);
 
-  					// there is no need for parameters in technique
-  					//pass.parameters = technique_json.parameters;
-
   					pass.attributes = [];
-  					for (var i=0; i<  pass_json.program.attributes.length;i++) {
-  						var attribute_json = pass_json.program.attributes[i];
+  					for (var symbol in instance_program.attributes) {
+  						var paramID = instance_program.attributes[symbol];
   						var attribute = {};
   						/*
   						        "semantic": "NORMAL",
                                 "symbol": "a_normal",
                                 "type": "FLOAT_VEC3"
                          */
-                         attribute.semantic = attribute_json.semantic; // this correspond to the mesh attribute
-                         attribute.symbol = attribute_json.symbol; // this correspond the symbol in the program
-                         attribute.type = attribute_json.type; // this is the type of one element of the attribute
+                         attribute.semantic = technique_json.parameters[paramID].semantic; // this correspond to the mesh attribute
+                         attribute.symbol = symbol; // this correspond the symbol in the program
+                         attribute.type = technique_json.parameters[paramID].type; // this is the type of one element of the attribute
                          pass.attributes.push(attribute);
   					}
 
   					pass.uniforms = [];
-  					for (var i=0; i<  pass_json.program.uniforms.length;i++) {
-  						var uniform_json = pass_json.program.uniforms[i];
+  					for (var symbol in instance_program.uniforms) {
+  						var uniforID = instance_program.uniforms[symbol]
+
   						var uniform = {};
   						/*
   						        "semantic": "WORLDVIEWINVERSETRANSPOSE",
                                 "symbol": "u_normalMatrix",
                                 "type": "FLOAT_MAT3"
 							OR !!
-                                "parameter": "diffuse",
+                              NO SEMANTIC
                                 "symbol": "u_diffuseTexture",
                                 "type": "SAMPLER_2D"
                          */
-                         uniform.semantic = (uniform_json.semantic || uniform_json.parameter); // this correspond to the engine parameter
-                         uniform.symbol = uniform_json.symbol; // this correspond the symbol in the program
-                         uniform.type = uniform_json.type; // this is the type of the uniform
+                         uniform.semantic = technique_json.parameters[uniforID].semantic || uniforID; // this correspond to the engine parameter
+                         uniform.symbol = symbol; // this correspond the symbol in the program
+                         uniform.type = technique_json.parameters[uniforID].type;; // this is the type of the uniform
 
                          pass.uniforms.push(uniform);
   					}
@@ -358,63 +358,73 @@ if (window.mat4 === undefined)
 
 		},
 		parse_material: function(_matID) {
+			if (this.materials[_matID]) return this.materials[_matID];
+
 			var material_json = this.json.materials[_matID];
-			var techniques_json = material_json.techniques;
+			var techniqueID = material_json.instanceTechnique.technique;
+
+			var technique_json = this.json.techniques[techniqueID];
 			var document = this;
-			var techniques = {}
-			// for all techniques
-            for (var techniqueID in techniques_json) {
-                var technique_json = techniques_json[techniqueID];
-                var techniques = {};
+			
+     
                 var overrides = {};
                 var parameters_json = technique_json.parameters;
-                for (var parameterID in parameters_json){
-                	var parameter = parameters_json[parameterID];
+                
+                for (var i=0; i< material_json.instanceTechnique.values.length; i++) {
+
+                	var value = material_json.instanceTechnique.values[i];
+                    
+                    var parameterID = value.parameter;
                 	// check if this is a texture or a value
                 	// create an override as propose for glTF spec
                 	// { semantic, value }
                 	// type has to match type in technique
                 	// value is either a float or array or typearray
-                	overrides[parameterID] = {};
-                	overrides[parameterID].type = parameter.type;
-                	if (parameter.value)
-                		overrides[parameterID].value=parameter.value;
-                	else {
-			            // kick off image loading
-			            if (!document.images) document.images={};
+                	if (technique_json.parameters[parameterID]) {
+                		overrides[parameterID] = {};
+	                	overrides[parameterID].type = technique_json.parameters[parameterID].type;
+	                	if (overrides[parameterID].type  !== "SAMPLER_2D")
+	                		overrides[parameterID].value=value.value;
+	                	else {
+				            // kick off image loading
+				            if (!document.images) document.images={};
 
-			            var imageID = parameter.image;
-		                var imagePath = this.json.images[imageID].path;
-		                var uri = document._path+imagePath;
-		                if (!document.images[imageID]) {
-			                document.images[imageID] = new Image();
-			                if (this.onload) this.images[imageID].onload = this.onload;
-			                document.images[imageID].src = uri;
-			            }
-			            overrides[parameterID].value={ 
-			            "path": imagePath,
-            			"image": document.images[imageID],
-                        "magFilter": parameter.magFilter,
-                        "minFilter": parameter.minFilter,
-                        "wrapS": parameter.wrapS,
-                        "wrapT": parameter.wrapT};
-                            
-                    }
-            	}
-            	techniques[techniqueID] = this.techniques[techniqueID];
+				            var textureID = value.value;
+	                        var imageID = this.json.textures[textureID].source;
+			                var imagePath = this.json.images[imageID].path;
+	                        var samplerID = this.json.textures[textureID].sampler;
+	                        var sampler = this.json.samplers[samplerID];
+	                        
+			                var uri = document._path+imagePath;
+			                if (!document.images[imageID]) {
+				                document.images[imageID] = new Image();
+				                if (this.onload) this.images[imageID].onload = this.onload;
+				                document.images[imageID].src = uri;
+				            }
+				            overrides[parameterID].value={ 
+	                            "path": imagePath,
+	                            "image": document.images[imageID],
+	                            "magFilter": (sampler.magFilter ? sampler.magFilter : "LINEAR"),
+	                            "minFilter": (sampler.minFilter ? sampler.minFilter : "LINEAR_MIPMAP_LINEAR"),
+	                            "wrapS": (sampler.wrapS ? sampler.wrapS : 'REPEAT'),
+	                            "wrapT": (sampler.wrapT ? sampler.wrapT : 'REPEAT')
+	                        };
+	                    }
+                	}
+                	
             }
-            var material = { technique: this.techniques[material_json.technique], techniques: techniques, overrides: overrides, id: _matID};
-            if (!this.materials) this.materials={};
+            var material = { pass: this.techniques[techniqueID].defaultPass, overrides: overrides, id: _matID};
+            //if (!this.materials) this.materials={};
             this.materials[_matID] = material;
             return material;
 		},
 		parse_visual_scene: function(_sceneID)
 		{
-			var nodeID = this.json.scenes[_sceneID].node;
-			var root = this.json.nodes[nodeID];
+
+			var roots = this.json.scenes[_sceneID].nodes;
 			var scene = [];
-			for (i=0; i< root.children.length; i++)
-				scene.push(this.parse_node(root.children[i]))
+			for (i=0; i< roots.length; i++)
+				scene.push(this.parse_node(roots[i]));
 			return scene;
 		} ,
 		// parse the mesh id="_mesh"
@@ -423,7 +433,7 @@ if (window.mat4 === undefined)
 			var json_mesh = this.json.meshes[_meshID];
 			var triangles=[];
 
-			var prim, attr, buffer, count, size, offset;
+			var prim, attr, bufferview, buffer, count, size, byteStride, offset;
 
 			triangles.bounds = aabb.create();
 
@@ -431,10 +441,13 @@ if (window.mat4 === undefined)
 				var mesh={};
 			    prim = json_mesh.primitives[primID];
 			    // get indices
-			    attr = prim.indices;
-			    buffer = this.buffers[this.json.bufferViews[attr.bufferView].buffer];
+			    attr = this.json.indices[prim.indices];
+			    bufferview = this.json.bufferViews[attr.bufferView];
+			    buffer = this.buffers[bufferview.buffer];
 			    count = attr.count;
-			    offset = attr.byteOffset+this.json.bufferViews[attr.bufferView].byteOffset;
+			    offset = attr.byteOffset+bufferview.byteOffset;
+			    byteStride = attr.byteStride;
+
 			    switch (attr.type){
 			    	case 'UNSIGNED_SHORT':
 			   			mesh.INDEX = new Int16Array(buffer,offset,count);
@@ -444,17 +457,22 @@ if (window.mat4 === undefined)
 			    }
 
 			    for (var semantic in prim.semantics) {
-			    	attr = json_mesh.attributes[prim.semantics[semantic]];
-			    	buffer = this.buffers[this.json.bufferViews[attr.bufferView].buffer];
+			    	attr = this.json.attributes[prim.semantics[semantic]];
+			    	bufferview = this.json.bufferViews[attr.bufferView];
+			    	buffer = this.buffers[bufferview.buffer];
 			    	count = attr.count;
-			    	size = attr.componentsPerAttribute;
+			    	byteStride = attr.byteStride;
+
 			    	offset = attr.byteOffset+this.json.bufferViews[attr.bufferView].byteOffset;
-			    	switch (attr.componentType) {
-			    		case 'FLOAT':
-			    			mesh[semantic] = new Float32Array(buffer,offset,count*size);
+			    	switch (attr.type) {
+			    		case 'FLOAT_VEC3':
+			    			mesh[semantic] = new Float32Array(buffer,offset,count*3);
+			    			break;
+			    		case 'FLOAT_VEC2':
+			    			mesh[semantic] = new Float32Array(buffer,offset,count*2);
 			    			break;
 			    		default:
-			    			glTF.log('attribute '+attr.componentType+' is not allowed');
+			    			glTF.log('attribute '+attr.type+' is not allowed');
 			    	}
 			    	// get bounding box
 			    	if (semantic === "POSITION"){
