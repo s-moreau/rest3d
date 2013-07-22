@@ -1269,18 +1269,6 @@ server.get(/^\/rest3d\/upload.*/, function(req,res,next){
      }
      return next();
 });
-// static server
-server.get(/^\/.*/, function (req, res, next) {
-	
-
-	var p=path.resolve(static + req.url);
-
-	console.log('http get path='+p);
-
-	sendFile(req,res,p);
-	return next();
-});
-
 // convert
 
 server.post(/^\/rest3d\/convert.*/,function(_req,_res,_next){
@@ -1350,12 +1338,17 @@ server.post(/^\/rest3d\/convert.*/,function(_req,_res,_next){
     form.parse(req);
 
 });
-//post
-server.post(/^\/rest3d.*/,function(req,res,next){
 
-	var test = req.url.split("/rest3d/")[1];
-	console.log('[post]'+test);
-	console.log(req.params)
+// static server
+server.get(/^\/.*/, function (req, res, next) {
+	
+	// parse out parameters from url
+	var filename = req.url.split('\?')[0];
+	var p=path.resolve(static + filename);
+
+	console.log('http get path='+p);
+
+	sendFile(req,res,p);
 	return next();
 });
 
