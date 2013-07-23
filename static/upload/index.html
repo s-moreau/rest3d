@@ -162,8 +162,14 @@ $(function () {
                         // ennumerate all resulting files
                         $.each(data.result.files, function (index, file) {
 
-                            var span = $('<a href="'+decodeURIComponent(file.url)+'" target="_blank"><p><span>'+formatName(data,file)+'</span></p></a>');
-                            data.context.append(span);
+                            var span = '<p><span><a href="'+decodeURIComponent(file.url)+'" target="_blank"><p><span>'+formatName(data,file)+'</a>';
+                            // endsWith
+                            if (file.url.indexOf('.json', file.url.length - '.json'.length) !== -1) {
+                                var url='/viewer/viewer4.html?file=/rest3d/upload/'+decodeURIComponent(file.name);
+                                span += ' -> <a href="'+url+'" target="_blank"> View '+formatName(data,file)+'</a>';
+                            }
+                            span += '</span></p>';
+                            data.context.append($(span));
                         });
                     }
                 }

@@ -1269,6 +1269,24 @@ server.get(/^\/rest3d\/upload.*/, function(req,res,next){
      }
      return next();
 });
+
+// utility
+copyFileSync = function(srcFile, destFile) {
+  var BUF_LENGTH, buff, bytesRead, fdr, fdw, pos;
+  BUF_LENGTH = 64 * 1024;
+  buff = new Buffer(BUF_LENGTH);
+  fdr = fs.openSync(srcFile, "r");
+  fdw = fs.openSync(destFile, "w");
+  bytesRead = 1;
+  pos = 0;
+  while (bytesRead > 0) {
+    bytesRead = fs.readSync(fdr, buff, 0, BUF_LENGTH, pos);
+    fs.writeSync(fdw, buff, 0, bytesRead);
+    pos += bytesRead;
+  }
+  fs.closeSync(fdr);
+  return fs.closeSync(fdw);
+};
 // convert
 
 server.post(/^\/rest3d\/convert.*/,function(_req,_res,_next){
@@ -1309,6 +1327,18 @@ server.post(/^\/rest3d\/convert.*/,function(_req,_res,_next){
 			console.log('Exit code:', code);
 	  		console.log('Program output:', output);
 					
+			// hack, copy all images in the output_dir, so the viewer will work
+		    fs.readdir('upload/', function (err, list) {
+                list.forEach(function (name) {
+                	if (name.endsWith('.png'))
+                	{
+                		copyFileSync('upload/'+name,'upload/'+output_dir+'/'+name);
+                		console.log('upload/'+name+'  TO  upload/'+output_dir+'/'+name);
+                	}
+		        });
+		    });
+		    // end hack
+
 			var files = [];
 			fs.readdir('upload/'+output_dir, function (err, list) {
                 list.forEach(function (name) {
@@ -1330,6 +1360,8 @@ server.post(/^\/rest3d\/convert.*/,function(_req,_res,_next){
                     setTimeout(function() { timeout()},5 * 60 * 1000);
 		        handleResult(req, res, {files: files});
 		    });
+
+		   
 						
 		     return next();
 	     });
