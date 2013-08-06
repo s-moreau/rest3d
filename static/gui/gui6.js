@@ -47,10 +47,12 @@ if (window.$ === undefined) {
     document.write('<script type="text/javascript" src="/deps/jquery.cookie.js"><\/' + 'script>');
     document.write('<script type="text/javascript" src="/deps/jquery.hotkeys.js"><\/' + 'script>');
     document.write('<script type="text/javascript" src="/deps/jquery.jstree.js"><\/' + 'script>');
+    document.write('<script type="text/javascript" src="/deps/jquery.terminal-0.7.3.js"><\/' + 'script>');
     //document.write('<link href="/gui/themes/vader/ui.dynatree.css" rel="stylesheet" type="text/css" />');
 
     document.write('<link rel="stylesheet" href="/gui/gui6.css" />');
     document.write('<link rel="stylesheet" href="/gui/themes/menu.css" />');
+    document.write('<link rel="stylesheet" href="/gui/themes/jquery.terminal.css" />');
 }
 
 
@@ -67,12 +69,12 @@ if (window.$ === undefined) {
     // -------------
     // Save a reference to the global object (`window` in the browser, `exports`
     // on the server).
-    var root = this;
+
     // The top-level namespace. All public GUI classes and modules will
     // be attached to this. Exported for both CommonJS and the browser.
     var GUI;
     if (typeof exports !== 'undefined') GUI = exports;
-    else { GUI = root.GUI = {}; };
+    else { GUI = this.GUI = {}; };
     // Current version of the library. Keep in sync with `package.json`.
     GUI.VERSION = '0.0.1';
 
@@ -251,8 +253,7 @@ if (window.$ === undefined) {
     };
 
     GUI.canvas = function(_parent) {
-    	$canvas = $(
-    		'<canvas class="ui-resize-me" style="padding: 0; margin: 0;" ></canvas>');
+    	$canvas = $('<canvas class="ui-resize-me" style="padding: 0; margin: 0;" ></canvas>');
 
 		resize=function(event) {
  			$(this).height($(this).parent().parent().height()-2);
@@ -320,6 +321,74 @@ if (window.$ === undefined) {
 			var $menu = $(menu);
 			$('ul.'+_position).append($menu);
 			return $menu;}};
+
+	GUI.console = function(_centralPane){
+	        var content = '<div id="accordion"><h3>Console</h3><div id="content-accordion"><div id="content-console"></div><!--<div id="console"></div>--></div></div>';
+	  		var $content = $(content);
+	  		$('.ui-layout-south').prepend($content);
+	  		
+	  		//var icons = {header: "iconClosed",activeHeader: "iconOpen"};
+	  		$( '#accordion').accordion({ /*icons: icons,*/header: "h3", collapsible: true, active: false, heightStyle: "fill", beforeActivate: function(event, ui) {
+	  		var opened = $(this).find('.ui-state-active').length;
+	  		if(opened==0){_centralPane.sizePane("south",115);}
+	  		if(opened!=0){_centralPane.sizePane("south",40);}}});
+	  		
+	  		/*Terminal plugin, usefull?
+	  		$('#console').terminal(function(command, term) {
+	                var fso =  new ActiveXObject("Scripting.FileSystemObject");  
+	   			    var s = fso.OpenTextFile("test.txt", true);
+	    			s.WriteLine(command);
+	   				 s.Close();
+	    }, {
+	    	greetings: '',
+	        name: 'console',
+	        height: 20,
+	        prompt: 'rest3d> '});*/
+	        
+	  		//handling errors,warnings,debugs,logs
+	  		//catch error alert fron window
+	  		window.onerror = function(message, url, linenumber) {
+	  		var content = '<div id="blocConsole2"><a class="ui-icon ui-icon-circle-close" id="blocConsole1"></a>';
+	  		if(!url){url="indefined";}
+	  		if(!linenumber){linenumber="indefined";}
+	        content += '<a style="color:red">'+message+' url:'+url+' line:'+linenumber+'</a></div>';
+	        var $content = $(content);
+	        $('#content-console').prepend($content);};
+	        
+	   		//catch debug from console firebug API
+	   		var oldDebug = console.debug;
+	    	console.debug = function (message) {
+	        var content = '<div id="blocConsole2"><a class="ui-icon ui-icon-info" id="blocConsole1"></a>';
+	        content += '<a>'+message+'</a></div>';
+	        var $content = $(content);
+	        $('#content-console').prepend($content);
+	        oldDebug.apply(console, arguments);};
+	        //catch log from console firebug API
+	        var oldLog=console.log;
+	    	console.log = function (message) {
+	        var content = '<div id="blocConsole2"><a class="ui-icon ui-icon-cancel" id="blocConsole1"></a>';
+	        content += '<a style="color:blanc">'+message+'</a></div>';
+	        var $content = $(content);
+	        $('#content-console').prepend($content);
+	        oldLog.apply(console, arguments);};
+	        //catch error from console firebug API
+	        var oldError=console.error;
+	    	console.error = function (message) {
+	        var content = '<div id="blocConsole2"><a class="ui-icon ui-icon-circle-close" id="blocConsole1"></a>';
+	        content += '<a style="color:red">'+message+'</a></div>';
+	        var $content = $(content);
+	        $('#content-console').prepend($content);
+	        oldError.apply(console, arguments);};
+	        //catch warning from console firebug API
+	        var oldWarn = console.warn;
+	    	console.warn = function (message) {
+	        var content = '<div id="blocConsole2"><a class="ui-icon ui-icon-alert" id="blocConsole1"></a>';
+	        content += '<a style="color:yellow">'+message+'</a></div>';
+	        var $content = $(content);
+	        $('#content-console').prepend($content);
+	        oldWarn.apply(console, arguments);};};
+   		
+   
 	
     GUI.window = function(_txt, _pane, _float) {
 
@@ -371,7 +440,7 @@ if (window.$ === undefined) {
             '</div>'+
             '<div class="ui-layout-center ui-widget-header" >'+
             '</div>'+
-            '<div class="ui-layout-south ui-widget-header">&copy; R&eacute;mi Arnaud - Advanced Micro Devices, Inc. 2013</div>'
+            '<div class="ui-layout-south ui-widget-header"><span style="font-size:10px; font-family:tahoma;">&copy; R&eacute;mi Arnaud - Advanced Micro Devices, Inc. 2013</span></div>'
     	);
 
     	$('body').append($layout);
@@ -406,7 +475,8 @@ if (window.$ === undefined) {
         	}
         });
 
-      
+     //   myLayout.menuBar = GUI.menu((
+     //    .console =
 
         myLayout.options.west.minSize='10%';
         myLayout.options.west.maxSize='90%';

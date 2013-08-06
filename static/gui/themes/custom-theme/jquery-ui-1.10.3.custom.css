@@ -1,7 +1,7 @@
-/*! jQuery UI - v1.10.3 - 2013-07-31
+/*! jQuery UI - v1.10.3 - 2013-08-03
 * http://jqueryui.com
 * Includes: jquery.ui.core.css, jquery.ui.resizable.css, jquery.ui.selectable.css, jquery.ui.accordion.css, jquery.ui.autocomplete.css, jquery.ui.button.css, jquery.ui.datepicker.css, jquery.ui.dialog.css, jquery.ui.menu.css, jquery.ui.progressbar.css, jquery.ui.slider.css, jquery.ui.spinner.css, jquery.ui.tabs.css, jquery.ui.tooltip.css
-* To view and modify this theme, visit http://jqueryui.com/themeroller/?ffDefault=Verdana%2CArial%2Csans-serif&fwDefault=normal&fsDefault=1.1em&cornerRadius=0px&bgColorHeader=%23444444&bgTextureHeader=highlight_soft&bgImgOpacityHeader=44&borderColorHeader=%23333333&fcHeader=%23ffffff&iconColorHeader=%23ffffff&bgColorContent=%23000000&bgTextureContent=layered_circles&bgImgOpacityContent=25&borderColorContent=%23fffcfc&fcContent=%23ffffff&iconColorContent=%23cccccc&bgColorDefault=%23222222&bgTextureDefault=highlight_soft&bgImgOpacityDefault=35&borderColorDefault=%23444444&fcDefault=%23eeeeee&iconColorDefault=%23cccccc&bgColorHover=%23003147&bgTextureHover=highlight_soft&bgImgOpacityHover=33&borderColorHover=%230b93d5&fcHover=%23ffffff&iconColorHover=%23ffffff&bgColorActive=%230972a5&bgTextureActive=highlight_hard&bgImgOpacityActive=20&borderColorActive=%2326b3f7&fcActive=%23ffffff&iconColorActive=%23222222&bgColorHighlight=%23eeeeee&bgTextureHighlight=highlight_soft&bgImgOpacityHighlight=80&borderColorHighlight=%23cccccc&fcHighlight=%232e7db2&iconColorHighlight=%234b8e0b&bgColorError=%23ffc73d&bgTextureError=glass&bgImgOpacityError=40&borderColorError=%23ffb73d&fcError=%23111111&iconColorError=%23a83300&bgColorOverlay=%235c5c5c&bgTextureOverlay=flat&bgImgOpacityOverlay=50&opacityOverlay=80&bgColorShadow=%23cccccc&bgTextureShadow=flat&bgImgOpacityShadow=30&opacityShadow=60&thicknessShadow=7px&offsetTopShadow=-7px&offsetLeftShadow=-7px&cornerRadiusShadow=8px
+* To view and modify this theme, visit http://jqueryui.com/themeroller/?ffDefault=Verdana%2CArial%2Csans-serif&fwDefault=normal&fsDefault=1.1em&cornerRadius=0px&bgColorHeader=%23444444&bgTextureHeader=highlight_soft&bgImgOpacityHeader=44&borderColorHeader=%23333333&fcHeader=%23ffffff&iconColorHeader=%23ffffff&bgColorContent=%23130e0e&bgTextureContent=diagonals_medium&bgImgOpacityContent=25&borderColorContent=%23555555&fcContent=%23ffffff&iconColorContent=%23cccccc&bgColorDefault=%231b68a8&bgTextureDefault=highlight_soft&bgImgOpacityDefault=35&borderColorDefault=%23444444&fcDefault=%23eeeeee&iconColorDefault=%23cccccc&bgColorHover=%23003147&bgTextureHover=highlight_soft&bgImgOpacityHover=33&borderColorHover=%230b93d5&fcHover=%23ffffff&iconColorHover=%23ffffff&bgColorActive=%230972a5&bgTextureActive=highlight_hard&bgImgOpacityActive=20&borderColorActive=%2326b3f7&fcActive=%23ffffff&iconColorActive=%23222222&bgColorHighlight=%23eeeeee&bgTextureHighlight=highlight_soft&bgImgOpacityHighlight=80&borderColorHighlight=%23cccccc&fcHighlight=%232e7db2&iconColorHighlight=%234b8e0b&bgColorError=%23ffc73d&bgTextureError=glass&bgImgOpacityError=40&borderColorError=%23ffb73d&fcError=%23111111&iconColorError=%23a83300&bgColorOverlay=%235c5c5c&bgTextureOverlay=flat&bgImgOpacityOverlay=50&opacityOverlay=80&bgColorShadow=%23cccccc&bgTextureShadow=flat&bgImgOpacityShadow=30&opacityShadow=60&thicknessShadow=7px&offsetTopShadow=-7px&offsetLeftShadow=-7px&cornerRadiusShadow=8px
 * Copyright 2013 jQuery Foundation and other contributors Licensed MIT */
 
 /* Layout helpers
@@ -800,8 +800,8 @@ body .ui-tooltip {
 	font-size: 1em;
 }
 .ui-widget-content {
-	border: 1px solid #fffcfc;
-	background: #000000 url(images/ui-bg_layered-circles_25_000000_13x13.png) 50% 50% repeat;
+	border: 1px solid #555555;
+	background: #130e0e url(images/ui-bg_diagonals-medium_25_130e0e_40x40.png) 50% 50% repeat;
 	color: #ffffff;
 }
 .ui-widget-content a {
@@ -823,7 +823,7 @@ body .ui-tooltip {
 .ui-widget-content .ui-state-default,
 .ui-widget-header .ui-state-default {
 	border: 1px solid #444444;
-	background: #222222 url(images/ui-bg_highlight-soft_35_222222_1x100.png) 50% 50% repeat-x;
+	background: #1b68a8 url(images/ui-bg_highlight-soft_35_1b68a8_1x100.png) 50% 50% repeat-x;
 	font-weight: normal;
 	color: #eeeeee;
 }
