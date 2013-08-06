@@ -12,13 +12,13 @@
   -moz-border-radius: 0px 0px 0 0;
   -webkit-border-radius: 0px 0px 0 0;
   background: #141414;
-  background:url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAAxCAIAAACUDVRzAAAAA3NCSVQICAjb4U/gAAAALElEQVQImWMwMrJi+v//PxMDw3+m//8ZoPR/qBgDEhuXGLoeYswhXg8R5gAAdVpfoJ3dB5oAAAAASUVORK5CYII=) 50% 50%; 
-  background: -moz-linear-gradient(top, #32323a 0%, #141414 50%);
-  background: -webkit-gradient(linear, left top, left bottom, color-stop(0%, #32323a), color-stop(50%, #141414));
-  background: -webkit-linear-gradient(top, #32323a 0%, #141414 50%);
-  background: -o-linear-gradient(top, #32323a 0%, #141414 50%);
-  background: -ms-linear-gradient(top, #32323a 0%, #141414 50%);
-  background: linear-gradient(to bottom, #32323a 0%, #141414 50%);
+  background:url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAAxCAIAAACUDVRzAAAAA3NCSVQICAjb4U/gAAAALElEQVQImWMwMrJi+v//PxMDw3+m//8ZoPR/qBgDEhuXGLoeYswhXg8R5gAAdVpfoJ3dB5oAAAAASUVORK5CYII=) 100% 100%; 
+  background: -moz-linear-gradient(top, #32323a 0%, #141414 100%);
+  background: -webkit-gradient(linear, left top, left bottom, color-stop(0%, #32323a), color-stop(100%, #141414));
+  background: -webkit-linear-gradient(top, #32323a 0%, #141414 100%);
+  background: -o-linear-gradient(top, #32323a 0%, #141414 100%);
+  background: -ms-linear-gradient(top, #32323a 0%, #141414 100%);
+  background: linear-gradient(to bottom, #32323a 0%, #141414 100%);
   border-bottom: 2px solid #0fa1e0;
 }
 #cssmenu:after,
@@ -29,13 +29,13 @@
 }
 #cssmenu a {
   background: #141414;
-  background:url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAAxCAIAAACUDVRzAAAAA3NCSVQICAjb4U/gAAAALElEQVQImWMwMrJi+v//PxMDw3+m//8ZoPR/qBgDEhuXGLoeYswhXg8R5gAAdVpfoJ3dB5oAAAAASUVORK5CYII=) 50% 50%; 
-  background: -moz-linear-gradient(top, #32323a 0%, #141414 50%);
-  background: -webkit-gradient(linear, left top, left bottom, color-stop(0%, #32323a), color-stop(50%, #141414));
-  background: -webkit-linear-gradient(top, #32323a 0%, #141414 50%);
-  background: -o-linear-gradient(top, #32323a 0%, #141414 50%);
-  background: -ms-linear-gradient(top, #32323a 0%, #141414 50%);
-  background: linear-gradient(to bottom, #32323a 0%, #141414 50%);
+  background:url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAAxCAIAAACUDVRzAAAAA3NCSVQICAjb4U/gAAAALElEQVQImWMwMrJi+v//PxMDw3+m//8ZoPR/qBgDEhuXGLoeYswhXg8R5gAAdVpfoJ3dB5oAAAAASUVORK5CYII=) 100% 100%; 
+  background: -moz-linear-gradient(top, #32323a 0%, #141414 100%);
+  background: -webkit-gradient(linear, left top, left bottom, color-stop(0%, #32323a), color-stop(100%, #141414));
+  background: -webkit-linear-gradient(top, #32323a 0%, #141414 100%);
+  background: -o-linear-gradient(top, #32323a 0%, #141414 100%);
+  background: -ms-linear-gradient(top, #32323a 0%, #141414 100%);
+  background: linear-gradient(to bottom, #32323a 0%, #141414 100%);
   color: #ffffff;
   display: inline-block;
   font-family: Helvetica, Arial, Verdana, sans-serif;
@@ -116,7 +116,7 @@
   left: 0;
 }
 #cssmenu .has-sub ul li {
-  margin-bottom: -1px;
+  *margin-bottom: -1px;
 }
 #cssmenu .has-sub ul li a {
   background: #0fa1e0;
@@ -124,10 +124,10 @@
   filter: none;
   font-size: 11px;
   display: block;
-  line-height: 120%;
+  line-height: 100%;
   padding: 10px;
 }
-#cssmenu .has-sub ul li:hover a, #cssmenu .has-sub ul li a:hover{
+#cssmenu .has-sub ul li:hover a {
   background: #0c7fb0;
 }
 #cssmenu .has-sub .has-sub:hover > ul {
@@ -143,7 +143,7 @@
   background: #0c7fb0;
   border-bottom: 1px dotted #6db2d0;
 }
-#cssmenu .has-sub .has-sub ul li a:hover, #cssmenu .has-sub .has-sub ul li:hover a{
+#cssmenu .has-sub .has-sub ul li a:hover {
   background: #095c80;
 }
 
