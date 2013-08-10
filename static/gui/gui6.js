@@ -634,7 +634,7 @@ function changeBloom()
                 onresize: GUI.resize,
         	},
         	west: {
-        		size: "80%",
+        		size: "76%",
         		resizerCursor:"move",
         		onresize: GUI.resize,
         	},
