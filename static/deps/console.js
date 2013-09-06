@@ -1,31 +1,31 @@
 (function () {
 CONSOLE = this.CONSOLE = {};
 CONSOLE.open = function () {
-    $('.ui-layout-west').attr('id', 'mainPanel');
-    $('#mainPanel').append('<div id="console" class="ui-layout-south"></div><div id="viewerFrame" class="ui-layout-center"></div>')
-    var newLayout = $('#mainPanel').layout({
+    //$('.ui-layout-west').attr('id', 'mainPanel');
+    $('#mainLayout-west').append('<div id="console" class="ui-layout-south"></div><div id="mainLayout-westBis" class="ui-layout-center"></div>')
+    var newLayout = $('#mainLayout-west').layout({
         togglerLength_open: 0, // HIDE the toggler button
 
         south: {
-            size: 120,
+            spacing_closed: 0,
 
         },
         center: {
-            resizable: true,
-            onresize: GUI.resize,
-            resizerCursor: "move",
+            resizable: false,
+            size:1000,
         }
     });
 
     $('#console').hide();
     $('#console').addClass('ui-widget-content');
-    var toggle_button = GUI.addStickyButton('buttonLayout', [""], $("#south-panel"));
+    var toggle_button = GUI.addStickyButton('buttonLayout', [""], $("#mainLayout-south"));
     toggle_button.width(35);
-    toggle_button.height(50);
-    GUI.image($('#south-panel > label'), "img-console", "img/console.png", '20', '30');
+    toggle_button.height(25);
+    GUI.image($('#mainLayout-south > label'), "img-console", "img/console.png", '20', '30');
     toggle_button.on('change', function (e) {
         if ($(this).is(':checked')) {
             $('#console').show();
+            newLayout.sizePane('south','120');
         } else {
             $('#console').hide();
         }

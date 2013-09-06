@@ -29,44 +29,45 @@ THE SOFTWARE.
     
     
     $(function () {
+				
         // status manager
         window.fl4reStatus = function (type, text) {
             if (type == 'CLEAR' || type == 'READY') {
                 $('#defaultText').remove();
-                GUI.label("defaultText", "ready", $("#south-panel"));
-                //$('#south-panel span:first-child').remove();
-                GUI.addIcon($("#south-panel"), "ui-icon-circle-check", "float:left;margin:3px;", "before");
+                GUI.label("defaultText", "ready", $("#mainLayout-south"));
+                //$('#mainLayout-south span:first-child').remove();
+                GUI.addIcon($("#mainLayout-south"), "ui-icon-circle-check", "float:left;margin:3px;", "before");
             } else if (type == 'BUSY') {
                 $('#defaultText').remove();
-                GUI.label("defaultText", text, $("#south-panel"));
+                GUI.label("defaultText", text, $("#mainLayout-south"));
             } else if (type == 'ERROR') {
                 $('#defaultText').remove();
-                GUI.label("defaultText", text, $("#south-panel"));
+                GUI.label("defaultText", text, $("#mainLayout-south"));
             } else if (type == 'WARNING') {
                 $('#defaultText').remove();
-                GUI.label("defaultText", text, $("#south-panel"));
-                $('#south-panel span:first-child').remove();
-                GUI.addIcon($("#south-panel"), "ui-icon-alert", "float:left;margin:3px;", "before");
+                GUI.label("defaultText", text, $("#mainLayout-south"));
+                $('#mainLayout-south span:first-child').remove();
+                GUI.addIcon($("#mainLayout-south"), "ui-icon-alert", "float:left;margin:3px;", "before");
             } else {
                 $('#defaultText').remove();
-                GUI.label("defaultText", text, $("#south-panel"));
-                $('#south-panel span:first-child').remove();
-                GUI.addIcon($("#south-panel"), "ui-icon-info", "float:left;margin:3px;", "before");
+                GUI.label("defaultText", text, $("#mainLayout-south"));
+                $('#mainLayout-south span:first-child').remove();
+                GUI.addIcon($("#mainLayout-south"), "ui-icon-info", "float:left;margin:3px;", "before");
             }
         };
         // mask
-        var pleaseWait = GUI.mask("mask-loading", "Loading...");
-        GUI.image(pleaseWait, "img-loading", "img/loading.gif", 30, 30, "before");
-        window.fl4reStatus('INFO', 'loading');
-        pleaseWait.show();
+         var pleaseWait = GUI.mask("mask-loading", "Loading...");
+         GUI.image(pleaseWait, "img-loading", "img/loading.gif", 30, 30, "before");
+         window.fl4reStatus('INFO', 'loading');
+         pleaseWait.show();
 
-        var defaultIconCls = GUI.addIcon($("#south-panel"), "", "");
-        var defaultText = GUI.label("defaultText", "", $("#south-panel"));
+        var defaultIconCls = GUI.addIcon($("#mainLayout-south"), "", "");
+        var defaultText = GUI.label("defaultText", "", $("#mainLayout-south"));
 
         //main layout
-        var layout = GUI.layout();
-        layout.sizePane("north", 35);
-        layout.sizePane("south", 25);
+        var layout = GUI.Layout("mainLayout",1);
+        layout.jqueryObject.sizePane("north", 35);
+        layout.jqueryObject.sizePane("south", 25);
         //menu
         GUI.addMenu(["Scenes", "Animations", "Cameras", "Help"], [0, 0, 0, "javascript:window.onHelp();"], "0", "menu");
         GUI.addMenu(["New", "Load", "Save", "Append", "Clone", "Quit"], [0, 0, 0, 0, "checkbox", "javascript:window.onQuit()"], "0_1", "Scenes");
@@ -117,7 +118,7 @@ THE SOFTWARE.
         GUI.image($("#z0_3>a"), "img-cameras", "img/camera-anim.gif", 27, 27, "before");
         GUI.image($("#z0_4>a"), "img-help", "img/aide.gif", 20, 20, "before");
 
-        /*------------------------------//tab menu ---------------------------------------------------------------------------------------------*/
+        //------------------------------//tab menu ---------------------------------------------------------------------------------------------
         //callback slider change exposure
 
         function changeExposure() {
@@ -133,8 +134,9 @@ THE SOFTWARE.
             $("#bloomBiasText").html(bloomBias + " bloom bias");
             $("#bloomScaleText").html(bloomScale + " bloom scale");
         }
+		
 
-        var renderTab = GUI.addTabWindow($(".ui-layout-center"), "tabsoune", "EG1");
+        var renderTab = GUI.addTabWindow($("#mainLayout-center"), "tabsoune", "EG1");
         GUI.image(renderTab.find('.ui-tabs-anchor'), "img-render", "img/menu-render.png", 12, 14, "before");
         var tab2 = GUI.addNewTab("tabsoune", "material", "EG2", "example");
         GUI.image($('#ui-id-3'), "img-material", "img/menu-scenes.png", 12, 14, "before");
@@ -192,7 +194,7 @@ THE SOFTWARE.
         GUI.label("...", "one sticky button", tab2, '', "isolate");
         var item = new Array("tefa");
         GUI.addStickyButton("example2", item, tab2);
-
+		
         //help dialog
         window.onHelp = function () {
             var txt = 'The greenhouse effect is a process by which thermal radiation from a planetary surface is absorbed by atmospheric greenhouse gases, and is re-radiated in all directions. Since part of this re-radiation is back towards the surface and the lower atmosphere, it results in an elevation of the average surface temperature above what it would be in the absence of the gases","C string that contains the text to be written to stdout.It can optionally contain embedded format specifiers that are replaced by the values specified in subsequent additional arguments and formatted as requested.A format specifier follows this prototype: [see compatibility note below] specifier Where the specifier character at the end is the most significant component, since it defines the type and the interpretation of its corresponding argument:';
@@ -225,21 +227,85 @@ THE SOFTWARE.
             var quitPanel = GUI.confirmDialog("quitPanel", "Leaving?", "Are you sure you want to quit?", "Quit", "console.log('exit requested')");
             GUI.image(quitPanel, "img-quit", "img/icon-error2.png", '40', '40', 'before');
         }
-
+ 		
+		renderTab.wrapAll('<div id="secondLayout-center" class="ui-layout-center" style="height:100%;width:100%"></div>');
+		
+		
         // allow autoscroll on tabs
         GUI.autoScroll($(".ui-accordion-header"), $("#content-renderMenus"));
 
         //this is really important! enables scrolling and autofilling of the tab content
-        myLayout.initContent("center");
-        layout.resizeAll();
+        layout.jqueryObject.initContent("center");
+        layout.jqueryObject.resizeAll();
 
-        GUI.label("auteur", "&copy; R&eacute;mi Arnaud - Advanced Micro Devices, Inc. 2013", $("#south-panel"));
+        GUI.label("auteur", "&copy; R&eacute;mi Arnaud - Advanced Micro Devices, Inc. 2013", $("#mainLayout-south"));
 
         CONSOLE.open();
+		
+//-----------------------------------------------------------------------------------------------------------------------------
+
+		var toggle_buttonV = GUI.addStickyButton('buttonCutV', [""], $("#mainLayout-south"));
+		GUI.image(toggle_buttonV, "img-cutV", "img/scissorV.png", 15, 15, "before");
+   		toggle_buttonV.width(35);
+    	toggle_buttonV.height(50);
+	    toggle_buttonV.on('change', function (e) {
+	        if ($(this).is(':checked')) {
+	            $('#mainLayout-west, #mainLayout-center').css({'cursor': 'url(img/scissorV.png), default'});
+				$('#mainLayout-west, #mainLayout-center').click(function(event){ 
+					var parentOffset = $(this).offset(); 
+   					var relX = event.pageX - parentOffset.left;
+   					var relY = event.pageY - parentOffset.top;
+                    var percentageY = Math.round(relY*(100/$(this).height()));
+                    var percentageX = Math.round(relX*(100/$(this).width()));
+					var check = true; 
+					var idSearch = event.target.id;
+                    console.debug("id click= "+idSearch);
+                    var count = 0;
+					while(check){
+                        console.debug("id dans la boucle= "+idSearch);
+                        count++;
+						var search = $('#'+idSearch).attr('class');
+						if(search){
+							if(search.match("ui-layout-center")||search.match("ui-layout-south")||search.match("ui-layout-north")||search.match("ui-layout-est")||search.match("ui-layout-west")){
+                                    console.debug("avant correction "+idSearch);
+    								idSearch = idSearch.replace("-center","");
+                                    console.debug("apres correction "+idSearch);
+                                    if(bufferLayout.length==1){var obj1 = layout.cutV(idSearch,percentageX);}
+    								else{
+                                        for(var i=0;i<bufferLayout.length;i++){
+                                            for(var j=0;j<bufferLayout[i].idWrap.length;j++){
+                                                if(bufferLayout[i].idWrap[j]==idSearch){bufferLayout[i].cutV("ui-id-"+Math.round(Math.random()*10000),percentageX);}
+                                        }}
+
+                                    }
+
+    								check=false;}}
+						var $parent = $('#'+idSearch).parent(); 
+						idSearch = $parent.attr('id');
+                        if(count==20){break;}
+						}
+					});
+			} else {
+				$('#mainLayout-west, #mainLayout-center').css('cursor', 'auto');
+				$('#mainLayout-west, #mainLayout-center').unbind("click");
+	        }
+	    }); 
+		
+		var toggle_button = GUI.addStickyButton('buttonCutH', [""], $("#mainLayout-south"));
+		GUI.image(toggle_button, "img-cutH", "img/scissorH.png", 15, 15, "before");
+   		toggle_button.width(35);
+    	toggle_button.height(50);
+
+
+//-----------------------------------------------------------------------------------------------------------------------------
+        //$('#console').next().addSelf().next().addSelf().wrapAll('<div id="tefa-center" class="ui-layout-center"></div>');
+		  //renderTab.wrapAll('<div id="tefa-center" class="ui-layout-center"></div>')
+		//var obj1 = layout.cutH("tefa"); 
+        //obj1.randomColor();
 
         pleaseWait.hide();
         $('#mask-loading').remove();
-        window.fl4reStatus('CLEAR');
+        window.fl4reStatus('CLEAR'); 
 
     });
 
