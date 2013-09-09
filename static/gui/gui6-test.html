@@ -29,6 +29,8 @@ THE SOFTWARE.
     
     
     $(function () {
+        "use strict";
+
 				
         // status manager
         window.fl4reStatus = function (type, text) {
@@ -59,10 +61,6 @@ THE SOFTWARE.
          var pleaseWait = GUI.mask("mask-loading", "Loading...");
          GUI.image(pleaseWait, "img-loading", "img/loading.gif", 30, 30, "before");
          window.fl4reStatus('INFO', 'loading');
-         pleaseWait.show();
-
-        var defaultIconCls = GUI.addIcon($("#mainLayout-south"), "", "");
-        var defaultText = GUI.label("defaultText", "", $("#mainLayout-south"));
 
         //main layout
         var layout = GUI.Layout("mainLayout",1);
@@ -70,7 +68,8 @@ THE SOFTWARE.
         layout.jqueryObject.sizePane("south", 25);
         //menu
         GUI.addMenu(["Scenes", "Animations", "Cameras", "Help"], [0, 0, 0, "javascript:window.onHelp();"], "0", "menu");
-        GUI.addMenu(["New", "Load", "Save", "Append", "Clone", "Quit"], [0, 0, 0, 0, "checkbox", "javascript:window.onQuit()"], "0_1", "Scenes");
+        GUI.addMenu(["New", "Load", "Save", "Append", "Clone", "Quit"], [0, 0, 0, 0, "checkbox", "javascript:window.onQuit()"], "0_1","Scenes");
+      
         GUI.addMenu(["eg1", "eg2"], [0, 0], "0_1_2", "Load");
         GUI.addMenu(["eg1", "eg2", "eg3"], [0, 0, 0], "0_1_4", "Append");
         //disable save
@@ -108,10 +107,10 @@ THE SOFTWARE.
 
         //add icons to the menu
         GUI.addIcon($("#menu>.has-sub>a"), "ui-icon-triangle-1-s", "float:right;");
-        GUI.addIcon($("#z0_1_2>a"), "ui-icon-triangle-1-e", "float:right;");
-        GUI.addIcon($("#z0_1_4>a"), "ui-icon-triangle-1-e", "float:right;");
-        GUI.addIcon($("#z0_2_3>a"), "ui-icon-triangle-1-e", "float:right;");
-        GUI.addIcon($("#z0_2_4>a"), "ui-icon-triangle-1-e", "float:right;");
+        GUI.addIcon($("#z0_1_2>a"), "ui-icon-triangle-1-e", "float:right;bottom:2px !important;");
+        GUI.addIcon($("#z0_1_4>a"), "ui-icon-triangle-1-e", "float:right;bottom:2px !important;");
+        GUI.addIcon($("#z0_2_3>a"), "ui-icon-triangle-1-e", "float:right;bottom:2px !important;");
+        GUI.addIcon($("#z0_2_4>a"), "ui-icon-triangle-1-e", "float:right;bottom:2px !important;");
 
         GUI.image($("#z0_1>a"), "img-scenes", "img/action.gif", 22, 22, "before");
         GUI.image($("#z0_2>a"), "img-animation", "img/menu-animations.gif", 20, 20, "before");
@@ -136,7 +135,7 @@ THE SOFTWARE.
         }
 		
 
-        var renderTab = GUI.addTabWindow($("#mainLayout-center"), "tabsoune", "EG1");
+        var renderTab = GUI.addTabWindow(layout.jqueryObjectCenter, "tabsoune", "EG1");
         GUI.image(renderTab.find('.ui-tabs-anchor'), "img-render", "img/menu-render.png", 12, 14, "before");
         var tab2 = GUI.addNewTab("tabsoune", "material", "EG2", "example");
         GUI.image($('#ui-id-3'), "img-material", "img/menu-scenes.png", 12, 14, "before");
@@ -228,7 +227,6 @@ THE SOFTWARE.
             GUI.image(quitPanel, "img-quit", "img/icon-error2.png", '40', '40', 'before');
         }
  		
-		renderTab.wrapAll('<div id="secondLayout-center" class="ui-layout-center" style="height:100%;width:100%"></div>');
 		
 		
         // allow autoscroll on tabs
@@ -238,74 +236,68 @@ THE SOFTWARE.
         layout.jqueryObject.initContent("center");
         layout.jqueryObject.resizeAll();
 
-        GUI.label("auteur", "&copy; R&eacute;mi Arnaud - Advanced Micro Devices, Inc. 2013", $("#mainLayout-south"));
+        GUI.label("auteur", "&copy; R&eacute;mi Arnaud - Advanced Micro Devices, Inc. 2013", layout.jqueryObjectSouth);
 
-        CONSOLE.open();
+        var toggle_button = GUI.addStickyButton('buttonLayout', [""], layout.jqueryObjectSouth);
+        toggle_button.width(35);
+        toggle_button.height(25);
+        GUI.image(toggle_button, "img-console", "img/console.png", '20', '30');
+
+
+        CONSOLE.open(layout);
 		
 //-----------------------------------------------------------------------------------------------------------------------------
 
-		var toggle_buttonV = GUI.addStickyButton('buttonCutV', [""], $("#mainLayout-south"));
-		GUI.image(toggle_buttonV, "img-cutV", "img/scissorV.png", 15, 15, "before");
-   		toggle_buttonV.width(35);
-    	toggle_buttonV.height(50);
-	    toggle_buttonV.on('change', function (e) {
-	        if ($(this).is(':checked')) {
-	            $('#mainLayout-west, #mainLayout-center').css({'cursor': 'url(img/scissorV.png), default'});
-				$('#mainLayout-west, #mainLayout-center').click(function(event){ 
-					var parentOffset = $(this).offset(); 
-   					var relX = event.pageX - parentOffset.left;
-   					var relY = event.pageY - parentOffset.top;
-                    var percentageY = Math.round(relY*(100/$(this).height()));
-                    var percentageX = Math.round(relX*(100/$(this).width()));
-					var check = true; 
-					var idSearch = event.target.id;
-                    console.debug("id click= "+idSearch);
-                    var count = 0;
-					while(check){
-                        console.debug("id dans la boucle= "+idSearch);
-                        count++;
-						var search = $('#'+idSearch).attr('class');
-						if(search){
-							if(search.match("ui-layout-center")||search.match("ui-layout-south")||search.match("ui-layout-north")||search.match("ui-layout-est")||search.match("ui-layout-west")){
-                                    console.debug("avant correction "+idSearch);
-    								idSearch = idSearch.replace("-center","");
-                                    console.debug("apres correction "+idSearch);
-                                    if(bufferLayout.length==1){var obj1 = layout.cutV(idSearch,percentageX);}
-    								else{
-                                        for(var i=0;i<bufferLayout.length;i++){
-                                            for(var j=0;j<bufferLayout[i].idWrap.length;j++){
-                                                if(bufferLayout[i].idWrap[j]==idSearch){bufferLayout[i].cutV("ui-id-"+Math.round(Math.random()*10000),percentageX);}
-                                        }}
+        var buttonV = GUI.addStickyButton('buttonCutV', [""], layout.jqueryObjectSouth);
+        GUI.image(buttonV, "img-cutV", "img/scissorV.png", 15, 15, "before");
+        buttonV.width(35);
+        buttonV.height(50);
+        var buttonH = GUI.addStickyButton('buttonCutH', [""], layout.jqueryObjectSouth);
+        GUI.image(buttonH, "img-cutH", "img/scissorH.png", 15, 15, "before");
+        buttonH.width(35);
+        buttonH.height(25);
 
-                                    }
-
-    								check=false;}}
-						var $parent = $('#'+idSearch).parent(); 
-						idSearch = $parent.attr('id');
-                        if(count==20){break;}
-						}
-					});
-			} else {
-				$('#mainLayout-west, #mainLayout-center').css('cursor', 'auto');
-				$('#mainLayout-west, #mainLayout-center').unbind("click");
-	        }
-	    }); 
+        buttonV.on('change', function (e) {
+            buttonH.removeClass('ui-state-active');
+            layout.jqueryObjectPanes.css('cursor', 'auto');
+            layout.jqueryObjectPanes.unbind("click");
+            if ($(this).is(':checked')) {
+                layout.jqueryObjectPanes.css({'cursor': 'url(img/scissorV.png), default'});
+                layout.jqueryObjectPanes.click(function(event){ 
+                    var result = GUI.searchClickId(event,this);
+                    GUI.bufferLayout[0].cutV(GUI.uniqueId(),result.percentagex,result.id);      
+                    buttonV.trigger('change');   
+                    buttonV.removeClass('ui-state-active');  
+                    });
+            } else {
+                layout.jqueryObjectPanes.css('cursor', 'auto');
+                layout.jqueryObjectPanes.unbind('click');
+            }
+        });
 		
-		var toggle_button = GUI.addStickyButton('buttonCutH', [""], $("#mainLayout-south"));
-		GUI.image(toggle_button, "img-cutH", "img/scissorH.png", 15, 15, "before");
-   		toggle_button.width(35);
-    	toggle_button.height(50);
+        buttonH.on('change',function(e) {
+            buttonV.removeClass('ui-state-active');
+            layout.jqueryObjectPanes.css('cursor', 'auto');
+            layout.jqueryObjectPanes.unbind("click");
+            if ($(this).is(':checked')) {
+                layout.jqueryObjectPanes.css({'cursor': 'url(img/scissorH.png), default'});
+                layout.jqueryObjectPanes.click(function(event){ 
+                    var result = GUI.searchClickId(event,this);
+                    GUI.bufferLayout[0].cutH(GUI.uniqueId(),result.percentagey,result.id);    
+                    buttonH.trigger('change');   
+                    buttonH.removeClass('ui-state-active'); 
+                    });
+            } else {
+                layout.jqueryObjectPanes.css('cursor', 'auto');
+                layout.jqueryObjectPanes.unbind("click");
+            }
 
+        });
 
 //-----------------------------------------------------------------------------------------------------------------------------
-        //$('#console').next().addSelf().next().addSelf().wrapAll('<div id="tefa-center" class="ui-layout-center"></div>');
-		  //renderTab.wrapAll('<div id="tefa-center" class="ui-layout-center"></div>')
-		//var obj1 = layout.cutH("tefa"); 
-        //obj1.randomColor();
-
         pleaseWait.hide();
-        $('#mask-loading').remove();
-        window.fl4reStatus('CLEAR'); 
+        pleaseWait.remove();
+        window.fl4reStatus('CLEAR');
 
     });
 
