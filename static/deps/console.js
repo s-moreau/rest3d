@@ -127,7 +127,7 @@ CONSOLE.open = function (object) {
         });
     };
 
-    function script() {
+    window.scriptGo = function() {
         $('#message-console').hide();
         $('#layout-console').show();
         $('#mode_console').remove();
@@ -165,7 +165,7 @@ CONSOLE.open = function (object) {
         });
     };
 
-    var linksTool = ["allMessage();", "debug();", "error();", "log();", "warn();", "script();"];
+    var linksTool = ["allMessage();", "debug();", "error();", "log();", "warn();", "window.scriptGo();"];
     var itemTool = ["icon-list", "icon-info-sign", "icon-remove-sign", "icon-ban-circle", "icon-warning-sign ", "icon-comment"];
     GUI.toolBar("toolConsole", $('#console'), itemTool, linksTool, "top", $('#normal-button-bottom'));
     //GUI.label = function(_id,_txt, _parent,_style,_mode) 
@@ -173,15 +173,7 @@ CONSOLE.open = function (object) {
     GUI.label('mode_console', "all", $('#console '));
 
     $('#console').append("<div id='content-console'><div id='message-console'></div><div id='layout-console'></div></div>")
-
-    CONSOLE.messages();
-
-    return
-    };
-
-    CONSOLE.messages=function(){
-
-            //handling errors,warnings,debugs,logs
+      //handling errors,warnings,debugs,logs
     //catch error 
 
     window.onerror = function (message, url, linenumber) {
@@ -239,9 +231,7 @@ CONSOLE.open = function (object) {
 
 
 
+    return
+    };
 
-
-
-
-    }
 }).call(this);
