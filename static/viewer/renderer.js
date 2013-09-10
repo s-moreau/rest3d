@@ -283,20 +283,20 @@ if (window.TextureUtil === undefined)
 
       var state = this.state;
 
-      State.setClearColor(state, 1, 0, 0, 1);
+      State.setClearColor(state, 0.5, 0.5, 0.5, 1);
       State.setScissorTestEnable(state, false);
       State.setDepthClear(state, 1.);
       State.setClear(state, State.COLOR_BUFFER_BIT | State.DEPTH_BUFFER_BIT);
 
 
-      State.setDepthTestEnable(state, true);
+      //State.setDepthTestEnable(state, true);
       State.setDepthFunc(state, State.LESS);
         
 
-      State.setScissorTestEnable(state,true);
-      State.setScissor(state, 1, 1, State.canvasWidth() - 2, State.canvasHeight() - 2);
-      State.setClearColor(state, 0, 1, 0, 1);
-      State.setClear(state, State.COLOR_BUFFER_BIT);
+      //State.setScissorTestEnable(state,true);
+      //State.setScissor(state, 1, 1, State.canvasWidth() - 2, State.canvasHeight() - 2);
+      //State.setClearColor(state, 0, 1, 0, 1);
+      //State.setClear(state, State.COLOR_BUFFER_BIT);
 
   };
 
