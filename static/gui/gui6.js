@@ -25,6 +25,8 @@ THE SOFTWARE.
 
  GUI.js needs jquery, jqueryUI and jqueryUI layout
 */
+"use strict";
+
 if (window.$ === undefined) {
   //document.write('<link rel="stylesheet" href="/gui/themes/vader/jquery-ui.css" />');
 	document.write('<link rel="stylesheet" href="/gui/themes/custom-theme/jquery-ui-1.10.3.custom.css" />');
@@ -44,7 +46,6 @@ if (window.$ === undefined) {
     //document.write('<link href="/gui/themes/vader/ui.dynatree.css" rel="stylesheet" type="text/css" />');
 
     document.write('<link rel="stylesheet" href="/gui/gui6.css" />');
-    document.write('<link rel="stylesheet" href="/gui/themes/menu.css" />');
     document.write('<link rel="stylesheet" href="/gui/themes/jquery.terminal.css" />');
     document.write('<link rel="stylesheet" href="/gui/themes/jquery.toolbars.css" />');
     document.write('<link rel="stylesheet" href="/gui/themes/bootstrap.icons.css" />');
@@ -52,6 +53,8 @@ if (window.$ === undefined) {
 
 
 }
+
+
 
 /***
   Require Underscore, if we're on the server, and it's not already present.
@@ -76,6 +79,8 @@ if (window.$ === undefined) {
     };
     // Current version of the library. Keep in sync with `package.json`.
     GUI.VERSION = '0.0.1';
+
+    GUI.bufferLayout = [];
 
     GUI.button = function (_txt, _parent, _callback, _x1, _y1, _x2, _y2) {
         var $button = $('<button></button>');
@@ -316,6 +321,11 @@ if (window.$ === undefined) {
         return html;
     }
 
+    GUI.uniqueId = function () {
+        var html = "ui-id-"+Math.round(Math.random()*10000);
+        return html;
+    }
+
     //checked	 
     GUI.addAccordion = function (_id, _items, _parent, _content, _mode) {
         if (_id == "console" || _id == "Console") return console.error("GUI.console: _id ever used, please enter a new one");
@@ -346,16 +356,16 @@ if (window.$ === undefined) {
     //checked
     GUI.addNewTab = function (_idTabWindow, _idTab, _headerTitle, _contentHTML) {
         var headerTab = '<li><a href="#' + _idTab + '">' + _headerTitle + '</a></li>';
-        $headerTab = $(headerTab);
+        var $headerTab = $(headerTab);
         $("#header-" + _idTabWindow).append($headerTab);
         var contentTab = '<div id="' + _idTab + '">';
         if (_contentHTML) {
             contentTab += _contentHTML;
         }
         contentTab += '</div>';
-        $contentTab = $(contentTab);
+        var $contentTab = $(contentTab);
         $("#content-" + _idTabWindow).append($contentTab);
-        $(".ui-layout-center").tabs("refresh");
+        $("#header-"+_idTabWindow).parent().tabs("refresh");
         return $contentTab;
     }
 
@@ -368,7 +378,7 @@ if (window.$ === undefined) {
             tab += _contentHTML;
         }
         tab += '</div></div>'
-        $tab = $(tab);
+        var $tab = $(tab);
         _parent.append($tab);
         _parent.tabs();
         return $tab;
@@ -417,7 +427,7 @@ if (window.$ === undefined) {
 
     GUI.image = function (_parent, _id, _url, _width, _height, _position) {
         var image = '<img id=' + _id + ' src="' + _url + '" />';
-        $image = $(image);
+        var $image = $(image);
         if (_position == "before") {
             _parent.prepend($image);
         } else {
@@ -460,17 +470,16 @@ if (window.$ === undefined) {
         var dialog = '<div id=' + _id + ' title=' + _title + '>' + _HTMLtext + '</div>';
 
         var $dialog = $(dialog);
-        if ($('.ui-layout-west').find('#' + _id).length) {
-            $('.ui-layout-west').appendTo($dialog);
-        } else {
-            $('.ui-layout-west').append($dialog);
-        }
+        $('body').append($dialog);
         $("#" + _id).dialog({
             resizable: false,
             height: 'auto',
             width: 'auto',
             modal: true
         });
+        $("#" + _id).bind('dialogclose', function(event) {
+             this.remove();
+         });
         return $("#" + _id);
     };
 
@@ -478,7 +487,7 @@ if (window.$ === undefined) {
     GUI.confirmDialog = function (_id, _title, _text, _titleConfirmButton, _callback) {
         var dialog = '<div id=' + _id + ' title=' + _title + '><span style= "margin: 0 7px 20px 35px;" >' + _text + '</span></div>';
         var $dialog = $(dialog);
-        $('.ui-layout-west').append($dialog);
+        $('body').append($dialog);
         $("#" + _id).dialog({
             resizable: false,
             height: 150,
@@ -491,7 +500,7 @@ if (window.$ === undefined) {
                 },
                 No: function () {
                     $(this).dialog("close");
-                    $dialog.remove();
+                    $(this).remove();
                 }
             }
         })
@@ -507,9 +516,9 @@ if (window.$ === undefined) {
         if (size_list != 1) {
             stickyButton += '<div id="' + _id + '">';
         }
-        for (i = 0; i < size_list; i++) {
+        for (var i = 0; i < size_list; i++) {
             stickyButton += '<input type="checkbox" id="' + _id + '-' + _items[i] + '"';
-            stickyButton += '/><label for="' + _id + '-' + _items[i] + '">' + _items[i] + '</label>';
+            stickyButton += '/><label class="' + _id + '-' + _items[i] + '" for="' + _id + '-' + _items[i] + '">' + _items[i] + '</label>';
         }
         if (size_list != 1) {
             stickyButton += '</div>';
@@ -573,7 +582,7 @@ if (window.$ === undefined) {
     GUI.addRadioList = function (_id, _items, _parent) {
         var size_list = _items.length;
         var radioList = '<li id=' + _id + '>';
-        for (i = 0; i < size_list; i++) {
+        for (var i = 0; i < size_list; i++) {
             var tmp = "";
             if (!i) {
                 tmp = "checked";
@@ -600,7 +609,7 @@ if (window.$ === undefined) {
             if (_position != 0) {
                 $('li#z' + _position).addClass("has-sub");
             }
-            for (i = 1; i < (size_menu + 1); i++) {
+            for (var i = 1; i < (size_menu + 1); i++) {
                 if (_link[i - 1] != 0) {
                     if (_link[i - 1] == "checkbox") {
                         menu += GUI.addCheckBox('z' + _position + '_' + i, _item[i - 1]);
@@ -658,15 +667,15 @@ if (window.$ === undefined) {
 
     GUI.toolBar = function (_id, _parent, _icones, _links, _position) {
         var tomp = '<div id="icon-' + _id + '" class="settings-button" style="width:20px;height:20px;border-radius: 1px;">' + GUI.addIcon("0", "ui-icon-gear") + '</div>';
-        $tomp = $(tomp);
+        var $tomp = $(tomp);
         _parent.append($tomp);
         var size_toolbar = _icones.length;
         var toolbar = '<div id="' + _id + '" class="toolbar-icons" style="display:none;">';
-        for (i = 0; i < size_toolbar; i++) {
+        for (var i = 0; i < size_toolbar; i++) {
             toolbar += '<a onclick="' + _links[i] + '"><i class="' + _icones[i] + '"></i></a>';
         }
         toolbar += '</div>';
-        $toolbar = $(toolbar);
+        var $toolbar = $(toolbar);
         _parent.append($toolbar);
         var result = $tomp.toolbar({
             content: '#' + _id,
@@ -727,31 +736,202 @@ if (window.$ === undefined) {
     };
 
 
-    GUI.layout = function () {
+    // does not work without this
+    GUI.resize = function (pane, $pane, paneState, paneOptions) {
+        $pane.find('.ui-resize-me').resize();
+    };
+    
+    //----------------------------------------------------------------------------------------------------------------------------------------
+    GUI.searchClickId = function(event,element){
+            var idSearch = event.target.id;
+            var check = true; 
+            var count = 0;
+            var condition = ''
+            while(check){
+                count++;
+                var search = $('#'+idSearch).attr('class');
+                    if(search){
+                        if(search.match("ui-layout-center")||search.match("ui-layout-south")||search.match("ui-layout-north")||search.match("ui-layout-est")||search.match("ui-layout-west")){
+                            check=false;
+                            break;}}
+                    var $parent = $('#'+idSearch).parent(); 
+                    idSearch = $parent.attr('id');
+                    if(count==20){throw "didn't find any layouts"; return false;}
+                    }
+            element = $('#'+idSearch);
+            var parentOffset = element.offset(); 
+            var relX = event.pageX - parentOffset.left;
+            var relY = event.pageY - parentOffset.top;
+            var percentageY = Math.round(relY*(100/$(element).height()));
+            var percentageX = Math.round(relX*(100/$(element).width()));
+            return {id : idSearch, percentagex : percentageX, percentagey : percentageY};
+            }
 
-        var $layout = $(
-            '<div id="cssmenu" class="ui-layout-north"></div>' +
-            '<div id="mainPanel" class="ui-layout-west" >' +
-            '</div>' +
-            '<div id="center-panel" class="ui-layout-center" >' +
-            '</div>' +
-            '<div id="south-panel" class="ui-layout-south ui-widget-header"></div>'
-        );
 
-        $('body').append($layout);
 
-        // CREATE THE LAYOUT
-        myLayout = $('body').layout({
-            togglerLength_open: 0, // HIDE the toggler button
+   GUI.Layout = function(id,position) {
+    
+        function Frame(id,position){
+            this.id=id;
+            this.position=position; 
+            this.parent= {};
+            this.jqueryObject = $([]);
+            this.jqueryObjectPanes = $([]);
+            this.jqueryObjectNorth = $([]);
+            this.jqueryObjectSouth = $([]);
+            this.jqueryObjectWest = $([]);
+            this.jqueryObjectEst = $([]);
+            this.jqueryObjectCenter = $([]);
+            this.north = {};
+            this.south = {};
+            this.west = {};
+            this.est = {};
+            this.center = {};
+            this.html = ''; 
+            this.pane = [0,0,0,0,0];
+            this.pane.size = 0;
+            GUI.bufferLayout.push(this);
+            
+            this.reset = function(){
+                this.id='';
+                this.position=0; 
+                this.idWrap = '';
+                this.parent= {};
+                this.child = {};
+                this.jqueryObject = $([]);
+                this.html = '';  
+                this.north = {};
+                this.south = {};
+                this.west = {};
+                this.est = {};
+                this.center = {};
+                this.pane = [0,0,0,0,0];
+                this.pane.size = 0;
+            }
+                
+            //check layout compatibility, if there are enough components to create a layout
+            this.checkIn = function() {
+                var checkNorth = jQuery.isEmptyObject(this.north) ? false : true;
+                if(checkNorth&&! this.pane[0]){this.pane[0]="1";this.pane.size++;}
+                var checkSouth = jQuery.isEmptyObject(this.south) ? false : true;
+                if(checkSouth&&!this.pane[1]){this.pane[1]="1";this.pane.size++;}
+                var checkEst = jQuery.isEmptyObject(this.est) ? false : true;
+                if(checkEst&&!this.pane[2]){this.pane[2]="1";this.pane.size++;}
+                var checkWest = jQuery.isEmptyObject(this.west) ? false : true;
+                if(checkWest&&!this.pane[3]){this.pane[3]="1";this.pane.size++;}
+                var checkCenter = jQuery.isEmptyObject(this.center) ? false : true;
+                if(checkCenter&&!this.pane[4]){this.pane[4]="1";this.pane.size++;}
+                var checkEmpty = jQuery.isEmptyObject(this.north)&&jQuery.isEmptyObject(this.south)&&jQuery.isEmptyObject(this.est)&&jQuery.isEmptyObject(this.west)&&jQuery.isEmptyObject(this.center) ? true : false;
+                if((checkEmpty)||(this.pane.size<2)){return false;}
+                else{return true;}
+            }
+            
+            this.checkOut = function(){
+                var txt = "Layout{"+this.id +"} which has "+this.pane.size+" panes. North:"+this.pane[0]+" South:"+this.pane[1]+" Est:"+this.pane[2]+" West:"+this.pane[3]+" Center:"+this.pane[4];
+                return txt;
+            }
+            
+            this.paneInfo = function(nb){
+                if((!nb)&&((this.pane[nb]))){return {name:'north',link:this.north,object:this.jqueryObjectNorth};}
+                if((nb==1)&&(this.pane[nb])){return {name:"south",link:this.south,object:this.jqueryObjectSouth};}
+                if((nb==2)&&(this.pane[nb])){return {name:'est',link:this.est,object:this.jqueryObjectEst};}
+                if((nb==3)&&(this.pane[nb])){return {name:'west',link:this.west,object:this.jqueryObjectWest};}
+                if((nb==4)&&(this.pane[nb])){return {name:'center',link:this.center,object:this.jqueryObjectCenter};}
+                else{return false;}
+            }
+            
+            //Creation Layout
+            this.create = function(){
+                if(this.checkIn()){ 
+                    console.log("creating... "+this.checkOut());
+                    var layoutBuffer={};  
+                    layoutBuffer['togglerLength_open']=0;
+                    var selector  = ""; 
+                    for(var i=0;i<this.pane.length;i++){ 
+                        var info = this.paneInfo(i);
+                        if(info){ 
+                            if(selector){selector += ',';}
+                            this.html += '<div id="'+this.id+'-'+info.name+'" class="ui-layout-'+ info.name +'"></div>';}
+                            layoutBuffer[info.name] = info.link;} 
+                    if(this.position==1){selector="#"+this.id+"-west,#"+this.id+"-center";}
+                    this.jqueryObject=$(this.html);
+                    if(this.position==1){this.parent = $('body');} 
+                    this.parent.append(this.jqueryObject);
+                    this.jqueryObject = this.parent.layout(layoutBuffer);
+                    this.jqueryObjectPanes = $(selector);
+                    this.jqueryObjectWest = $('#'+this.id+'-west');
+                    this.jqueryObjectNorth = $('#'+this.id+'-north');
+                    this.jqueryObjectSouth = $('#'+this.id+'-south');
+                    this.jqueryObjectEst = $('#'+this.id+'-est');
+                    this.jqueryObjectCenter = $('#'+this.id+'-center');
+                    }
+                else{console.error("Can't create "+this.checkOut());}}
+            
+            this.randomColor= function(){
+                for(var i=0;i<this.pane.length;i++){
+                    if(this.paneInfo(i)){
+                    var color ='#'+Math.floor(Math.random()*16777215).toString(16); //paul irish 
+                    $('#'+this.id+'-'+this.paneInfo(i).name).css('background',color);}
+                    }}
 
-            north: {
+
+
+            this.wrap = function(id,idSearch){
+                var selector = $('#'+idSearch);
+                if(selector.html()){
+                    selector.children().wrapAll('<div id="'+id+'-center" class="ui-layout-center" style="height:100%;width:100%"></div>');
+                }
+                else{selector.append('<div id="'+id+'-center" class="ui-layout-center" style="height:100%;width:100%"></div>');}
+            }
+            
+                
+            this.cutH = function(id,position,idSearch){
+                var positionOrigin = position;
+                this.wrap(id,idSearch);
+                var tmp = new Frame(id,this.position+1); 
+                tmp.north = { size: position+"%" };
+                position = 100 - position; 
+                tmp.center = { size: position+"%" };
+                tmp.parent=$('#'+idSearch); 
+                tmp.create(); 
+                tmp.randomColor();
+                tmp.parent = this;
+               // if(idSearch=="mainLayout-west"){tmp.cutH(GUI.uniqueId(),positionOrigin,tmp.id+"-center");}
+           }
+            
+            this.cutV = function(id,position,idSearch){
+                var positionOrigin = position;
+                this.wrap(id,idSearch);
+                var tmp = new Frame(id,this.position+1); 
+                tmp.west = { size: position+"%" };
+                position = 100 - position; 
+                tmp.center = { size: position+"%" };
+                tmp.parent=$('#'+idSearch); 
+                tmp.create(); 
+                tmp.randomColor();
+                tmp.parent = this;
+               // if(idSearch=="mainLayout-west"){tmp.cutV(GUI.uniqueId(),positionOrigin,tmp.id+"-center");}
+            } 
+            }
+
+        
+        var obj = new Frame(id,1); 
+        obj.south = { closable: false,
+                resizable: false,
+                slidable: false,
+                spacing_open: 0,
+                spacing_closed: 0,};
+        obj.center = {
+                onresize: GUI.resize,
+            };
+        obj.north = {
                 closable: false,
                 resizable: false,
                 slidable: false,
                 spacing_open: 0,
                 spacing_closed: 0,
-            },
-            south: {
+            }; 
+        obj.south = {
                 resizable: true,
                 closable: false,
                 slidable: false,
@@ -759,29 +939,21 @@ if (window.$ === undefined) {
                 spacing_closed: 0,
                 resizerCursor: "move",
                 onresize: GUI.resize,
-            },
-            west: {
+            };
+        obj.west = {
                 size: "78%",
                 resizerCursor: "move",
                 onresize: GUI.resize,
-            },
-            center: {
-                onresize: GUI.resize,
-            }
-        });
-
-        //   myLayout.menuBar = GUI.menu((
-        //    .console =
-        //$("body").layout({ option1: value, option2: value });
-        myLayout.options.west.minSize = '10%';
-        myLayout.options.west.maxSize = '90%';
-        myLayout.allowOverflow("north");
-        myLayout.allowOverflow("south");
-        return myLayout;
-    };
-    // does not work without this
-    GUI.resize = function (pane, $pane, paneState, paneOptions) {
-        $pane.find('.ui-resize-me').resize();
-    };
+            };
+        obj.create();
+        obj.jqueryObject.options.west.minSize = '10%';
+        obj.jqueryObject.options.west.maxSize = '90%';
+        obj.jqueryObject.allowOverflow("north");
+        obj.jqueryObject.allowOverflow("south");   
+        obj.jqueryObjectWest.append("<div id='support-layout' class='ui-layout-center' style='height:100%;width:100%'></div>");
+        return obj;
+   }
+    
+    
 
 }).call(this);

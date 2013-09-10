@@ -29,47 +29,47 @@ THE SOFTWARE.
     
     
     $(function () {
+        "use strict";
+
+				
         // status manager
         window.fl4reStatus = function (type, text) {
             if (type == 'CLEAR' || type == 'READY') {
                 $('#defaultText').remove();
-                GUI.label("defaultText", "ready", $("#south-panel"));
-                //$('#south-panel span:first-child').remove();
-                GUI.addIcon($("#south-panel"), "ui-icon-circle-check", "float:left;margin:3px;", "before");
+                GUI.label("defaultText", "ready", $("#mainLayout-south"));
+                //$('#mainLayout-south span:first-child').remove();
+                GUI.addIcon($("#mainLayout-south"), "ui-icon-circle-check", "float:left;margin:3px;", "before");
             } else if (type == 'BUSY') {
                 $('#defaultText').remove();
-                GUI.label("defaultText", text, $("#south-panel"));
+                GUI.label("defaultText", text, $("#mainLayout-south"));
             } else if (type == 'ERROR') {
                 $('#defaultText').remove();
-                GUI.label("defaultText", text, $("#south-panel"));
+                GUI.label("defaultText", text, $("#mainLayout-south"));
             } else if (type == 'WARNING') {
                 $('#defaultText').remove();
-                GUI.label("defaultText", text, $("#south-panel"));
-                $('#south-panel span:first-child').remove();
-                GUI.addIcon($("#south-panel"), "ui-icon-alert", "float:left;margin:3px;", "before");
+                GUI.label("defaultText", text, $("#mainLayout-south"));
+                $('#mainLayout-south span:first-child').remove();
+                GUI.addIcon($("#mainLayout-south"), "ui-icon-alert", "float:left;margin:3px;", "before");
             } else {
                 $('#defaultText').remove();
-                GUI.label("defaultText", text, $("#south-panel"));
-                $('#south-panel span:first-child').remove();
-                GUI.addIcon($("#south-panel"), "ui-icon-info", "float:left;margin:3px;", "before");
+                GUI.label("defaultText", text, $("#mainLayout-south"));
+                $('#mainLayout-south span:first-child').remove();
+                GUI.addIcon($("#mainLayout-south"), "ui-icon-info", "float:left;margin:3px;", "before");
             }
         };
         // mask
-        var pleaseWait = GUI.mask("mask-loading", "Loading...");
-        GUI.image(pleaseWait, "img-loading", "img/loading.gif", 30, 30, "before");
-        window.fl4reStatus('INFO', 'loading');
-        pleaseWait.show();
-
-        var defaultIconCls = GUI.addIcon($("#south-panel"), "", "");
-        var defaultText = GUI.label("defaultText", "", $("#south-panel"));
+         var pleaseWait = GUI.mask("mask-loading", "Loading...");
+         GUI.image(pleaseWait, "img-loading", "img/loading.gif", 30, 30, "before");
+         window.fl4reStatus('INFO', 'loading');
 
         //main layout
-        var layout = GUI.layout();
-        layout.sizePane("north", 35);
-        layout.sizePane("south", 25);
+        var layout = GUI.Layout("mainLayout",1);
+        layout.jqueryObject.sizePane("north", 35);
+        layout.jqueryObject.sizePane("south", 25);
         //menu
         GUI.addMenu(["Scenes", "Animations", "Cameras", "Help"], [0, 0, 0, "javascript:window.onHelp();"], "0", "menu");
-        GUI.addMenu(["New", "Load", "Save", "Append", "Clone", "Quit"], [0, 0, 0, 0, "checkbox", "javascript:window.onQuit()"], "0_1", "Scenes");
+        GUI.addMenu(["New", "Load", "Save", "Append", "Clone", "Quit"], [0, 0, 0, 0, "checkbox", "javascript:window.onQuit()"], "0_1","Scenes");
+      
         GUI.addMenu(["eg1", "eg2"], [0, 0], "0_1_2", "Load");
         GUI.addMenu(["eg1", "eg2", "eg3"], [0, 0, 0], "0_1_4", "Append");
         //disable save
@@ -107,17 +107,17 @@ THE SOFTWARE.
 
         //add icons to the menu
         GUI.addIcon($("#menu>.has-sub>a"), "ui-icon-triangle-1-s", "float:right;");
-        GUI.addIcon($("#z0_1_2>a"), "ui-icon-triangle-1-e", "float:right;");
-        GUI.addIcon($("#z0_1_4>a"), "ui-icon-triangle-1-e", "float:right;");
-        GUI.addIcon($("#z0_2_3>a"), "ui-icon-triangle-1-e", "float:right;");
-        GUI.addIcon($("#z0_2_4>a"), "ui-icon-triangle-1-e", "float:right;");
+        GUI.addIcon($("#z0_1_2>a"), "ui-icon-triangle-1-e", "float:right;bottom:2px !important;");
+        GUI.addIcon($("#z0_1_4>a"), "ui-icon-triangle-1-e", "float:right;bottom:2px !important;");
+        GUI.addIcon($("#z0_2_3>a"), "ui-icon-triangle-1-e", "float:right;bottom:2px !important;");
+        GUI.addIcon($("#z0_2_4>a"), "ui-icon-triangle-1-e", "float:right;bottom:2px !important;");
 
         GUI.image($("#z0_1>a"), "img-scenes", "img/action.gif", 22, 22, "before");
         GUI.image($("#z0_2>a"), "img-animation", "img/menu-animations.gif", 20, 20, "before");
         GUI.image($("#z0_3>a"), "img-cameras", "img/camera-anim.gif", 27, 27, "before");
         GUI.image($("#z0_4>a"), "img-help", "img/aide.gif", 20, 20, "before");
 
-        /*------------------------------//tab menu ---------------------------------------------------------------------------------------------*/
+        //------------------------------//tab menu ---------------------------------------------------------------------------------------------
         //callback slider change exposure
 
         function changeExposure() {
@@ -133,8 +133,9 @@ THE SOFTWARE.
             $("#bloomBiasText").html(bloomBias + " bloom bias");
             $("#bloomScaleText").html(bloomScale + " bloom scale");
         }
+		
 
-        var renderTab = GUI.addTabWindow($(".ui-layout-center"), "tabsoune", "EG1");
+        var renderTab = GUI.addTabWindow(layout.jqueryObjectCenter, "tabsoune", "EG1");
         GUI.image(renderTab.find('.ui-tabs-anchor'), "img-render", "img/menu-render.png", 12, 14, "before");
         var tab2 = GUI.addNewTab("tabsoune", "material", "EG2", "example");
         GUI.image($('#ui-id-3'), "img-material", "img/menu-scenes.png", 12, 14, "before");
@@ -192,7 +193,7 @@ THE SOFTWARE.
         GUI.label("...", "one sticky button", tab2, '', "isolate");
         var item = new Array("tefa");
         GUI.addStickyButton("example2", item, tab2);
-
+		
         //help dialog
         window.onHelp = function () {
             var txt = 'The greenhouse effect is a process by which thermal radiation from a planetary surface is absorbed by atmospheric greenhouse gases, and is re-radiated in all directions. Since part of this re-radiation is back towards the surface and the lower atmosphere, it results in an elevation of the average surface temperature above what it would be in the absence of the gases","C string that contains the text to be written to stdout.It can optionally contain embedded format specifiers that are replaced by the values specified in subsequent additional arguments and formatted as requested.A format specifier follows this prototype: [see compatibility note below] specifier Where the specifier character at the end is the most significant component, since it defines the type and the interpretation of its corresponding argument:';
@@ -225,20 +226,77 @@ THE SOFTWARE.
             var quitPanel = GUI.confirmDialog("quitPanel", "Leaving?", "Are you sure you want to quit?", "Quit", "console.log('exit requested')");
             GUI.image(quitPanel, "img-quit", "img/icon-error2.png", '40', '40', 'before');
         }
-
+ 		
+		
+		
         // allow autoscroll on tabs
         GUI.autoScroll($(".ui-accordion-header"), $("#content-renderMenus"));
 
         //this is really important! enables scrolling and autofilling of the tab content
-        myLayout.initContent("center");
-        layout.resizeAll();
+        layout.jqueryObject.initContent("center");
+        layout.jqueryObject.resizeAll();
 
-        GUI.label("auteur", "&copy; R&eacute;mi Arnaud - Advanced Micro Devices, Inc. 2013", $("#south-panel"));
+        GUI.label("auteur", "&copy; R&eacute;mi Arnaud - Advanced Micro Devices, Inc. 2013", layout.jqueryObjectSouth);
 
-        CONSOLE.open();
+        var toggle_button = GUI.addStickyButton('buttonLayout', [""], layout.jqueryObjectSouth);
+        toggle_button.width(35);
+        toggle_button.height(25);
+        GUI.image(toggle_button, "img-console", "img/console.png", '20', '30');
 
+
+        CONSOLE.open(layout);
+		
+//-----------------------------------------------------------------------------------------------------------------------------
+
+        var buttonV = GUI.addStickyButton('buttonCutV', [""], layout.jqueryObjectSouth);
+        GUI.image(buttonV, "img-cutV", "img/scissorV.png", 15, 15, "before");
+        buttonV.width(35);
+        buttonV.height(50);
+        var buttonH = GUI.addStickyButton('buttonCutH', [""], layout.jqueryObjectSouth);
+        GUI.image(buttonH, "img-cutH", "img/scissorH.png", 15, 15, "before");
+        buttonH.width(35);
+        buttonH.height(25);
+
+        buttonV.on('change', function (e) {
+            buttonH.removeClass('ui-state-active');
+            layout.jqueryObjectPanes.css('cursor', 'auto');
+            layout.jqueryObjectPanes.unbind("click");
+            if ($(this).is(':checked')) {
+                layout.jqueryObjectPanes.css({'cursor': 'url(img/scissorV.png), default'});
+                layout.jqueryObjectPanes.click(function(event){ 
+                    var result = GUI.searchClickId(event,this);
+                    GUI.bufferLayout[0].cutV(GUI.uniqueId(),result.percentagex,result.id);      
+                    buttonV.trigger('change');   
+                    buttonV.removeClass('ui-state-active');  
+                    });
+            } else {
+                layout.jqueryObjectPanes.css('cursor', 'auto');
+                layout.jqueryObjectPanes.unbind('click');
+            }
+        });
+		
+        buttonH.on('change',function(e) {
+            buttonV.removeClass('ui-state-active');
+            layout.jqueryObjectPanes.css('cursor', 'auto');
+            layout.jqueryObjectPanes.unbind("click");
+            if ($(this).is(':checked')) {
+                layout.jqueryObjectPanes.css({'cursor': 'url(img/scissorH.png), default'});
+                layout.jqueryObjectPanes.click(function(event){ 
+                    var result = GUI.searchClickId(event,this);
+                    GUI.bufferLayout[0].cutH(GUI.uniqueId(),result.percentagey,result.id);    
+                    buttonH.trigger('change');   
+                    buttonH.removeClass('ui-state-active'); 
+                    });
+            } else {
+                layout.jqueryObjectPanes.css('cursor', 'auto');
+                layout.jqueryObjectPanes.unbind("click");
+            }
+
+        });
+
+//-----------------------------------------------------------------------------------------------------------------------------
         pleaseWait.hide();
-        $('#mask-loading').remove();
+        pleaseWait.remove();
         window.fl4reStatus('CLEAR');
 
     });

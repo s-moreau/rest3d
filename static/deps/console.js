@@ -1,39 +1,47 @@
+"use strict";
+
 (function () {
 CONSOLE = this.CONSOLE = {};
-CONSOLE.open = function () {
-    $('.ui-layout-west').attr('id', 'mainPanel');
-    $('#mainPanel').append('<div id="console" class="ui-layout-south"></div><div id="viewerFrame" class="ui-layout-center"></div>')
-    var newLayout = $('#mainPanel').layout({
+CONSOLE.open = function (object) {
+    var here = object.jqueryObjectWest.append("<div id='support-console' style='height:100%;width:100%'></div>");
+    $('#support-console').append('<div id="console" class="ui-layout-south"></div><div id="mainLayout-westBis" class="ui-layout-center"></div>')
+    var newLayout = $('#support-console').layout({
         togglerLength_open: 0, // HIDE the toggler button
 
         south: {
-            size: 120,
-
+            enableCursorHotkey: false,
+            closable: false,
+            resizable: false,
+            spacing_open: 0,
+            spacing_closed: 0,
         },
         center: {
-            resizable: true,
-            onresize: GUI.resize,
-            resizerCursor: "move",
+            enableCursorHotkey: false,
+            closable: false,
+            resizable: false,
+            spacing_open: 0,
+            spacing_closed: 0,
+            size:1000,
         }
     });
 
     $('#console').hide();
     $('#console').addClass('ui-widget-content');
-    var toggle_button = GUI.addStickyButton('buttonLayout', [""], $("#south-panel"));
-    toggle_button.width(35);
-    toggle_button.height(50);
-    GUI.image($('#south-panel > label'), "img-console", "img/console.png", '20', '30');
-    toggle_button.on('change', function (e) {
+
+    $('#buttonLayout-').on('change', function (e) {
         if ($(this).is(':checked')) {
             $('#console').show();
+            newLayout.sizePane('south','120');
         } else {
             $('#console').hide();
+            $('#support-layout').css("height", '100%');
+            newLayout.sizePane('south','0');
         }
     });
 
     newLayout.allowOverflow("south");
 
-    debug = function () {
+    function debug() {
         allMessage();
         $('#message-console').show();
         $('#layout-console').hide();
@@ -50,7 +58,7 @@ CONSOLE.open = function () {
         });
     };
 
-    log = function () {
+    function log() {
         allMessage();
         $('#message-console').show();
         $('#layout-console').hide();
@@ -67,7 +75,7 @@ CONSOLE.open = function () {
         });
     };
 
-    warn = function () {
+    function warn() {
         allMessage();
         $('#message-console').show();
         $('#layout-console').hide();
@@ -84,7 +92,7 @@ CONSOLE.open = function () {
         });
     };
 
-    error = function () {
+    function error() {
         allMessage();
         $('#message-console').show();
         $('#layout-console').hide();
@@ -101,7 +109,7 @@ CONSOLE.open = function () {
         });
     };
 
-    allMessage = function () {
+    function allMessage() {
         $('#message-console').show();
         $('#layout-console').hide();
         $('#mode_console').remove();
@@ -119,7 +127,7 @@ CONSOLE.open = function () {
         });
     };
 
-    script = function () {
+    function script() {
         $('#message-console').hide();
         $('#layout-console').show();
         $('#mode_console').remove();
@@ -166,8 +174,14 @@ CONSOLE.open = function () {
 
     $('#console').append("<div id='content-console'><div id='message-console'></div><div id='layout-console'></div></div>")
 
+    CONSOLE.messages();
 
-    //handling errors,warnings,debugs,logs
+    return
+    };
+
+    CONSOLE.messages=function(){
+
+            //handling errors,warnings,debugs,logs
     //catch error 
 
     window.onerror = function (message, url, linenumber) {
@@ -222,6 +236,12 @@ CONSOLE.open = function () {
         $('#message-console').prepend($content);
         oldWarn.apply(console, arguments);
     };
-    return
-    };
+
+
+
+
+
+
+
+    }
 }).call(this);
