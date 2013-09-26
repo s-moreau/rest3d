@@ -3,7 +3,7 @@
 
 The MIT License (MIT)
 
-Copyright (c) 2013 RÃ©mi Arnaud - Advanced Micro Devices, Inc.
+Copyright (c) 2013 Rémi Arnaud - Advanced Micro Devices, Inc.
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -27,36 +27,7 @@ THE SOFTWARE.
 */
 "use strict";
 
-if (window.$ === undefined) {
-  //document.write('<link rel="stylesheet" href="/gui/themes/vader/jquery-ui.css" />');
-	document.write('<link rel="stylesheet" href="/gui/themes/custom-theme/jquery-ui-1.10.3.custom.css" />');
-	//document.write('<link rel="stylesheet" href="/gui/themes/dot-luv/jquery-ui-1.10.3.custom.css" />');
-	//document.write('<link rel="stylesheet" href="/gui/themes/dark-hive/jquery-ui-1.10.3.custom.css" />');
-
-    document.write('<script src="/deps/jquery.js"><\/' + 'script>');
-    document.write('<script src="/deps/jquery-ui.js"><\/' + 'script>');
-    document.write('<script src="/deps/jquery.layout.min.js"><\/' + 'script>');
-
-    document.write('<script type="text/javascript" src="/deps/jquery.cookie.js"><\/' + 'script>');
-    document.write('<script type="text/javascript" src="/deps/jquery.hotkeys.js"><\/' + 'script>');
-    document.write('<script type="text/javascript" src="/deps/jquery.jstree.js"><\/' + 'script>');
-    document.write('<script type="text/javascript" src="/deps/jquery.terminal-0.7.3.js"><\/' + 'script>');
-    document.write('<script type="text/javascript" src="/deps/jquery.toolbar.js"><\/' + 'script>');
-    document.write('<script type="text/javascript" src="/deps/console.js"><\/' + 'script>');
-    //document.write('<link href="/gui/themes/vader/ui.dynatree.css" rel="stylesheet" type="text/css" />');
-
-    document.write('<link rel="stylesheet" href="/gui/gui6.css" />');
-    document.write('<link rel="stylesheet" href="/gui/themes/jquery.terminal.css" />');
-    document.write('<link rel="stylesheet" href="/gui/themes/jquery.toolbars.css" />');
-    document.write('<link rel="stylesheet" href="/gui/themes/bootstrap.icons.css" />');
-
-
-
-}
-
-
-
-/***
+/***ff
   Require Underscore, if we're on the server, and it's not already present.
   var _ = root._;
   if (!_ && (typeof require !== 'undefined')) _ = require('underscore')._;
@@ -305,33 +276,202 @@ if (window.$ === undefined) {
     //----------------------------------------------------------------------------------------------------------------------------------------
     GUI.autoScroll = function (_jqueryObject, _parentToScroll) {
         _jqueryObject.on("click", function (event, ui) {
+            /*setTimeout(function () {
+                _parentToScroll.scrollTop((_parentToScroll[0].scrollHeight) - (_parentToScroll.height()))
+            }, 300);*/
             setTimeout(function () {
-                _parentToScroll.scrollTop((_parentToScroll[0].scrollHeight + 500) - (_parentToScroll.height()))
-            }, 300);
+                _parentToScroll.scrollTop(658198126);
+            }, 500);
         });
     };
 
     GUI.time = function () {
-        var html = "<a id='time'> ";
+        var html = '';
         var a = new Date();
         var myDate = a.toTimeString().replace(/.*(\d{2}:\d{2}:\d{2}).*/, "$1");
         var ms = '.' + String((a.getUTCMilliseconds() / 1000).toFixed(3)).slice(2, 5)
         html += myDate + ms;
-        html += "</a>";
         return html;
     }
 
-    GUI.uniqueId = function () {
-        var html = "ui-id-"+Math.round(Math.random()*10000);
-        return html;
+    GUI.InputInteractive = function (_parent, _id, _min, _max, _defaultValue, _precision, _sensibility) {
+
+        function Object(_parent, _id, _min, _max, _defaultValue, _precision_sensibility) {
+            this.parent = _parent;
+            this.id = _id;
+            this.min = _min;
+            this.max = _max;
+            this.defaultValue = _defaultValue;
+            this.input = $([]);
+            this.html = '';
+            this.callback = '';
+            this.precision = _precision;
+            this.sensibility = _sensibility;
+            this.jqueryObjectInput = $([]);
+            this.jqueryObjectButton = $([]);
+
+            this.createButton = function () {
+                this.jqueryObjectButton = GUI.button("", this.parent, '', '', '', '20', '23');
+                 this.jqueryObjectButton.css("position:relative; top: 10px !important;")
+                /* GUI.addIcon = function (_parent, _cssClass, _style, _position)*/
+                GUI.addIcon(this.jqueryObjectButton,"ui-icon-carat-2-n-s","position:relative; bottom:6px !important; left:1px;");
+                this.jqueryObjectButton.wrapAll('<span style="display:inline;"></span>')
+            }
+
+            this.buttonEvent = function () {
+                var precision = this.precision;
+                var input = this.jqueryObjectInput.find("input");
+                var max = this.max;
+                var min = this.min;
+                var sensibility = this.sensibility;
+                var callback = this.callback;
+                this.jqueryObjectButton.click(function () {
+                    var tmp = input.val() - (-precision); /*-(-this.precision);*/
+                    var newPrecision = 1 / precision;
+                    tmp = Math.round(tmp * newPrecision) / newPrecision;
+                    if (tmp > max) {
+                        tmp = max;
+                    }
+                    input.val(tmp);
+                })
+                this.jqueryObjectButton.mousedown(function () {
+
+                    $(this).data("mousedown", true);
+                    $(this).data("mouseup", true);
+
+                    var element = $(this);
+                    $(this).mouseleave(function () {
+                        if (element.data("mouseup")) {
+                            $(this).addClass('ui-state-active');
+                        }
+                    })
+                    $('body').mouseup(function () {
+                        element.removeClass('ui-state-active');
+                        element.data("mouseup", false);
+                        if (callback) {
+                            callback.call();
+                        };
+                    })
+                    var mY = 0;
+
+                    $('body').mousemove(function (e) {
+                        if (element.data("mouseup")) {
+                            if (e.clientY < mY) {
+                                var tmp = input.val() - (-precision);
+                                var newPrecision = 1 / precision;
+                                tmp = Math.round(tmp * newPrecision) / newPrecision;
+                                if (tmp > max) {
+                                    tmp = max;
+                                }
+                                if (tmp < min) {
+                                    tmp = min;
+                                }
+                                if (sensibility) {
+                                    setTimeout(function () {
+                                        input.val(tmp)
+                                    }, sensibility);
+                                } else {
+                                    input.val(tmp)
+                                }
+                            } else {
+                                var tmp4 = input.val() - precision;
+                                var newPrecision1 = 1 / precision;
+                                tmp4 = Math.round(tmp4 * newPrecision1) / newPrecision1;
+                                if (tmp4 > max) {
+                                    tmp4 = max;
+                                }
+                                if (tmp4 < min) {
+                                    tmp4 = min;
+                                }
+                                if (sensibility) {
+                                    setTimeout(function () {
+                                        input.val(tmp4)
+                                    }, sensibility);
+                                } else {
+                                    input.val(tmp);
+                                }
+                            }
+                            mY = e.clientY;
+                        }
+                    });
+                })
+            }
+
+            this.createInput = function () {
+                this.html = '<span style="display:inline; position: relative; left: 25px;"><input type="text" id="' + this.id + '" name="' + this.id + '" style="right: 40px !important;"></span>';
+                this.jqueryObjectInput = $(this.html);
+                this.input = this.jqueryObjectInput.find("input");
+                this.parent.append(this.jqueryObjectInput);
+            }
+
+            this.inputEvent = function () {
+                var max = this.max;
+                var min = this.min;
+                var precision = this.precision;
+                var input = this.input;
+                input.val(this.defaultValue);
+                input.width(35);
+                input.keypress(function (event) {
+
+                    var check = $(this).data("check");
+                    var charCode = (event.which) ? event.which : event.keyCode
+                    if (charCode == 13) {
+                        var check = Math.round(-Math.log(precision) / Math.LN10);
+                        input.val(parseFloat(input.val()).toFixed(check));
+                    }
+                    if (charCode > 31 && (charCode < 48 || charCode > 57) && charCode != 46) {
+                        if (charCode == 45) {
+                            return true;
+                        } else {
+                            return false;
+                        }
+                    } else {
+                        return true;
+                    }
+                })
+                input.keyup(function (event) {
+                    var value = $(this).val()
+                    if (value > max && value != '') {
+                        $(this).val(max);
+                        return false;
+                    }
+                    if (value < min && value != '') {
+                        $(this).val(min);
+                        return false;
+                    }
+                })
+                input.on('blur', function () {
+                    var check = Math.round(-Math.log(precision) / Math.LN10);
+                    input.val(parseFloat(input.val()).toFixed(check));
+                });
+            }
+
+
+            this.onChange = function (callback) {
+                this.jqueryObjectInput.find("input").on('blur', callback);
+                this.callback = callback;
+                this.buttonEvent();
+            }
+        }
+
+        var tefa = new Object(_parent, _id, _min, _max, _defaultValue, _precision);
+        tefa.parent.append('<div id="content-' + tefa.id + '" style="" >'); /*float: left !important*/
+        tefa.createButton();
+        tefa.createInput();
+        tefa.buttonEvent();
+        tefa.inputEvent();
+        tefa.parent.append('</div>');
+        tefa.parent.append("</br>");
+        return tefa;
     }
 
-    //checked	 
+
+    //checked    
     GUI.addAccordion = function (_id, _items, _parent, _content, _mode) {
         if (_id == "console" || _id == "Console") return console.error("GUI.console: _id ever used, please enter a new one");
         var size_items = _items.length;
         var accordion = '<div id="' + _id + '" >'
-        for (i = 0; i < size_items; i++) {
+        for (var i = 0; i < size_items; i++) {
             accordion += '<h3>' + _items[i] + '</h3><div id="' + _id + '-' + i + '" >';
             if (_content && (_content[i] != "0")) {
                 accordion += _content[i];
@@ -365,8 +505,15 @@ if (window.$ === undefined) {
         contentTab += '</div>';
         var $contentTab = $(contentTab);
         $("#content-" + _idTabWindow).append($contentTab);
-        $("#header-"+_idTabWindow).parent().tabs("refresh");
+        $("#header-" + _idTabWindow).parent().tabs("refresh");
+
         return $contentTab;
+    }
+
+    GUI.removeNewTab = function (_idTabWindow, id) {
+        $('li[aria-controls="' + id + '"]').remove();
+        $('#' + id).remove();
+        $("#header-" + _idTabWindow).parent().tabs("refresh");
     }
 
     //checked
@@ -384,13 +531,16 @@ if (window.$ === undefined) {
         return $tab;
     };
 
-    //checked	 	 
+    //checked        
     GUI.addSlider = function (_id, _parent, _min, _max, _step, _defaultValue, _style) {
         var slider = '<div id="' + _id + '"'
         if (_style) {
             slider += 'style="' + _style + '" ';
         }
         slider += '></div>';
+        if (_parent == "code") {
+            return slider;
+        }
         var $slider = $(slider);
         _parent.append($slider);
         $("#" + _id).slider({
@@ -443,25 +593,23 @@ if (window.$ === undefined) {
     }
 
 
-    GUI.mask = function (_id, _HTMLtext) {
+    GUI.mask = function (_id, _HTMLtext,_parent) {
         var dialog = '<div id=' + _id + ' ><span id="text-mask" style="position:relative;left:15px;bottom:10px;">' + _HTMLtext + '</span></div>';
         var $dialog = $(dialog);
-        if ($('body').find('#' + _id).length) {
-            $('body').append($dialog);
+        if (_parent.find('#' + _id).length) {
+            _parent.appendTo($dialog);
         } else {
-            $('body').append($dialog);
+            _parent.append($dialog);
         }
         $("#" + _id).dialog({
             dialogClass: 'alert',
-            resizable: false,
+            resizable: true,
             height: '105',
             width: '250',
-            modal: true,
-            position :['middle','middle'],
+            modal: true
         });
         $(".ui-dialog-titlebar").hide();
-         $("div.ui-dialog.ui-widget.ui-widget-content.ui-corner-all.alert.ui-draggable").css("top","50%");
-       return $("#" + _id);
+        return $("#" + _id);
     };
 
 
@@ -470,16 +618,17 @@ if (window.$ === undefined) {
         var dialog = '<div id=' + _id + ' title=' + _title + '>' + _HTMLtext + '</div>';
 
         var $dialog = $(dialog);
-        $('body').append($dialog);
+        if ($('.ui-layout-west').find('#' + _id).length) {
+            $('.ui-layout-west').appendTo($dialog);
+        } else {
+            $('.ui-layout-west').append($dialog);
+        }
         $("#" + _id).dialog({
-            resizable: false,
-            height: 'auto',
-            width: 'auto',
+            resizable: true,
+            height: '500',
+            width: '800',
             modal: true
         });
-        $("#" + _id).bind('dialogclose', function(event) {
-             this.remove();
-         });
         return $("#" + _id);
     };
 
@@ -487,20 +636,20 @@ if (window.$ === undefined) {
     GUI.confirmDialog = function (_id, _title, _text, _titleConfirmButton, _callback) {
         var dialog = '<div id=' + _id + ' title=' + _title + '><span style= "margin: 0 7px 20px 35px;" >' + _text + '</span></div>';
         var $dialog = $(dialog);
-        $('body').append($dialog);
+        $('.ui-layout-west').append($dialog);
         $("#" + _id).dialog({
             resizable: false,
-            height: 150,
-            width: 300,
+            height: 'auto',
+            width: 'auto',
             modal: true,
             buttons: {
                 Yes: function () {
-                    _callback;
+                    eval(_callback);
                     $(this).dialog("close");
                 },
                 No: function () {
                     $(this).dialog("close");
-                    $(this).remove();
+                    $dialog.remove();
                 }
             }
         })
@@ -518,7 +667,7 @@ if (window.$ === undefined) {
         }
         for (var i = 0; i < size_list; i++) {
             stickyButton += '<input type="checkbox" id="' + _id + '-' + _items[i] + '"';
-            stickyButton += '/><label class="' + _id + '-' + _items[i] + '" for="' + _id + '-' + _items[i] + '">' + _items[i] + '</label>';
+            stickyButton += '/><label for="' + _id + '-' + _items[i] + '">' + _items[i] + '</label>';
         }
         if (size_list != 1) {
             stickyButton += '</div>';
@@ -552,11 +701,12 @@ if (window.$ === undefined) {
         }
     };
 
-    // checked except mod vertical	
+    // checked except mod vertical  
     GUI.addStickyList = function (_id, _items, _parent, _mode) {
         var size_list = _items.length;
         var stickyList = '<form><div id="' + _id + '" >';
-        for (i = 0; i < size_list; i++) {
+        // if(_id.length==0)
+        for (var i = 0; i < size_list; i++) {
             var tmp = '';
             if (i == _mode) {
                 tmp = 'checked="checked"';
@@ -579,28 +729,32 @@ if (window.$ === undefined) {
     };
 
     //checked
-    GUI.addRadioList = function (_id, _items, _parent) {
-        var size_list = _items.length;
-        var radioList = '<li id=' + _id + '>';
-        for (var i = 0; i < size_list; i++) {
+    GUI.addRadioList = function (_position, _id, _value, _text, _parent) {
+        var radioList = '<li id=' + _id + ' style="list-style:none">';
+        for (var i = 0; i < _text.length; i++) {
             var tmp = "";
-            if (!i) {
+            if (i == _position - 1) {
                 tmp = "checked";
             }
-            radioList += '<input type="radio" name=' + _id + ' value=' + _items[i] + ' ' + tmp + '> ' + _items[i] + '<br>';
+            if (!(_id instanceof Array)) {
+                radioList += '<input type="radio" name="' + _id + '" value="' + _value[i] + '" style="border: red !important;" ' + tmp + ' ><span style="bottom: 2px;">' + _text[i] + '</span><br>';
+            } else {
+                radioList += '<input type="radio" name="' + _id[0] + '" value="' + _value[i] + '" style=" background-color: red  !important;"' + tmp + '><span style="bottom: 2px;">' + _text[i] + '</span><br>';
+            }
         }
         radioList += '</li>';
         if (_parent) {
             var $radioList = $(radioList);
-            _parent.append($radioList);
+            _parent.append($radioList);s
             return $radioList;
         } else {
             return radioList;
         }
     };
 
-    //checked
+    //checked GUI.addSlider = function (_id, _parent, _min, _max, _step, _defaultValue, _style) {
     GUI.addMenu = function (_item, _link, _position, _id) {
+        var slider = false;
         if (!_link || !_position) return console.error("function:menuAddElement: miss argument");
         if (_item.length != _item.length) return console.error("function:menu invalid arguments, it must have same length");
         else {
@@ -614,7 +768,12 @@ if (window.$ === undefined) {
                     if (_link[i - 1] == "checkbox") {
                         menu += GUI.addCheckBox('z' + _position + '_' + i, _item[i - 1]);
                     } else if (_link[i - 1] == "radioList") {
-                        menu += GUI.addRadioList('z' + _position + '_' + i, _item[i - 1]);
+                        menu += GUI.addRadioList(1, 'z' + _position + '_' + i, _item[i - 1], _item[i - 1]);
+                    } else if (_link[i - 1] == "slider") {
+                        menu += '<li id="z' + _position + '_' + i + '">'
+                        menu += GUI.addSlider('slider' + _position + '_' + i, "code");
+                        menu += '</li>';
+                        slider = i;
                     } else {
                         menu += '<li id="z' + _position + '_' + i + '">' + '<a href="' + _link[i - 1] + '"><span>' + _item[i - 1] + '</span></a></li>';
                     }
@@ -628,6 +787,17 @@ if (window.$ === undefined) {
                 $('div.ui-layout-north').append($menu); /*$("#"+_id+">li").css("border-right","30px dotted white")*/
             } else {
                 $('li#z' + _position).append($menu);
+            }
+            if (slider) {
+
+                $('#slider' + _position + '_' + slider).slider({
+                    animate: true,
+                    min: _item[slider - 1][0],
+                    max: _item[slider - 1][1],
+                    step: _item[slider - 1][2],
+                    value: _item[slider - 1][3],
+                    slidechange: _item[slider - 1][4],
+                }).width(175);
             }
             return $menu;
         }
@@ -646,7 +816,7 @@ if (window.$ === undefined) {
             }
             var size_menu = _item.length;
             var menu = '<!---->';
-            for (i = 1; i < (size_menu + 1); i++) {
+            for (var i = 1; i < (size_menu + 1); i++) {
                 if (_link[i - 1] != 0) {
                     menu += '<li id=';
                     menu += '\'' + _position + '_' + nb + '\'>' + '<a href="' + _link[i - 1] + '">';
@@ -662,7 +832,6 @@ if (window.$ === undefined) {
             return $menu;
         }
     };
-
 
 
     GUI.toolBar = function (_id, _parent, _icones, _links, _position) {
@@ -696,11 +865,11 @@ if (window.$ === undefined) {
         // TODO - rename fragment-1 to something more useful
         var code =
             '<ul>' +
-            '	<li><a href="#tabs-' + _pane + '-1" >' + _txt + '</a></li>' +
+            '   <li><a href="#tabs-' + _pane + '-1" >' + _txt + '</a></li>' +
             '</ul>' +
 
         '<div class="ui-layout-content ui-widget-content" >' +
-            '	<div id="tabs-' + _pane + '-1" class=" ui-widget-content" ></div>' +
+            '   <div id="tabs-' + _pane + '-1" class=" ui-widget-content" ></div>' +
             '</div>';
         var $window;
 
@@ -736,45 +905,12 @@ if (window.$ === undefined) {
     };
 
 
-    // does not work without this
-    GUI.resize = function (pane, $pane, paneState, paneOptions) {
-        $pane.find('.ui-resize-me').resize();
-    };
-    
-    //----------------------------------------------------------------------------------------------------------------------------------------
-    GUI.searchClickId = function(event,element){
-            var idSearch = event.target.id;
-            var check = true; 
-            var count = 0;
-            var condition = ''
-            while(check){
-                count++;
-                var search = $('#'+idSearch).attr('class');
-                    if(search){
-                        if(search.match("ui-layout-center")||search.match("ui-layout-south")||search.match("ui-layout-north")||search.match("ui-layout-est")||search.match("ui-layout-west")){
-                            check=false;
-                            break;}}
-                    var $parent = $('#'+idSearch).parent(); 
-                    idSearch = $parent.attr('id');
-                    if(count==20){throw "didn't find any layouts"; return false;}
-                    }
-            element = $('#'+idSearch);
-            var parentOffset = element.offset(); 
-            var relX = event.pageX - parentOffset.left;
-            var relY = event.pageY - parentOffset.top;
-            var percentageY = Math.round(relY*(100/$(element).height()));
-            var percentageX = Math.round(relX*(100/$(element).width()));
-            return {id : idSearch, percentagex : percentageX, percentagey : percentageY};
-            }
+    GUI.Layout = function (id, position) {
 
-
-
-   GUI.Layout = function(id,position) {
-    
-        function Frame(id,position){
-            this.id=id;
-            this.position=position; 
-            this.parent= {};
+        function Frame(id, position) {
+            this.id = id;
+            this.position = position;
+            this.parent = {};
             this.jqueryObject = $([]);
             this.jqueryObjectPanes = $([]);
             this.jqueryObjectNorth = $([]);
@@ -787,173 +923,268 @@ if (window.$ === undefined) {
             this.west = {};
             this.est = {};
             this.center = {};
-            this.html = ''; 
-            this.pane = [0,0,0,0,0];
+            this.html = '';
+            this.pane = [0, 0, 0, 0, 0];
             this.pane.size = 0;
             GUI.bufferLayout.push(this);
-            
-            this.reset = function(){
-                this.id='';
-                this.position=0; 
+
+            this.reset = function () {
+                this.id = '';
+                this.position = 0;
                 this.idWrap = '';
-                this.parent= {};
+                this.parent = {};
                 this.child = {};
                 this.jqueryObject = $([]);
-                this.html = '';  
+                this.html = '';
                 this.north = {};
                 this.south = {};
                 this.west = {};
                 this.est = {};
                 this.center = {};
-                this.pane = [0,0,0,0,0];
+                this.pane = [0, 0, 0, 0, 0];
                 this.pane.size = 0;
             }
-                
+
             //check layout compatibility, if there are enough components to create a layout
-            this.checkIn = function() {
+            this.checkIn = function () {
                 var checkNorth = jQuery.isEmptyObject(this.north) ? false : true;
-                if(checkNorth&&! this.pane[0]){this.pane[0]="1";this.pane.size++;}
+                if (checkNorth && !this.pane[0]) {
+                    this.pane[0] = "1";
+                    this.pane.size++;
+                }
                 var checkSouth = jQuery.isEmptyObject(this.south) ? false : true;
-                if(checkSouth&&!this.pane[1]){this.pane[1]="1";this.pane.size++;}
+                if (checkSouth && !this.pane[1]) {
+                    this.pane[1] = "1";
+                    this.pane.size++;
+                }
                 var checkEst = jQuery.isEmptyObject(this.est) ? false : true;
-                if(checkEst&&!this.pane[2]){this.pane[2]="1";this.pane.size++;}
+                if (checkEst && !this.pane[2]) {
+                    this.pane[2] = "1";
+                    this.pane.size++;
+                }
                 var checkWest = jQuery.isEmptyObject(this.west) ? false : true;
-                if(checkWest&&!this.pane[3]){this.pane[3]="1";this.pane.size++;}
+                if (checkWest && !this.pane[3]) {
+                    this.pane[3] = "1";
+                    this.pane.size++;
+                }
                 var checkCenter = jQuery.isEmptyObject(this.center) ? false : true;
-                if(checkCenter&&!this.pane[4]){this.pane[4]="1";this.pane.size++;}
-                var checkEmpty = jQuery.isEmptyObject(this.north)&&jQuery.isEmptyObject(this.south)&&jQuery.isEmptyObject(this.est)&&jQuery.isEmptyObject(this.west)&&jQuery.isEmptyObject(this.center) ? true : false;
-                if((checkEmpty)||(this.pane.size<2)){return false;}
-                else{return true;}
+                if (checkCenter && !this.pane[4]) {
+                    this.pane[4] = "1";
+                    this.pane.size++;
+                }
+                var checkEmpty = jQuery.isEmptyObject(this.north) && jQuery.isEmptyObject(this.south) && jQuery.isEmptyObject(this.est) && jQuery.isEmptyObject(this.west) && jQuery.isEmptyObject(this.center) ? true : false;
+                if ((checkEmpty) || (this.pane.size < 2)) {
+                    return false;
+                } else {
+                    return true;
+                }
             }
-            
-            this.checkOut = function(){
-                var txt = "Layout{"+this.id +"} which has "+this.pane.size+" panes. North:"+this.pane[0]+" South:"+this.pane[1]+" Est:"+this.pane[2]+" West:"+this.pane[3]+" Center:"+this.pane[4];
+
+            this.checkOut = function () {
+                var txt = "Layout{" + this.id + "} which has " + this.pane.size + " panes. North:" + this.pane[0] + " South:" + this.pane[1] + " Est:" + this.pane[2] + " West:" + this.pane[3] + " Center:" + this.pane[4];
                 return txt;
             }
-            
-            this.paneInfo = function(nb){
-                if((!nb)&&((this.pane[nb]))){return {name:'north',link:this.north,object:this.jqueryObjectNorth};}
-                if((nb==1)&&(this.pane[nb])){return {name:"south",link:this.south,object:this.jqueryObjectSouth};}
-                if((nb==2)&&(this.pane[nb])){return {name:'est',link:this.est,object:this.jqueryObjectEst};}
-                if((nb==3)&&(this.pane[nb])){return {name:'west',link:this.west,object:this.jqueryObjectWest};}
-                if((nb==4)&&(this.pane[nb])){return {name:'center',link:this.center,object:this.jqueryObjectCenter};}
-                else{return false;}
+
+            this.paneInfo = function (nb) {
+                if ((!nb) && ((this.pane[nb]))) {
+                    return {
+                        name: 'north',
+                        link: this.north,
+                        object: this.jqueryObjectNorth
+                    };
+                }
+                if ((nb == 1) && (this.pane[nb])) {
+                    return {
+                        name: "south",
+                        link: this.south,
+                        object: this.jqueryObjectSouth
+                    };
+                }
+                if ((nb == 2) && (this.pane[nb])) {
+                    return {
+                        name: 'est',
+                        link: this.est,
+                        object: this.jqueryObjectEst
+                    };
+                }
+                if ((nb == 3) && (this.pane[nb])) {
+                    return {
+                        name: 'west',
+                        link: this.west,
+                        object: this.jqueryObjectWest
+                    };
+                }
+                if ((nb == 4) && (this.pane[nb])) {
+                    return {
+                        name: 'center',
+                        link: this.center,
+                        object: this.jqueryObjectCenter
+                    };
+                } else {
+                    return false;
+                }
             }
-            
+
             //Creation Layout
-            this.create = function(){
-                if(this.checkIn()){ 
-                    console.log("creating... "+this.checkOut());
-                    var layoutBuffer={};  
-                    layoutBuffer['togglerLength_open']=0;
-                    var selector  = ""; 
-                    for(var i=0;i<this.pane.length;i++){ 
+            this.create = function () {
+                if (this.checkIn()) {
+                    var layoutBuffer = {};
+                    layoutBuffer['togglerLength_open'] = 0;
+                    var selector = "";
+                    for (var i = 0; i < this.pane.length; i++) {
                         var info = this.paneInfo(i);
-                        if(info){ 
-                            if(selector){selector += ',';}
-                            this.html += '<div id="'+this.id+'-'+info.name+'" class="ui-layout-'+ info.name +'"></div>';}
-                            layoutBuffer[info.name] = info.link;} 
-                    if(this.position==1){selector="#"+this.id+"-west,#"+this.id+"-center";}
-                    this.jqueryObject=$(this.html);
-                    if(this.position==1){this.parent = $('body');} 
+                        if (info) {
+                            if (selector) {
+                                selector += ',';
+                            }
+                            this.html += '<div id="' + this.id + '-' + info.name + '" class="ui-layout-' + info.name + '"></div>';
+                        }
+                        layoutBuffer[info.name] = info.link;
+                    }
+                    if (this.position == 1) {
+                        selector = "#" + this.id + "-west,#" + this.id + "-center";
+                    }
+                    this.jqueryObject = $(this.html);
+                    if (this.position == 1) {
+                        this.parent = $('body');
+                    }
                     this.parent.append(this.jqueryObject);
                     this.jqueryObject = this.parent.layout(layoutBuffer);
                     this.jqueryObjectPanes = $(selector);
-                    this.jqueryObjectWest = $('#'+this.id+'-west');
-                    this.jqueryObjectNorth = $('#'+this.id+'-north');
-                    this.jqueryObjectSouth = $('#'+this.id+'-south');
-                    this.jqueryObjectEst = $('#'+this.id+'-est');
-                    this.jqueryObjectCenter = $('#'+this.id+'-center');
-                    }
-                else{console.error("Can't create "+this.checkOut());}}
-            
-            this.randomColor= function(){
-                for(var i=0;i<this.pane.length;i++){
-                    if(this.paneInfo(i)){
-                    var color ='#'+Math.floor(Math.random()*16777215).toString(16); //paul irish 
-                    $('#'+this.id+'-'+this.paneInfo(i).name).css('background',color);}
-                    }}
-
-
-
-            this.wrap = function(id,idSearch){
-                var selector = $('#'+idSearch);
-                if(selector.html()){
-                    selector.children().wrapAll('<div id="'+id+'-center" class="ui-layout-center" style="height:100%;width:100%"></div>');
+                    this.jqueryObjectWest = $('#' + this.id + '-west');
+                    this.jqueryObjectNorth = $('#' + this.id + '-north');
+                    this.jqueryObjectSouth = $('#' + this.id + '-south');
+                    this.jqueryObjectEst = $('#' + this.id + '-est');
+                    this.jqueryObjectCenter = $('#' + this.id + '-center');
+                } else {
+                    console.error("Can't create " + this.checkOut());
                 }
-                else{selector.append('<div id="'+id+'-center" class="ui-layout-center" style="height:100%;width:100%"></div>');}
-            }
-            
-                
-            this.cutH = function(id,position,idSearch){
-                var positionOrigin = position;
-                this.wrap(id,idSearch);
-                var tmp = new Frame(id,this.position+1); 
-                tmp.north = { size: position+"%" };
-                position = 100 - position; 
-                tmp.center = { size: position+"%" };
-                tmp.parent=$('#'+idSearch); 
-                tmp.create(); 
-                tmp.randomColor();
-                tmp.parent = this;
-               // if(idSearch=="mainLayout-west"){tmp.cutH(GUI.uniqueId(),positionOrigin,tmp.id+"-center");}
-           }
-            
-            this.cutV = function(id,position,idSearch){
-                var positionOrigin = position;
-                this.wrap(id,idSearch);
-                var tmp = new Frame(id,this.position+1); 
-                tmp.west = { size: position+"%" };
-                position = 100 - position; 
-                tmp.center = { size: position+"%" };
-                tmp.parent=$('#'+idSearch); 
-                tmp.create(); 
-                tmp.randomColor();
-                tmp.parent = this;
-               // if(idSearch=="mainLayout-west"){tmp.cutV(GUI.uniqueId(),positionOrigin,tmp.id+"-center");}
-            } 
             }
 
-        
-        var obj = new Frame(id,1); 
-        obj.south = { closable: false,
-                resizable: false,
-                slidable: false,
-                spacing_open: 0,
-                spacing_closed: 0,};
-        obj.center = {
-                onresize: GUI.resize,
-            };
-        obj.north = {
-                closable: false,
-                resizable: false,
-                slidable: false,
-                spacing_open: 0,
-                spacing_closed: 0,
-            }; 
+            this.randomColor = function () {
+                for (var i = 0; i < this.pane.length; i++) {
+                    if (this.paneInfo(i)) {
+                        var color = '#' + Math.floor(Math.random() * 16777215).toString(16); //paul irish 
+                        $('#' + this.id + '-' + this.paneInfo(i).name).css('background', color);
+                    }
+                }
+            }
+
+
+
+            this.wrap = function (id, idSearch) {
+                var selector = $('#' + idSearch);
+                if (selector.html()) {
+                    selector.children().wrapAll('<div id="' + id + '-center" class="ui-layout-center" style="height:100%;width:100%"></div>');
+                } else {
+                    selector.append('<div id="' + id + '-center" class="ui-layout-center" style="height:100%;width:100%"></div>');
+                }
+            }
+
+
+            this.cutH = function (id, position, idSearch) {
+                var positionOrigin = position;
+                this.wrap(id, idSearch);
+                var tmp = new Frame(id, this.position + 1);
+                tmp.north = {
+                    size: position + "%"
+                };
+                position = 100 - position;
+                tmp.center = {
+                    size: position + "%"
+                };
+                tmp.parent = $('#' + idSearch);
+                tmp.create();
+                tmp.randomColor();
+                tmp.parent = this;
+                // if(idSearch=="mainLayout-west"){tmp.cutH(GUI.uniqueId(),positionOrigin,tmp.id+"-center");}
+            }
+
+            this.cutV = function (id, position, idSearch) {
+                var positionOrigin = position;
+                this.wrap(id, idSearch);
+                var tmp = new Frame(id, this.position + 1);
+                tmp.west = {
+                    size: position + "%"
+                };
+                position = 100 - position;
+                tmp.center = {
+                    size: position + "%"
+                };
+                tmp.parent = $('#' + idSearch);
+                tmp.create();
+                tmp.randomColor();
+                tmp.parent = this;
+                // if(idSearch=="mainLayout-west"){tmp.cutV(GUI.uniqueId(),positionOrigin,tmp.id+"-center");}
+            }
+        }
+
+
+        var obj = new Frame(id, 1);
         obj.south = {
-                resizable: true,
-                closable: false,
-                slidable: false,
-                spacing_open: 0,
-                spacing_closed: 0,
-                resizerCursor: "move",
-                onresize: GUI.resize,
-            };
+            closable: false,
+            resizable: false,
+            slidable: false,
+            spacing_open: 0,
+            spacing_closed: 0,
+        };
+        obj.center = {
+            onresize: GUI.resize,
+        };
+        obj.north = {
+            closable: false,
+            resizable: false,
+            slidable: false,
+            spacing_open: 0,
+            spacing_closed: 0,
+        };
+        obj.south = {
+            resizable: true,
+            closable: false,
+            slidable: false,
+            spacing_open: 0,
+            spacing_closed: 0,
+        };
         obj.west = {
-                size: "78%",
-                resizerCursor: "move",
-                onresize: GUI.resize,
-            };
+            resizerCursor: "move",
+            onresize: GUI.resize,
+        };
         obj.create();
-        obj.jqueryObject.options.west.minSize = '10%';
-        obj.jqueryObject.options.west.maxSize = '90%';
+        //obj.jqueryObject.options.west.minSize = '10%';
+        //obj.jqueryObject.options.west.maxSize = '90%';
+
+        obj.jqueryObject.sizePane("west", $(window).width() - 275);
+        $(window).on('resize orientationChanged', function () {
+            setTimeout(function () {
+                obj.jqueryObject.sizePane("west", $(window).width() - 275)
+            }, 500);
+        });
         obj.jqueryObject.allowOverflow("north");
-        obj.jqueryObject.allowOverflow("south");   
+        obj.jqueryObject.allowOverflow("south");
         obj.jqueryObjectWest.append("<div id='support-layout' class='ui-layout-center' style='height:100%;width:100%'></div>");
         return obj;
-   }
-    
-    
+    }
+    // does not work without this
+    GUI.resize = function () {
+        // $pane.find('.ui-resize-me').resize();
+        var tmp = $("#mainLayout-west").height();
+        var tmp1 = $("#mainLayout-west").width();
+        Conduit.viewportSetViewSize("default", tmp1, tmp);
+        Conduit.viewportSetViewOrigin("default", 0, 25);
+    };
+
+    GUI.setMenuSensitivity = function (sensitivity,timeoutMouseOver,timeoutMouseOut){
+    $('#mainLayout-north .has-sub .has-sub, #z0_5_3').hoverIntent({    
+         sensitivity: sensitivity,   
+         interval: timeoutMouseOver, 
+         over: function(){
+            $(this).find('ul').css("display", "block")
+         },   
+         timeout: timeoutMouseOut, 
+         out: function(){
+            $(this).find('ul').css("display", "none")
+         } 
+
+        });}
 
 }).call(this);
