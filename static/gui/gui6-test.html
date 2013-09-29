@@ -31,171 +31,121 @@ THE SOFTWARE.
     $(function () {
         "use strict";
 
-				
-        // status manager
-        window.fl4reStatus = function (type, text) {
+        window.Status = function (type, text, _parent) {
+            $('#iconStatus').remove();
+            $('#defaultText').remove();
             if (type == 'CLEAR' || type == 'READY') {
-                $('#defaultText').remove();
-                GUI.label("defaultText", "ready", $("#mainLayout-south"));
-                //$('#mainLayout-south span:first-child').remove();
-                GUI.addIcon($("#mainLayout-south"), "ui-icon-circle-check", "float:left;margin:3px;", "before");
+                GUI.label("defaultText", "ready", _parent);
+                GUI.addIcon(_parent, "ui-icon-circle-check", "float:left;margin:3px;", "before").attr('id', 'iconStatus');;
             } else if (type == 'BUSY') {
-                $('#defaultText').remove();
-                GUI.label("defaultText", text, $("#mainLayout-south"));
+                GUI.label("defaultText", text, _parent);
             } else if (type == 'ERROR') {
-                $('#defaultText').remove();
-                GUI.label("defaultText", text, $("#mainLayout-south"));
+                GUI.label("defaultText", text, _parent);
             } else if (type == 'WARNING') {
-                $('#defaultText').remove();
-                GUI.label("defaultText", text, $("#mainLayout-south"));
-                $('#mainLayout-south span:first-child').remove();
-                GUI.addIcon($("#mainLayout-south"), "ui-icon-alert", "float:left;margin:3px;", "before");
+                GUI.label("defaultText", text, _parent);
+                GUI.addIcon($("#mainLayout-south"), "ui-icon-alert", "float:left;margin:3px;", "before").attr('id', 'iconStatus');;
             } else {
-                $('#defaultText').remove();
-                GUI.label("defaultText", text, $("#mainLayout-south"));
-                $('#mainLayout-south span:first-child').remove();
-                GUI.addIcon($("#mainLayout-south"), "ui-icon-info", "float:left;margin:3px;", "before");
+                GUI.label("defaultText", text, _parent);
+                GUI.addIcon(_parent, "ui-icon-info", "float:left;margin:3px;", "before").attr('id', 'iconStatus');;
             }
         };
-        // mask
-         var pleaseWait = GUI.mask("mask-loading", "Loading...");
-         GUI.image(pleaseWait, "img-loading", "img/loading.gif", 30, 30, "before");
-         window.fl4reStatus('INFO', 'loading');
 
         //main layout
-        var layout = GUI.Layout("mainLayout",1);
+        var layout = GUI.Layout("mainLayout", 1);
         layout.jqueryObject.sizePane("north", 35);
         layout.jqueryObject.sizePane("south", 25);
-        //menu
-        GUI.addMenu(["Scenes", "Animations", "Cameras", "Help"], [0, 0, 0, "javascript:window.onHelp();"], "0", "menu");
-        GUI.addMenu(["New", "Load", "Save", "Append", "Clone", "Quit"], [0, 0, 0, 0, "checkbox", "javascript:window.onQuit()"], "0_1","Scenes");
-      
-        GUI.addMenu(["eg1", "eg2"], [0, 0], "0_1_2", "Load");
-        GUI.addMenu(["eg1", "eg2", "eg3"], [0, 0, 0], "0_1_4", "Append");
-        //disable save
+
+        pleaseWait(true, layout);
+
+        GUI.label("auteur", "&copy; R&eacute;mi Arnaud - Advanced Micro Devices, Inc. 2013", layout.jqueryObjectSouth);
+        CONSOLE.open(layout);
+
+        GUI.addMenu(["Scenes", "Animations", "Cameras", "Engine", "Sound", "Particles", "Help", " "], [0, 0, 0, 0, 0, 0, "javascript:window.onHelp();", "javascript:window.callbackFullScreen();"], "0", "menu");
+
+        //------------------------------//fileMenu  ---------------------------------------------------------------------------------------------
+
+        GUI.addMenu(["New", "Load", "Save", "Append", "Clone", "Fix broken DAE export", "Quit"], ["javascript:window.onNew();", "javascript:window.onLoad()", 0, "javascript:window.onAppend()", "checkbox", 0, "javascript:window.onQuit()"], "0_1", "Scenes");
+
+        var fileDebugMenu = GUI.addMenu(["Ignore transparency", "Flip CW / CCW", "Force single (first) effect"], ["checkbox", "checkbox", "checkbox"], "0_1_6", "fileDebugMenu");
+
+        window.onNew = function () {
+            hideOnClick($("#z0_1"));
+            console.log("New")
+        };
+
+        window.onAppend = function () {
+            hideOnClick($("#z0_1"));
+            console.log("Append");
+        };
+
+        window.onLoad = function () {
+            hideOnClick($("#z0_1"));
+            console.log("Load")
+
+        };
+
+        var quitPanel = $([]);
+        window.onQuit = function () {
+            hideOnClick($("#z0_1"));
+            quitPanel.remove();
+            quitPanel = GUI.confirmDialog("quitPanel", "Leaving?", "Are you sure you want to quit?", "Quit", "window.close()");
+            GUI.image(quitPanel, "img-quit", "img/icon-error2.png", '40', '40', 'before');
+        }
+
+        var filesMenu = GUI.addMenu([], [], "0_1_2", "Load");
+        var filesMenuBis = GUI.addMenu([], [], "0_1_4", "Append");
+
         $('#z0_1_3').addClass("disable");
 
-        // add sub menus
-        GUI.addMenu(["Play all", "Stop all", "Animation List", "Animation Clips"], ["javascript:window.onAnimPlayAll();", "javascript:window.onAnimStopAll();", 0, 0], "0_2", "Animations");
-        GUI.addMenu(["eg1.1", "eg1.2", "eg1.3"], ["checkbox", "checkbox", "checkbox"], "0_2_3", "animMenu");
-        GUI.addMenu(["eg2", "eg3"], [0, 0], "0_2_4", "animClipMenu");
-        GUI.addMenu(["Camera", ["eg1", "eg2", "eg3"]], ["0", "radioList"], "0_3", "Cameras");
+        //------------------------------/AnimationsMenu---------------------------------------------------------------------------------------------
+        var Scenes = GUI.addMenu(["Play all", "Stop all", "Animation List", "Animation Clips"], ["javascript:window.onAnimPlayAll();", "javascript:window.onAnimStopAll();", 0, 0], "0_2", "Animations");
 
-        //e.g disable/enable elem menu	
-        $('#z0_1_5 input').on('change', function () {
-            g_cloneMeshes = $(this).is(':checked');
-            if ($(this).is(':checked')) {
-                $('#z0_1_4 a').attr('href', '#');
-                $('#z0_1_4').addClass("disable");
-            } else {
-                $('#z0_1_4 a').attr('href', "javascript:console.debug('enabled');");
-                $('#z0_1_4').removeClass("disable");
-            }
-        });
-        //callback check all anomation clips
-        window.onAnimPlayAll = function () {
-            $('#z0_2_3').find("li").each(function (index) {
-                $(this).find('input:checkbox').prop('checked', true);
-            });
+        //Callbacks
+        //sub-menus  animMenu
+        var animMenu = GUI.addMenu(["example1", "example2"], [0, 0], "0_2_3", "animMenu");
+        var animClipMenu = GUI.addMenu(["example1", "example2", "example3"], [0, 0, 0], "0_2_4", "animClipMenu");
+
+        window.onAnimPlayAll = function () { // have to improve it 
+            hideOnClick($("#z0_2"));
+            console.log("playAll")
         }
-        //callback uncheck all animation clips
+
         window.onAnimStopAll = function () {
-            $('#z0_2_3').find("li").each(function (index) {
-                $(this).find('input:checkbox').prop('checked', false);
-            });
+            hideOnClick($("#z0_2"));
+            console.log("StopAll");
         }
 
-        //add icons to the menu
-        GUI.addIcon($("#menu>.has-sub>a"), "ui-icon-triangle-1-s", "float:right;");
-        GUI.addIcon($("#z0_1_2>a"), "ui-icon-triangle-1-e", "float:right;bottom:2px !important;");
-        GUI.addIcon($("#z0_1_4>a"), "ui-icon-triangle-1-e", "float:right;bottom:2px !important;");
-        GUI.addIcon($("#z0_2_3>a"), "ui-icon-triangle-1-e", "float:right;bottom:2px !important;");
-        GUI.addIcon($("#z0_2_4>a"), "ui-icon-triangle-1-e", "float:right;bottom:2px !important;");
-
-        GUI.image($("#z0_1>a"), "img-scenes", "img/action.gif", 22, 22, "before");
-        GUI.image($("#z0_2>a"), "img-animation", "img/menu-animations.gif", 20, 20, "before");
-        GUI.image($("#z0_3>a"), "img-cameras", "img/camera-anim.gif", 27, 27, "before");
-        GUI.image($("#z0_4>a"), "img-help", "img/aide.gif", 20, 20, "before");
-
-        //------------------------------//tab menu ---------------------------------------------------------------------------------------------
-        //callback slider change exposure
-
-        function changeExposure() {
-
-            var value = $("#exposureSlider").slider("value");
-            $("#exposureText").text(value + " f-stops ");
+        window.onAnimClip = function (uri) {
+            Conduit.animReset();
+            Conduit.animPlayClip(uri, true);
         }
-        //callback slider changebloom
-
-        function changeBloom() {
-            var bloomBias = $("#bloomBiasSlider").slider("value");
-            var bloomScale = $("#bloomScaleSlider").slider("value");
-            $("#bloomBiasText").html(bloomBias + " bloom bias");
-            $("#bloomScaleText").html(bloomScale + " bloom scale");
+        //------------------------------//camera menu    ---------------------------------------------------------------------------------------------
+        //Callbacks
+        window.onViewportReset = function () {
+            hideOnClick($("#z0_3"));
+            console.log("viewportReset");
         }
-		
 
-        var renderTab = GUI.addTabWindow(layout.jqueryObjectCenter, "tabsoune", "EG1");
-        GUI.image(renderTab.find('.ui-tabs-anchor'), "img-render", "img/menu-render.png", 12, 14, "before");
-        var tab2 = GUI.addNewTab("tabsoune", "material", "EG2", "example");
-        GUI.image($('#ui-id-3'), "img-material", "img/menu-scenes.png", 12, 14, "before");
+        window.onViewportCreate = function () {
+            hideOnClick($("#z0_3"));
+            console.log("viewportCreate");
+        }
 
-        GUI.label("exposureTitle", "exposure = ", renderTab.find(".content"));
-        GUI.label("exposureText", "0 f-stops", renderTab.find(".content"));
-        var exposurerSlide = GUI.addSlider("exposureSlider", renderTab.find(".content"), -8, 8, 0.1, 0, "margin:5 5 5 5;background:white !important;");
-        exposurerSlide.width(250);
-        exposurerSlide.on("slidechange", changeExposure);
-        exposurerSlide.on("slide", changeExposure);
+        window.onCameraLost = function () {
+            hideOnClick($("#z0_3"));
+            console.log("cameraLost");
+        }
 
-        GUI.label("bloomBiasTitle", "bloomBias = ", renderTab.find(".content"));
-        GUI.label("bloomBiasText", "0.9 bloom bias", renderTab.find(".content"));
-        var bloomBiasSlide = GUI.addSlider("bloomBiasSlider", renderTab.find(".content"), 0, 2, 0.01, 0.9, "margin:5 5 5 5;background:white !important;");
-        bloomBiasSlide.width(250);
-        bloomBiasSlide.on("slidechange", changeBloom);
-        bloomBiasSlide.on("slide", changeBloom);
 
-        GUI.label("bloomScaleTitle", "bloomScale = ", renderTab.find(".content"));
-        GUI.label("bloomScaleText", "1.5 bloom scale", renderTab.find(".content"));
-        var bloomScaleSlide = GUI.addSlider("bloomScaleSlider", renderTab.find(".content"), 0, 8, 0.1, 1.5, "margin:5 5 5 5;background:white !important;");
-        bloomScaleSlide.width(250);
-        bloomScaleSlide.on("slidechange", changeBloom);
-        bloomScaleSlide.on("slide", changeBloom);
-
-        GUI.label("solid", " --------------------------------------------------------- ", renderTab.find(".content"));
-        GUI.addCheckBox("debugSetRenderFullScreen", "Full Screen", renderTab.find(".content"));
-
-        GUI.label("titreMenu", "Back buffer resolution:", renderTab.find(".content"), "0", "isolate");
-        GUI.button("Native", renderTab.find(".content"));
-        GUI.button("1280x720", renderTab.find(".content"));
-        GUI.button("860x640", renderTab.find(".content"));
-        GUI.button("720x480", renderTab.find(".content"));
-        GUI.label("jump_line", "", renderTab.find(".content"), "0", "isolate");
-        GUI.button("Load background image", renderTab.find(".content"));
-        GUI.label("jump_line", "", renderTab.find(".content"), "0", "isolate");
-        GUI.label("solid", " --------------------------------------------------------- ", renderTab.find(".content"));
-        GUI.label("jump_line", "", renderTab.find(".content"), "0", "isolate");
-        GUI.button("Load cube map", renderTab.find(".content"));
-        GUI.addCheckBox("renderSetFilmCurve", "Film curve", renderTab.find(".content"));
-        GUI.addCheckBox("debugSetRenderGPass", "Deferred", renderTab.find(".content"));
-        GUI.addCheckBox("renderSetAdaptiveSampling", "Adaptive sampling", renderTab.find(".content"));
-        GUI.addCheckBox("renderSetDynamicLights", "Dynamic lights", renderTab.find(".content"));
-        GUI.label("solid", " --------------------------------------------------------- ", renderTab.find(".content"));
-        GUI.addCheckBox("enablePickerAxes", "Draw picker axes", renderTab.find(".content"));
-        GUI.addCheckBox("enablePickerGrid", "Draw picker grid", renderTab.find(".content"));
-        GUI.label("solid", " --------------------------------------------------------- ", renderTab.find(".content"));
-        GUI.addCheckBox("debugSetRenderVSync", "Draw enable vsync", renderTab.find(".content"));
-        GUI.label("solid", " --------------------------------------------------------- ", renderTab.find(".content"));
-
-        GUI.label("...", "list sticky button", tab2, '', "isolate");
-        var egg = new Array("eg1", "eg2", "eg3", "eg4", "eg5");
-        GUI.addStickyButton("example1", egg, tab2);
-
-        GUI.label("...", "one sticky button", tab2, '', "isolate");
-        var item = new Array("tefa");
-        GUI.addStickyButton("example2", item, tab2);
-		
-        //help dialog
+        window.onCameraReset = function () {
+            hideOnClick($("#z0_3"));
+            console.log("cameraReset");
+        }
+        GUI.addMenu(["Create viewports", "Create cubemap", "Remove viewports", "reset", "find anything", ["cameraExemple1", "cameraExemple2", "cameraExemple3"]], ["javascript:window.onViewportCreate()", "javascript:window.CreateCubemap()", "javascript:window.onViewportReset()", "javascript:window.onCameraReset()", "javascript:window.onCameraLost()", "radioList", "0", "slider"], "0_3", "Cameras");
+        //------------------------------///help dialog  ---------------------------------------------------------------------------------------------
+        var helpMenu = $([]);
         window.onHelp = function () {
+            helpMenu.remove();
             var txt = 'The greenhouse effect is a process by which thermal radiation from a planetary surface is absorbed by atmospheric greenhouse gases, and is re-radiated in all directions. Since part of this re-radiation is back towards the surface and the lower atmosphere, it results in an elevation of the average surface temperature above what it would be in the absence of the gases","C string that contains the text to be written to stdout.It can optionally contain embedded format specifiers that are replaced by the values specified in subsequent additional arguments and formatted as requested.A format specifier follows this prototype: [see compatibility note below] specifier Where the specifier character at the end is the most significant component, since it defines the type and the interpretation of its corresponding argument:';
             var helpText = "<div><pre>";
             var emptyCharacter = false;
@@ -218,35 +168,511 @@ THE SOFTWARE.
             helpText += "</pre></div>";
             helpText += "<br>";
 
-            GUI.messageDialog("help", "Help", helpText);
+            helpMenu = GUI.messageDialog("help", "Help", helpText);
         }
-        //quit dialog
-        window.onQuit = function () {
-            $('#quitPanel').remove();
-            var quitPanel = GUI.confirmDialog("quitPanel", "Leaving?", "Are you sure you want to quit?", "Quit", "console.log('exit requested')");
-            GUI.image(quitPanel, "img-quit", "img/icon-error2.png", '40', '40', 'before');
+        //------------------------------//engine/sound/particles menu    ---------------------------------------------------------------------------------------------
+
+        GUI.addMenu(["Load", "Save", "Reset"], ["javascript:window.onEngineLoad()", "javascript:window.onEngineSave()", "javascript:window.onEngineReset()"], "0_4", "Engine");
+        var soundMenu = GUI.addMenu(["Play All", "Stop All"], ["javascript:window.onSoundPlay()", "javascript:window.onSoundStop()"], "0_5", "Sounds");
+        GUI.addMenu(["Create All"], ["javascript:window.onCreateAllParticles()"], "0_6", "Particles");
+
+        window.onEngineLoad = function () {
+            hideOnClick($("#z0_4"));
+            console.log("engineLoad");
+        };
+
+        window.onEngineSave = function () {
+            hideOnClick($("#z0_4"));
+            console.log("engineSave");
+        };
+
+        window.onEngineReset = function () {
+            hideOnClick($("#z0_4"));
+            console.log("engineReset");
+        };
+
+        window.onCreateAllParticles = function () {
+            hideOnClick($("#z0_6"));
+            console.log("createAllParticles")
+        };
+
+        window.onSoundPlay = function () {
+            hideOnClick($("#z0_5"));
+            console.log("soundPlay")
         }
- 		
-		
-		
-        // allow autoscroll on tabs
-        GUI.autoScroll($(".ui-accordion-header"), $("#content-renderMenus"));
 
-        //this is really important! enables scrolling and autofilling of the tab content
-        layout.jqueryObject.initContent("center");
-        layout.jqueryObject.resizeAll();
+        window.onSoundStop = function () {
+            hideOnClick($("#z0_5"));
+            console.log("soundStop")
+        }
 
-        GUI.label("auteur", "&copy; R&eacute;mi Arnaud - Advanced Micro Devices, Inc. 2013", layout.jqueryObjectSouth);
+        var flagFullScreen = true;
+        window.callbackFullScreen = function () {
+            var el = document.documentElement,
+                rfs = // for newer Webkit and Firefox
+                el.requestFullScreen || el.webkitRequestFullScreen || el.mozRequestFullScreen || el.msRequestFullScreen;
+            if (typeof rfs != "undefined" && rfs) {
+                rfs.call(el);
+            } else if (typeof window.ActiveXObject != "undefined") {
+                // for Internet Explorer
+                var wscript = new ActiveXObject("WScript.Shell");
+                if (wscript != null) {
+                    wscript.SendKeys("{F11}");
+                }
+            }
+            if (flagFullScreen) flagFullScreen = false;
+            else flagFullScreen = true;
+        }
 
-        var toggle_button = GUI.addStickyButton('buttonLayout', [""], layout.jqueryObjectSouth);
-        toggle_button.width(35);
-        toggle_button.height(25);
-        GUI.image(toggle_button, "img-console", "img/console.png", '20', '30');
+        function hideOnClick(_parent) {
+            _parent.find(">ul").hide();
+            _parent.mouseover(function () {
+                _parent.find('>ul').show();
+            });
+            _parent.mouseout(function () {
+                _parent.find('>ul').hide();
+            });
+        }
+
+        // GUI.setMenuSensitivity(5,0,400);  
+
+        //add icons to the menu
+        GUI.addIcon($("#z0_1>a"), "ui-icon-triangle-1-s", "float:right;");
+        GUI.addIcon($("#z0_2>a"), "ui-icon-triangle-1-s", "float:right;");
+        GUI.addIcon($("#z0_3>a"), "ui-icon-triangle-1-s", "float:right;");
+        GUI.addIcon($("#z0_4>a"), "ui-icon-triangle-1-s", "float:right;");
+        GUI.addIcon($("#z0_5>a"), "ui-icon-triangle-1-s", "float:right;");
+        GUI.addIcon($("#z0_6>a"), "ui-icon-triangle-1-s", "float:right;");
+        GUI.addIcon($("#z0_2_3>a"), "ui-icon-triangle-1-e", "float:right;bottom:1px !important;");
+        GUI.addIcon($("#z0_2_4>a"), "ui-icon-triangle-1-e", "float:right;bottom:1px !important;");
+        GUI.addIcon($("#z0_1_6>a"), "ui-icon-triangle-1-e", "float:right;bottom:1px !important;");
+
+        GUI.image($("#z0_1>a"), "img-scenes", "img/action.gif", 22, 22, "before");
+        GUI.image($("#z0_2>a"), "img-animation", "img/menu-animations.gif", 20, 20, "before");
+        GUI.image($("#z0_3>a"), "img-cameras", "img/camera-anim.gif", 27, 27, "before");
+        GUI.image($("#z0_4>a"), "img-engine", "img/counter.gif", 20, 20, "before");
+        GUI.image($("#z0_5>a"), "img-sound", "img/sound.gif", 18, 20, "before");
+        GUI.image($("#z0_6>a"), "img-particles", "img/particles.gif", 17, 17, "before");
+        GUI.image($("#z0_7>a"), "img-help", "img/menu-help.png", 18, 18, "before");
+        GUI.image($("#z0_8>a"), "img-fullscreen", "img/view_fullscreen.png", 25, 20, "before");
+
+        //------------------------------//render menu ---------------------------------------------------------------------------------------------
+
+        var renderMenu = GUI.addTabWindow(layout.jqueryObjectCenter, "renderMenus", "  Render");
+        GUI.image(renderMenu.find('.ui-tabs-anchor'), "img-render", "img/menu-render.png", 12, 14, "before");
+        var materialMenu = GUI.addNewTab("renderMenus", "material", "  Material");
+        GUI.image($('#header-renderMenus :last-child').find('.ui-tabs-anchor'), "img-material", "img/menu-scenes.png", 12, 14, "before");
+
+        // GUI.addStickyList = function (_id, _items, _parent, _mode)
+        var exemple = ["example1", "example2", "example3", "example4", "example5"];
+        GUI.addRadioList(2, exemple, exemple, exemple, materialMenu);
+
+        GUI.label("fovSliderContent", "Camera, fov = ", renderMenu.find(".content"));
+        var fovSliderText = GUI.label("fovSliderText", "80", renderMenu.find(".content"));
+        var fovSliderCamera = GUI.addSlider("fovSliderCamera", renderMenu.find(".content"), 10, 120, 1, 80).width(200);
+        fovSliderCamera.on("slidechange", function () {
+            fovSliderText.text($(this).slider("value"));
+        })
+
+        renderMenu.find(".content").append('</br>');
+
+        GUI.label("exposureTitle", "exposure = ", renderMenu.find(".content"));
+        GUI.label("exposureText", "0 f-stops", renderMenu.find(".content"));
+        var exposurerSlide = GUI.addSlider("exposureSlider", renderMenu.find(".content"), -8, 8, 0.1, 0).width(200).on("slidechange", newExposure);
+
+        function newExposure() {
+            $("#exposureText").text($("#exposureSlider").slider("value") + " f-stops ");
+        }
+
+        GUI.label("bloomBiasTitle", "bloomBias = ", renderMenu.find(".content"));
+        GUI.label("bloomBiasText", "0.9 bloom bias", renderMenu.find(".content"));
+        var bloomBiasSlide = GUI.addSlider("bloomBiasSlider", renderMenu.find(".content"), 0, 2, 0.01, 0.9).width(200).on("slidechange", newBloom);
+
+        GUI.label("bloomScaleTitle", "bloomScale = ", renderMenu.find(".content"));
+        GUI.label("bloomScaleText", "1.5 bloom scale", renderMenu.find(".content"));
+        var bloomScaleSlide = GUI.addSlider("bloomScaleSlider", renderMenu.find(".content"), 0, 8, 0.1, 1.5).width(200).on("slidechange", newBloom);
+
+        function newBloom() {
+            $("#bloomBiasText").html($("#bloomBiasSlider").slider("value") + " bloom bias");
+            $("#bloomScaleText").html($("#bloomScaleSlider").slider("value") + " bloom scale");
+        }
+
+        renderMenu.find(".content").append('<br>');
+
+        function onRenderOption($_parent, _id) {
+            var tmp = $_parent.attr('id');
+            if (_id) {
+                tmp = _id;
+            }
+            console.debug("onRenderOption id = " + tmp + " , check ? " + $_parent.find('input:checkbox').is(':checked'));
+        }
+
+        GUI.label("titreMenu", "Back buffer resolution:", renderMenu.find(".content"), "text-decoration:underline;", "isolate");
+        GUI.button("Native", renderMenu.find(".content"), onBackBufferNative).width(100);
+
+        function onBackBufferNative() {
+            console.debug("nativeMode")
+        }
+        GUI.button("1280x720", renderMenu.find(".content"), makeBackBufferHandler).width(100);
+        renderMenu.find(".content").append('<br>');
+        GUI.button("860x640", renderMenu.find(".content"), makeBackBufferHandler).width(100);
+        GUI.button("720x480", renderMenu.find(".content"), makeBackBufferHandler).width(100);
+        renderMenu.find(".content").append('<br>');
+
+        function makeBackBufferHandler(width, height) {
+            console.log("resize");
+        }
+
+        renderMenu.find(".content").append('<br>');
+
+        GUI.button("Load cube map", renderMenu.find(".content"), onLoadCubeMap).width(203);
+
+        function onLoadCubeMap() {
+            console.log("loadCubeMap")
+        }
+
+        renderMenu.find(".content").append('<br>');
+        renderMenu.find(".content").append('<br>');
+
+        var renderSetFilmCurve = GUI.addCheckBox("renderSetFilmCurve", "Film curve", renderMenu.find(".content"));
+        renderSetFilmCurve.on('change', 'input[type=checkbox]', function (e) {
+            onRenderOption(renderSetFilmCurve);
+        });
+
+        var debugSetRenderGPass = GUI.addCheckBox("debugSetRenderGPass", "Deferred", renderMenu.find(".content"));
+        debugSetRenderGPass.find("input").prop('checked', true);
+        debugSetRenderGPass.on('change', 'input[type=checkbox]', function (e) {
+            onRenderOption(debugSetRenderGPass)
+        });
+
+        var renderSetAdaptiveSampling = GUI.addCheckBox("renderSetAdaptiveSampling", "Adaptive sampling", renderMenu.find(".content"));
+        renderSetAdaptiveSampling.on('change', 'input[type=checkbox]', function (e) {
+            onRenderOption(renderSetAdaptiveSampling)
+        });
+        var renderSetDynamicLights = GUI.addCheckBox("renderSetDynamicLights", "Dynamic lights", renderMenu.find(".content"));
+        renderSetDynamicLights.on('change', 'input[type=checkbox]', function (e) {
+            onRenderOption(renderSetDynamicLights)
+        });
+        renderMenu.find(".content").append('<br>');
+        var enablePickerAxes = GUI.addCheckBox("enablePickerAxes", "Draw picker axes", renderMenu.find(".content"));
+        enablePickerAxes.on('change', 'input[type=checkbox]', function (e) {
+            onRenderOption(enablePickerAxes)
+        });
+        enablePickerAxes.find("input").prop('checked', true);
+        var enablePickerGrid = GUI.addCheckBox("enablePickerGrid", "Draw picker grid", renderMenu.find(".content"));
+        enablePickerGrid.on('change', 'input[type=checkbox]', function (e) {
+            onRenderOption(enablePickerGrid)
+        });
+        renderMenu.find(".content").append('<br>');
+        var debugSetRenderVSync = GUI.addCheckBox("debugSetRenderVSync", "Draw enable vsync", renderMenu.find(".content"));
+        debugSetRenderVSync.on('change', 'input[type=checkbox]', function (e) {
+            onRenderOption(debugSetRenderVSync)
+        });
+        debugSetRenderVSync.find("input").prop('checked', true);
+        renderMenu.find(".content").append('<br>');
+
+        //----------create accordions for rest of render's menus ---------------------------------------------------------------------------------------------
+        var accordion_render = GUI.addAccordion("menu-render", ["Shadows && SSAO", "Anti-Aliasing", "Sharpen", "Reflections", "GI", "Debug render", "Profiler"], renderMenu.find(".content"), ["0", "0", "0", "0", "0", "0", "0"]).width(203);
+        // Hack to allow all accordions openables 
+        accordion_render.on("accordionbeforeactivate", function (event, ui) {
+            // hhACK accordion don't collapse if his content is empty
+            if ((($.trim($(ui.newPanel).html()).length == 0) && ($(ui.oldHeader).length == 0)) || (($.trim($(ui.newPanel).html()).length == 0) && ($(ui.newHeader).length))) {
+                event.preventDefault();
+            }
+            if (ui.newHeader[0]) {
+                var currHeader = ui.newHeader;
+                var currContent = currHeader.next('.ui-accordion-content');
+            } else {
+                var currHeader = ui.oldHeader;
+                var currContent = currHeader.next('.ui-accordion-content');
+            }
+            var isPanelSelected = currHeader.attr('aria-selected') == 'true';
+            currHeader.toggleClass('ui-corner-all', isPanelSelected).toggleClass('accordion-header-active ui-state-active ui-corner-top', !isPanelSelected).attr('aria-selected', ((!isPanelSelected).toString()));
+            currHeader.children('.ui-icon').toggleClass('ui-icon-triangle-1-e', isPanelSelected).toggleClass('ui-icon-triangle-1-s', !isPanelSelected);
+            currContent.toggleClass('accordion-content-active', !isPanelSelected)
+            if (isPanelSelected) {
+                currContent.slideUp();
+            } else {
+                currContent.slideDown();
+            }
+            return false;
+        });
+
+        //--------- Anti Aliasing -----------------------------------------------------------------------------
+        var renderSetHistoryAA = GUI.addCheckBox("renderSetHistoryAA", "Temporal AA", accordion_render.find("#menu-render-1"));
+        renderSetHistoryAA.on('change', 'input[type=checkbox]', function (e) {
+            onRenderOption(renderSetShadowResolution);
+        });
+        var renderSetFxaa3 = GUI.addCheckBox("renderSetFxaa3", "FXAA version 3", accordion_render.find("#menu-render-1"));
+        renderSetFxaa3.on('change', 'input[type=checkbox]', function (e) {
+            onRenderOption(renderSetShadowResolution);
+        });
+        //--------- Element Sharpen-----------------------------------------------------------------------------
+        var renderSetSharpen = GUI.addCheckBox("renderSetSharpen", "Sharpen filter", accordion_render.find("#menu-render-2"));
+        renderSetSharpen.on('change', 'input[type=checkbox]', function (e) {
+            onRenderOption(renderSetSharpen)
+        });
+        accordion_render.find("#menu-render-2").append('<br>');
+        GUI.label("strengthTitle", "strength = ", accordion_render.find("#menu-render-2"));
+        GUI.label("sharpenText", "2", accordion_render.find("#menu-render-2"));
+        var sharpenSlider = GUI.addSlider("sharpenSlider", accordion_render.find("#menu-render-2"), 0, 32, 0.1, 2);
+        sharpenSlider.on("slidechange", newSharpen);
+        accordion_render.find("#menu-render-2").append('<br>');
+
+        var renderSetSharpenAdaptive = GUI.addCheckBox("renderSetSharpenAdaptive", "Adaptive sharpening", accordion_render.find("#menu-render-2"));
+        renderSetSharpenAdaptive.on('change', 'input[type=checkbox]', function (e) {
+            onRenderOption(renderSetSharpenAdaptive)
+        });
+        accordion_render.find("#menu-render-2").append('<br>');
+        GUI.label("strengthTitle1", "strength = ", accordion_render.find("#menu-render-2"));
+        GUI.label("sharpenAdaptiveText", "12", accordion_render.find("#menu-render-2"));
+        var sharpenAdaptiveSlider = GUI.addSlider("sharpenAdaptiveSlider", accordion_render.find("#menu-render-2"), 0, 32, 0.1, 12);
+        sharpenAdaptiveSlider.on("slidechange", newSharpenAdaptive);
+        GUI.label("strengthTitle2", "jitter = ", accordion_render.find("#menu-render-2"));
+        GUI.label("sharpenJitterText", "0.0", accordion_render.find("#menu-render-2"));
+        var sharpenJitterSlider = GUI.addSlider("sharpenJitterSlider", accordion_render.find("#menu-render-2"), 0, 1, 0.01, 0);
+        sharpenJitterSlider.on("slidechange", newSharpenJitter);
+        accordion_render.find("#menu-render-2").append('<br>');
+        var renderSetDebugSharpenMask = GUI.addCheckBox("renderSetDebugSharpenMask", "Debug sharpen mask", accordion_render.find("#menu-render-2"));
+        renderSetDebugSharpenMask.on('change', 'input[type=checkbox]', function (e) {
+            onRenderOption(renderSetDebugSharpenMask)
+        });
+
+        function onRenderMode(item) {
+            Conduit.debugSetRenderMode(item);
+        };
+
+        function newSharpen() {
+            $("#sharpenText").html($("#sharpenSlider").slider("value"));
+        }
+
+        function newSharpenAdaptive() {
+            $("#sharpenAdaptiveText").html($("#sharpenAdaptiveSlider").slider("value"));
+        }
 
 
-        CONSOLE.open(layout);
-		
-//-----------------------------------------------------------------------------------------------------------------------------
+        function newSharpenJitter() {
+            $("#sharpenJitterText").html($("#sharpenJitterSlider").slider("value"));
+        }
+
+        //---------- element reflection-----------------------------------------------------------------------------
+        var renderSetReflectionQuality = GUI.addCheckBox("renderSetShadowQuality", "HQ reflections", accordion_render.find("#menu-render-3"));
+        accordion_render.find("#menu-render-3").append('<br>');
+        renderSetReflectionQuality.on('change', 'input[type=checkbox]', function (e) {
+            onRenderOption(renderSetReflectionQuality)
+        });
+
+        GUI.label("reflectionStepsTitle", "Reflection steps : ", accordion_render.find("#menu-render-3"), "text-decoration:underline;");
+        accordion_render.find("#menu-render-3").append('<br><br>');
+        var reflectionStepsSlider = GUI.InputInteractive(accordion_render.find("#menu-render-3"), "0", 3, 25, 0.1, 1, 0.001, 1)
+        accordion_render.find("#menu-render-3").append('<br>');
+
+
+        GUI.label("reflectionFadeFactorTitle", "Reflection fade factor : ", accordion_render.find("#menu-render-3"), "text-decoration:underline;");
+        accordion_render.find("#menu-render-3").append('<br><br>');
+        var reflectionFadeFactorSlider = GUI.InputInteractive(accordion_render.find("#menu-render-3"), "0", 1, 10, 1, 1, 0.001, 1)
+        accordion_render.find("#menu-render-3").append('<br>');
+
+        //---------- element GI-----------------------------------------------------------------------------
+        var EnableGI = GUI.addCheckBox("unique_id", "Enable GI", accordion_render.find("#menu-render-4"));
+        EnableGI.on('change', 'input[type=checkbox]', function (e) {
+            console.log("enbaleGI ? " + EnableGI.find('input').is(':checked'));
+        });
+        var renderSetRandSeedWorld = GUI.addCheckBox("World-pinned", "World-pinned", accordion_render.find("#menu-render-4"));
+        renderSetRandSeedWorld.on('change', 'input[type=checkbox]', function (e) {
+            console.log("enbaleGI ? " + renderSetRandSeedWorld.find('input').is(':checked'));
+        });
+        var renderSetGIAdaptive = GUI.addCheckBox("renderSetGIAdaptive", "Adaptive GI", accordion_render.find("#menu-render-4"));
+        renderSetGIAdaptive.on('change', 'input[type=checkbox]', function (e) {
+            console.log("enbaleGI ? " + renderSetGIAdaptive.find('input').is(':checked'));
+        });
+        var renderSetGIHistory = GUI.addCheckBox("renderSetGIHistory", "Temporal GI", accordion_render.find("#menu-render-4"));
+        renderSetGIHistory.on('change', 'input[type=checkbox]', function (e) {
+            console.log("enbaleGI ? " + renderSetGIHistory.find('input').is(':checked'));
+        });
+        var renderSetGIQuality = GUI.addCheckBox("renderSetGIQuality", "High quality GI", accordion_render.find("#menu-render-4"));
+        renderSetGIQuality.on('change', 'input[type=checkbox]', function (e) {
+            console.log("enbaleGI ? " + renderSetGIQuality.find('input').is(':checked'));
+        });
+        var renderSetGISpecular = GUI.addCheckBox("renderSetGISpecular", "Specular", accordion_render.find("#menu-render-4"));
+        renderSetGISpecular.on('change', 'input[type=checkbox]', function (e) {
+            console.log("enbaleGI ? " + renderSetGIQuality.find('input').is(':checked'));
+        });
+        var renderSetBlurSasGI = GUI.addCheckBox("renderSetBlurSasGI", "Blur GI", accordion_render.find("#menu-render-4"));
+        renderSetBlurSasGI.on('change', 'input[type=checkbox]', function (e) {
+            onRenderOption(renderSetBlurSasGI)
+        });
+        var renderSetSSSOnly = GUI.addCheckBox("renderSetSSSOnly", "SSS only", accordion_render.find("#menu-render-4"));
+        renderSetSSSOnly.on('change', 'input[type=checkbox]', function (e) {
+            onRenderOption(renderSetSSSOnly)
+        });
+        var renderSetGILow = GUI.addCheckBox("renderSetGILow", "Use lowres GI source", accordion_render.find("#menu-render-4"));
+        renderSetGILow.on('change', 'input[type=checkbox]', function (e) {
+            onRenderOption(renderSetGILow)
+        });
+        renderSetRandSeedWorld.find("input").prop('checked', true);
+        renderSetGIHistory.find("input").prop('checked', true);
+        renderSetBlurSasGI.find("input").prop('checked', true);
+        renderSetGILow.find("input").prop('checked', true);
+
+        accordion_render.find("#menu-render-4").append('<br>');
+
+        GUI.label("sssAbsorbtionTitle", "SSS absorbtion = ", accordion_render.find("#menu-render-4"));
+        GUI.label("sssAbsorbtionText", "1", accordion_render.find("#menu-render-4"));
+        var sssAbsorbtionSlider = GUI.addSlider("sssAbsorbtionSlider", accordion_render.find("#menu-render-4"), 0, 1, 0.01, 1);
+        sssAbsorbtionSlider.on("slidechange", newAmbient);
+
+        GUI.label("sssDistanceFactorTitle", "SSS distance factor = ", accordion_render.find("#menu-render-4"));
+        GUI.label("sssDistanceFactorText", "2", accordion_render.find("#menu-render-4"));
+        var sssDistanceFactorSlider = GUI.addSlider("sssDistanceFactorSlider", accordion_render.find("#menu-render-4"), 0.01, 10, 0.01, 2);
+        sssDistanceFactorSlider.on("slidechange", newAmbient);
+
+        GUI.label("ambientSigmaTitle", "Sigma = ", accordion_render.find("#menu-render-4"));
+        GUI.label("ambientSigmaText", "0.5", accordion_render.find("#menu-render-4"));
+        var ambientSigmaSlider = GUI.addSlider("ambientSigmaSlider", accordion_render.find("#menu-render-4"), 0.01, 0.9, 0.01, 0.5);
+        ambientSigmaSlider.on("slidechange", newAmbient);
+
+        GUI.label("ambientRadiusTitle", "Radius = ", accordion_render.find("#menu-render-4"));
+        GUI.label("ambientRadiusText", "3", accordion_render.find("#menu-render-4"));
+        var ambientRadiusSlider = GUI.addSlider("ambientRadiusSlider", accordion_render.find("#menu-render-4"), 0.1, 10, 0.05, 3);
+        ambientRadiusSlider.on("slidechange", newAmbient);
+
+        GUI.label("ambientCountTitle", "Steps = ", accordion_render.find("#menu-render-4"));
+        GUI.label("ambientCountText", "16", accordion_render.find("#menu-render-4"));
+        var ambientCountSlider = GUI.addSlider("ambientCountSlider", accordion_render.find("#menu-render-4"), 1, 64, 1, 16);
+        ambientCountSlider.on("slidechange", newAmbient);
+
+        GUI.label("ambientAbsorbtionTitle", "Absorbtion = ", accordion_render.find("#menu-render-4"));
+        GUI.label("ambientAbsorbtionText", "50", accordion_render.find("#menu-render-4"));
+        var ambientAbsorbtionSlider = GUI.addSlider("ambientAbsorbtionSlider", accordion_render.find("#menu-render-4"), 0, 500, 0.05, 50);
+        ambientAbsorbtionSlider.on("slidechange", newAmbient);
+
+        GUI.label("ambientPercentTitle", "Original ambient = ", accordion_render.find("#menu-render-4"));
+        GUI.label("ambientPercentText", "1", accordion_render.find("#menu-render-4"));
+        var ambientPercentSlider = GUI.addSlider("ambientPercentSlider", accordion_render.find("#menu-render-4"), 0, 1, 0.01, 1);
+        ambientPercentSlider.on("slidechange", newAmbient);
+
+        GUI.label("ambientPercentLightTitle", "Original sun = ", accordion_render.find("#menu-render-4"));
+        GUI.label("ambientPercentLightText", "1", accordion_render.find("#menu-render-4"));
+        var ambientPercentLightSlider = GUI.addSlider("ambientPercentLightSlider", accordion_render.find("#menu-render-4"), 0, 10, 0.01, 1);
+        ambientPercentLightSlider.on("slidechange", newAmbient);
+
+        function newAmbient() {
+            $("#sssAbsorbtionText").text($("#sssAbsorbtionSlider").slider("value"));
+            $("#sssDistanceFactorText").text($("#sssDistanceFactorSlider").slider("value"));
+            $("#ambientSigmaText").text($("#ambientSigmaSlider").slider("value"));
+            $("#ambientRadiusText").text($("#ambientRadiusSlider").slider("value"));
+            $("#ambientCountText").text($("#ambientCountSlider").slider("value"));
+            $("#ambientAbsorbtionText").text($("#ambientAbsorbtionSlider").slider("value"));
+            $("#ambientPercentText").text($("#ambientPercentSlider").slider("value"));
+            $("#ambientPercentLightText").text($("#ambientPercentLightSlider").slider("value"))
+        }
+
+        //---------- element debug render-----------------------------------------------------------------------------
+        var elems = ["example1", "example2", "example3", "example4", "example5", "example6"]
+        var rendermodesRadio2 = GUI.addRadioList(4, elems, elems, elems, accordion_render.find("#menu-render-5"));
+
+        rendermodesRadio2.find('input').each(function (index) {
+            $(this).on('change', function (e) {
+                if ($(this).is(':checked')) {
+                    onRenderMode($(this).attr('value'));
+                }
+            });
+        });
+        accordion_render.find("#menu-render-5").append('<br>');
+
+        GUI.label("mipDebugTitle", "mip = ", accordion_render.find("#menu-render-5"));
+        GUI.label("mipDebugText", "0", accordion_render.find("#menu-render-5"));
+        var mipDebugSlider = GUI.addSlider("mipDebugSlider", accordion_render.find("#menu-render-5"), 0, 3, 1, 0);
+        mipDebugSlider.on("slidechange", mipDebug);
+        GUI.label("splitDebugTitle", "split = ", accordion_render.find("#menu-render-5"));
+        GUI.label("splitDebugText", "0", accordion_render.find("#menu-render-5"));
+        var debugSplitSlider = GUI.addSlider("debugSplitSlider", accordion_render.find("#menu-render-5"), 0, 3, 1, 0);
+        debugSplitSlider.on("slidechange", splitDebug);
+
+        var debugSetWireframe = GUI.addCheckBox("renderSetGILow", "Wireframe", accordion_render.find("#menu-render-5"));
+        debugSetWireframe.on('change', 'input[type=checkbox]', function (e) {
+            onRenderOption(debugSetWireframe)
+        });
+
+        accordion_render.find("#menu-render-5").append('<br>');
+
+        function mipDebug() {
+            $("#mipDebugText").html($("#mipDebugSlider").slider("value"));
+        }
+
+        function splitDebug() {
+            $("#splitDebugText").html($("#debugSplitSlider").slider("value"));
+        }
+
+        //---------- Profiler render-----------------------------------------------------------------------------
+        var debugCPUProfiler = GUI.addCheckBox("debugCPUProfiler", "CPU profiler", accordion_render.find("#menu-render-6"));
+        debugCPUProfiler.on('change', 'input[type=checkbox]', function (e) {
+            onRenderOption(debugCPUProfiler);
+        });
+
+        var debugGPUProfiler = GUI.addCheckBox("debugGPUProfiler", "GPU profiler", accordion_render.find("#menu-render-6"));
+        debugGPUProfiler.on('change', 'input[type=checkbox]', function (e) {
+            onRenderOption(debugGPUProfiler);
+        });
+
+        var debugShowFPS = GUI.addCheckBox("debugShowFPS", "Show FPS", accordion_render.find("#menu-render-6"));
+        debugShowFPS.on('change', 'input[type=checkbox]', function (e) {
+            console.log("showFps")
+        });
+
+        accordion_render.find("#menu-render-6").append('<br>');
+
+        var renderSetEnableOpenCL = GUI.addCheckBox("renderSetEnableOpenCL", "OpenCL feedback", accordion_render.find("#menu-render-6"));
+        renderSetEnableOpenCL.on('change', 'input[type=checkbox]', function (e) {
+            onRenderOption(renderSetEnableOpenCL);
+        });
+        var renderSetUpdateVtex = GUI.addCheckBox("renderSetUpdateVtex", "OpenCL sorting", accordion_render.find("#menu-render-6"));
+        renderSetUpdateVtex.on('change', 'input[type=checkbox]', function (e) {
+            onRenderOption(renderSetUpdateVtex);
+        });
+        var renderSetSoftwareUpdateVtex = GUI.addCheckBox("renderSetSoftwareUpdateVtex", "Software feedback", accordion_render.find("#menu-render-6"));
+        renderSetSoftwareUpdateVtex.on('change', 'input[type=checkbox]', function (e) {
+            onRenderOption(renderSetSoftwareUpdateVtex);
+        });
+
+        accordion_render.find("#menu-render-6").append('<br>');
+
+        var renderUseOclCull = GUI.addCheckBox("renderUseOclCull", "OpenCL culling", accordion_render.find("#menu-render-6"));
+        renderUseOclCull.on('change', 'input[type=checkbox]', function (e) {
+            onRenderOption(renderUseOclCull);
+        });
+        var renderUseOclSort = GUI.addCheckBox("renderUseOclSort", "OpenCL sorting", accordion_render.find("#menu-render-6"));
+        renderUseOclSort.on('change', 'input[type=checkbox]', function (e) {
+            onRenderOption(renderUseOclSort);
+        });
+        var renderUseOclFixedSizeSort = GUI.addCheckBox("renderUseOclFixedSizeSort", "Fixed size sort", accordion_render.find("#menu-render-6"));
+        renderUseOclFixedSizeSort.on('change', 'input[type=checkbox]', function (e) {
+            onRenderOption(renderUseOclFixedSizeSort);
+        });
+        var renderUseOclApu = GUI.addCheckBox("renderUseOclApu", "OpenCL APU mode", accordion_render.find("#menu-render-6"));
+        renderUseOclApu.on('change', 'input[type=checkbox]', function (e) {
+            onRenderOption(renderUseOclApu);
+        });
+
+        accordion_render.find("#menu-render-6").append('<br>');
+
+        var debugOpenGLOutput = GUI.addCheckBox("debugOpenGLOutput", "Debug OpenGL", accordion_render.find("#menu-render-6"));
+        debugOpenGLOutput.on('change', 'input[type=checkbox]', function (e) {
+            onRenderOption(debugOpenGLOutput);
+        });
+        var debugSetEnableGlErrors = GUI.addCheckBox("debugSetEnableGlErrors", "glGetError asserts", accordion_render.find("#menu-render-6"));
+        debugSetEnableGlErrors.on('change', 'input[type=checkbox]', function (e) {
+            onRenderOption(debugSetEnableGlErrors);
+        });
+        var debugSetEnableGlValidation = GUI.addCheckBox("debugSetEnableGlValidation", "ResetState asserts", accordion_render.find("#menu-render-6"));
+        debugSetEnableGlValidation.on('change', 'input[type=checkbox]', function (e) {
+            onRenderOption(debugSetEnableGlValidation);
+        });
+        renderSetUpdateVtex.find("input").prop('checked', true);
+        debugSetEnableGlErrors.find("input").prop('checked', true);
+
+        //-----------------------------------------------------------------------------------------------------------------------------
 
         var buttonV = GUI.addStickyButton('buttonCutV', [""], layout.jqueryObjectSouth);
         GUI.image(buttonV, "img-cutV", "img/scissorV.png", 15, 15, "before");
@@ -262,31 +688,35 @@ THE SOFTWARE.
             layout.jqueryObjectPanes.css('cursor', 'auto');
             layout.jqueryObjectPanes.unbind("click");
             if ($(this).is(':checked')) {
-                layout.jqueryObjectPanes.css({'cursor': 'url(img/scissorV.png), default'});
-                layout.jqueryObjectPanes.click(function(event){ 
-                    var result = GUI.searchClickId(event,this);
-                    GUI.bufferLayout[0].cutV(GUI.uniqueId(),result.percentagex,result.id);      
-                    buttonV.trigger('change');   
-                    buttonV.removeClass('ui-state-active');  
-                    });
+                layout.jqueryObjectPanes.css({
+                    'cursor': 'url(img/scissorV.png), default'
+                });
+                layout.jqueryObjectPanes.click(function (event) {
+                    var result = GUI.searchClickId(event, this);
+                    GUI.bufferLayout[0].cutV(GUI.uniqueId(), result.percentagex, result.id);
+                    buttonV.trigger('change');
+                    buttonV.removeClass('ui-state-active');
+                });
             } else {
                 layout.jqueryObjectPanes.css('cursor', 'auto');
                 layout.jqueryObjectPanes.unbind('click');
             }
         });
-		
-        buttonH.on('change',function(e) {
+
+        buttonH.on('change', function (e) {
             buttonV.removeClass('ui-state-active');
             layout.jqueryObjectPanes.css('cursor', 'auto');
             layout.jqueryObjectPanes.unbind("click");
             if ($(this).is(':checked')) {
-                layout.jqueryObjectPanes.css({'cursor': 'url(img/scissorH.png), default'});
-                layout.jqueryObjectPanes.click(function(event){ 
-                    var result = GUI.searchClickId(event,this);
-                    GUI.bufferLayout[0].cutH(GUI.uniqueId(),result.percentagey,result.id);    
-                    buttonH.trigger('change');   
-                    buttonH.removeClass('ui-state-active'); 
-                    });
+                layout.jqueryObjectPanes.css({
+                    'cursor': 'url(img/scissorH.png), default'
+                });
+                layout.jqueryObjectPanes.click(function (event) {
+                    var result = GUI.searchClickId(event, this);
+                    GUI.bufferLayout[0].cutH(GUI.uniqueId(), result.percentagey, result.id);
+                    buttonH.trigger('change');
+                    buttonH.removeClass('ui-state-active');
+                });
             } else {
                 layout.jqueryObjectPanes.css('cursor', 'auto');
                 layout.jqueryObjectPanes.unbind("click");
@@ -294,12 +724,33 @@ THE SOFTWARE.
 
         });
 
-//-----------------------------------------------------------------------------------------------------------------------------
-        pleaseWait.hide();
-        pleaseWait.remove();
-        window.fl4reStatus('CLEAR');
+        //-----------------------------------------------------------------------------------------------------------------------------
 
-    });
+        //---------- others function -----------------------------------------------------------------------------
+        var mask;
+
+        function pleaseWait(_displayMode, _parent) {
+            if (_displayMode == true) {
+                var mask = GUI.mask("mask-loading", "Please wait ...", _parent.jqueryObjectWest);
+                GUI.image(mask, "img-loading", "img/loading.gif", 30, 30, "before");
+                window.Status('INFO', 'loading UI...', _parent.jqueryObjectSouth)
+                return mask;
+            } else if (_displayMode == false) {
+                $('#mask-loading').remove();
+                window.Status('CLEAR', '', _parent.jqueryObjectSouth);
+                return true;
+            } else {
+                return false;
+            }
+        }
+        GUI.autoScroll($(".ui-accordion-header"), $("#content-renderMenus"));
+        //this is really important! enables scrolling and filling the tab content
+        layout.jqueryObject.initContent("center");
+        layout.jqueryObject.resizeAll();
+
+        pleaseWait(false, layout);
+
+    })
 
         
          </script>

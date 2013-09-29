@@ -1,3 +1,4 @@
+
 /*
  GUI.js 
 
@@ -27,7 +28,31 @@ THE SOFTWARE.
 */
 "use strict";
 
-/***ff
+if (window.$ === undefined) {
+    document.write('<link rel="stylesheet" href="/gui/themes/custom-theme/jquery-ui-1.10.3.custom.css" />');
+
+    document.write('<script src="/deps/jquery.js"><\/' + 'script>');
+    document.write('<script src="/deps/jquery-ui.js"><\/' + 'script>');
+    document.write('<script src="/deps/jquery.layout.min.js"><\/' + 'script>');
+
+    document.write('<script type="text/javascript" src="/deps/jquery.cookie.js"><\/' + 'script>');
+    document.write('<script type="text/javascript" src="/deps/jquery.hotkeys.js"><\/' + 'script>');
+    document.write('<script type="text/javascript" src="/deps/jquery.jstree.js"><\/' + 'script>');
+    document.write('<script type="text/javascript" src="/deps/jquery.terminal-0.7.3.js"><\/' + 'script>');
+    document.write('<script type="text/javascript" src="/deps/jquery.toolbar.js"><\/' + 'script>');
+    document.write('<script type="text/javascript" src="/deps/jquery.hover.js"><\/' + 'script>');
+    document.write('<script type="text/javascript" src="/deps/console.js"><\/' + 'script>');
+
+    document.write('<link rel="stylesheet" href="/gui/gui6.css" />');
+    document.write('<link rel="stylesheet" href="/gui/themes/jquery.terminal.css" />');
+    document.write('<link rel="stylesheet" href="/gui/themes/jquery.toolbars.css" />');
+    document.write('<link rel="stylesheet" href="/gui/themes/bootstrap.icons.css" />');
+
+
+
+}
+
+/***
   Require Underscore, if we're on the server, and it's not already present.
   var _ = root._;
   if (!_ && (typeof require !== 'undefined')) _ = require('underscore')._;
@@ -55,11 +80,9 @@ THE SOFTWARE.
 
     GUI.button = function (_txt, _parent, _callback, _x1, _y1, _x2, _y2) {
         var $button = $('<button></button>');
-        var callback = _callback;
 
         $button.button().click(function (event) {
-            if (callback) callback.call(this);
-            event.preventDefault();
+            if (_callback) _callback.call(this);
         });
         // create unique ID
         $button.button().uniqueId();
@@ -294,6 +317,12 @@ THE SOFTWARE.
         return html;
     }
 
+    GUI.uniqueId = function () {
+        var html = "ui-id-" + Math.round(Math.random() * 10000);
+        return html;
+    }
+
+
     GUI.InputInteractive = function (_parent, _id, _min, _max, _defaultValue, _precision, _sensibility) {
 
         function Object(_parent, _id, _min, _max, _defaultValue, _precision_sensibility) {
@@ -312,9 +341,9 @@ THE SOFTWARE.
 
             this.createButton = function () {
                 this.jqueryObjectButton = GUI.button("", this.parent, '', '', '', '20', '23');
-                 this.jqueryObjectButton.css("position:relative; top: 10px !important;")
+                this.jqueryObjectButton.css("position:relative; top: 10px !important;")
                 /* GUI.addIcon = function (_parent, _cssClass, _style, _position)*/
-                GUI.addIcon(this.jqueryObjectButton,"ui-icon-carat-2-n-s","position:relative; bottom:6px !important; left:1px;");
+                GUI.addIcon(this.jqueryObjectButton, "ui-icon-carat-2-n-s", "position:relative; bottom:6px !important; left:1px;");
                 this.jqueryObjectButton.wrapAll('<span style="display:inline;"></span>')
             }
 
@@ -593,7 +622,7 @@ THE SOFTWARE.
     }
 
 
-    GUI.mask = function (_id, _HTMLtext,_parent) {
+    GUI.mask = function (_id, _HTMLtext, _parent) {
         var dialog = '<div id=' + _id + ' ><span id="text-mask" style="position:relative;left:15px;bottom:10px;">' + _HTMLtext + '</span></div>';
         var $dialog = $(dialog);
         if (_parent.find('#' + _id).length) {
@@ -625,8 +654,8 @@ THE SOFTWARE.
         }
         $("#" + _id).dialog({
             resizable: true,
-            height: '500',
-            width: '800',
+            height: '300',
+            width: '850',
             modal: true
         });
         return $("#" + _id);
@@ -745,7 +774,7 @@ THE SOFTWARE.
         radioList += '</li>';
         if (_parent) {
             var $radioList = $(radioList);
-            _parent.append($radioList);s
+            _parent.append($radioList);
             return $radioList;
         } else {
             return radioList;
@@ -903,6 +932,40 @@ THE SOFTWARE.
 
         return $window.find('.ui-widget-content');
     };
+
+    GUI.searchClickId = function (event, element) {
+        var idSearch = event.target.id;
+        var check = true;
+        var count = 0;
+        var condition = ''
+        while (check) {
+            count++;
+            var search = $('#' + idSearch).attr('class');
+            if (search) {
+                if (search.match("ui-layout-center") || search.match("ui-layout-south") || search.match("ui-layout-north") || search.match("ui-layout-est") || search.match("ui-layout-west")) {
+                    check = false;
+                    break;
+                }
+            }
+            var $parent = $('#' + idSearch).parent();
+            idSearch = $parent.attr('id');
+            if (count == 20) {
+                throw "didn't find any layouts";
+                return false;
+            }
+        }
+        element = $('#' + idSearch);
+        var parentOffset = element.offset();
+        var relX = event.pageX - parentOffset.left;
+        var relY = event.pageY - parentOffset.top;
+        var percentageY = Math.round(relY * (100 / $(element).height()));
+        var percentageX = Math.round(relX * (100 / $(element).width()));
+        return {
+            id: idSearch,
+            percentagex: percentageX,
+            percentagey: percentageY
+        };
+    }
 
 
     GUI.Layout = function (id, position) {
@@ -1097,7 +1160,6 @@ THE SOFTWARE.
                 tmp.create();
                 tmp.randomColor();
                 tmp.parent = this;
-                // if(idSearch=="mainLayout-west"){tmp.cutH(GUI.uniqueId(),positionOrigin,tmp.id+"-center");}
             }
 
             this.cutV = function (id, position, idSearch) {
@@ -1115,7 +1177,6 @@ THE SOFTWARE.
                 tmp.create();
                 tmp.randomColor();
                 tmp.parent = this;
-                // if(idSearch=="mainLayout-west"){tmp.cutV(GUI.uniqueId(),positionOrigin,tmp.id+"-center");}
             }
         }
 
@@ -1150,41 +1211,34 @@ THE SOFTWARE.
             onresize: GUI.resize,
         };
         obj.create();
-        //obj.jqueryObject.options.west.minSize = '10%';
-        //obj.jqueryObject.options.west.maxSize = '90%';
 
-        obj.jqueryObject.sizePane("west", $(window).width() - 275);
+        obj.jqueryObject.sizePane("west", $(window).width() - 250);
         $(window).on('resize orientationChanged', function () {
             setTimeout(function () {
-                obj.jqueryObject.sizePane("west", $(window).width() - 275)
+                obj.jqueryObject.sizePane("west", $(window).width() - 250)
             }, 500);
         });
         obj.jqueryObject.allowOverflow("north");
         obj.jqueryObject.allowOverflow("south");
-        obj.jqueryObjectWest.append("<div id='support-layout' class='ui-layout-center' style='height:100%;width:100%'></div>");
+        obj.jqueryObjectWest.append("<div id='support-layout' class='ui-layout-center'></div>");
         return obj;
     }
     // does not work without this
-    GUI.resize = function () {
-        // $pane.find('.ui-resize-me').resize();
-        var tmp = $("#mainLayout-west").height();
-        var tmp1 = $("#mainLayout-west").width();
-        Conduit.viewportSetViewSize("default", tmp1, tmp);
-        Conduit.viewportSetViewOrigin("default", 0, 25);
-    };
+    GUI.resize = function () {};
 
-    GUI.setMenuSensitivity = function (sensitivity,timeoutMouseOver,timeoutMouseOut){
-    $('#mainLayout-north .has-sub .has-sub, #z0_5_3').hoverIntent({    
-         sensitivity: sensitivity,   
-         interval: timeoutMouseOver, 
-         over: function(){
-            $(this).find('ul').css("display", "block")
-         },   
-         timeout: timeoutMouseOut, 
-         out: function(){
-            $(this).find('ul').css("display", "none")
-         } 
+    GUI.setMenuSensitivity = function (sensitivity, timeoutMouseOver, timeoutMouseOut) {
+        $('#mainLayout-north .has-sub .has-sub, #z0_5_3').hoverIntent({
+            sensitivity: sensitivity,
+            interval: timeoutMouseOver,
+            over: function () {
+                $(this).find('ul').css("display", "block")
+            },
+            timeout: timeoutMouseOut,
+            out: function () {
+                $(this).find('ul').css("display", "none")
+            }
 
-        });}
+        });
+    }
 
 }).call(this);
