@@ -23,658 +23,668 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
  -->
 <head>
-    <script type="text/javascript" src="/gui/gui6.js"></script>
-    <script type="text/javascript">
-    // initialize Application
     
-    
-    $(function () {
-        "use strict";
+    <script type="text/javascript" src="../deps/jquery-2.0.3.min.js"></script>
+    <script type="text/javascript" src="../deps/jquery-ui-1.9.2.min.js"></script>                
+    <script type="text/javascript" src="../deps/jquery.layout-1.3.0.min.js"></script>        
+                    
+    <script type="text/javascript" src="../deps/jquery.jstree.js"></script>
+    <script type="text/javascript" src="../deps/jquery.toolbar.js"></script> 
+    <script type="text/javascript" src="../deps/jquery.terminal-0.7.10.min.js"></script> 
+    <script type="text/javascript" src="../deps/jquery.pnotify.min.js"></script>
 
-        window.Status = function (type, text, _parent) {
+    <!-- skinner plugin -->
+    <link href="../deps/css/jquery-skinner.css" rel="stylesheet" />
+    <script src="../deps/jquery-skinner.js" type="text/javascript"></script>
+
+    <!-- codemirror plugin -->
+    <script type="text/javascript" src="../deps/codemirror/codemirror.min.js"></script>
+    <script type="text/javascript" src="../deps/codemirror/javascript.js"></script>
+    <script type="text/javascript" src="../deps/codemirror/show-hint.js"></script>
+    <script type="text/javascript" src="../deps/codemirror/javascript-hint.js"></script>
+    <script type="text/javascript" src="../deps/codemirror/dialog.js"></script>
+    <script type="text/javascript" src="../deps/codemirror/search.js"></script>
+    <script type="text/javascript" src="../deps/codemirror/search-cursor.js"></script>
+
+    <link rel="stylesheet" href="../deps/codemirror/css/eclipse.css"/>   
+    <link rel="stylesheet" href="../deps/codemirror/css/codemirror.css"/>
+    <link rel="stylesheet" href="../deps/codemirror/css/show-hint.css"/>     
+    <link rel="stylesheet" href="../deps/codemirror/css/dialog.css"/>    
+  
+    <link rel="stylesheet" href="../deps/css/bootstrap.icons.css"/>
+    <link rel="stylesheet" href="../deps/css/jquery.toolbars.css"/>
+    <link rel="stylesheet" href="../deps/css/jquery.terminal.css"/>  
+    <link rel="stylesheet" href="../deps/css/jquery.pnotify.default.css"/>
+
+    <script type="text/javascript" src="/gui/gui6.js"></script>
+    <link rel="stylesheet" href="../gui/gui6.css"/>   
+    <script type="text/javascript" src="../deps/console.js"></script>
+
+    <script type="text/javascript">
+    
+    $("document").ready(function () {
+        "use strict";
+        var listThemes = ["black-tie", "blitzer", "cupertino", "dark-hive", "dot-luv", "eggplant", "excite-bike", "flick", "hot-sneaks", "humanity", "le-frog", "mint-choc", "overcast", "pepper-grinder", "redmond", "smoothness", "south-street", "start", "sunny", "swanky-purse", "trontastic", "ui-darkness", "ui-lightness", "vader"];
+        var renderMenu = $('');
+        var flagStatus = false;
+        var url = "http://www.google.com/custom?q=fl4re&btnG=Search";
+
+         window.fl4reStatus = function (type, text, _parent) {
+            $('#copyButton').remove();
             $('#iconStatus').remove();
             $('#defaultText').remove();
+            $('#defaultTextBis').remove();
             if (type == 'CLEAR' || type == 'READY') {
                 GUI.label("defaultText", "ready", _parent);
-                GUI.addIcon(_parent, "ui-icon-circle-check", "float:left;margin:3px;", "before").attr('id', 'iconStatus');;
+                GUI.addIcon(_parent, "ui-icon-circle-check", "float:left;margin:3px;", "before").attr('id', 'iconStatus');
             } else if (type == 'BUSY') {
                 GUI.label("defaultText", text, _parent);
+                GUI.addIcon(_parent, "ui-icon-clock", "float:left;margin:3px;", "before").attr('id', 'iconStatus');;
             } else if (type == 'ERROR') {
                 GUI.label("defaultText", text, _parent);
+                GUI.addIcon($("#mainLayout-south"), "ui-icon-circle-close", "float:left;margin:3px;", "before").attr('id', 'iconStatus');;
             } else if (type == 'WARNING') {
                 GUI.label("defaultText", text, _parent);
                 GUI.addIcon($("#mainLayout-south"), "ui-icon-alert", "float:left;margin:3px;", "before").attr('id', 'iconStatus');;
             } else {
-                GUI.label("defaultText", text, _parent);
-                GUI.addIcon(_parent, "ui-icon-info", "float:left;margin:3px;", "before").attr('id', 'iconStatus');;
+                var label = GUI.label("defaultTextBis", text, _parent);
+                GUI.addIcon(_parent, "ui-icon-info", "float:left;margin:3px;", "before").attr('id', 'iconStatus');
+                var clear = GUI.button("Clear", label, function(){
+                    GUI.copyToClipboard(text.slice(15,-1));
+                    $('this').addTooltip({content:"copy completed!"});
+                });
+                clear.prop("id","copyButton");
+                clear.html('');
+                GUI.addIcon(clear, "ui-icon-copy", "", "before");
+                clear.addTooltip({content:"copy URL to clipboard"});
             }
         };
 
-        //main layout
+        window.loadCss = function (item) {
+            var link = "../deps/themes/" + item + "/jquery-ui.css";
+            GUI.destroyCurrentCssTheme();
+            GUI.loadCssFile(link);
+            GUI.currentCssTheme = link;
+            setTimeout(function () {
+                GUI.setColorJqueryTheme();
+                GUI.refreshJqueryTheme();
+            }, 1000);
+        }
+
+        function pleaseWait(_displayMode, _parent) {
+            if (_displayMode == true) {
+                var mask = GUI.mask("mask-loading", "Please wait ...", _parent.jqueryObjectWest);
+                GUI.image($('#mask-loading'), "img-loading", "images/loading.gif", 30, 30, "before");
+                window.fl4reStatus('INFO', 'loading UI...', _parent.jqueryObjectSouth)
+                return mask;
+            } else if (_displayMode == false) {
+                $('#mask-loading').remove();
+                window.fl4reStatus('CLEAR', '', _parent.jqueryObjectSouth);
+                // Conduit.viewportSetViewSize("default", layout.jqueryObjectWest.width() + 10, layout.jqueryObjectWest.height());
+        }};
+
         var layout = GUI.Layout("mainLayout", 1);
-        layout.jqueryObject.sizePane("north", 35);
-        layout.jqueryObject.sizePane("south", 25);
 
-        pleaseWait(true, layout);
-
-        GUI.label("auteur", "&copy; R&eacute;mi Arnaud - Advanced Micro Devices, Inc. 2013", layout.jqueryObjectSouth);
+        pleaseWait(true,layout);
+        window.loadCss("vader");
+        GUI.label("auteur", "&copy; fl4re 2013", layout.jqueryObjectSouth);
         CONSOLE.open(layout);
 
-        GUI.addMenu(["Scenes", "Animations", "Cameras", "Engine", "Sound", "Particles", "Help", " "], [0, 0, 0, 0, 0, 0, "javascript:window.onHelp();", "javascript:window.callbackFullScreen();"], "0", "menu");
+                ////////////
+        // MAIN MENU
 
-        //------------------------------//fileMenu  ---------------------------------------------------------------------------------------------
+        var menu = GUI.menu({
+            id: "menu",
+            parent: layout.jqueryObjectNorth,
+            item: [
+                {
+                    text        :   "Scenes",
+                    id          :   "scenes"
+                },
+                {
+                    text        :   "Animations",
+                    id          :   "animation"
+                },
+                {
+                    text        :   "Cameras",
+                    id          :   "cameras"
+                },
+                {
+                    text        :   "Sounds",
+                    id          :   "sound"
+                },
+                {
+                    text        :   "Lights",
+                    id          :   "light"
+                },
+                {
+                    text        :   "Particles",
+                    id          :   "particle"
+                },
+                {
+                    text        :   "Settings",
+                    id          :   "settings"
+                },
+                {
+                    text        :   "Themes UI",
+                    id          :   "themes"
+                },
+                {
+                    text        :   "Support",
+                    id          :   "support"
+                },
+                {
+                    text        :   "b",
+                    id          :   "fullscreen",
+                    callback    :   function(){
+                                        console.debug("fullscreen");
+                                        },
+                                    }
+            ]});
 
-        GUI.addMenu(["New", "Load", "Save", "Append", "Clone", "Fix broken DAE export", "Quit"], ["javascript:window.onNew();", "javascript:window.onLoad()", 0, "javascript:window.onAppend()", "checkbox", 0, "javascript:window.onQuit()"], "0_1", "Scenes");
-
-        var fileDebugMenu = GUI.addMenu(["Ignore transparency", "Flip CW / CCW", "Force single (first) effect"], ["checkbox", "checkbox", "checkbox"], "0_1_6", "fileDebugMenu");
-
-        window.onNew = function () {
-            hideOnClick($("#z0_1"));
-            console.log("New")
-        };
-
-        window.onAppend = function () {
-            hideOnClick($("#z0_1"));
-            console.log("Append");
-        };
-
-        window.onLoad = function () {
-            hideOnClick($("#z0_1"));
-            console.log("Load")
-
-        };
-
-        var quitPanel = $([]);
-        window.onQuit = function () {
-            hideOnClick($("#z0_1"));
-            quitPanel.remove();
-            quitPanel = GUI.confirmDialog("quitPanel", "Leaving?", "Are you sure you want to quit?", "Quit", "window.close()");
-            GUI.image(quitPanel, "img-quit", "img/icon-error2.png", '40', '40', 'before');
-        }
-
-        var filesMenu = GUI.addMenu([], [], "0_1_2", "Load");
-        var filesMenuBis = GUI.addMenu([], [], "0_1_4", "Append");
-
-        $('#z0_1_3').addClass("disable");
-
-        //------------------------------/AnimationsMenu---------------------------------------------------------------------------------------------
-        var Scenes = GUI.addMenu(["Play all", "Stop all", "Animation List", "Animation Clips"], ["javascript:window.onAnimPlayAll();", "javascript:window.onAnimStopAll();", 0, 0], "0_2", "Animations");
-
-        //Callbacks
-        //sub-menus  animMenu
-        var animMenu = GUI.addMenu(["example1", "example2"], [0, 0], "0_2_3", "animMenu");
-        var animClipMenu = GUI.addMenu(["example1", "example2", "example3"], [0, 0, 0], "0_2_4", "animClipMenu");
-
-        window.onAnimPlayAll = function () { // have to improve it 
-            hideOnClick($("#z0_2"));
-            console.log("playAll")
-        }
-
-        window.onAnimStopAll = function () {
-            hideOnClick($("#z0_2"));
-            console.log("StopAll");
-        }
-
-        window.onAnimClip = function (uri) {
-            Conduit.animReset();
-            Conduit.animPlayClip(uri, true);
-        }
-        //------------------------------//camera menu    ---------------------------------------------------------------------------------------------
-        //Callbacks
-        window.onViewportReset = function () {
-            hideOnClick($("#z0_3"));
-            console.log("viewportReset");
-        }
-
-        window.onViewportCreate = function () {
-            hideOnClick($("#z0_3"));
-            console.log("viewportCreate");
-        }
-
-        window.onCameraLost = function () {
-            hideOnClick($("#z0_3"));
-            console.log("cameraLost");
-        }
+            GUI.mainMenu = menu;
 
 
-        window.onCameraReset = function () {
-            hideOnClick($("#z0_3"));
-            console.log("cameraReset");
-        }
-        GUI.addMenu(["Create viewports", "Create cubemap", "Remove viewports", "reset", "find anything", ["cameraExemple1", "cameraExemple2", "cameraExemple3"]], ["javascript:window.onViewportCreate()", "javascript:window.CreateCubemap()", "javascript:window.onViewportReset()", "javascript:window.onCameraReset()", "javascript:window.onCameraLost()", "radioList", "0", "slider"], "0_3", "Cameras");
-        //------------------------------///help dialog  ---------------------------------------------------------------------------------------------
-        var helpMenu = $([]);
-        window.onHelp = function () {
-            helpMenu.remove();
-            var txt = 'The greenhouse effect is a process by which thermal radiation from a planetary surface is absorbed by atmospheric greenhouse gases, and is re-radiated in all directions. Since part of this re-radiation is back towards the surface and the lower atmosphere, it results in an elevation of the average surface temperature above what it would be in the absence of the gases","C string that contains the text to be written to stdout.It can optionally contain embedded format specifiers that are replaced by the values specified in subsequent additional arguments and formatted as requested.A format specifier follows this prototype: [see compatibility note below] specifier Where the specifier character at the end is the most significant component, since it defines the type and the interpretation of its corresponding argument:';
-            var helpText = "<div><pre>";
-            var emptyCharacter = false;
-            // break line every 100 characters
-            for (var j = 0; j < txt.length; j++) {
-                if (j == 0) {
-                    helpText += " ";
-                }
-                var intRegex = /^\d+$/;
-                if ((intRegex.test(j / 100) || emptyCharacter) && (j != 0)) {
-                    if (txt[j] == " ") {
-                        emptyCharacter = false;
-                        helpText += "<br>";
-                    } else {
-                        emptyCharacter = true;
-                    }
-                }
-                helpText += txt[j];
-            };
-            helpText += "</pre></div>";
-            helpText += "<br>";
+        var scenes = GUI.menu({
+            id: "scenes-menu",
+            parent: menu.scenes,
+            item: [
+                {
+                    text        :   "New",
+                    id          :   "new",
+                    callback    :   function() {
+                                    }
+                },
+                {
+                    text        :   "Load",
+                    id          :   "load",
+                    callback    :   function() {
+                                    }
+                },
+                {
+                    text        :   "Append",
+                    id          :   "append",
+                    type        :   "checkbox",
+                },
+                {
+                    text        :   "Clone",
+                    id          :   "clone",
+                    type        :   "checkbox",
+                },
+                {type:"separator"},
+                {
+                    text        :   "Save patches",
+                    id          :   "savePatches",
 
-            helpMenu = GUI.messageDialog("help", "Help", helpText);
-        }
-        //------------------------------//engine/sound/particles menu    ---------------------------------------------------------------------------------------------
+                },
+                {type:"separator"},
+                {
+                    text        :   "Quit",
+                    id          :   "quit",}
+            ]
+        });
 
-        GUI.addMenu(["Load", "Save", "Reset"], ["javascript:window.onEngineLoad()", "javascript:window.onEngineSave()", "javascript:window.onEngineReset()"], "0_4", "Engine");
-        var soundMenu = GUI.addMenu(["Play All", "Stop All"], ["javascript:window.onSoundPlay()", "javascript:window.onSoundStop()"], "0_5", "Sounds");
-        GUI.addMenu(["Create All"], ["javascript:window.onCreateAllParticles()"], "0_6", "Particles");
+        var filesMenu = GUI.menu({id: "load-menu",parent: scenes.load, item:[]});
+        
+        ////////////
+        // ANIMATION
 
-        window.onEngineLoad = function () {
-            hideOnClick($("#z0_4"));
-            console.log("engineLoad");
-        };
+        var animations = GUI.menu({
+            id: "animation-menu",
+            parent: menu.animation,
+            item: [
+            {
+                id          :   "playAllDefault",
+                text        :   'Play all default',
+            },
+            {
+                id          :   "playAllOther",
+                text        :   'Play all other',
+            },
+            {
+                id          :   "stopAll",
+                text        :   'Stop all',
+            },
+            {type:"separator"},
+            {
+                id          :   "animationClip",
+                text        :   "Animation Clips"
+            },
+            ]
+        });
 
-        window.onEngineSave = function () {
-            hideOnClick($("#z0_4"));
-            console.log("engineSave");
-        };
+        var animClipMenu = GUI.menu({id: "clip-menu",parent: animations.animationClip, item:[]});
 
-        window.onEngineReset = function () {
-            hideOnClick($("#z0_4"));
-            console.log("engineReset");
-        };
+        /////////
+        // CAMERA
 
-        window.onCreateAllParticles = function () {
-            hideOnClick($("#z0_6"));
-            console.log("createAllParticles")
-        };
-
-        window.onSoundPlay = function () {
-            hideOnClick($("#z0_5"));
-            console.log("soundPlay")
-        }
-
-        window.onSoundStop = function () {
-            hideOnClick($("#z0_5"));
-            console.log("soundStop")
-        }
-
-        var flagFullScreen = true;
-        window.callbackFullScreen = function () {
-            var el = document.documentElement,
-                rfs = // for newer Webkit and Firefox
-                el.requestFullScreen || el.webkitRequestFullScreen || el.mozRequestFullScreen || el.msRequestFullScreen;
-            if (typeof rfs != "undefined" && rfs) {
-                rfs.call(el);
-            } else if (typeof window.ActiveXObject != "undefined") {
-                // for Internet Explorer
-                var wscript = new ActiveXObject("WScript.Shell");
-                if (wscript != null) {
-                    wscript.SendKeys("{F11}");
-                }
+        var cameras = GUI.menu({
+            id: "camera-menu",
+            parent: menu.cameras,
+            item: [
+            {
+                id          :   "allCameraList",
+                text        :   'List of cameras',
+            },
+            {type:"separator"},
+            {
+                id          :   "createViewport",
+                text        :   'Create viewports',},
+            {
+                id          :   "createCubemap",
+                text        :   "Create cubemap",
+            },
+            {
+                id          :   "removeViewport",
+                text        :   "Remove viewports",
+            },
+            {type:"separator"},
+            {
+                id          :   "reset",
+                text        :   "Reset",
+            },
+            {
+                id          :   "findAnything",
+                text        :   "Find anything",
+            },
+            {type:"separator"},
+            {
+                id          :   "debugGesture",
+                text        :   "Debug gesture",
             }
-            if (flagFullScreen) flagFullScreen = false;
-            else flagFullScreen = true;
+            ]
+        });
+        
+        
+        
+        var camerasList = GUI.menu({id:"cameraList-menu", text:"Cameras", parent:cameras.allCameraList, item:[]});
+        
+        // --------------------------------------------------------- support and help -----------------------------------------------------------------------------
+
+        var supportMenu = GUI.menu({
+            id: "support-menu",
+            parent: menu.support,
+            item:[
+            {id:"help-panel",text:"Help",callback:"window.onHelp()"},
+            {id:"google",text:"Google",callback:"window.onGithub()"}
+            ]
+        })
+
+        var helpPanel = $([]);
+        
+        //help dialog
+        window.onHelp = function () {
         }
 
-        function hideOnClick(_parent) {
-            _parent.find(">ul").hide();
-            _parent.mouseover(function () {
-                _parent.find('>ul').show();
-            });
-            _parent.mouseout(function () {
-                _parent.find('>ul').hide();
-            });
+        var gitPanel = $([]);
+        window.onGithub = function(){
+            var gitHtml = '<div id="dialog"><iframe id="myIframe" src="" style="height:99% !important; width:99% !important; border:0px;"></iframe></div>';
+            gitPanel = $('body').append(gitHtml);
+            $("#dialog").dialog({
+                    autoOpen: true,
+                    width: 800,
+                    height: 600,
+                    open: function(ev, ui){
+             $('#myIframe').attr('src',url);
+          }});
         }
 
-        // GUI.setMenuSensitivity(5,0,400);  
+        /////////
+        // LIGHTS
+        
+        var lights = GUI.menu({id: "lights-menu", parent: menu.light, item:[
+            {
+                id          :   "defaultLights",
+                text        :   "Default lights",
+            },
+            {type:"separator"},
+            {
+                id : "listLights",
+                text : "List of lights"
+            },
+        ]});
+        
+        ////////////
+        // PARTICLES
+        
+        var particles = GUI.menu({id: "settings-menu", parent: menu.particle, item:[
+            {
+                id          :   "newParticles",
+                text        :   "New",
+            },
+            {
+                id          :   "daeParticles",
+                text        :   "New from DAE",
+            },
+            {
+                id          :   "loadParticles",
+                text        :   "Load",
+            },
+            {
+                id          :   "appendParticles",
+                text        :   "Append",
+               
+            }
+        ]});
+        
+        particles.setAutoHeight();
+        // SOUND MENU
 
-        //add icons to the menu
-        GUI.addIcon($("#z0_1>a"), "ui-icon-triangle-1-s", "float:right;");
-        GUI.addIcon($("#z0_2>a"), "ui-icon-triangle-1-s", "float:right;");
-        GUI.addIcon($("#z0_3>a"), "ui-icon-triangle-1-s", "float:right;");
-        GUI.addIcon($("#z0_4>a"), "ui-icon-triangle-1-s", "float:right;");
-        GUI.addIcon($("#z0_5>a"), "ui-icon-triangle-1-s", "float:right;");
-        GUI.addIcon($("#z0_6>a"), "ui-icon-triangle-1-s", "float:right;");
-        GUI.addIcon($("#z0_2_3>a"), "ui-icon-triangle-1-e", "float:right;bottom:1px !important;");
-        GUI.addIcon($("#z0_2_4>a"), "ui-icon-triangle-1-e", "float:right;bottom:1px !important;");
-        GUI.addIcon($("#z0_1_6>a"), "ui-icon-triangle-1-e", "float:right;bottom:1px !important;");
+        var soundMenu = GUI.menu({
+            id: "sound-menu",
+            parent: menu.sound,
+            item:[
+            {
+                id          :   "playAllSound",
+                text        :   "Play All",
+            },
+            {
+                id          :   "stopAllSound",
+                text        :   "Stop All",
+            },
+            {type:"separator"},
+            {
+                id          :   "soundList",
+                text        :   "Sound instances"
+            },
+            {type:"separator"},
+            {
+                id          :   "debugSpeakers",
+                text        :   "Debug",
+            },
+            {
+                id          :   "soundSystems",
+                text        :   "Sound  systems"
+            }
+            ]
+            
+        });
+        
+        ///////////
+        // SETTINGS
+        
+        var settings_menu = GUI.menu({id: "settings-menu", parent: menu.settings, item:[
+            {
+                id          :   "resetSettings",
+                text        :   "Reset",
+            },
+            {
+                id          :   "importSettings",
+                text        :   "Import",
+            },
+            {
+                id: "exportSettings",
+                text : "Export",
+            },
+            {type:"separator"},
+            {
+                id: "autoSaveSettings",
+                text : "Auto-save",
+                type : "checkbox",
+                state : true,
+                
+            },
+        ]});
+        
+        settings_menu.setAutoHeight();
+        
+        
+        //////////////
+        // THEMES MENU
 
-        GUI.image($("#z0_1>a"), "img-scenes", "img/action.gif", 22, 22, "before");
-        GUI.image($("#z0_2>a"), "img-animation", "img/menu-animations.gif", 20, 20, "before");
-        GUI.image($("#z0_3>a"), "img-cameras", "img/camera-anim.gif", 27, 27, "before");
-        GUI.image($("#z0_4>a"), "img-engine", "img/counter.gif", 20, 20, "before");
-        GUI.image($("#z0_5>a"), "img-sound", "img/sound.gif", 18, 20, "before");
-        GUI.image($("#z0_6>a"), "img-particles", "img/particles.gif", 17, 17, "before");
-        GUI.image($("#z0_7>a"), "img-help", "img/menu-help.png", 18, 18, "before");
-        GUI.image($("#z0_8>a"), "img-fullscreen", "img/view_fullscreen.png", 25, 20, "before");
+        var listCallback = [];
+        var jsonTheme = {id:'theme-menu', parent:menu.themes, item:[]};
+        for (var lgt = 0; lgt < listThemes.length; lgt++) {
+            jsonTheme.item[lgt] = {
+                text        :   listThemes[lgt],
+                id          :   listThemes[lgt],
+                  callback    :   function(theme) { return function() {
+                                    window.loadCss(theme);
+                                }} ( listThemes[lgt] )
+              
+            };
+        }
+        var theme = GUI.menu(jsonTheme);
+        theme.setAutoHeight();
+    
+        
+        //------------------------------ all menu icons ---------------------------------------------------------------------------------------------
+
+        // //add icons to the menu
+        GUI.image(menu.scenes.text, "img-scenes", "images/action.gif", 18, 18, "before");
+        GUI.image(menu.animation.text, "img-animation", "images/menu-animations.gif", 15, 15, "before");
+        GUI.image(menu.cameras.text, "img-cameras", "images/camera-anim.gif", 20, 20, "before");
+        GUI.image(menu.sound.text, "img-sound", "images/sound.gif", 10, 17, "before");
+        GUI.image(menu.light.text, "img-light", "images/lightbulb.png", 16, 16, "before");
+        GUI.image(menu.particle.text, "img-particles", "images/particles.gif", 15, 15, "before");
+        GUI.image(menu.settings.text, "img-settings", "images/icon-cog.png", 15, 15, "before");
+        GUI.image(menu.support.text, "img-help", "images/menu-help.png", 15, 15, "before");
+        GUI.image(menu.themes.text, "img-themes", "images/jquery.png", 15, 15, "before");
+        GUI.addIcon(menu.fullscreen.text, "ui-icon-arrow-4-diag", "position: relative !important; right:10px !important;bottom: 10px !important;", "before");
+        menu.fullscreen.moveToRightFromLeft();
+        menu.support.moveToRightFromLeft(25);
+        menu.themes.moveToRightFromLeft();
+        menu.settings.moveToRightFromLeft(220);
 
         //------------------------------//render menu ---------------------------------------------------------------------------------------------
 
-        var renderMenu = GUI.addTabWindow(layout.jqueryObjectCenter, "renderMenus", "  Render");
-        GUI.image(renderMenu.find('.ui-tabs-anchor'), "img-render", "img/menu-render.png", 12, 14, "before");
-        var materialMenu = GUI.addNewTab("renderMenus", "material", "  Material");
-        GUI.image($('#header-renderMenus :last-child').find('.ui-tabs-anchor'), "img-material", "img/menu-scenes.png", 12, 14, "before");
+        var renderMenu = GUI.tab ({
+            id: "renderMenus",
+            parent: layout.jqueryObjectCenter,
+            item :[
+                {id:"render", text:"  Render"},
+            ]
+        })
 
-        // GUI.addStickyList = function (_id, _items, _parent, _mode)
-        var exemple = ["example1", "example2", "example3", "example4", "example5"];
-        GUI.addRadioList(2, exemple, exemple, exemple, materialMenu);
+        renderMenu.sortable();
+        renderMenu.tabManager();
 
-        GUI.label("fovSliderContent", "Camera, fov = ", renderMenu.find(".content"));
-        var fovSliderText = GUI.label("fovSliderText", "80", renderMenu.find(".content"));
-        var fovSliderCamera = GUI.addSlider("fovSliderCamera", renderMenu.find(".content"), 10, 120, 1, 80).width(200);
-        fovSliderCamera.on("slidechange", function () {
+        GUI.image(renderMenu.render.title, "img-render", "images/menu-render.png", 12, 14, "before");
+
+        GUI.label("fovSliderContent", "Camera, fov = ", renderMenu.render);
+        var fovSliderText = GUI.label("fovSliderText", "60", renderMenu.render);
+        var fovSliderCamera = GUI.addSlider("fovSliderCamera", renderMenu.render, 10, 120, 1, 60).width(200);
+        fovSliderCamera.on("slide", function () {
             fovSliderText.text($(this).slider("value"));
         })
 
-        renderMenu.find(".content").append('</br>');
+        renderMenu.render.append('</br>');
 
-        GUI.label("exposureTitle", "exposure = ", renderMenu.find(".content"));
-        GUI.label("exposureText", "0 f-stops", renderMenu.find(".content"));
-        var exposurerSlide = GUI.addSlider("exposureSlider", renderMenu.find(".content"), -8, 8, 0.1, 0).width(200).on("slidechange", newExposure);
 
-        function newExposure() {
-            $("#exposureText").text($("#exposureSlider").slider("value") + " f-stops ");
-        }
+        renderMenu.render.append('</br>');
 
-        GUI.label("bloomBiasTitle", "bloomBias = ", renderMenu.find(".content"));
-        GUI.label("bloomBiasText", "0.9 bloom bias", renderMenu.find(".content"));
-        var bloomBiasSlide = GUI.addSlider("bloomBiasSlider", renderMenu.find(".content"), 0, 2, 0.01, 0.9).width(200).on("slidechange", newBloom);
 
-        GUI.label("bloomScaleTitle", "bloomScale = ", renderMenu.find(".content"));
-        GUI.label("bloomScaleText", "1.5 bloom scale", renderMenu.find(".content"));
-        var bloomScaleSlide = GUI.addSlider("bloomScaleSlider", renderMenu.find(".content"), 0, 8, 0.1, 1.5).width(200).on("slidechange", newBloom);
+        var debugShowFPS = GUI.addCheckBox("debugShowFPS", "Show FPS", renderMenu.render);
 
-        function newBloom() {
-            $("#bloomBiasText").html($("#bloomBiasSlider").slider("value") + " bloom bias");
-            $("#bloomScaleText").html($("#bloomScaleSlider").slider("value") + " bloom scale");
-        }
+        var enablePickerAxes = GUI.addCheckBox("enablePickerAxes", "Draw picker axes", renderMenu.render);
 
-        renderMenu.find(".content").append('<br>');
+        var enablePickerGrid = GUI.addCheckBox("enablePickerGrid", "Draw picker grid", renderMenu.render);
+ 
+        renderMenu.render.append('</br>');
+        renderMenu.render.append('</br>');
+        
+        //////////////////
+        // ENGINE SETTINGS
 
-        function onRenderOption($_parent, _id) {
-            var tmp = $_parent.attr('id');
-            if (_id) {
-                tmp = _id;
+        var accordion = GUI.accordion({
+            id: "menu-render",
+            parent: renderMenu.render,
+            item:[
+                {id:"debugRender", text:"Debug render"},
+                {id:"profiler", text:"Profiler"},
+                {id:"resolution", text:"Resolution"}
+            ]
+        })
+        accordion.autoScrollDown();
+
+        function jumpLine (){
+            accordion.debugRender.append("<br></br>");
+            accordion.profiler.append("<br></br>");
+            accordion.resolution.append("<br></br>");
+        } 
+
+        //GUI.addSelect = function (_id, _items, _parent, _selectedIndex, _callback) 
+        GUI.addSelect("rea", ["select1","select2","select3"], accordion.debugRender, 1);
+        GUI.addSelect("rea1", ["select1","select2","select3"], accordion.profiler, 2);
+        GUI.addSelect("rea2", ["select1","select2","select3"], accordion.resolution, 0);
+
+        jumpLine();
+
+        //GUI.InputInteractive = function (_parent, _id, _min, _max, _defaultValue, _precision, _sensibility, _newLine)
+        GUI.InputInteractive(accordion.debugRender,"input", 0, 50, 10, 1, 0.01);
+        GUI.InputInteractive(accordion.profiler,"input1", 0, 50, 1, 1, 0.01);
+        GUI.InputInteractive(accordion.resolution,"input2", 0, 50, 30, 1, 0.01);
+
+        jumpLine();
+
+        //GUI.addStickyButton = function (_id, _items, _parent, _mode)
+        GUI.addStickyButton("sticku", ["ex1","ex2","ex3"], accordion.debugRender);
+        GUI.addStickyButton("sticku1", ["ex1","ex2","ex3"], accordion.profiler);
+        GUI.addStickyButton("sticku2", ["ex1","ex2","ex3"], accordion.resolution);
+
+        jumpLine();
+
+        //GUI.addStickyList = function (_id, _items, _parent, _mode, _selectedIndex, _callback)
+        GUI.addStickyList("list",["list1","list2","list3"],accordion.debugRender, "", 1)
+        GUI.addStickyList("list1",["list1","list2","list3"],accordion.profiler, "", 2)
+        GUI.addStickyList("list2",["list1","list2","list3"],accordion.resolution, "", 3)
+
+        jumpLine();
+
+        //GUI.addRadioList = function (_position, _id, _value, _text, _parent)
+        GUI.addRadioList(2, "list", [1,2,3,4], ["radio1","radio2","radio3","radio4"], accordion.debugRender);
+        GUI.addRadioList(3, "list1", [1,2,3,4], ["radio1","radio2","radio3","radio4"], accordion.profiler);
+        GUI.addRadioList(1, "list2", [1,2,3,4], ["radio1","radio2","radio3","radio4"], accordion.resolution);
+
+         //---------- SCRIPT tab --------------------------------------------------------------------------------------
+
+        renderMenu.addTab({id:"script",text: "  Script"});
+
+        var sample ="$('body').keypress(\n  function(e){\n  if (e.keyCode==113){\n//if key 'q' \n console.debug(e.keyCode)\n  //tape your code here \n } \n});";
+
+        var script = GUI.script({id:"scriptArea",parent:renderMenu.script,content: sample});
+
+        script.object.setSize("100%","93%");
+        renderMenu.refresh();
+
+        var play; var stop; var clear; var help; var save; var load;
+
+        GUI.image(renderMenu.script.title, "img-script", "images/script.png", 20, 14, "before");
+        play = GUI.button("Play",  renderMenu.script ,function(){
+            //window.unbindEventToConduit();
+            window.runStatus();
+            window.interprate();
+            script.parent.on('keyup', function(){window.interprate();})
+            play.addClass("disablehide");
+            stop.removeClass("disablehide");
+            clear.addClass("disablehide");
+            flagStatus = true;
+            if(CONSOLE.flagError){
+                CONSOLE.flagError=false;
+                window.errorStatus();
             }
-            console.debug("onRenderOption id = " + tmp + " , check ? " + $_parent.find('input:checkbox').is(':checked'));
-        }
-
-        GUI.label("titreMenu", "Back buffer resolution:", renderMenu.find(".content"), "text-decoration:underline;", "isolate");
-        GUI.button("Native", renderMenu.find(".content"), onBackBufferNative).width(100);
-
-        function onBackBufferNative() {
-            console.debug("nativeMode")
-        }
-        GUI.button("1280x720", renderMenu.find(".content"), makeBackBufferHandler).width(100);
-        renderMenu.find(".content").append('<br>');
-        GUI.button("860x640", renderMenu.find(".content"), makeBackBufferHandler).width(100);
-        GUI.button("720x480", renderMenu.find(".content"), makeBackBufferHandler).width(100);
-        renderMenu.find(".content").append('<br>');
-
-        function makeBackBufferHandler(width, height) {
-            console.log("resize");
-        }
-
-        renderMenu.find(".content").append('<br>');
-
-        GUI.button("Load cube map", renderMenu.find(".content"), onLoadCubeMap).width(203);
-
-        function onLoadCubeMap() {
-            console.log("loadCubeMap")
-        }
-
-        renderMenu.find(".content").append('<br>');
-        renderMenu.find(".content").append('<br>');
-
-        var renderSetFilmCurve = GUI.addCheckBox("renderSetFilmCurve", "Film curve", renderMenu.find(".content"));
-        renderSetFilmCurve.on('change', 'input[type=checkbox]', function (e) {
-            onRenderOption(renderSetFilmCurve);
         });
+        play.html('');
+        GUI.addIcon(play, "ui-icon-play", "", "before");
+        play.addTooltip( {content : "Run script"});
+        stop = GUI.button("Stop", renderMenu.script, function(){
+            script.parent.off();
+            //window.bindEventToConduit();
+            play.removeClass("disablehide");
+            stop.addClass("disablehide");
+            clear.removeClass("disablehide");
+            flagStatus = false;
+            window.readyStatus();
+        });
+        stop.addClass("disablehide");
+        stop.html('');
+        GUI.addIcon(stop, "ui-icon-stop", "", "before");
+        stop.addTooltip({content : "Stop script"});
+        clear = GUI.button("Clear", renderMenu.script, function(){
+            script.parent.off();
+            script.object.setValue(sample);
+            script.object.clearHistory();
+            window.readyStatus();
+            flagStatus = false;
+        });
+        clear.html('');
+        GUI.addIcon(clear, "ui-icon-trash", "", "before");
+        clear.addTooltip({content : "Clear script"});
+        // var flagHelpNotif = false;
+        help = GUI.button("Help", renderMenu.script, function(){
+            var html = "<dl><dt>Ctrl-F / Cmd-F</dt><dd>Start searching</dd><dt>Ctrl-G / Cmd-G</dt><dd>Find next</dd><dt>Shift-Ctrl-G / Shift-Cmd-G</dt><dd>Find previous</dd><dt>Shift-Ctrl-F / Cmd-Option-F</dt><dd>Replace</dd> <dt>Shift-Ctrl-R / Shift-Cmd-Option-F</dt><dd>Replace all</dd><dt>Ctrl-Space / Cmd-Space</dt><dd>Auto-complete</dd></dl>"
+            GUI.notification({title:"Script hotkeys", text: html, type:"notice"})
+        });
+        help.html('');
+        help.prop('id',"helpScript");
+        GUI.addIcon(help, "ui-icon-note", "", "before");
+        help.addTooltip({content : "Hotkeys"});
 
-        var debugSetRenderGPass = GUI.addCheckBox("debugSetRenderGPass", "Deferred", renderMenu.find(".content"));
-        debugSetRenderGPass.find("input").prop('checked', true);
-        debugSetRenderGPass.on('change', 'input[type=checkbox]', function (e) {
-            onRenderOption(debugSetRenderGPass)
-        });
+        save = GUI.button("Save",renderMenu.script,function(){
+               
+            })
+        save.html('');
+        save.prop('id',"saveScript");
+        GUI.addIcon(save, "ui-icon-disk", "", "before");
+        save.addTooltip({content : "Save current script"});
 
-        var renderSetAdaptiveSampling = GUI.addCheckBox("renderSetAdaptiveSampling", "Adaptive sampling", renderMenu.find(".content"));
-        renderSetAdaptiveSampling.on('change', 'input[type=checkbox]', function (e) {
-            onRenderOption(renderSetAdaptiveSampling)
+        var loadInput = GUI.input({id:"loadScript",parent:renderMenu.script,hide:true,extension:"application/javascript",mode:"readText",callback:function(FILE){
+            script.object.setValue(FILE.target.result);
+            GUI.notification({text:"Script loaded",time:"5000",type:"notice"});}});
+            load = GUI.button("Load",renderMenu.script,function(){
+            loadInput.click();
+            script.refresh();
         });
-        var renderSetDynamicLights = GUI.addCheckBox("renderSetDynamicLights", "Dynamic lights", renderMenu.find(".content"));
-        renderSetDynamicLights.on('change', 'input[type=checkbox]', function (e) {
-            onRenderOption(renderSetDynamicLights)
-        });
-        renderMenu.find(".content").append('<br>');
-        var enablePickerAxes = GUI.addCheckBox("enablePickerAxes", "Draw picker axes", renderMenu.find(".content"));
-        enablePickerAxes.on('change', 'input[type=checkbox]', function (e) {
-            onRenderOption(enablePickerAxes)
-        });
-        enablePickerAxes.find("input").prop('checked', true);
-        var enablePickerGrid = GUI.addCheckBox("enablePickerGrid", "Draw picker grid", renderMenu.find(".content"));
-        enablePickerGrid.on('change', 'input[type=checkbox]', function (e) {
-            onRenderOption(enablePickerGrid)
-        });
-        renderMenu.find(".content").append('<br>');
-        var debugSetRenderVSync = GUI.addCheckBox("debugSetRenderVSync", "Draw enable vsync", renderMenu.find(".content"));
-        debugSetRenderVSync.on('change', 'input[type=checkbox]', function (e) {
-            onRenderOption(debugSetRenderVSync)
-        });
-        debugSetRenderVSync.find("input").prop('checked', true);
-        renderMenu.find(".content").append('<br>');
+        load.html('');
+        GUI.addIcon(load, "ui-icon-folder-open", "", "before");
+        load.addTooltip({content : "Load script"});
 
-        //----------create accordions for rest of render's menus ---------------------------------------------------------------------------------------------
-        var accordion_render = GUI.addAccordion("menu-render", ["Shadows && SSAO", "Anti-Aliasing", "Sharpen", "Reflections", "GI", "Debug render", "Profiler"], renderMenu.find(".content"), ["0", "0", "0", "0", "0", "0", "0"]).width(203);
-        // Hack to allow all accordions openables 
-        accordion_render.on("accordionbeforeactivate", function (event, ui) {
-            // hhACK accordion don't collapse if his content is empty
-            if ((($.trim($(ui.newPanel).html()).length == 0) && ($(ui.oldHeader).length == 0)) || (($.trim($(ui.newPanel).html()).length == 0) && ($(ui.newHeader).length))) {
-                event.preventDefault();
+        var runStatus = GUI.image(renderMenu.script, "traffic-light", "images/traffic-cone_blue.png", '20', '20');
+        runStatus.addTooltip({content : "Ready to run"})
+
+        window.interprate = function(){
+            //$('body').unbind();
+            // $(document).unbind();
+            window.runStatus();
+            $('#scriptElement').remove();
+            $('#scriptElement').empty();
+            $('#scriptElement').html('');
+            var js = script.object.getValue();
+            var variable = document.createElement('script');
+            variable.id = 'scriptElement';
+            variable.textContent = js;
+            document.body.appendChild(variable);
+            if(CONSOLE.flagError){
+                CONSOLE.flagError=false;
+                window.errorStatus();
             }
-            if (ui.newHeader[0]) {
-                var currHeader = ui.newHeader;
-                var currContent = currHeader.next('.ui-accordion-content');
-            } else {
-                var currHeader = ui.oldHeader;
-                var currContent = currHeader.next('.ui-accordion-content');
-            }
-            var isPanelSelected = currHeader.attr('aria-selected') == 'true';
-            currHeader.toggleClass('ui-corner-all', isPanelSelected).toggleClass('accordion-header-active ui-state-active ui-corner-top', !isPanelSelected).attr('aria-selected', ((!isPanelSelected).toString()));
-            currHeader.children('.ui-icon').toggleClass('ui-icon-triangle-1-e', isPanelSelected).toggleClass('ui-icon-triangle-1-s', !isPanelSelected);
-            currContent.toggleClass('accordion-content-active', !isPanelSelected)
-            if (isPanelSelected) {
-                currContent.slideUp();
-            } else {
-                currContent.slideDown();
-            }
-            return false;
-        });
-
-        //--------- Anti Aliasing -----------------------------------------------------------------------------
-        var renderSetHistoryAA = GUI.addCheckBox("renderSetHistoryAA", "Temporal AA", accordion_render.find("#menu-render-1"));
-        renderSetHistoryAA.on('change', 'input[type=checkbox]', function (e) {
-            onRenderOption(renderSetShadowResolution);
-        });
-        var renderSetFxaa3 = GUI.addCheckBox("renderSetFxaa3", "FXAA version 3", accordion_render.find("#menu-render-1"));
-        renderSetFxaa3.on('change', 'input[type=checkbox]', function (e) {
-            onRenderOption(renderSetShadowResolution);
-        });
-        //--------- Element Sharpen-----------------------------------------------------------------------------
-        var renderSetSharpen = GUI.addCheckBox("renderSetSharpen", "Sharpen filter", accordion_render.find("#menu-render-2"));
-        renderSetSharpen.on('change', 'input[type=checkbox]', function (e) {
-            onRenderOption(renderSetSharpen)
-        });
-        accordion_render.find("#menu-render-2").append('<br>');
-        GUI.label("strengthTitle", "strength = ", accordion_render.find("#menu-render-2"));
-        GUI.label("sharpenText", "2", accordion_render.find("#menu-render-2"));
-        var sharpenSlider = GUI.addSlider("sharpenSlider", accordion_render.find("#menu-render-2"), 0, 32, 0.1, 2);
-        sharpenSlider.on("slidechange", newSharpen);
-        accordion_render.find("#menu-render-2").append('<br>');
-
-        var renderSetSharpenAdaptive = GUI.addCheckBox("renderSetSharpenAdaptive", "Adaptive sharpening", accordion_render.find("#menu-render-2"));
-        renderSetSharpenAdaptive.on('change', 'input[type=checkbox]', function (e) {
-            onRenderOption(renderSetSharpenAdaptive)
-        });
-        accordion_render.find("#menu-render-2").append('<br>');
-        GUI.label("strengthTitle1", "strength = ", accordion_render.find("#menu-render-2"));
-        GUI.label("sharpenAdaptiveText", "12", accordion_render.find("#menu-render-2"));
-        var sharpenAdaptiveSlider = GUI.addSlider("sharpenAdaptiveSlider", accordion_render.find("#menu-render-2"), 0, 32, 0.1, 12);
-        sharpenAdaptiveSlider.on("slidechange", newSharpenAdaptive);
-        GUI.label("strengthTitle2", "jitter = ", accordion_render.find("#menu-render-2"));
-        GUI.label("sharpenJitterText", "0.0", accordion_render.find("#menu-render-2"));
-        var sharpenJitterSlider = GUI.addSlider("sharpenJitterSlider", accordion_render.find("#menu-render-2"), 0, 1, 0.01, 0);
-        sharpenJitterSlider.on("slidechange", newSharpenJitter);
-        accordion_render.find("#menu-render-2").append('<br>');
-        var renderSetDebugSharpenMask = GUI.addCheckBox("renderSetDebugSharpenMask", "Debug sharpen mask", accordion_render.find("#menu-render-2"));
-        renderSetDebugSharpenMask.on('change', 'input[type=checkbox]', function (e) {
-            onRenderOption(renderSetDebugSharpenMask)
-        });
-
-        function onRenderMode(item) {
-            Conduit.debugSetRenderMode(item);
-        };
-
-        function newSharpen() {
-            $("#sharpenText").html($("#sharpenSlider").slider("value"));
         }
 
-        function newSharpenAdaptive() {
-            $("#sharpenAdaptiveText").html($("#sharpenAdaptiveSlider").slider("value"));
+        window.readyStatus = function(){
+            runStatus.remove();
+            runStatus = GUI.image(renderMenu.script, "traffic-light", "images/traffic-cone_blue.png", '20', '20');
+            runStatus.addTooltip({content:"Ready to run"})
+        }
+
+        window.errorStatus = function(){
+            runStatus.remove();
+            runStatus = GUI.image(renderMenu.script, "traffic-light", "images/traffic-cone_red.png", '20', '20');
+            runStatus.addTooltip({content:"Error detected into the script, please consult the console"});
+        }
+
+        window.runStatus = function(){
+            runStatus.remove();
+            runStatus = GUI.image(renderMenu.script, "traffic-light", "images/traffic-cone_green.png", '20', '20');
+            runStatus.addTooltip({content:"Running..."});
         }
 
 
-        function newSharpenJitter() {
-            $("#sharpenJitterText").html($("#sharpenJitterSlider").slider("value"));
-        }
+        $('#tabindex_2').find('input').click();
+        $('#tabindex_1').find('input').click();
 
-        //---------- element reflection-----------------------------------------------------------------------------
-        var renderSetReflectionQuality = GUI.addCheckBox("renderSetShadowQuality", "HQ reflections", accordion_render.find("#menu-render-3"));
-        accordion_render.find("#menu-render-3").append('<br>');
-        renderSetReflectionQuality.on('change', 'input[type=checkbox]', function (e) {
-            onRenderOption(renderSetReflectionQuality)
-        });
+        //---------------------------------------------------------------------------------------------------------------------
 
-        GUI.label("reflectionStepsTitle", "Reflection steps : ", accordion_render.find("#menu-render-3"), "text-decoration:underline;");
-        accordion_render.find("#menu-render-3").append('<br><br>');
-        var reflectionStepsSlider = GUI.InputInteractive(accordion_render.find("#menu-render-3"), "0", 3, 25, 0.1, 1, 0.001, 1)
-        accordion_render.find("#menu-render-3").append('<br>');
-
-
-        GUI.label("reflectionFadeFactorTitle", "Reflection fade factor : ", accordion_render.find("#menu-render-3"), "text-decoration:underline;");
-        accordion_render.find("#menu-render-3").append('<br><br>');
-        var reflectionFadeFactorSlider = GUI.InputInteractive(accordion_render.find("#menu-render-3"), "0", 1, 10, 1, 1, 0.001, 1)
-        accordion_render.find("#menu-render-3").append('<br>');
-
-        //---------- element GI-----------------------------------------------------------------------------
-        var EnableGI = GUI.addCheckBox("unique_id", "Enable GI", accordion_render.find("#menu-render-4"));
-        EnableGI.on('change', 'input[type=checkbox]', function (e) {
-            console.log("enbaleGI ? " + EnableGI.find('input').is(':checked'));
-        });
-        var renderSetRandSeedWorld = GUI.addCheckBox("World-pinned", "World-pinned", accordion_render.find("#menu-render-4"));
-        renderSetRandSeedWorld.on('change', 'input[type=checkbox]', function (e) {
-            console.log("enbaleGI ? " + renderSetRandSeedWorld.find('input').is(':checked'));
-        });
-        var renderSetGIAdaptive = GUI.addCheckBox("renderSetGIAdaptive", "Adaptive GI", accordion_render.find("#menu-render-4"));
-        renderSetGIAdaptive.on('change', 'input[type=checkbox]', function (e) {
-            console.log("enbaleGI ? " + renderSetGIAdaptive.find('input').is(':checked'));
-        });
-        var renderSetGIHistory = GUI.addCheckBox("renderSetGIHistory", "Temporal GI", accordion_render.find("#menu-render-4"));
-        renderSetGIHistory.on('change', 'input[type=checkbox]', function (e) {
-            console.log("enbaleGI ? " + renderSetGIHistory.find('input').is(':checked'));
-        });
-        var renderSetGIQuality = GUI.addCheckBox("renderSetGIQuality", "High quality GI", accordion_render.find("#menu-render-4"));
-        renderSetGIQuality.on('change', 'input[type=checkbox]', function (e) {
-            console.log("enbaleGI ? " + renderSetGIQuality.find('input').is(':checked'));
-        });
-        var renderSetGISpecular = GUI.addCheckBox("renderSetGISpecular", "Specular", accordion_render.find("#menu-render-4"));
-        renderSetGISpecular.on('change', 'input[type=checkbox]', function (e) {
-            console.log("enbaleGI ? " + renderSetGIQuality.find('input').is(':checked'));
-        });
-        var renderSetBlurSasGI = GUI.addCheckBox("renderSetBlurSasGI", "Blur GI", accordion_render.find("#menu-render-4"));
-        renderSetBlurSasGI.on('change', 'input[type=checkbox]', function (e) {
-            onRenderOption(renderSetBlurSasGI)
-        });
-        var renderSetSSSOnly = GUI.addCheckBox("renderSetSSSOnly", "SSS only", accordion_render.find("#menu-render-4"));
-        renderSetSSSOnly.on('change', 'input[type=checkbox]', function (e) {
-            onRenderOption(renderSetSSSOnly)
-        });
-        var renderSetGILow = GUI.addCheckBox("renderSetGILow", "Use lowres GI source", accordion_render.find("#menu-render-4"));
-        renderSetGILow.on('change', 'input[type=checkbox]', function (e) {
-            onRenderOption(renderSetGILow)
-        });
-        renderSetRandSeedWorld.find("input").prop('checked', true);
-        renderSetGIHistory.find("input").prop('checked', true);
-        renderSetBlurSasGI.find("input").prop('checked', true);
-        renderSetGILow.find("input").prop('checked', true);
-
-        accordion_render.find("#menu-render-4").append('<br>');
-
-        GUI.label("sssAbsorbtionTitle", "SSS absorbtion = ", accordion_render.find("#menu-render-4"));
-        GUI.label("sssAbsorbtionText", "1", accordion_render.find("#menu-render-4"));
-        var sssAbsorbtionSlider = GUI.addSlider("sssAbsorbtionSlider", accordion_render.find("#menu-render-4"), 0, 1, 0.01, 1);
-        sssAbsorbtionSlider.on("slidechange", newAmbient);
-
-        GUI.label("sssDistanceFactorTitle", "SSS distance factor = ", accordion_render.find("#menu-render-4"));
-        GUI.label("sssDistanceFactorText", "2", accordion_render.find("#menu-render-4"));
-        var sssDistanceFactorSlider = GUI.addSlider("sssDistanceFactorSlider", accordion_render.find("#menu-render-4"), 0.01, 10, 0.01, 2);
-        sssDistanceFactorSlider.on("slidechange", newAmbient);
-
-        GUI.label("ambientSigmaTitle", "Sigma = ", accordion_render.find("#menu-render-4"));
-        GUI.label("ambientSigmaText", "0.5", accordion_render.find("#menu-render-4"));
-        var ambientSigmaSlider = GUI.addSlider("ambientSigmaSlider", accordion_render.find("#menu-render-4"), 0.01, 0.9, 0.01, 0.5);
-        ambientSigmaSlider.on("slidechange", newAmbient);
-
-        GUI.label("ambientRadiusTitle", "Radius = ", accordion_render.find("#menu-render-4"));
-        GUI.label("ambientRadiusText", "3", accordion_render.find("#menu-render-4"));
-        var ambientRadiusSlider = GUI.addSlider("ambientRadiusSlider", accordion_render.find("#menu-render-4"), 0.1, 10, 0.05, 3);
-        ambientRadiusSlider.on("slidechange", newAmbient);
-
-        GUI.label("ambientCountTitle", "Steps = ", accordion_render.find("#menu-render-4"));
-        GUI.label("ambientCountText", "16", accordion_render.find("#menu-render-4"));
-        var ambientCountSlider = GUI.addSlider("ambientCountSlider", accordion_render.find("#menu-render-4"), 1, 64, 1, 16);
-        ambientCountSlider.on("slidechange", newAmbient);
-
-        GUI.label("ambientAbsorbtionTitle", "Absorbtion = ", accordion_render.find("#menu-render-4"));
-        GUI.label("ambientAbsorbtionText", "50", accordion_render.find("#menu-render-4"));
-        var ambientAbsorbtionSlider = GUI.addSlider("ambientAbsorbtionSlider", accordion_render.find("#menu-render-4"), 0, 500, 0.05, 50);
-        ambientAbsorbtionSlider.on("slidechange", newAmbient);
-
-        GUI.label("ambientPercentTitle", "Original ambient = ", accordion_render.find("#menu-render-4"));
-        GUI.label("ambientPercentText", "1", accordion_render.find("#menu-render-4"));
-        var ambientPercentSlider = GUI.addSlider("ambientPercentSlider", accordion_render.find("#menu-render-4"), 0, 1, 0.01, 1);
-        ambientPercentSlider.on("slidechange", newAmbient);
-
-        GUI.label("ambientPercentLightTitle", "Original sun = ", accordion_render.find("#menu-render-4"));
-        GUI.label("ambientPercentLightText", "1", accordion_render.find("#menu-render-4"));
-        var ambientPercentLightSlider = GUI.addSlider("ambientPercentLightSlider", accordion_render.find("#menu-render-4"), 0, 10, 0.01, 1);
-        ambientPercentLightSlider.on("slidechange", newAmbient);
-
-        function newAmbient() {
-            $("#sssAbsorbtionText").text($("#sssAbsorbtionSlider").slider("value"));
-            $("#sssDistanceFactorText").text($("#sssDistanceFactorSlider").slider("value"));
-            $("#ambientSigmaText").text($("#ambientSigmaSlider").slider("value"));
-            $("#ambientRadiusText").text($("#ambientRadiusSlider").slider("value"));
-            $("#ambientCountText").text($("#ambientCountSlider").slider("value"));
-            $("#ambientAbsorbtionText").text($("#ambientAbsorbtionSlider").slider("value"));
-            $("#ambientPercentText").text($("#ambientPercentSlider").slider("value"));
-            $("#ambientPercentLightText").text($("#ambientPercentLightSlider").slider("value"))
-        }
-
-        //---------- element debug render-----------------------------------------------------------------------------
-        var elems = ["example1", "example2", "example3", "example4", "example5", "example6"]
-        var rendermodesRadio2 = GUI.addRadioList(4, elems, elems, elems, accordion_render.find("#menu-render-5"));
-
-        rendermodesRadio2.find('input').each(function (index) {
-            $(this).on('change', function (e) {
-                if ($(this).is(':checked')) {
-                    onRenderMode($(this).attr('value'));
-                }
-            });
-        });
-        accordion_render.find("#menu-render-5").append('<br>');
-
-        GUI.label("mipDebugTitle", "mip = ", accordion_render.find("#menu-render-5"));
-        GUI.label("mipDebugText", "0", accordion_render.find("#menu-render-5"));
-        var mipDebugSlider = GUI.addSlider("mipDebugSlider", accordion_render.find("#menu-render-5"), 0, 3, 1, 0);
-        mipDebugSlider.on("slidechange", mipDebug);
-        GUI.label("splitDebugTitle", "split = ", accordion_render.find("#menu-render-5"));
-        GUI.label("splitDebugText", "0", accordion_render.find("#menu-render-5"));
-        var debugSplitSlider = GUI.addSlider("debugSplitSlider", accordion_render.find("#menu-render-5"), 0, 3, 1, 0);
-        debugSplitSlider.on("slidechange", splitDebug);
-
-        var debugSetWireframe = GUI.addCheckBox("renderSetGILow", "Wireframe", accordion_render.find("#menu-render-5"));
-        debugSetWireframe.on('change', 'input[type=checkbox]', function (e) {
-            onRenderOption(debugSetWireframe)
-        });
-
-        accordion_render.find("#menu-render-5").append('<br>');
-
-        function mipDebug() {
-            $("#mipDebugText").html($("#mipDebugSlider").slider("value"));
-        }
-
-        function splitDebug() {
-            $("#splitDebugText").html($("#debugSplitSlider").slider("value"));
-        }
-
-        //---------- Profiler render-----------------------------------------------------------------------------
-        var debugCPUProfiler = GUI.addCheckBox("debugCPUProfiler", "CPU profiler", accordion_render.find("#menu-render-6"));
-        debugCPUProfiler.on('change', 'input[type=checkbox]', function (e) {
-            onRenderOption(debugCPUProfiler);
-        });
-
-        var debugGPUProfiler = GUI.addCheckBox("debugGPUProfiler", "GPU profiler", accordion_render.find("#menu-render-6"));
-        debugGPUProfiler.on('change', 'input[type=checkbox]', function (e) {
-            onRenderOption(debugGPUProfiler);
-        });
-
-        var debugShowFPS = GUI.addCheckBox("debugShowFPS", "Show FPS", accordion_render.find("#menu-render-6"));
-        debugShowFPS.on('change', 'input[type=checkbox]', function (e) {
-            console.log("showFps")
-        });
-
-        accordion_render.find("#menu-render-6").append('<br>');
-
-        var renderSetEnableOpenCL = GUI.addCheckBox("renderSetEnableOpenCL", "OpenCL feedback", accordion_render.find("#menu-render-6"));
-        renderSetEnableOpenCL.on('change', 'input[type=checkbox]', function (e) {
-            onRenderOption(renderSetEnableOpenCL);
-        });
-        var renderSetUpdateVtex = GUI.addCheckBox("renderSetUpdateVtex", "OpenCL sorting", accordion_render.find("#menu-render-6"));
-        renderSetUpdateVtex.on('change', 'input[type=checkbox]', function (e) {
-            onRenderOption(renderSetUpdateVtex);
-        });
-        var renderSetSoftwareUpdateVtex = GUI.addCheckBox("renderSetSoftwareUpdateVtex", "Software feedback", accordion_render.find("#menu-render-6"));
-        renderSetSoftwareUpdateVtex.on('change', 'input[type=checkbox]', function (e) {
-            onRenderOption(renderSetSoftwareUpdateVtex);
-        });
-
-        accordion_render.find("#menu-render-6").append('<br>');
-
-        var renderUseOclCull = GUI.addCheckBox("renderUseOclCull", "OpenCL culling", accordion_render.find("#menu-render-6"));
-        renderUseOclCull.on('change', 'input[type=checkbox]', function (e) {
-            onRenderOption(renderUseOclCull);
-        });
-        var renderUseOclSort = GUI.addCheckBox("renderUseOclSort", "OpenCL sorting", accordion_render.find("#menu-render-6"));
-        renderUseOclSort.on('change', 'input[type=checkbox]', function (e) {
-            onRenderOption(renderUseOclSort);
-        });
-        var renderUseOclFixedSizeSort = GUI.addCheckBox("renderUseOclFixedSizeSort", "Fixed size sort", accordion_render.find("#menu-render-6"));
-        renderUseOclFixedSizeSort.on('change', 'input[type=checkbox]', function (e) {
-            onRenderOption(renderUseOclFixedSizeSort);
-        });
-        var renderUseOclApu = GUI.addCheckBox("renderUseOclApu", "OpenCL APU mode", accordion_render.find("#menu-render-6"));
-        renderUseOclApu.on('change', 'input[type=checkbox]', function (e) {
-            onRenderOption(renderUseOclApu);
-        });
-
-        accordion_render.find("#menu-render-6").append('<br>');
-
-        var debugOpenGLOutput = GUI.addCheckBox("debugOpenGLOutput", "Debug OpenGL", accordion_render.find("#menu-render-6"));
-        debugOpenGLOutput.on('change', 'input[type=checkbox]', function (e) {
-            onRenderOption(debugOpenGLOutput);
-        });
-        var debugSetEnableGlErrors = GUI.addCheckBox("debugSetEnableGlErrors", "glGetError asserts", accordion_render.find("#menu-render-6"));
-        debugSetEnableGlErrors.on('change', 'input[type=checkbox]', function (e) {
-            onRenderOption(debugSetEnableGlErrors);
-        });
-        var debugSetEnableGlValidation = GUI.addCheckBox("debugSetEnableGlValidation", "ResetState asserts", accordion_render.find("#menu-render-6"));
-        debugSetEnableGlValidation.on('change', 'input[type=checkbox]', function (e) {
-            onRenderOption(debugSetEnableGlValidation);
-        });
-        renderSetUpdateVtex.find("input").prop('checked', true);
-        debugSetEnableGlErrors.find("input").prop('checked', true);
-
-        //-----------------------------------------------------------------------------------------------------------------------------
-
-        var buttonV = GUI.addStickyButton('buttonCutV', [""], layout.jqueryObjectSouth);
+        /*var buttonV = GUI.addStickyButton('buttonCutV', [""], layout.jqueryObjectSouth);
         GUI.image(buttonV, "img-cutV", "img/scissorV.png", 15, 15, "before");
         buttonV.width(35);
         buttonV.height(50);
@@ -723,34 +733,23 @@ THE SOFTWARE.
             }
 
         });
+*/
+        //--------------------------------------------------------------------------------------------------------------------
 
-        //-----------------------------------------------------------------------------------------------------------------------------
+        layout.jqueryObject.sizePane("west", $(window).width() - 300);
+        setTimeout(function(){layout.jqueryObject.sizePane("west", $(window).width() - 299);},4000);
 
-        //---------- others function -----------------------------------------------------------------------------
-        var mask;
-
-        function pleaseWait(_displayMode, _parent) {
-            if (_displayMode == true) {
-                var mask = GUI.mask("mask-loading", "Please wait ...", _parent.jqueryObjectWest);
-                GUI.image(mask, "img-loading", "img/loading.gif", 30, 30, "before");
-                window.Status('INFO', 'loading UI...', _parent.jqueryObjectSouth)
-                return mask;
-            } else if (_displayMode == false) {
-                $('#mask-loading').remove();
-                window.Status('CLEAR', '', _parent.jqueryObjectSouth);
-                return true;
-            } else {
-                return false;
-            }
-        }
-        GUI.autoScroll($(".ui-accordion-header"), $("#content-renderMenus"));
-        //this is really important! enables scrolling and filling the tab content
-        layout.jqueryObject.initContent("center");
         layout.jqueryObject.resizeAll();
+        layout.jqueryObject.initContent("center");
+        layout.jqueryObject.initContent("west");
+
 
         pleaseWait(false, layout);
+       
 
-    })
+        
+
+    });
 
         
          </script>

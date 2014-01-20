@@ -2,13 +2,15 @@
     CONSOLE = this.CONSOLE = {};
     CONSOLE.terminal = '';
     CONSOLE.window = 'all';
+    CONSOLE.jqueryObject = "";
+    CONSOLE.flagError = false;
+    CONSOLE.statusOpen = false;
     CONSOLE.open = function (object) {
 
         var timer;
 
-        object.jqueryObjectWest.append("<div id='support-console' style='height:100%;width:100%'></div>");
-        $('#support-console').append('<div id="console" class="ui-layout-south"></div><div id="mainLayout-westBis" class="ui-layout-center"></div>')
-        var newLayout = $('#support-console').layout({
+        object.jqueryObjectWest.append('<div id="console" class="ui-layout-south"></div><div id="viewerFrame" class="ui-layout-center"></div>')
+        var newLayout = object.jqueryObjectWest.layout({
             togglerLength_open: 0, // HIDE the toggler button
 
             south: {
@@ -22,24 +24,56 @@
             }
         });
 
+        
         var toggle_button = GUI.addStickyButton('buttonLayout', [""], object.jqueryObjectSouth);
         toggle_button.width(35);
         toggle_button.height(25);
         var consoleObject = $('#console');
         var modeConsoleObject = $('#mode_console');
+        CONSOLE.jqueryObject = consoleObject;
         consoleObject.hide();
-        GUI.image(toggle_button, "img-console", "img/console.png", '20', '30');
+        GUI.image(toggle_button, "img-console", "images/console.png", '20', '30');
         toggle_button.on('change', function (e) {
             if ($(this).is(':checked')) {
                 consoleObject.show();
                 stopSignal();
+                $("#layout-console").click();
                 $("#layout-console").scrollTop(5000);
-                newLayout.sizePane("south", 120);
+                // if(!flagStatus){window.unbindEventToConduit()};
+                linesToColor();
+                var flagSelect = true;
+                $(".prompt").next().on("mouseup",function(e){
+                    if(flagSelect){
+                    var select = document.getSelection().toString();
+                    var value = $(".prompt").next().html();
+                    var res = value.replace(select,"");
+                    $('body').keydown(
+                          function(e){
+                          if (e.keyCode==8||e.keyCode==46){
+                                //console.debug(res)
+                                $(".prompt").next().text("");
+                                setTimeout(function(){$(".prompt").next().text(res)},100);
+                                // console.debug($(".prompt").next().text())
+                                e.preventDefault();
+                                $("body").unbind("keydown");};
+                         });
+
+                    flagSelect = false;}
+                        
+                });
+                // $(".prompt").next().on("mousedown",function(e){
+                //     $(this).off("mouseup");
+                //     flagSelect = true;
+                //  });
+                        CONSOLE.statusOpen = true;
             } else {
                 consoleObject.hide();
-                newLayout.sizePane('south', '0');
-                // $('#support-layout').css("height", '100%');
                 stopSignal();
+                $("body").click();
+                // if(!flagStatus){window.bindEventToConduit()};
+                CONSOLE.flagError = false;
+                linesToColor();
+                CONSOLE.statusOpen = false;
             }
         });
 
@@ -122,7 +156,7 @@
 
 
         $("#viewerFrame").hide();
-        // $("#support-layout").hide();
+        $("#support-layout").hide();
         $(".ui-layout-resizer.ui-layout-resizer-south.ui-layout-resizer-open.ui-layout-resizer-south-open").hide();
         var linksTool = ["window.scriptGo();", "window.debug();", "window.error();", "window.log();", "window.warn();"];
         var itemTool = ["icon-comment", "icon-info-sign", "icon-remove-sign", "icon-ban-circle", "icon-warning-sign "];
@@ -132,6 +166,13 @@
         consoleObject.append("<div id='content-console'><div id='layout-console'></div></div>");
         window.scriptGo();
 
+        $("#layout-console").on("mousewheel DOMMouseScroll", function (e) {
+            if (e.originalEvent.wheelDelta / 120 > 0) {
+                $(this).scrollTop($(this).scrollTop() + 20);
+            } else {
+                $(this).scrollTop($(this).scrollTop() - 20);
+            }
+        })
         //handling errors,warnings,debugs,logs
         //catch error 
 
@@ -143,9 +184,18 @@
             if (!linenumber) {
                 linenumber = "undefined";
             }
+            var checkVisible = false;
+            if (consoleObject.is(':hidden')) {
+                checkVisible = true;
+                consoleObject.show();
+            }
             CONSOLE.terminal.echo("fl4re_ERROR> " + GUI.time() + ", line: " + linenumber + ", " + message + " url: " + url);
+            if (checkVisible) {
+                consoleObject.hide();
+            }
             linesToColor();
-            playSignal(1, 0, 0, 0);
+            CONSOLE.flagError = true;
+            if(!CONSOLE.statusOpen){playSignal(1, 0, 0, 0);}
             check();
         };
 
@@ -153,10 +203,18 @@
         //var oldAlert = alert;
         alert = function (message) {
             message = decodeJson(message);
+            var checkVisible = false;
+            if (consoleObject.is(':hidden')) {
+                checkVisible = true;
+                consoleObject.show();
+            }
             CONSOLE.terminal.echo("fl4re_ALERT> " + GUI.time() + ": " + message);
+            if (checkVisible) {
+                consoleObject.hide();
+            }
             linesToColor();
             check();
-            playSignal(1, 0, 0, 0);
+            if(!CONSOLE.statusOpen){playSignal(1, 0, 0, 0)};
             oldDebug.apply(console, arguments);
         };
 
@@ -164,10 +222,18 @@
         var oldDebug = console.debug;
         console.debug = function (message) {
             message = decodeJson(message);
+            var checkVisible = false;
+            if (consoleObject.is(':hidden')) {
+                checkVisible = true;
+                consoleObject.show();
+            }
             CONSOLE.terminal.echo("fl4re_DEBUG> " + GUI.time() + ": " + message);
+            if (checkVisible) {
+                consoleObject.hide();
+            }
             linesToColor();
             check();
-            playSignal(0, 1, 0, 0);
+            if(!CONSOLE.statusOpen){playSignal(0, 1, 0, 0)};
             oldDebug.apply(console, arguments);
         };
 
@@ -175,10 +241,18 @@
         var oldLog = console.log;
         console.log = function (message) {
             message = decodeJson(message);
+            var checkVisible = false;
+            if (consoleObject.is(':hidden')) {
+                checkVisible = true;
+                consoleObject.show();
+            }
             CONSOLE.terminal.echo("fl4re_LOG> " + GUI.time() + ": " + message);
+            if (checkVisible) {
+                consoleObject.hide();
+            }
             linesToColor();
             check();
-            playSignal(0, 0, 1, 0);
+            if(!CONSOLE.statusOpen){playSignal(0, 0, 1, 0)};
             oldDebug.apply(console, arguments);
         };
 
@@ -186,10 +260,19 @@
         var oldError = console.error;
         console.error = function (message) {
             message = decodeJson(message);
+            var checkVisible = false;
+            if (consoleObject.is(':hidden')) {
+                checkVisible = true;
+                consoleObject.show();
+            }
             CONSOLE.terminal.echo("fl4re_ERROR> " + GUI.time() + ": " + message);
+            if (checkVisible) {
+                consoleObject.hide();
+            }
             linesToColor();
             check();
-            playSignal(1, 0, 0, 0);
+            CONSOLE.flagError = true;
+            if(!CONSOLE.statusOpen){playSignal(1, 0, 0, 0)};
             oldError.apply(console, arguments);
         };
 
@@ -197,10 +280,18 @@
         var oldWarn = console.warn;
         console.warn = function (message) {
             message = decodeJson(message);
+            var checkVisible = false;
+            if (consoleObject.is(':hidden')) {
+                checkVisible = true;
+                consoleObject.show();
+            }
             CONSOLE.terminal.echo("fl4re_WARNING> " + GUI.time() + ": " + message);
+            if (checkVisible) {
+                consoleObject.hide();
+            }
             linesToColor();
             check();
-            playSignal(0, 0, 0, 1);
+            if(!CONSOLE.statusOpen){playSignal(0, 0, 0, 1)};
             oldWarn.apply(console, arguments);
         };
 
@@ -332,7 +423,7 @@
             toggle_button.removeClass('button-debug');
         }
 
-
         return
     };
 }).call(this);
+

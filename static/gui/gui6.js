@@ -1,4 +1,3 @@
-
 /*
  GUI.js 
 
@@ -26,31 +25,6 @@ THE SOFTWARE.
 
  GUI.js needs jquery, jqueryUI and jqueryUI layout
 */
-"use strict";
-
-if (window.$ === undefined) {
-    document.write('<link rel="stylesheet" href="/gui/themes/custom-theme/jquery-ui-1.10.3.custom.css" />');
-
-    document.write('<script src="/deps/jquery.js"><\/' + 'script>');
-    document.write('<script src="/deps/jquery-ui.js"><\/' + 'script>');
-    document.write('<script src="/deps/jquery.layout.min.js"><\/' + 'script>');
-
-    document.write('<script type="text/javascript" src="/deps/jquery.cookie.js"><\/' + 'script>');
-    document.write('<script type="text/javascript" src="/deps/jquery.hotkeys.js"><\/' + 'script>');
-    document.write('<script type="text/javascript" src="/deps/jquery.jstree.js"><\/' + 'script>');
-    document.write('<script type="text/javascript" src="/deps/jquery.terminal-0.7.3.js"><\/' + 'script>');
-    document.write('<script type="text/javascript" src="/deps/jquery.toolbar.js"><\/' + 'script>');
-    document.write('<script type="text/javascript" src="/deps/jquery.hover.js"><\/' + 'script>');
-    document.write('<script type="text/javascript" src="/deps/console.js"><\/' + 'script>');
-
-    document.write('<link rel="stylesheet" href="/gui/gui6.css" />');
-    document.write('<link rel="stylesheet" href="/gui/themes/jquery.terminal.css" />');
-    document.write('<link rel="stylesheet" href="/gui/themes/jquery.toolbars.css" />');
-    document.write('<link rel="stylesheet" href="/gui/themes/bootstrap.icons.css" />');
-
-
-
-}
 
 /***
   Require Underscore, if we're on the server, and it's not already present.
@@ -58,6 +32,8 @@ if (window.$ === undefined) {
   if (!_ && (typeof require !== 'undefined')) _ = require('underscore')._;
 ***/
 // UI library
+// "use strict";
+
 (function () {
 
 
@@ -78,19 +54,41 @@ if (window.$ === undefined) {
 
     GUI.bufferLayout = [];
 
-    GUI.button = function (_txt, _parent, _callback, _x1, _y1, _x2, _y2) {
+    GUI.mainMenu = '';
+
+    GUI.flagResize = true;
+
+    GUI.makeScrollable = function (guiObj) {
+        guiObj.on("mousewheel DOMMouseScroll", function (e) {
+            $(this).scrollTop($(this).scrollTop() - e.originalEvent.wheelDelta);
+            e.preventDefault();
+        })
+    };
+
+    GUI.button = function (_txt, _parent, _callback, _x1, _y1, _x2, _y2, _textEnabled, _icon) {
         var $button = $('<button></button>');
+        var callback = _callback;
 
         $button.button().click(function (event) {
-            if (_callback) _callback.call(this);
+            if (callback) callback.call(this);
+            event.preventDefault();
         });
         // create unique ID
         $button.button().uniqueId();
         var id = $button.attr('id');
-        if (_txt !== undefined && _txt !== null)
-            $button.button({
+        if (_txt !== undefined && _txt !== null) {
+            var params = {
                 label: _txt
-            });
+            };
+            if (_icon != undefined)
+                params["icons"] = {
+                    primary: _icon
+                };
+            if (_textEnabled != undefined)
+                params["text"] = _textEnabled;
+
+            $button.button(params);
+        }
         if (_x1 !== undefined && _y1 !== undefined) {
             $button.css('position', 'absolute');
             $button.css('left', _x1);
@@ -126,7 +124,6 @@ if (window.$ === undefined) {
             label += '</p>';
         }
         var $label = $(label);
-        //$label.button().uniqueId();
         if (!_parent)
             $('body').append($label);
         else if (_mode == "replace")
@@ -281,7 +278,6 @@ if (window.$ === undefined) {
             }
         };
 
-        //$canvas.button().uniqueId();
         if (!_parent)
             $('body').append($canvas);
         else {
@@ -297,16 +293,7 @@ if (window.$ === undefined) {
     };
 
     //----------------------------------------------------------------------------------------------------------------------------------------
-    GUI.autoScroll = function (_jqueryObject, _parentToScroll) {
-        _jqueryObject.on("click", function (event, ui) {
-            /*setTimeout(function () {
-                _parentToScroll.scrollTop((_parentToScroll[0].scrollHeight) - (_parentToScroll.height()))
-            }, 300);*/
-            setTimeout(function () {
-                _parentToScroll.scrollTop(658198126);
-            }, 500);
-        });
-    };
+   
 
     GUI.time = function () {
         var html = '';
@@ -317,15 +304,22 @@ if (window.$ === undefined) {
         return html;
     }
 
-    GUI.uniqueId = function () {
-        var html = "ui-id-" + Math.round(Math.random() * 10000);
-        return html;
+    GUI.addInput = function (_id, _defaultValue, _parent, _onChangeCallback) {
+        var html = '<span><input type="text" id="' + _id + '" name="' + _id + '"></span>';
+        var jqueryObjectInput = $(html);
+        var input = jqueryObjectInput.find("input");
+        input.val(_defaultValue);
+
+        if (_onChangeCallback != undefined)
+            input.on('blur', _onChangeCallback);
+
+        _parent.append(jqueryObjectInput);
+        return input;
     }
 
+    GUI.InputInteractive = function (_parent, _id, _min, _max, _defaultValue, _precision, _sensibility, _newLine) {
 
-    GUI.InputInteractive = function (_parent, _id, _min, _max, _defaultValue, _precision, _sensibility) {
-
-        function Object(_parent, _id, _min, _max, _defaultValue, _precision_sensibility) {
+        function Object(_parent, _id, _min, _max, _defaultValue, _precision, _sensibility) {
             this.parent = _parent;
             this.id = _id;
             this.min = _min;
@@ -427,7 +421,7 @@ if (window.$ === undefined) {
             }
 
             this.createInput = function () {
-                this.html = '<span style="display:inline; position: relative; left: 25px;"><input type="text" id="' + this.id + '" name="' + this.id + '" style="right: 40px !important;"></span>';
+                this.html = '<span style="display:inline; position: relative; left: 25px;"><input type="text" id="' + this.id + '" name="' + this.id + '" style="right: 40px !important; width: 80% !important;"></span>';
                 this.jqueryObjectInput = $(this.html);
                 this.input = this.jqueryObjectInput.find("input");
                 this.parent.append(this.jqueryObjectInput);
@@ -446,7 +440,19 @@ if (window.$ === undefined) {
                     var charCode = (event.which) ? event.which : event.keyCode
                     if (charCode == 13) {
                         var check = Math.round(-Math.log(precision) / Math.LN10);
-                        input.val(parseFloat(input.val()).toFixed(check));
+                        var value = input.val();
+                        var valueNum = parseFloat(value);
+                         var finalVal = valueNum.toFixed(check);
+                         if (valueNum > max && value != '') {
+                             finalVal = max;
+                         }
+                         if (valueNum < min && value != '') {
+                             finalVal = min;
+                         }
+                         input.val(finalVal);
+                         if ($(this).data("changeCallback") != undefined) {
+                             $(this).data("changeCallback")();
+                         }
                     }
                     if (charCode > 31 && (charCode < 48 || charCode > 57) && charCode != 46) {
                         if (charCode == 45) {
@@ -458,107 +464,498 @@ if (window.$ === undefined) {
                         return true;
                     }
                 })
-                input.keyup(function (event) {
-                    var value = $(this).val()
-                    if (value > max && value != '') {
-                        $(this).val(max);
-                        return false;
-                    }
-                    if (value < min && value != '') {
-                        $(this).val(min);
-                        return false;
-                    }
-                })
                 input.on('blur', function () {
-                    var check = Math.round(-Math.log(precision) / Math.LN10);
-                    input.val(parseFloat(input.val()).toFixed(check));
+                      var check = Math.round(-Math.log(precision) / Math.LN10);
+                      var value = input.val();
+                      var valueNum = parseFloat(value);
+                      if (valueNum > max && value != '') {
+                        $(this).val(max);
+                        return;
+                    }
+                    if (valueNum < min && value != '') {
+                        $(this).val(min);
+                        return;
+                    }
+                    input.val(valueNum.toFixed(check));
                 });
             }
 
 
             this.onChange = function (callback) {
                 this.jqueryObjectInput.find("input").on('blur', callback);
+                this.jqueryObjectInput.find("input").data("changeCallback", callback);
                 this.callback = callback;
                 this.buttonEvent();
             }
         }
 
-        var tefa = new Object(_parent, _id, _min, _max, _defaultValue, _precision);
+        var tefa = new Object(_parent, _id, _min, _max, _defaultValue, _precision, _sensibility);
         tefa.parent.append('<div id="content-' + tefa.id + '" style="" >'); /*float: left !important*/
         tefa.createButton();
         tefa.createInput();
         tefa.buttonEvent();
         tefa.inputEvent();
         tefa.parent.append('</div>');
-        tefa.parent.append("</br>");
+        if (_newLine) {
+            tefa.parent.append("</br>");
+        }
         return tefa;
     }
 
 
-    //checked    
-    GUI.addAccordion = function (_id, _items, _parent, _content, _mode) {
-        if (_id == "console" || _id == "Console") return console.error("GUI.console: _id ever used, please enter a new one");
-        var size_items = _items.length;
-        var accordion = '<div id="' + _id + '" >'
-        for (var i = 0; i < size_items; i++) {
-            accordion += '<h3>' + _items[i] + '</h3><div id="' + _id + '-' + i + '" >';
-            if (_content && (_content[i] != "0")) {
-                accordion += _content[i];
+      GUI.accordion = function (_json) {
+        function Accordion(_json) {     
+            this.idObject = _json.id;
+            this.parent = _json.parent;
+            this.items = [];
+            this.links = [];
+            this.id = [];
+            this.listJqueryObjectElement = [];
+            var stock = this;
+            for(var nbItem = 0; nbItem<_json.item.length;nbItem++){
+                this.items[nbItem] = _json.item[nbItem].text;
+                this.id[nbItem] = _json.item[nbItem].id;
+                if( _json.item[nbItem].hasOwnProperty("content")){
+                    this.links[nbItem] = _json.item[nbItem].content;
+                }
+                else{this.links[nbItem] = false;}
             }
-            accordion += '</div>';
+
+            this.init = function(){
+                this.html = '<div id="' + this.idObject + '" >'
+                for (var i = 0; i < this.items.length; i++) {
+                    this.html += '<h3 id="' + this.id[i]+'_header">' + this.items[i] + '</h3><div id="' + this.id[i] + '" >';
+                    if (this.links[i]) {
+                        this.html += this.links[i];
+                    }
+                    this.html += '</div>';}
+                
+                this.html += '</div>';
+               }
+
+            this.create = function(){                
+                this.jqueryObjectRoot = this.parent.append(this.html);
+                this.jqueryObjectRoot.accordion({
+                    header: "h3",
+                    navigation: true,
+                    collapsible: true,
+                    active: false,
+                    heightStyle: "content"
+                });}
+
+
+            this.refresh = function () {
+                stock = this;
+                this.jqueryObjectRoot.accordion("refresh");
+            }
+
+            this.createJqueryObjects = function () {
+                for(var nbId=0; nbId<this.id.length; nbId++){
+                    this[this.id[nbId]] = $("#" + this.id[nbId]);
+                    this[this.id[nbId]]["header"] = $("#" + this.id[nbId]+"_header");
+                    this.listJqueryObjectElement[nbItem] = this[this.id[nbId]];
+                }
+            }
+            $.fn.removeJqueryObjectA = function () {
+                delete stock[this.prop("id")];
+            }
+
+            $.fn.recallItem = function (id) {
+                this.removeJqueryObjectA();
+                this.removeAttr('id');
+                this.prop("id",id);
+                stock[id] = $('#'+id);
+                this.header.removeJqueryObjectA();
+                this.header.removeAttr('id');
+                this.header.prop("id",id+"_header");
+                stock[id]["header"] =  $('#'+id+'_header');
+                }
+
+            $.fn.removeItem = function () {
+                this.removeJqueryObjectA();
+                this.header.removeJqueryObjectA();
+                this.header.remove();
+                this.remove();
+                stock.refresh();
+            }
+
+            this.removeAllAccordion = function () {
+                this.refresh();
+                this.jqueryObjectRoot.remove();
+                this.refresh();
+                for (var key in this){
+                     delete this[key];
+                }
+                delete this;
+            }
+
+
+            this.addItem = function (_json) {
+                this.html = '';
+                this.html += '<h3 id="' + _json.id +'_header">' + _json.text + '</h3><div id="' + _json.id + '" >';
+                    if (_json.content) {
+                        this.html += _json.content;
+                    }
+                    this.html += '</div>';
+                
+                this.html += '</div>';
+
+                if(_json.hasOwnProperty("before")&&_json.before){
+                    if(_json.hasOwnProperty("position")){
+                        this[_json.position]["header"].before(this.html);}
+                    else{this.jqueryObjectRoot.before(this.html);}
+                } else {
+                    if(_json.hasOwnProperty("position")){
+                        this[_json.position].after(this.html);}
+                     else{this.jqueryObjectRoot.after(this.html);}
+                }
+
+                this.refresh();
+                this[_json.id]=$('#'+_json.id);
+                this[_json.id]["header"] = $("#" + _json.id +"_header");
+                this["listJqueryObjectElement"].push(stock[_json.id]);
+            }
+           
+            $.fn.onClick = function (_callback) {
+                this.header.on("click", function (event) {
+                    _callback.call();
+                    });}
+
+            this.allOpenable = function(){
+                this.jqueryObjectRoot.on("accordionbeforeactivate", function (event, ui) {
+                    if ((($.trim($(ui.newPanel).html()).length == 0) && ($(ui.oldHeader).length == 0)) || (($.trim($(ui.newPanel).html()).length == 0) && ($(ui.newHeader).length))) {
+                        event.preventDefault();
+                    }
+                    if (ui.newHeader[0]) {
+                        var currHeader = ui.newHeader;
+                        var currContent = currHeader.next('.ui-accordion-content');
+                        // console.debug(currHeader.offset().top);
+                        // $("#renderMenus_content").scrollTop(currHeader.offset().top+($("#renderMenus_content").scrollTop()/2));
+                    } else {
+                        var currHeader = ui.oldHeader;
+                        var currContent = currHeader.next('.ui-accordion-content');
+                    }
+                    var isPanelSelected = currHeader.attr('aria-selected') == 'true';
+                    currHeader.toggleClass('ui-corner-all', isPanelSelected).toggleClass('accordion-header-active ui-state-active ui-corner-top', !isPanelSelected).attr('aria-selected', ((!isPanelSelected).toString()));
+                    currHeader.children('.ui-icon').toggleClass('ui-icon-triangle-1-e', isPanelSelected).toggleClass('ui-icon-triangle-1-s', !isPanelSelected);
+                    currContent.toggleClass('accordion-content-active', !isPanelSelected)
+                    if (isPanelSelected) {
+                        currContent.slideUp();
+
+                    } else {
+                        currContent.slideDown();
+                    }
+                    return false;
+                });
+                }
+            this.autoScrollDown = function () {
+                $(".ui-accordion-header").on("click", function (event, ui) {
+                    var buffer = this;
+                    var container = $("#renderMenus_content"),
+                    scrollTo = $(this);
+                    setTimeout(function () {
+                    // console.debug(scrollTo.offset().top + "  " +scrollTo.next().height()+"  "+container.height())
+                    if(scrollTo.offset().top+scrollTo.next().height()>container.height()){
+                    container.scrollTop(
+                        scrollTo.offset().top - container.offset().top + container.scrollTop()
+                    );} }, 300);
+                
+                });
+                }
+
+            }
+        
+        var tmp = new Accordion(_json);
+        tmp.init();
+        tmp.create();
+        tmp.createJqueryObjects();
+        tmp.allOpenable();
+        return tmp;
+    };
+
+     GUI.script = function(_json){
+        function Script(_json){
+            this.idObject = _json.id;
+            this.parent = _json.parent;
+            this.content = _json.content;
+            var stock = this;
+            this.init = function(){
+                this.html = '';
+                this.html += '<form><textarea id="'+ this.idObject +'" name="'+this.idObject+'">'+this.content+'</textarea></form>';
+            }
+            this.create = function(){
+                this.jqueryObjectRoot = this.parent.append(this.html);
+                CodeMirror.commands.autocomplete = function(cm) {
+                         CodeMirror.showHint(cm, CodeMirror.hint.javascript);
+                     };
+                this.object = CodeMirror.fromTextArea(document.getElementById(stock.idObject), {
+                    lineNumbers: true,
+                    styleActiveLine: true,
+                    matchBrackets: true,
+                    mode:  "javascript",
+                    autofocus: true,
+                    extraKeys: {"Ctrl-Space": "autocomplete"},
+                    smartIndent: false,
+                });
+                this.form = $("#"+this.idObject).parent();
+            }
+            this.refresh = function(){
+                $('.CodeMirror').each(function(i, el){
+                    el.CodeMirror.refresh();
+                });
+            }
         }
-        accordion += '</div>';
-        var $accordion = $(accordion);
-        if (_mode == "before") {
-            _parent.prepend($accordion);
-        } else _parent.append($accordion);
-        $('#' + _id).accordion({
-            header: "h3",
-            navigation: true,
-            collapsible: true,
-            active: false,
-            heightStyle: "content"
+        var tmp = new Script(_json);
+        tmp.init();
+        tmp.create();
+        return tmp;
+    }
+
+    GUI.tab = function(_json){
+        function Tab (_json){
+            this.idObject = _json.id;
+            this.parent = _json.parent;
+            this.item = _json.item;
+            this.json = _json;
+            this.listJqueryObjectElement = [];
+            this.id=[];
+            this.listTab = [];
+            for(var nbItem = 0; nbItem<_json.item.length;nbItem++){
+                this.id[nbItem] = _json.item[nbItem].id;}
+            var stock = this;
+            this.listUnchecked = [];
+            this.optionManager = false;
+
+            this.init = function(){
+                this.html = '<ul id="'+this.idObject+'_header" ><li><a href="#' + this.item[0].id + '">' + this.item[0].text + '</a></li></ul>';
+                this.html += '<div id="'+this.idObject+'_content" class="ui-widget-content ui-layout-content ui-corner-top" >';
+                this.html += '<div id="' + this.item[0].id + '" class="content">';
+                if (this.item[0].hasOwnProperty('content')){
+                this.html += this.item[0].content;
+                }
+                this.html += '</div></div>'
+            }
+
+            this.children = function(){
+                for(var nbItem = 1; nbItem<_json.item.length;nbItem++){
+                    this.addTab(_json.item[nbItem])
+                }
+            }
+
+            this.create = function(){
+                this.jqueryObjectRoot = this.parent.append(this.html);
+                this.jqueryObjectRoot = this.jqueryObjectRoot.tabs(
+                    {activate:function(event,ui){                                                       
+                                   $('.CodeMirror').each(function(i, el){
+                                        el.CodeMirror.refresh();});                                                
+                            } });}
+
+            this.createJqueryObjects = function () {
+                this['header'] = $('#'+this.idObject+'_header');
+                this['content'] = $('#'+this.idObject+'_content');
+                this[this.id[0]] = $('#'+this.idObject+'_content').find(".content");
+                this[this.id[0]]["title"] = $('#'+this.idObject+'_header').find("li:nth-child(1) a");
+                this.listJqueryObjectElement[0] = this[this.id[0]];
+                for(var nbId=1; nbId<this.id.length; nbId++){
+                    this[this.id[nbId]] = $("#" + this.id[nbId]);
+                    this[this.id[nbId]]["title"] = $('#'+this.idObject+'_header').find("li:nth-child("+(nbId+3)+") a");
+                    this.listJqueryObjectElement[nbItem] = this[this.id[nbId]];
+                }}
+
+            this.refresh = function () {
+               this.jqueryObjectRoot.tabs("refresh");
+               stock = this;
+            }
+
+            this.addTab = function(_json){
+                this.html = '';
+                this.html += '<li><a href="#' + _json.id + '">' + _json.text + '</a></li>';
+                this.header.append(this.html);
+                this.html = '';
+                this.html += '<div id="' + _json.id + '">';
+                if (_json.hasOwnProperty('content')) {
+                    this.html += _json.content;
+                }
+                this.html += '</div>';
+                this.content.append(this.html);
+                this.id.push(_json.id);
+                this.refresh();
+                this.createJqueryObjects();
+                if(_json.text.trim() != "Material" && this.optionManager){this.manager();}
+            }
+
+            $.fn.removeTab = function (_idTabWindow, id) {
+                this.removeJqueryObjectTab();
+                $('li[aria-controls="' + this.prop('id') + '"]').remove();
+                $('#' + this.prop('id')).remove();
+                this.remove();
+                stock.refresh();
+            }
+
+            $.fn.removeJqueryObjectTab = function () {
+                try{delete stock[this.prop("id")].title;}catch(err){};
+                delete stock[this.prop("id")];
+                var result = true;
+                while(result){
+                    result = stock.id.lastIndexOf(this.prop("id"));
+                    if(result==-1){result=false;break;}
+                    stock.id.splice(result,1)
+                }
+                stock.refresh();
+            }
+
+            this.sortable = function(){
+                this.jqueryObjectRoot.find( ".ui-tabs-nav" ).sortable({
+                    axis: "x",
+                    stop: function() {
+                        stock.refresh();
+                        }
+                        });
+            }   
+
+            this.refreshTabList = function(){
+                this.listTab = [];
+                var buffer = this;
+                this.jqueryObjectRoot.find("ul>li").each(function(index){
+                    var text = $(this).find('a').text();
+                    var json = {};
+                    json["index"]=index;
+                    json["text"]=text;
+                    if(text){buffer.listTab.push(json)};
+                });
+                }
+
+            this.manager = function (){
+                $('#tabManager').remove();
+                var html = '<div id="tabManager"><div>';
+                $('body').append(html);
+                this.refreshTabList();
+                var buffer = this;
+                var indexII = -1; var check = '';
+                for(var i = 0; i<this.listTab.length; i++){
+                    var indexII = this.listTab[i].index;
+                    var check = GUI.addCheckBox("tabindex_"+indexII,this.listTab[i].text.trim(),$('#tabManager')).find('input').prop('checked', true);
+                    check.on('change', function (e) {
+                        var indexI = $(this).parent().prop("id").substr(9);
+                        if($(this).is(":checked")){
+                            buffer.jqueryObjectRoot.tabs('enable',indexI*1);
+                            buffer.jqueryObjectRoot.tabs("option", "active",indexI*1);
+                            var posit=buffer.listUnchecked.indexOf(indexI*1);
+                            while(posit!=-1){
+                                posit = buffer.listUnchecked.indexOf(indexI*1);
+                                if(posit!=-1){
+                                buffer.listUnchecked.splice(posit,1);}}
+                        }
+                        else{
+                            buffer.jqueryObjectRoot.tabs('disable',indexI*1);
+                            buffer.listUnchecked.push(indexI*1);
+                            for(var j=0;j<6;j++){
+                                buffer.jqueryObjectRoot.tabs("option", "active",j);}
+                        }
+                        buffer.hidePanel();
+                        
+                });
+                for(var z=0;z<buffer.listUnchecked.length;z++){
+                    $('#'+"tabindex_"+buffer.listUnchecked[z]).find("input").prop("checked", false);
+                }
+                }
+                $('#tabManager').addClass('ui-widget-header');
+                $('#tabManager').hide();
+            }
+
+            this.hidePanel = function(){
+                var disabled = this.jqueryObjectRoot.tabs( "option", "disabled" );
+                var buffer = this;
+                if(disabled.toString()=="true"){
+                    $("#tab").remove();
+                    $('#mainLayout-center').hide();
+                    $('.ui-layout-resizer-west').hide();
+                    GUI.flagResize = false;
+                    $('#tabManager').hide();
+                    GUI.mainMenu.addElement({id:'tab',text:'Tabs',position:'sound'}); 
+                    var array = [];
+                    var json = {};
+                    for(var i = 0; i<this.listTab.length; i++){
+                        var json = {};
+                        json['id']= this.listTab[i].text.trim()+"_check";
+                        json['text']= this.listTab[i].text.trim();
+                        json['type']= "checkbox";
+                        array.push(json);
+                     }   
+                    var menu = GUI.menu({id:'tabs-menu',parent:GUI.mainMenu.tab,item:array});
+                    GUI.image(GUI.mainMenu.tab.text, "img-tab", "images/icon-cog.png", 15, 15, "before");
+                    menu.jqueryObjectRoot.find("li").each(function (index) {
+                        $(this).on('change', 'input[type=checkbox]', function (e) {
+                            var position = $(this).parent().prop("id").replace('_check','');
+                            $('#tabManager').find("li").each(function(index){
+                                if($(this).text()==position){
+                                    $(this).find('input').click();
+                                    buffer.showPanel();
+                                    GUI.container.sizePane("west", $(window).width() - 300);
+                                    GUI.container.resizeAll();
+                                    GUI.container.initContent("center");
+                                    GUI.container.initContent("west");
+                                }
+                            })
+                        });
+                    });
+                }
+                GUI.flagResize = false;
+                }
+
+             this.showPanel = function(){
+                var disabled = this.jqueryObjectRoot.tabs( "option", "disabled" );
+                if(disabled.toString()!="true"){
+                    $('#tab').remove();
+                    $('#mainLayout-center').show();
+                    $('.ui-layout-resizer-west').show();
+                    for(var j=0;j<6;j++){
+                            this.jqueryObjectRoot.tabs("option", "active",j);}
+                    GUI.resize();
+                    GUI.flagResize = true;
+                }
+            }
+
+            this.tabManager = function(){
+                this.optionManager = true;
+                var buffer =this;
+                this.closeButton = GUI.button("closeTab", this.header, function(){
+                    var activeTab = buffer.jqueryObjectRoot.tabs('option', 'active');
+                    var condition = buffer.jqueryObjectRoot.find("ul>li").eq(activeTab).text().trim();
+                    if(condition!="Material"){
+                        buffer.jqueryObjectRoot.tabs('disable', activeTab);
+                        $("#tabindex_"+activeTab).find('input').prop('checked',false)
+                        for(var j=0;j<6;j++){
+                            buffer.jqueryObjectRoot.tabs("option", "active",j);}
+                        buffer.hidePanel();
+                }
+            });
+                this.closeButton.prop("id","closeTab");
+                this.closeButton.html('');
+                GUI.addIcon(this.closeButton, "ui-icon-squaresmall-close", "", "before");
+                var flagPanel = false;
+                this.menuButton = GUI.button("menuTab", this.header, function(){
+                    if(!flagPanel){$('#tabManager').show();flagPanel= true;}
+                    else if(flagPanel){$('#tabManager').hide();flagPanel= false;}
+
         });
-        return $accordion;
-    };
+                this.menuButton.prop("id","menuTab");
+                this.menuButton.html('');
+                GUI.addIcon(this.menuButton, "ui-icon-squaresmall-plus", "", "before");
 
-    //checked
-    GUI.addNewTab = function (_idTabWindow, _idTab, _headerTitle, _contentHTML) {
-        var headerTab = '<li><a href="#' + _idTab + '">' + _headerTitle + '</a></li>';
-        var $headerTab = $(headerTab);
-        $("#header-" + _idTabWindow).append($headerTab);
-        var contentTab = '<div id="' + _idTab + '">';
-        if (_contentHTML) {
-            contentTab += _contentHTML;
+                this.refresh();
+
+            }
         }
-        contentTab += '</div>';
-        var $contentTab = $(contentTab);
-        $("#content-" + _idTabWindow).append($contentTab);
-        $("#header-" + _idTabWindow).parent().tabs("refresh");
+        
 
-        return $contentTab;
+        var tmp = new Tab (_json);
+        tmp.init();
+        tmp.create();
+        tmp.createJqueryObjects();
+        tmp.children();
+        return tmp;
     }
-
-    GUI.removeNewTab = function (_idTabWindow, id) {
-        $('li[aria-controls="' + id + '"]').remove();
-        $('#' + id).remove();
-        $("#header-" + _idTabWindow).parent().tabs("refresh");
-    }
-
-    //checked
-    GUI.addTabWindow = function (_parent, _idTab, _headerTitle, _contentHTML) {
-        var tab = '<ul id="header-' + _idTab + '" ><li><a href="#' + _idTab + '">' + _headerTitle + '</a></li></ul>';
-        tab += '<div id="content-' + _idTab + '" class="ui-widget-content ui-layout-content ui-corner-top" >';
-        tab += '<div id="' + _idTab + '" class="content">';
-        if (_contentHTML) {
-            tab += _contentHTML;
-        }
-        tab += '</div></div>'
-        var $tab = $(tab);
-        _parent.append($tab);
-        _parent.tabs();
-        return $tab;
-    };
 
     //checked        
     GUI.addSlider = function (_id, _parent, _min, _max, _step, _defaultValue, _style) {
@@ -572,7 +969,7 @@ if (window.$ === undefined) {
         }
         var $slider = $(slider);
         _parent.append($slider);
-        $("#" + _id).slider({
+        $("#" + _id, _parent).slider({
             animate: true,
             min: _min,
             max: _max,
@@ -583,14 +980,20 @@ if (window.$ === undefined) {
     };
 
     //checked
-    GUI.addIcon = function (_parent, _cssClass, _style, _position) {
+    GUI.addIcon = function (_parent, _cssClass, _style, _position, _isolate) {
         var icon = '';
+        if (_isolate) {
+            icon += "<p>"
+        }
         if (_style) {
-            icon = '<span id="' + _cssClass + '" class="ui-icon ' + _cssClass + '" style="' + _style + '"';
+            icon += '<span id="' + _cssClass + '" class="ui-icon ' + _cssClass + '" style="' + _style + '"';
         } else {
-            icon = '<span class="ui-icon ' + _cssClass + '"';
+            icon += '<span class="ui-icon ' + _cssClass + '"';
         }
         icon += '></span>';
+        if (_isolate) {
+            icon += "</p>";
+        }
         if (_parent == "0") {
             return icon;
         } else {
@@ -630,7 +1033,7 @@ if (window.$ === undefined) {
         } else {
             _parent.append($dialog);
         }
-        $("#" + _id).dialog({
+        $("#" + _id, _parent).dialog({
             dialogClass: 'alert',
             resizable: true,
             height: '105',
@@ -638,7 +1041,7 @@ if (window.$ === undefined) {
             modal: true
         });
         $(".ui-dialog-titlebar").hide();
-        return $("#" + _id);
+        return $("#" + _id, _parent);
     };
 
 
@@ -654,9 +1057,10 @@ if (window.$ === undefined) {
         }
         $("#" + _id).dialog({
             resizable: true,
-            height: '300',
-            width: '850',
-            modal: true
+            height: '500',
+            width: '900',
+            modalType: Boolean,
+            Default: false
         });
         return $("#" + _id);
     };
@@ -668,12 +1072,12 @@ if (window.$ === undefined) {
         $('.ui-layout-west').append($dialog);
         $("#" + _id).dialog({
             resizable: false,
-            height: 'auto',
-            width: 'auto',
+            height: '150',
+            width: '300',
             modal: true,
             buttons: {
                 Yes: function () {
-                    eval(_callback);
+                    _callback();
                     $(this).dialog("close");
                 },
                 No: function () {
@@ -707,68 +1111,261 @@ if (window.$ === undefined) {
             var $stickyButton = $(stickyButton);
             _parent.append($stickyButton);
             if (size_list == 1) {
-                $("#" + _id + '-' + _items[0]).button();
+                $("#" + _id + '-' + _items[0], _parent).button();
             } else if (_mode == "vertical") {
-                $("#" + _id).buttonsetvertical();
+                $("#" + _id, _parent).buttonsetvertical();
             } else {
-                $("#" + _id).buttonset();
+                $("#" + _id, _parent).buttonset();
             }
             return $stickyButton;
         }
     };
 
-    //checked
-    GUI.addCheckBox = function (_id, _text, _parent) {
-        var checkBox = '<li id="' + _id + '" style="list-style:none;"><input type="checkbox"';
-        checkBox += '><span>' + _text + '</span></li>';
-        if (_parent) {
-            var $checkBox = $(checkBox);
-            _parent.append($checkBox);
-            return $checkBox;
+    GUI.addCheckBox = function (_id, _text, _parent, checked) {
+         // /var debugShowSoundOverlay = GUI.addCheckBox("debugShowSoundOverlay", "Show sound overlay", soundTab);
+        if(!_text && !_parent){
+            var Checkbox = function(_id){
+                this.json = _id;
+                this.idObject = this.json.id;
+                this.html = '';
+                this.text = this.json.text;
+                if(this.json.hasOwnProperty('parent')){
+                    this.parent = this.json.parent;
+                }
+                if(this.json.hasOwnProperty('tooltip')){
+                    this.tooltip = this.json.tooltip;
+                }
+                if(this.json.hasOwnProperty('change')){
+                    this.change = this.json.change;
+                }
+                if(this.json.hasOwnProperty('isChecked')){
+                    this.isChecked = this.json.isChecked;
+                }
+                if(this.json.hasOwnProperty('noChecked')){
+                    this.noChecked = this.json.noChecked;
+                }
+                if(this.json.hasOwnProperty('state')){
+                    this.state = this.json.state;
+                }
+                this.generateHTML = function(){
+                    this.html = '<li id="' + this.idObject + '" style="list-style:none;" class="checkbox" ><input type="checkbox"';
+                    if (this.state)
+                        this.html += ' checked="true"';
+                    this.html += '><span>' + this.text + '</span></li>';
+                }
+                this.create = function(){
+                    if(this.parent){
+                        this.parent.append(this.html);
+                        this.link();
+                    }
+                }
+                this.link = function(){
+                    this.selector = $('#'+this.idObject);
+                    this.input = $('#'+this.idObject).find('input');
+                    this.title = $('#'+this.idObject).find('span');
+                    var stock = this;
+                    this.selector.on('change',function(){
+                        if(stock.change){
+                            stock.change.call();}
+                        if(stock.isChecked){
+                            if($(this).find('input').prop("checked")==true){
+                                stock.isChecked.call();
+                            }}
+                        if(stock.noChecked){
+                            if($(this).find('input').prop("checked")==false){
+                                stock.noChecked.call();
+                            }}
+                        });
+                    if(this.tooltip){
+                        this.selector.addTooltip(this.tooltip);
+                    }
+                }
+                this.queryState = function(){
+                    return this.input.is(':checked');
+                }
+
+            }
+            var tmp = new Checkbox(_id);
+            tmp.generateHTML();
+            tmp.create();
+            return tmp;
+
         } else {
-            return checkBox;
-        }
+            var checkBox = '<li id="' + _id + '" style="list-style:none;" class="checkbox" ><input type="checkbox"';
+            if ( checked )
+                checkBox += ' checked="true"';
+            checkBox += '><span>' + _text + '</span></li>';
+            if (_parent) {
+                var $checkBox = $(checkBox);
+                _parent.append($checkBox);
+                return $checkBox;
+            } else {
+                return checkBox;
+            }}
     };
 
     // checked except mod vertical  
-    GUI.addStickyList = function (_id, _items, _parent, _mode) {
+    GUI.addStickyList = function (_id, _items, _parent, _mode, _selectedIndex, _callback) {
         var size_list = _items.length;
         var stickyList = '<form><div id="' + _id + '" >';
         // if(_id.length==0)
         for (var i = 0; i < size_list; i++) {
             var tmp = '';
-            if (i == _mode) {
+            if (i == _selectedIndex) {
                 tmp = 'checked="checked"';
             }
             stickyList += '<input type="radio" id="' + _id + '-' + i + '" name="radio" ' + tmp + ' /><label for="' + _id + '-' + i + '">' + _items[i] + '</label>';
         }
         stickyList += '</div></form>';
-        if (_mode = "code") {
+        if (_mode == "code") {
             return stickyList;
         } else {
             var $stickyList = $(stickyList);
             _parent.append($stickyList);
             if (_mode == "vertical") {
-                $("#" + _id).buttonsetv();
+                $("#" + _id, _parent).buttonsetv();
             } else {
-                $("#" + _id).buttonset();
+                $("#" + _id, _parent).buttonset();
+            }
+            if (_callback != undefined) {
+                $stickyList.on('change', 'input[type=radio]', function (e) {
+                    if ($(e.target).is(":checked")) {
+                        var splitArray = $(e.target).attr('id').split('-');
+                        _callback(parseInt(splitArray[splitArray.length - 1]));
+                    }
+                });
             }
             return $stickyList;
         }
     };
 
-    //checked
+    GUI.addSelect = function (_id, _items, _parent, _selectedIndex, _callback) {
+        var html = "";
+        html += "<div>";
+        html += "<select";
+        html += " id='" + _id + "' ";
+        html += ">";
+        for (var i = 0; i < _items.length; i++) {
+            html += "<option"
+            html += " value='" + _items[i] + "' ";
+            if (i == _selectedIndex)
+                html += " selected='selected' ";
+            html += ">";
+            html += _items[i];
+            html += "</option>";
+        }
+        html += "</select>";
+        html += "</div>";
+        $(_parent).append(html);
+        var jquerySelect = $('#' + _id);
+        
+        jquerySelect.skinner();
+        if (_callback != undefined){jquerySelect.change(_callback);}
+        $('.select-skinned-cont').addClass('ui-widget-header');
+        jquerySelect.change(function(){
+            $('.select-skinned-cont').addClass('ui-widget-header');
+        });
+        jquerySelect.parent().click(function(){
+            //console.debug($(this).parent().html())
+            // var heightArea = $(this).parent().position().top;
+            var childPos = $(this).parent().offset();
+            var parentPos = $(this).parent().parent().offset();
+            var heightArea = childPos.top - parentPos.top;
+            var height = $(this).parent().parent().height();
+            $(".select-skinned ul").css("max-height",height - heightArea - 10);
+        })
+        return jquerySelect;
+    }
+
     GUI.addRadioList = function (_position, _id, _value, _text, _parent) {
-        var radioList = '<li id=' + _id + ' style="list-style:none">';
+        if(!_id && !_value && !_text && !_parent){
+            var Radio = function(_json){
+                this.html = "";
+                this.items = [];
+                this.links = [];
+                this.tooltips = [];
+                this.onchange = [];
+                this.id = [];
+                this.state = [];
+                this.json = _json;
+                this.idObject = _json.id;
+                this.header = '';
+                if( _json.hasOwnProperty("parent")){
+                    this.parent = _json.parent;
+                    }
+                if( _json.hasOwnProperty("change")){
+                    this.change = _json.change;
+                }
+                for(var nbItem = 0; nbItem<_json.item.length;nbItem++){
+                    this.items[nbItem] = _json.item[nbItem].text;
+                    this.id[nbItem] = _json.item[nbItem].value;
+                    if( _json.item[nbItem].hasOwnProperty("tooltip")){
+                        this.tooltips[nbItem] = _json.item[nbItem].tooltip;}
+                    if( _json.item[nbItem].hasOwnProperty("callback")){
+                        this.links[nbItem] = _json.item[nbItem].callback;
+                    }
+                    if( _json.item[nbItem].hasOwnProperty("state")){
+                        this.state[nbItem] = _json.item[nbItem].state;
+                    }
+                }
+                this.generateHTML = function(){
+                    this.html = '<li id=' + this.idObject + ' style="list-style:none;display: block;float: left;white-space: nowrap;">';
+                    var tefa = "Z" +  Math.floor((Math.random()*100000)+1);
+                    for (var i = 0; i < this.id.length; i++) {
+                        var tmp = "";
+                        if (true == this.state[i]) {
+                            tmp = "checked";
+                        }
+                        this.html += '<div class="radio_contain"><input type="radio" name="' + tefa + '" value="' + this.id[i] + '" ' + tmp + ' ></div><span style="bottom: 2px;">' + this.items[i] + '</span><br>';
+                    }
+                    this.html += '</li>';
+                    }
+
+                this.create = function(){  
+                    if (this.parent) {
+                        this.parent.append(this.html);
+                        this.link();
+                        };
+                }
+                this.link = function(){
+                    this.header = $("#"+this.idObject);
+                    if(this.change){
+                        var call = this.change;
+                        
+                            this.header.on('change',function(e){
+                                call.call();
+                            });
+                    }
+                    var stock = this;
+                    this.header.find('input').each(function(index){
+                        stock[stock.id[index]] = $(this);
+                        stock[stock.id[index]]["text"] = $(this).parent().next();
+                        if(stock.tooltips[index]){
+                            $(this).parent().next().addTooltip(stock.tooltips[index]);}
+                        if(stock.links[index]){
+                            var call = stock.links[index];
+                            $(this).on('change', function (e) {
+                                call.call();
+                            });}
+                        })
+                }
+                }
+
+        var tmp = new Radio(_position);
+        tmp.generateHTML();
+        tmp.create();
+        return tmp;
+        } else{
+        var radioList = '<li id=' + _id + ' style="list-style:none;display: block;float: left;white-space: nowrap;">';
         for (var i = 0; i < _text.length; i++) {
             var tmp = "";
             if (i == _position - 1) {
                 tmp = "checked";
             }
             if (!(_id instanceof Array)) {
-                radioList += '<input type="radio" name="' + _id + '" value="' + _value[i] + '" style="border: red !important;" ' + tmp + ' ><span style="bottom: 2px;">' + _text[i] + '</span><br>';
+                radioList += '<div class="radio_contain"><input type="radio" name="' + _id + '" value="' + _value[i] + '" ' + tmp + ' ></div><span style="bottom: 2px;">' + _text[i] + '</span><br>';
             } else {
-                radioList += '<input type="radio" name="' + _id[0] + '" value="' + _value[i] + '" style=" background-color: red  !important;"' + tmp + '><span style="bottom: 2px;">' + _text[i] + '</span><br>';
+                radioList += '<div class="radio_contain"><input type="radio" name="' + _id[0] + '" value="' + _value[i] + '"' + tmp + '></div><span style="bottom: 2px;">' + _text[i] + '</span><br>';
             }
         }
         radioList += '</li>';
@@ -778,89 +1375,402 @@ if (window.$ === undefined) {
             return $radioList;
         } else {
             return radioList;
+
+            }
         }
     };
 
-    //checked GUI.addSlider = function (_id, _parent, _min, _max, _step, _defaultValue, _style) {
-    GUI.addMenu = function (_item, _link, _position, _id) {
-        var slider = false;
-        if (!_link || !_position) return console.error("function:menuAddElement: miss argument");
-        if (_item.length != _item.length) return console.error("function:menu invalid arguments, it must have same length");
-        else {
-            var menu = '<ul id="' + _id + '" class="z' + _position + '">';
-            var size_menu = _item.length;
-            if (_position != 0) {
-                $('li#z' + _position).addClass("has-sub");
+   GUI.listMenu = [];
+
+    GUI.menu = function (_json){
+        if(_json.hasOwnProperty('replace')){
+                    var soundMenu = _json.replace;
+                    if(soundMenu){
+                        soundMenu.removeAllMenu();
+                        soundMenu = GUI.appendMenu(_json);
+                        return soundMenu;}
+                    else{console.error("'replace' property is wrong");}}
+        else{var tmp = GUI.appendMenu(_json);
+            return tmp;}
+
+    }
+
+    GUI.appendMenu = function (_json) {
+        function Menu(_json) {
+            this.items = [];
+            this.links = [];
+            this.tooltips = [];
+            this.onchange = [];
+            this.rightItems = [];
+            this.id = [];
+            this.idObject = _json.id;
+            for(var nbItem = 0; nbItem<_json.item.length;nbItem++){
+                if( _json.item[nbItem].hasOwnProperty("text")){
+                    this.items[nbItem] = _json.item[nbItem].text;}
+                if( _json.item[nbItem].hasOwnProperty("id")){
+                    this.id[nbItem] = _json.item[nbItem].id;}
+                if( _json.item[nbItem].hasOwnProperty("tooltip")){
+                    if(_json.item[nbItem].type != "checkbox"){
+                        this.tooltips[nbItem] = {content: _json.item[nbItem].tooltip, id:_json.item[nbItem].id};}
+                }
+                if( _json.item[nbItem].hasOwnProperty("callback")){
+                    this.links[nbItem] = _json.item[nbItem].callback;
+                }
+                else{
+                    this.links[nbItem] ="#";
+                }
             }
-            for (var i = 1; i < (size_menu + 1); i++) {
-                if (_link[i - 1] != 0) {
-                    if (_link[i - 1] == "checkbox") {
-                        menu += GUI.addCheckBox('z' + _position + '_' + i, _item[i - 1]);
-                    } else if (_link[i - 1] == "radioList") {
-                        menu += GUI.addRadioList(1, 'z' + _position + '_' + i, _item[i - 1], _item[i - 1]);
-                    } else if (_link[i - 1] == "slider") {
-                        menu += '<li id="z' + _position + '_' + i + '">'
-                        menu += GUI.addSlider('slider' + _position + '_' + i, "code");
-                        menu += '</li>';
-                        slider = i;
-                    } else {
-                        menu += '<li id="z' + _position + '_' + i + '">' + '<a href="' + _link[i - 1] + '"><span>' + _item[i - 1] + '</span></a></li>';
+            this.json = _json;
+           
+            this.parent = _json.parent;
+            this.html = '';
+            this.listJqueryObjectElement = [];
+            this.jqueryObjectHead = $(".head-menu");
+            this.tmp =[];
+            this.checkRadio = [];
+            this.checkBox = [];
+            var stock = this;
+            this.init = function () {
+                this.html = '<ul id=' + this.idObject;
+                if (GUI.listMenu.length == 0) {
+                    this.html += ' class="head-menu"';
+                }
+                this.html += '>';
+                 var buffer1 = function(){};
+                for (var i = 0; i < this.json.item.length; i++) {
+                    if ( ((typeof this.json.item[i])=="string") || (typeof this.json.item[i] instanceof String) ) {
+                        this.html += this.json.item[i];
                     }
+                    else if (this.json.item[i].type == "checkbox") {
+                        delete this.json.item[i].parent;
+                        var checked = null;
+                        if ( this.json.item[i].hasOwnProperty('checked') )
+                            this.json.item[i]['state']=true;
+                        var object = GUI.addCheckBox(this.json.item[i]);
+                        this.checkBox.push(object);
+                        this.html += object.html;
+                    } else if (this.json.item[i].type == "radioList") {
+                        if (!this.json.item[i].hasOwnProperty("text")) {
+                            delete this.json.item[i].type;
+                            delete this.json.item[i].parent;
+                            var tmp = GUI.addRadioList(this.json.item[i]);
+                            this.checkRadio.push(tmp);
+                            this.html += tmp.html;}
+                        else{
+                            this.html += GUI.addRadioList(1, this.id[i], this.items[i], this.items[i]);}
+                    } else if (this.json.item[i].type == "menu") {
+                        this.html += '<li id="' + this.id[i] + '">';
+                        this.html += '<a href="';
+                        if (this.links[i] != "#") {
+                            buffer1 = this.links[i];
+                            if(typeof buffer1!= "string"){
+                                var num = Math.floor((Math.random()*100000)+1);
+                                window["x"+num]=buffer1;
+                                window["z"+num]=function(item){
+                                    window["x"+item].call();}
+                                this.html += "javascript:window.z"+num +"("+num+");";}
+                            else{
+                                this.html += "javascript:" + this.links[i] +";";
+                            }
+                        } else {
+                            this.html += '#"';
+                        }
+                        this.html += '">' + this.items[i] + '</a>';
+                        this.html += '</li>';
+                        this.json.item[i].json["parent"] = $("#"+this.id[i]);
+                        this.tmp.push(this.json.item[i].json);
+                    } else if (this.json.item[i].type == "separator") {
+                        this.html += "<span class='separator' ><hr></hr></span>";
+                    } else {
+                        this.html += '<li id="' + this.id[i] + '">';
+                        this.html += '<a href="';
+                        if (this.links[i] != "#") {
+                            buffer1 = this.links[i];
+                            if(typeof buffer1!= "string"){
+                                var num = Math.floor((Math.random()*100000)+1);
+                                window["x"+num]=buffer1;
+                                window["z"+num]=function(item){
+                                    window["x"+item].call();}
+                                this.html += "javascript:window.z"+num +"("+num+");";}
+                            else{
+                                this.html += "javascript:" + this.links[i] +";";
+                            }
+                        } else {
+                            this.html += '#"';
+                        }
+                        this.html += '">' + this.items[i] + '</a>';
+                        this.html += '</li>';
+                    }
+
+                }
+                this.html += '</ul>';
+            }
+
+            this.create = function () {
+                this.jqueryObjectRoot = this.parent.append(this.html);
+                if (GUI.listMenu.length == 0) {
+                    this.jqueryObjectRoot = $(".head-menu").menu({
+                        position: {
+                            at: "left bottom"
+                        },
+                        icons: {
+                            submenu: "ui-icon-carat-1-e"
+                        },
+                    });
                 } else {
-                    menu += '<li id ="z' + _position + '_' + i + '">' + '<a href="#"><span>' + _item[i - 1] + '</span></a></li>';
+                    this.refresh();
+                }
+                GUI.listMenu.push(this.jqueryObjectRoot);
+                this.jqueryObjectRoot.area = this.jqueryObjectRoot.find('ul'); 
+                var buffer1 = this.parent;
+                $('#menu').find('> li').each(function(index){
+                    $(this).find('> a > span').removeClass();
+                    $(this).find('> a > span').addClass('ui-menu-icon ui-icon ui-icon-carat-1-s');
+                })
+                this.parent.beforeShow(function(){
+                    var tmp = buffer1.parent();
+                    if(tmp.prop("tagName") == "UL"){
+                    tmp = tmp.parent();
+                    if(tmp.prop("tagName") == "LI"){
+                        tmp = tmp.parent();
+                        if(tmp.prop("id") == "menu"){
+                            var left = buffer1.parent().width()+2;
+                            var top = buffer1.position().top;
+                            buffer1.find('ul').attr('style',"position: absolute !important; left: "+left+"px !important; top: "+top+"!important;");
+                            buffer1.find('ul').hide(); //buffer1
+                        }
+                    }   
+                }});
+                if(this.parent.parent().hasClass("head-menu")){
+                    var width = this.parent.find('ul').width()+40;
+                    this.parent.find('ul li a').css("width",width);}
+                for(var f=0;f<this.checkRadio.length;f++){
+                    this.checkRadio[f].link();
+                }
+                for(var c=0;c<this.checkBox.length;c++){
+                    this.checkBox[c].link();
                 }
             }
-            menu += '</ul>';
-            var $menu = $(menu);
-            if (_position == '0') {
-                $('div.ui-layout-north').append($menu); /*$("#"+_id+">li").css("border-right","30px dotted white")*/
-            } else {
-                $('li#z' + _position).append($menu);
-            }
-            if (slider) {
 
-                $('#slider' + _position + '_' + slider).slider({
-                    animate: true,
-                    min: _item[slider - 1][0],
-                    max: _item[slider - 1][1],
-                    step: _item[slider - 1][2],
-                    value: _item[slider - 1][3],
-                    slidechange: _item[slider - 1][4],
-                }).width(175);
-            }
-            return $menu;
-        }
-    };
-
-    //not udpdated,Broken
-    GUI.addElementMenu = function (_item, _link, _position) {
-        if (!_link || !_position || !_item) return console.error("function:menuAddElement: miss argument");
-        if (_item.length != _item.length) return console.error("function:menu invalid arguments, it must have same length");
-        else {
-            var _parent = $('div.ui-layout-north');
-            if (_position != 0) {
-                var nb = ($('li#z' + _position).children().size()) + 1;
-            } else {
-                var nb = ($('ul.' + _position).children().size()) + 1;;
-            }
-            var size_menu = _item.length;
-            var menu = '<!---->';
-            for (var i = 1; i < (size_menu + 1); i++) {
-                if (_link[i - 1] != 0) {
-                    menu += '<li id=';
-                    menu += '\'' + _position + '_' + nb + '\'>' + '<a href="' + _link[i - 1] + '">';
-                    nb++;
-                } else {
-                    menu += '<li id =\'' + _position + '_' + nb + '\'>' + '<a href="#">';
-                    nb++;
+            this.applyTooltip = function(){
+                for(var z =0; z<this.tooltips.length; z++){
+                    this[this.tooltips[z].id].addTooltip(this.tooltips[z].content);
                 }
-                menu += '<span>' + _item[i - 1] + '</span></a></li>';
             }
-            var $menu = $(menu);
-            $('ul.' + _position).append($menu);
-            return $menu;
+
+            this.callSubmenu = function (){
+                var example = '';
+                for (var leng=0;leng<this.tmp.length;leng++){
+                    example = this.tmp[leng]
+                    GUI.menu(example);
+                }
+            }
+
+            this.refresh = function () {
+                this.jqueryObjectHead.menu("refresh");
+                stock = this;
+            }
+            this.createJqueryObjects = function () {
+                for(var nbId=0; nbId<this.id.length; nbId++){
+                    this[this.id[nbId]] = $("#" + this.id[nbId]);
+                    this[this.id[nbId]]["text"] = $("#" + this.id[nbId]).find('>a');
+                    this[this.id[nbId]]["icon"] = $("#" + this.id[nbId]).find('>span');
+                    this["listJqueryObjectElement"][nbItem] = this[this.id[nbId]];
+                }
+                for(var t=0;t<this.checkRadio.length;t++){
+                    this[this.checkRadio[t].idObject] = this.checkRadio[t];
+                }
+                for(var x=0;x<this.checkBox.length;x++){
+                    this[this.checkBox[x].idObject] = this.checkBox[x];
+                }
+            }
+            $.fn.removeJqueryObject = function () {
+                delete stock[this.prop("id")];
+            }
+
+            $.fn.recall = function (id) {
+                this.removeJqueryObject();
+                this.removeAttr('id');
+                this.prop("id",id);
+                stock[id] = this;
+                this.text.removeJqueryObject();
+                stock[id]['text'] = this.find('>a');
+                this.icon.removeJqueryObject();
+                stock[id]['icon'] = this.find('>span');
+                }
+            $.fn.removeElement = function () {
+                this.removeJqueryObject();
+                this.remove();
+                stock.refresh();
+            }
+
+            this.removeAllMenu = function () {
+                this.parent.find("ul").remove();
+                this.parent.find("span").remove();
+                this.refresh();
+                for (var key in this){
+                     delete this[key];
+                }
+                delete this;
+            }
+
+            this.removeAllChildren = function () {
+                this.parent.find("ul").remove();
+                this.parent.find("span").remove();
+                this.refresh();
+                 for (var key in this){
+                     delete this[key];
+                }
+
+            }
+
+            this.addElement = function (_json) {
+                var element = '';
+                var radioList = '';
+                var checkbox = '';
+                if (_json.type == "checkbox") {
+                    delete _json.type;
+                    delete _json.parent;
+                    checkbox = GUI.addCheckBox(_json);
+                    element += checkbox.html;
+                } else if (_json.type == "radioList") {
+                    if (!_json.hasOwnProperty("text")) {
+                            delete _json.type;
+                            delete _json.parent;
+                            var tmp = GUI.addRadioList(_json);
+                            radioList= tmp;
+                            element += tmp.html;}
+                    else{
+                        element += GUI.addRadioList(1, _json.id,_json.text, _json.text);}
+                } else {
+                    element += '<li id="' + _json.id + '" class="ui-menu-item" role="presentation">';
+                    element += '<a href="';
+                    if (_json.hasOwnProperty("callback")) {
+                        element += "javascript:"+_json.callback+";";
+                    } else {
+                        element += '#"';
+                    }
+                    element += '" class="ui-corner-all" role="menuitem">' + _json.text + '</a>';
+                    element += '</li>';
+                }
+
+                if(_json.hasOwnProperty("before")&&_json.before){
+                    if(_json.hasOwnProperty("position")){
+                        this[_json.position].before(element);}
+                    else{this.jqueryObjectRoot.before(element);}
+                } else {
+                    if(_json.hasOwnProperty("position")){
+                        this[_json.position].after(element);}
+                     else{this.jqueryObjectRoot.after(element);}
+                }
+
+                radioList.link();
+                checkbox.link();
+
+                this.refresh();
+                this[_json.id]=$('#'+_json.id);
+                this[_json.id]["text"] = $("#" + _json.id).find('>a');
+                this[_json.id]["icon"] = $("#" + _json.id).find('>span');
+
+                this[radioList.idObject] = radioList;
+                this[checkbox.idObject] = checkbox;
+
+                this["listJqueryObjectElement"].push(stock[_json.id]);
+            }
+            $.fn.disableElement = function () {
+                this.addClass("disable");
+            }
+            $.fn.enableElement = function () {
+                this.removeClass("disable");
+            }
+            $.fn.checkDisable = function () {
+                return this.hasClass("disable");
+            }
+            $.fn.beforeShow = function (_callback) {
+                this.on("mouseenter", function (event) {
+                    _callback.call();
+                });
+            }
+            $.fn.attachCallback = function (_callback) {
+                this.text.attr("href", "javascript:" + _callback +";");
+            }
+            $.fn.detachCallback = function (_callback) {
+                this.text.attr("href", '#');
+            }
+
+            $.fn.moveToRightFromLeft = function(pixels){
+                var width =0;
+                if(!pixels){
+                    if(stock.rightItems.length != 0){width = stock.rightItems.slice(-1)[0]+90;}}
+                else if(pixels){width=pixels;}
+                this.attr("style","position: absolute !important; right: "+width+"px !important;");
+                stock.rightItems.push(width);
+            }
+
+            this.setAutoHeight = function () {
+                var elem = this.jqueryObjectRoot.area;
+                var height = "innerHeight" in window ? window.innerHeight : document.documentElement.offsetHeight;
+                var elemHeight = '';
+                elem.children().wrapAll('<div id="scrollPanel-' + GUI.listMenu.length + '"></div>');
+                var wrap = $('#scrollPanel-' + GUI.listMenu.length);
+                var tmp = this.parent;
+                this.jqueryObjectHead.on("menufocus", function (event, ui) {
+                    var heightArea = tmp.position().top;
+                    elemHeight = elem.height();
+                    if (elemHeight > height - 90) {
+                        elem.css("max-height", height - heightArea - 65);
+                        wrap.css("height", height - heightArea - 65);
+                        $(window).on('resize orientationChanged', function () {
+                            var heightBis = "innerHeight" in window ? window.innerHeight : document.documentElement.offsetHeight;
+                            elem.css("max-height",heightBis - heightArea - 65);
+                            wrap.css("height",heightBis - heightArea - 65); //88
+                        });
+                        wrap.scroll(function () {
+                            var value = wrap.scrollTop();
+                            var maxScrollTop = wrap[0].scrollHeight - elem.outerHeight();
+                            if (!value) {}
+                            if (value == maxScrollTop) {}
+                        })
+                    }
+                });
+            }
+            this.closeAll = function(){
+                $(".head-menu").menu("collapseAll", null, true );
+            }
+            this.setSentivityFocus=function(_time_ms){
+                var blurTimer;
+                var blurTimeAbandoned = _time_ms;  // time in ms for when menu is consider no longer in focus
+                $(".head-menu").on('menufocus', function() {
+                    clearTimeout(blurTimer);
+                });
+                $(".head-menu").on('menublur', function(event) {
+                    blurTimer = setTimeout(function() {
+                        $(".head-menu").menu("collapseAll", null, true );
+                    }, blurTimeAbandoned);
+                });
+
+                // this.parent.find('>a').on("mouseleave",function(){
+                //     // console.debug("helloWorld");
+                //     var titi = $(this);
+                //     var tefa = setInterval(function(){titi.trigger("mouseover");$(this).trigger("focus");},100);
+                //     setTimeout(function(){clearTimeout(tefa)},500);
+                // })
+            }
         }
-    };
+
+        var tmp = new Menu(_json);
+        tmp.init();
+        tmp.create();
+        tmp.createJqueryObjects();
+        if(tmp.tmp != 0){
+            tmp.callSubmenu();
+        }
+        tmp.applyTooltip();
+        tmp.setSentivityFocus(1000);
+        return tmp;
+
+    }
+
 
 
     GUI.toolBar = function (_id, _parent, _icones, _links, _position) {
@@ -884,89 +1794,156 @@ if (window.$ === undefined) {
         //$("div.tool-items a:first-child").remove();
         return result;
     };
-    //----------------------------------------------------------------------------------------------------------------------------------------
-
-    GUI.window = function (_txt, _pane, _float) {
-
-        if (_pane)
-            $parent = $(".ui-layout-" + _pane);
-
-        // TODO - rename fragment-1 to something more useful
-        var code =
-            '<ul>' +
-            '   <li><a href="#tabs-' + _pane + '-1" >' + _txt + '</a></li>' +
-            '</ul>' +
-
-        '<div class="ui-layout-content ui-widget-content" >' +
-            '   <div id="tabs-' + _pane + '-1" class=" ui-widget-content" ></div>' +
-            '</div>';
-        var $window;
-
-        if (!_pane || _float) {
-            code = '<div class="ui-tabs ui-widget">' + code + '</div>';
-
-            $window = $(code);
-            $window.tabs();
-            $('body').append($window);
-
-
-            if (_float)
-                $window.resizable({
-                    helper: "ui-resizable-helper"
-                })
-                    .draggable();
-        } else {
-            $window = $(code);
-            $parent.append($window);
-            $parent.tabs()
-            // allow tabs to be moved left/right
-            .find(".ui-tabs-nav").sortable({
-                axis: 'x',
-                zIndex: 2
-            });
-
-        }
-
-        //$window.uniqueId();
-        //var id=$window.attr('id');
-
-        return $window.find('.ui-widget-content');
-    };
-
-    GUI.searchClickId = function (event, element) {
-        var idSearch = event.target.id;
-        var check = true;
-        var count = 0;
-        var condition = ''
-        while (check) {
-            count++;
-            var search = $('#' + idSearch).attr('class');
-            if (search) {
-                if (search.match("ui-layout-center") || search.match("ui-layout-south") || search.match("ui-layout-north") || search.match("ui-layout-est") || search.match("ui-layout-west")) {
-                    check = false;
-                    break;
+    //---------------------------------------------------------------------------------------------------------------------------------------
+  GUI.getCSSRule = function (className) {
+        for (var i = 0; i < document.styleSheets.length; i++) {
+            var classes = document.styleSheets[i].rules || document.styleSheets[i].cssRules
+            for (var x = 0; x < classes.length; x++) {
+                if (classes[x].selectorText.search(className)) {
+                    (classes[x].cssText) ? console.debug(classes[x].cssText) : console.debug(classes[x].style.cssText);
                 }
             }
-            var $parent = $('#' + idSearch).parent();
-            idSearch = $parent.attr('id');
-            if (count == 20) {
-                throw "didn't find any layouts";
-                return false;
-            }
         }
-        element = $('#' + idSearch);
-        var parentOffset = element.offset();
-        var relX = event.pageX - parentOffset.left;
-        var relY = event.pageY - parentOffset.top;
-        var percentageY = Math.round(relY * (100 / $(element).height()));
-        var percentageX = Math.round(relX * (100 / $(element).width()));
-        return {
-            id: idSearch,
-            percentagex: percentageX,
-            percentagey: percentageY
-        };
     }
 
+
+    GUI.killCssRule = function (ruleName) {
+        function getCSSRule(ruleName, deleteFlag) {
+            if (document.styleSheets) {
+                var i = document.styleSheets.length - 1;
+                var styleSheet = document.styleSheets[i];
+                var ii = 0;
+                var cssRule = false;
+                do {
+                    if (styleSheet.cssRules) {
+                        cssRule = styleSheet.cssRules[ii];
+                    } else {
+                        cssRule = styleSheet.rules[ii];
+                    }
+                    if (cssRule) {
+                        if (cssRule.selectorText == ruleName) {
+                            if (deleteFlag == 'delete') {
+                                if (styleSheet.cssRules) {
+                                    styleSheet.deleteRule(ii);
+                                } else {
+                                    styleSheet.removeRule(ii);
+                                }
+                                return true;
+                            } else {
+                                return cssRule;
+                            }
+                        }
+                    }
+                    ii++;
+                } while (cssRule)
+
+            }
+            return false;
+        }
+        return getCSSRule(ruleName, 'delete');
+    }
+
+
+    GUI.addCssRule = function (selector, rule) {
+        if (document.styleSheets) {
+            if (!document.styleSheets.length) {
+                var head = document.getElementsByTagName('head')[0];
+                head.appendChild(bc.createEl('style'));
+            }
+
+            var i = document.styleSheets.length - 1;
+            var ss = document.styleSheets[i];
+
+            var l = 0;
+            if (ss.cssRules) {
+                l = ss.cssRules.length;
+            } else if (ss.rules) {
+                // IE
+                l = ss.rules.length;
+            }
+            try{
+            if (ss.insertRule) {
+                ss.insertRule(selector + ' {' + rule + '}', l);
+            } else if (ss.addRule) {
+                // IE
+                ss.addRule(selector, rule, l);
+            }}
+            catch(ERR){};
+        }
+    };
+
+    GUI.borderTheme = '';
+    GUI.colorTheme = '';
+    GUI.fontTheme = '';
+    GUI.setColorJqueryTheme = function () {
+        GUI.colorTheme = $("#header-renderMenus").parent().css("background-color");
+        GUI.borderTheme = $("#auteur").css("color");
+        GUI.fontTheme = $('#content-renderMenus').css("background-color");
+    }
+
+    GUI.refreshJqueryTheme = function () {
+        var colorvalue = GUI.colorTheme;
+        $('#mainLayout-south').addClass('ui-widget-content');
+        $("#console").addClass('ui-widget-header');
+        $(".ui-layout-resizer-west").addClass('ui-widget-header');
+        $('.ui-slider').addClass('ui-widget-header');
+        $('.select-skinned-cont').addClass('ui-widget-header');
+        GUI.killCssRule('#menu');
+        GUI.addCssRule('#menu', 'border-bottom-color: ' + GUI.borderTheme + ' !important;');
+        GUI.killCssRule('#mainLayout-south');
+        GUI.addCssRule('#mainLayout-south', 'border-top-color: ' + GUI.borderTheme + ' !important;');
+        GUI.killCssRule('#icon-toolConsole');
+        GUI.addCssRule('#icon-toolConsole', 'border-right-color: ' + GUI.borderTheme + ' !important;');
+        GUI.killCssRule('#content-console');
+        GUI.addCssRule('#content-console', 'border-top-color: ' + GUI.borderTheme + ' !important;');
+        GUI.killCssRule('#console');
+        GUI.addCssRule('#console', 'border-right-color: ' + GUI.borderTheme + ' !important; border-top-color: ' + GUI.borderTheme + ' !important;');
+        GUI.killCssRule('#auteur');
+        GUI.addCssRule('#auteur', 'border-left-color: ' + GUI.borderTheme + ' !important;');
+        GUI.killCssRule('.ui-dialog');
+        GUI.addCssRule('.ui-dialog', 'border-color: ' + GUI.borderTheme + ' !important;');
+        GUI.killCssRule('.ui-menu ul');
+        GUI.addCssRule('.ui-menu ul', 'border-color: ' + GUI.borderTheme + ' !important;');
+        GUI.killCssRule('.ui-menu ul li ul');
+        GUI.addCssRule('.ui-menu ul li ul', 'border-left-color: ' + GUI.borderTheme + ' !important; border-bottom-color: ' + GUI.borderTheme + ' !important; border-right-color: ' + GUI.borderTheme + ' !important;');
+        GUI.killCssRule('body *::-webkit-scrollbar-track');
+        GUI.addCssRule('body *::-webkit-scrollbar-track', '-webkit-box-shadow: inset 0 0 6px rgba(0,0,0,0.3) !important; border-radius: 10px; background-color: ' + GUI.colorTheme + ' !important;');
+        GUI.killCssRule("body *::-webkit-scrollbar");
+        GUI.addCssRule("body *::-webkit-scrollbar", "width: 10px; height: 10px; background-color:" + GUI.colorTheme + "!important;");
+        GUI.killCssRule("body *::-webkit-scrollbar-thumb");
+        GUI.addCssRule("body *::-webkit-scrollbar-thumb", "border-radius: 10px;-webkit-box-shadow: inset 0 0 6px rgba(0,0,0,.3);background-color:" + GUI.borderTheme + "!important;");
+        GUI.killCssRule(".ui-accordion-content");
+        GUI.addCssRule(".ui-accordion-content", "border-bottom-color: " + GUI.borderTheme + " !important;border-left-color: " + GUI.borderTheme + " !important;border-right-color: " + GUI.borderTheme + " !important;");
+        GUI.killCssRule(".ui-layout-resizer-west");
+        GUI.addCssRule(".ui-layout-resizer-west", "border-right: 1px solid " + GUI.borderTheme + "!important; border-left: 1px solid " + GUI.borderTheme + "!important;");
+    }
+    GUI.currentCssTheme = '';
+    GUI.loadCssFile = function (filename) {
+        var cssLink = $("<link>");
+        $("head").append(cssLink);
+        cssLink.attr({
+            rel: "stylesheet",
+            type: "text/css",
+            href: filename
+        });
+    }
+    GUI.destroyCurrentCssTheme = function () {
+        $("link[href='" + GUI.currentCssTheme + "']").remove();
+    }
+        //addTooltip( {content : "run script", hide : 3000,show: 2000});
+    $.fn.addTooltip = function(_json){
+        var content = _json.content;
+        this.prop('title',content);
+        this.tooltip();
+        if(_json.hasOwnProperty("hide")){
+            var hide = _json.hide;
+            this.tooltip( "option", "hide", { delay: hide })
+        }
+        if(_json.hasOwnProperty("show")){
+            var show = _json.show;
+            this.tooltip( "option", "show", { delay: show })
+        }
+    }
 
     GUI.Layout = function (id, position) {
 
@@ -1211,34 +2188,260 @@ if (window.$ === undefined) {
             onresize: GUI.resize,
         };
         obj.create();
+        //obj.jqueryObject.options.west.minSize = '10%';
+        //obj.jqueryObject.options.west.maxSize = '90%';
 
-        obj.jqueryObject.sizePane("west", $(window).width() - 250);
+        // obj.jqueryObject.sizePane("west", $(window).width() - 245);
+
+        GUI.container = obj.jqueryObject;
         $(window).on('resize orientationChanged', function () {
-            setTimeout(function () {
-                obj.jqueryObject.sizePane("west", $(window).width() - 250)
-            }, 500);
+            if(GUI.flagResize){
+                obj.jqueryObject.sizePane("west", $(window).width() - 300);
+                GUI.container.resizeAll();
+                GUI.container.initContent("center");
+                GUI.container.initContent("west");}
+            else{}
         });
+        
+        obj.jqueryObjectWest.append("<div id='support-layout' class='ui-layout-center' style='height:100%;width:100%'></div>");
+        obj.jqueryObject.sizePane("north", 37);
         obj.jqueryObject.allowOverflow("north");
-        obj.jqueryObject.allowOverflow("south");
-        obj.jqueryObjectWest.append("<div id='support-layout' class='ui-layout-center'></div>");
+        obj.jqueryObject.sizePane("south", 25);
         return obj;
     }
     // does not work without this
-    GUI.resize = function () {};
+    GUI.offset=false;
 
-    GUI.setMenuSensitivity = function (sensitivity, timeoutMouseOver, timeoutMouseOut) {
-        $('#mainLayout-north .has-sub .has-sub, #z0_5_3').hoverIntent({
-            sensitivity: sensitivity,
-            interval: timeoutMouseOver,
-            over: function () {
-                $(this).find('ul').css("display", "block")
-            },
-            timeout: timeoutMouseOut,
-            out: function () {
-                $(this).find('ul').css("display", "none")
+    GUI.resize = function () {
+
+    };
+
+    GUI.copyToClipboard = function(text) {  
+        $('body').append('<textarea id="clipboardholder" style="display:none;"></textarea>');         
+        var clipboardholder= document.getElementById("clipboardholder"); 
+        clipboardholder.style.display = "block"; 
+        clipboardholder.value = text; 
+        clipboardholder.select(); 
+        document.execCommand("Copy"); 
+        clipboardholder.style.display = "none";} 
+
+/*  role : it shows up a notification, it is automatically removed from the DOM when hidden/closed
+    function : GUI.notification(_json);
+    parameter : 
+        type : json
+        attributes :
+            text : 
+                type : string
+                role : text of the notification (required)
+            title :
+                type : string
+                role : title of the notification
+            type :
+                type : string
+                value : "notice", "info", "success", or "error". 
+                role : specify the type of the notification. The default type is "info" 
+            time :
+                type : number
+                value : ms
+                role : Delay before the notice is removed. The default state add a "close" button to remove the notification
+    variable returned: 
+        type : Object <Notification>
+    Example : GUI.notification({title:"tefa",text:"text",time:"4000"})
+            GUI.notification({text:"jajajaaaaa",type:"notice"})*/
+
+    GUI.notification = function(_json){
+        function Notification(_json){
+            this.text = _json.text;
+            if(_json.hasOwnProperty("title")){this.title = _json.title;}
+            else{this.title=false;}
+            this.json = _json;
+            this.create = function(){
+                $.pnotify.defaults.styling = "jqueryui";
+                $.pnotify.defaults.history = false;
+                var entry = {title: this.title,text: this.text,sticker: false,remove: true}
+                if(this.json.hasOwnProperty("time")){entry["delay"]=this.json.time;entry["closer"]=false;entry["hide"]=true;}
+                else{entry["hide"]=false;entry["closer"]=true;}
+                if(this.json.hasOwnProperty("type")){entry["type"]=this.json.type;}
+                $.pnotify(entry);
             }
-
-        });
+            // this.disableHistory = function(){
+                
+            // }
+            // this.enableHistory = function(){
+            //     $.pnotify.defaults.history = true;
+            // }
+        }
+        var tmp = new Notification(_json);
+        tmp.create();
+        // tmp.disableHistory();
+        return tmp;
     }
+
+    GUI.hideAllNotifications = function(){
+        $(".ui-pnotify").remove();
+        $(".ui-pnotify").hide();
+    }
+
+
+    GUI.searchBox = function(_json){
+        function Search (_json){
+            this.parent = _json.parent;
+            this.id = _json.id;
+            this.create = function(){
+                this.input = GUI.addInput(this.id,"",this.parent);
+                this.input.css("float:right;top:0px;")
+            }
+            this.search = function(){
+                var stock = this;
+                var buffer = $(''), scrollTo=$(''), container=$('#help'), index =0;
+                this.input.keyup(function(event){
+                // console.debug($("#help").find( ".ui-tabs-panel" )[$('#help').tabs( "option", "active" )])
+                if(event.keyCode == 13){
+                    index ++;
+                    scrollTo.css("background-color"," #CCCCCC")
+                    scrollTo=$('.highlight').eq(index);
+                    if(scrollTo.length){
+                    container.scrollTop(
+                            scrollTo.offset().top - container.offset().top + container.scrollTop() - 80
+                        );
+                    scrollTo.css("background-color","yellow")
+                  }
+                    else{
+                        index = 0;
+                        if(scrollTo.length){
+                            container.scrollTop(
+                            scrollTo.offset().top - container.offset().top + container.scrollTop() - 80
+                        );
+                        scrollTo.css("background-color","yellow")
+                  }
+
+                    }
+                }
+              else{
+                  $('#help').removeHighlight();
+                  $($("#help").find( ".ui-tabs-panel" )[$('#help').tabs( "option", "active" )]).highlight(this.value);
+                  if($('.highlight').length){
+                    index = 0;
+                    scrollTo=$('.highlight').eq(index);
+                    container.scrollTop(
+                            scrollTo.offset().top - container.offset().top + container.scrollTop() - 80
+                        );
+                    scrollTo.css("background-color","yellow")
+                    }
+                }});}
+
+        $.fn.highlight = function(pat) {
+             function innerHighlight(node, pat) {
+              var skip = 0;
+              if (node.nodeType == 3) {
+               var pos = node.data.toUpperCase().indexOf(pat);
+               if (pos >= 0) {
+                var spannode = document.createElement('span');
+                spannode.className = 'highlight';
+                var middlebit = node.splitText(pos);
+                var endbit = middlebit.splitText(pat.length);
+                var middleclone = middlebit.cloneNode(true);
+                spannode.appendChild(middleclone);
+                middlebit.parentNode.replaceChild(spannode, middlebit);
+                skip = 1;
+               }
+              }
+              else if (node.nodeType == 1 && node.childNodes && !/(script|style)/i.test(node.tagName)) {
+               for (var i = 0; i < node.childNodes.length; ++i) {
+                i += innerHighlight(node.childNodes[i], pat);
+               }
+              }
+              return skip;
+             }
+             return this.length && pat && pat.length ? this.each(function() {
+              innerHighlight(this, pat.toUpperCase());
+             }) : this;
+            };
+
+          $.fn.removeHighlight = function() {
+             return this.find("span.highlight").each(function() {
+              this.parentNode.firstChild.nodeName;
+              with(this.parentNode) {
+               replaceChild(this.firstChild, this);
+               normalize();
+              }
+             }).end();
+        };
+
+        }
+        var tmp = new Search(_json);
+        tmp.create();
+        tmp.search();
+        return tmp;
+    }
+
+    GUI.input = function(_json){
+        function InputDialog (_json){
+            this.json = _json;
+            this.parent = this.json.parent;
+            this.idObject = this.json.id;
+            var stock = this;
+            if(this.json.hasOwnProperty('callback')){
+                this.callback = this.json.callback;
+            }
+            if(this.json.hasOwnProperty('hide')){
+                this.hide = this.json.hide;
+            }
+            if(this.json.hasOwnProperty('extension')){
+                this.extension = this.json.extension;
+            }
+            this.mode = '';
+            if(this.json.hasOwnProperty('mode')){
+                this.mode = this.json.mode;
+            }
+            else{this.mode="none";}
+            this.generateHTML = function (){
+                this.html = '<input type="file" id="'+this.idObject+'" name="files[]"';
+                if(this.extension){
+                    this.html += ' accept="'+this.extension+'"';}
+                this.html += ' multiple ';
+                if(this.mode=='readText'){
+                    this.html += ' onchange="window.readFile(this.files)"/>';}
+            }
+            this.create = function (){
+                this.parent.append(this.html);
+                this.header = $('#'+this.idObject);
+                var stock = this;
+                if(this.hide){
+                    this.header.hide();
+                }
+                stock = this;
+                this.header.on("change",function () {
+                    this.value = null;
+                });
+            }
+            window.readFile = function(files){
+                 for (i = 0; i < files.length; i++) {
+                    var file = files[i];
+                    var reader = new FileReader();
+                    var ret = [];
+                    reader.onload = function(e) {
+                      stock.callback.call(undefined,e);
+                    }
+                    reader.onerror = function(stuff) {
+                      console.log("error", stuff)
+                      console.log (stuff.getMessage())
+                    }
+                    reader.readAsText(file);
+                    delete reader;
+                  }
+            }
+            this.click = function(){
+                this.header.click();
+            }
+        }
+        var tmp = new InputDialog(_json);
+        tmp.generateHTML();
+        tmp.create();
+        return tmp;
+
+    }
+
+   
 
 }).call(this);
