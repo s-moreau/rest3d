@@ -1,6 +1,6 @@
 [{
   "name"      : "rest3d_static_server",
-  "script"    : "./staticserver.js",
+  "script"    : "./static_server.js",
   "args"      : "['--toto=heya loco', '-d', '1']",
   "env": {
       "NODE_ENV": "production",
