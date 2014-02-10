@@ -30,7 +30,7 @@ var http = require("http"),
     fs = require("fs"),
     mime = require("mime");
 var port = process.argv[2] || process.env.OPENSHIFT_NODEJS_PORT || 8000;
-var ip_address = process.env.OPENSHIFT_NODEJS_IP || '127.0.0.1';
+var ip_address = process.env.OPENSHIFT_NODEJS_IP || 'localhost';
 var static = path.join(process.cwd(), '../static');
  
 http.createServer(function(request, response) {
