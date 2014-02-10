@@ -16,5 +16,6 @@
     "blueimp-file-upload":"",
     "formidable":"",
     "imagemagick":""
-  }
+  },
+  "scripts": {"start": "node static_server.js"}
 }
