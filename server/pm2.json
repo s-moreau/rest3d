@@ -1,7 +1,7 @@
 [{
   "name"      : "rest3d_static_server",
   "script"    : "./staticserver.js",
-  "args"      : "['--toto=heya coco', '-d', '1']",
+  "args"      : "['--toto=heya loco', '-d', '1']",
   "env": {
       "NODE_ENV": "production",
       "AWESOME_SERVICE_API_TOKEN": "xxx"
