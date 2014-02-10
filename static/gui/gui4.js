@@ -35,8 +35,8 @@ if (window.$ === undefined) {
     //document.write('<script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.js"><\/' + 'script>');
     //document.write('<script src="//ajax.googleapis.com/ajax/libs/jqueryui/1.9.2/jquery-ui.min.js"><\/' + 'script>');
     document.write('<link rel="stylesheet" href="/gui/themes/vader/jquery-ui.css" />');
-    document.write('<script src="/deps/jquery.js"><\/' + 'script>');
-    document.write('<script src="/deps/jquery-ui.js"><\/' + 'script>');
+    document.write('<script src="/deps/jquery-2.0.3.min.js"><\/' + 'script>');
+    document.write('<script src="/deps/jquery-ui-1.9.2.min.js"><\/' + 'script>');
     document.write('<script src="/deps/jquery.layout.min.js"><\/' + 'script>');
     document.write('<link rel="stylesheet" href="/gui/gui4.css" />');
 }
