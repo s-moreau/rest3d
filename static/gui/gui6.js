@@ -64,7 +64,7 @@ THE SOFTWARE.
             e.preventDefault();
         })
     };
-
+// add button
     GUI.button = function (_txt, _parent, _callback, _x1, _y1, _x2, _y2, _textEnabled, _icon) {
         var $button = $('<button></button>');
         var callback = _callback;
