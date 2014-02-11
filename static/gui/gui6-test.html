@@ -101,7 +101,7 @@ THE SOFTWARE.
         };
 
         window.loadCss = function (item) {
-            var link = "../deps/themes/" + item + "/jquery-ui.css";
+            var link = "/themes/" + item + "/jquery-ui.css";
             GUI.destroyCurrentCssTheme();
             GUI.loadCssFile(link);
             GUI.currentCssTheme = link;
