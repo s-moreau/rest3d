@@ -83,8 +83,8 @@ var platform = os.type().match(/^Win/) ? 'win' :
 				(os.type().match(/^Dar/) ? 'mac' : 'unix');
 
 console.log('host platform=',platform);
-
-var static = path.join(process.cwd(), '../static');
+var this_path = process.argv[1].replace(/^.*(\\|\/|\:)/, '');
+var static = path.join(this_path, '../static');
 
 console.log('static folder=',static);
 
