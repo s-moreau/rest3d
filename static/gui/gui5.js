@@ -37,9 +37,9 @@ if (window.$ === undefined) {
 
     document.write('<link rel="stylesheet" href="/gui/themes/vader/jquery-ui.css" />');
 
-    document.write('<script src="/deps/jquery.js"><\/' + 'script>');
-    document.write('<script src="/deps/jquery-ui.js"><\/' + 'script>');
-    document.write('<script src="/deps/jquery.layout.min.js"><\/' + 'script>');
+    document.write('<script src="/deps/jquery-2.0.3.min.js"><\/' + 'script>');
+    document.write('<script src="/deps/jquery-ui-1.9.2.min.js"><\/' + 'script>');
+    document.write('<script src="/deps/jquery.layout-1.3.0.min.js"><\/' + 'script>');
 
     document.write('<script type="text/javascript" src="/deps/jquery.cookie.js"><\/' + 'script>');
     document.write('<script type="text/javascript" src="/deps/jquery.hotkeys.js"><\/' + 'script>');
