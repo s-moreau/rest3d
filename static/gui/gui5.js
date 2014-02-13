@@ -57,8 +57,6 @@ if (window.$ === undefined) {
 ***/
 // UI library
 (function () {
-
-
     // Initial Setup
     // -------------
     // Save a reference to the global object (`window` in the browser, `exports`

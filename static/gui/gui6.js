@@ -32,15 +32,47 @@ THE SOFTWARE.
   if (!_ && (typeof require !== 'undefined')) _ = require('underscore')._;
 ***/
 // UI library
-// "use strict";
-
-(function () {
 
 
+
+    if (window.$ === undefined) {
     // Initial Setup
     // -------------
     // Save a reference to the global object (`window` in the browser, `exports`
     // on the server).
+    document.write('<script type="text/javascript" src="../deps/jquery-2.0.3.min.js"></script>');
+    document.write('<script type="text/javascript" src="../deps/jquery-ui-1.9.2.min.js"></script>');                
+    document.write('<script type="text/javascript" src="../deps/jquery.layout-1.3.0.min.js"></script> ');       
+                    
+    document.write('<script type="text/javascript" src="../deps/jquery.jstree.js"></script>');
+    document.write('<script type="text/javascript" src="../deps/jquery.toolbar.js"></script>');
+    document.write('<script type="text/javascript" src="../deps/jquery.terminal-0.7.10.min.js"></script>'); 
+    document.write('<script type="text/javascript" src="../deps/jquery.pnotify.min.js"></script>');
+
+    //<!-- skinner plugin -->
+    document.write('<link href="../deps/css/jquery-skinner.css" rel="stylesheet" />');
+    document.write('<script src="../deps/jquery-skinner.js" type="text/javascript"></script>');
+
+    //<!-- codemirror plugin -->
+    document.write('<script type="text/javascript" src="../deps/codemirror/codemirror.min.js"></script>');
+    document.write('<script type="text/javascript" src="../deps/codemirror/javascript.js"></script>');
+    document.write('<script type="text/javascript" src="../deps/codemirror/show-hint.js"></script>');
+    document.write('<script type="text/javascript" src="../deps/codemirror/javascript-hint.js"></script>');
+    document.write('<script type="text/javascript" src="../deps/codemirror/dialog.js"></script>');
+    document.write('<script type="text/javascript" src="../deps/codemirror/search.js"></script>');
+    document.write('<script type="text/javascript" src="../deps/codemirror/search-cursor.js"></script>');
+
+    document.write('<link rel="stylesheet" href="../deps/codemirror/css/eclipse.css"/>');
+    document.write('<link rel="stylesheet" href="../deps/codemirror/css/codemirror.css"/>');
+    document.write('<link rel="stylesheet" href="../deps/codemirror/css/show-hint.css"/>');     
+    document.write('<link rel="stylesheet" href="../deps/codemirror/css/dialog.css"/>');    
+  
+    document.write('<link rel="stylesheet" href="../deps/css/bootstrap.icons.css"/>');
+    document.write('<link rel="stylesheet" href="../deps/css/jquery.toolbars.css"/>');
+    document.write('<link rel="stylesheet" href="../deps/css/jquery.terminal.css"/>'); 
+    document.write('<link rel="stylesheet" href="../deps/css/jquery.pnotify.default.css"/>');
+}
+    (function () {
 
     // The top-level namespace. All public GUI classes and modules will
     // be attached to this. Exported for both CommonJS and the browser.
@@ -117,9 +149,15 @@ THE SOFTWARE.
             if (_id) label += ' id= "p' + _id;
             label += '" >';
         }
+        if(_mode == "justify"){
+            label += '<div style="text-align: justify">';
+        }
         label += '<span style="' + _style;
         if (_id) label += '" id= "' + _id;
         label += '">' + _txt + '</span>';
+        if(_mode == "justify"){
+            label += '</div>';
+        }
         if (_mode == "isolate") {
             label += '</p>';
         }
@@ -264,31 +302,16 @@ THE SOFTWARE.
         return $tree;
     };
 
-    GUI.canvas = function (_parent) {
-        $canvas = $('<canvas class="ui-resize-me" style="padding: 0; margin: 0;" ></canvas>');
-
-        resize = function (event) {
-            $(this).height($(this).parent().parent().height() - 2);
-            $(this).width($(this).parent().parent().width());
-            if (this.width != this.clientWidth ||
-                this.height != this.clientHeight) {
-                // Change the size of the canvas to match the size it's being displayed
-                this.width = this.clientWidth;
-                this.height = this.clientHeight;
-            }
-        };
-
+    GUI.canvas = function(_parent) {
+        $canvas = $(
+            '<canvas id="tmp" class="ui-resize-me" style="padding: 0; margin: 0;" ></canvas>');
         if (!_parent)
             $('body').append($canvas);
         else {
-
-            $parent = $(_parent);
+        
+            $parent=$(_parent);
             $parent.append($canvas);
-            resize.call($canvas[0], null);
         }
-
-        $canvas.bind('resize', resize);
-
         return $canvas[0];
     };
 
@@ -872,7 +895,7 @@ THE SOFTWARE.
                     $('.ui-layout-resizer-west').hide();
                     GUI.flagResize = false;
                     $('#tabManager').hide();
-                    GUI.mainMenu.addElement({id:'tab',text:'Tabs',position:'sound'}); 
+                    GUI.mainMenu.addElement({id:'tab',text:'Tabs',position:'settings'}); 
                     var array = [];
                     var json = {};
                     for(var i = 0; i<this.listTab.length; i++){
@@ -883,7 +906,7 @@ THE SOFTWARE.
                         array.push(json);
                      }   
                     var menu = GUI.menu({id:'tabs-menu',parent:GUI.mainMenu.tab,item:array});
-                    GUI.image(GUI.mainMenu.tab.text, "img-tab", "images/icon-cog.png", 15, 15, "before");
+                    GUI.image(GUI.mainMenu.tab.text, "img-tab", "../gui/images/icon-cog.png", 15, 15, "before");
                     menu.jqueryObjectRoot.find("li").each(function (index) {
                         $(this).on('change', 'input[type=checkbox]', function (e) {
                             var position = $(this).parent().prop("id").replace('_check','');
@@ -1930,18 +1953,19 @@ THE SOFTWARE.
     GUI.destroyCurrentCssTheme = function () {
         $("link[href='" + GUI.currentCssTheme + "']").remove();
     }
-        //addTooltip( {content : "run script", hide : 3000,show: 2000});
-    $.fn.addTooltip = function(_json){
+
+    GUI.addTooltip = function(_json){
         var content = _json.content;
-        this.prop('title',content);
-        this.tooltip();
+        var parent = _json.parent;
+        parent.prop('title',content);
+        parent.tooltip();
         if(_json.hasOwnProperty("hide")){
             var hide = _json.hide;
-            this.tooltip( "option", "hide", { delay: hide })
+            parent.tooltip( "option", "hide", { delay: hide })
         }
         if(_json.hasOwnProperty("show")){
             var show = _json.show;
-            this.tooltip( "option", "show", { delay: show })
+            parent.tooltip( "option", "show", { delay: show })
         }
     }
 
@@ -2442,6 +2466,4 @@ THE SOFTWARE.
 
     }
 
-   
-
-}).call(this);
+    }).call(this);

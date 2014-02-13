@@ -365,6 +365,12 @@ overflow:hidden;
     float:none;
 }
 
+#collada .ui-button, #glTF .ui-button{
+    line-height: 1.3 !important;
+    display: inline !important;
+    padding-right: 0px !important;
+}
+
 /*.ui-menu ul li ul {
     position: absolute;
     left: 70px;
@@ -435,9 +441,8 @@ display: none;
 display: table-row-group!important;
 }
 
-#mainLayout-west{
-
-    pointer-events:none;
+.ui-layout-resizer.ui-layout-resizer-south.ui-layout-resizer-open.ui-layout-resizer-south-open{
+    display: none !important;
 }
 
 .radio_contain {
@@ -500,6 +505,8 @@ label[for="buttonLayout-"]{
 border-left:1px solid !important;
 border-right:1px solid !important;
 border-bottom:1px solid !important;
+padding-left: 5px !important;
+padding-right: 5px !important;
 }
 
 #themes ul{
@@ -644,4 +651,13 @@ padding: 2px 2px 2px 2px;
 .separator{
     margin-top: 20px !important;
     margin-bottom: 20px !important;
+}
+
+#collada{
+    width: herit !important;
+}
+
+#tmp{
+    width: 100%;
+    height: 100%;
 }

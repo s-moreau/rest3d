@@ -56,7 +56,7 @@ THE SOFTWARE.
     <link rel="stylesheet" href="../deps/css/jquery.terminal.css"/>  
     <link rel="stylesheet" href="../deps/css/jquery.pnotify.default.css"/>
 
-    <script type="text/javascript" src="/gui/gui6.js"></script>
+    <script type="text/javascript" src="../gui/gui6.js"></script>
     <link rel="stylesheet" href="../gui/gui6.css"/>   
     <script type="text/javascript" src="../deps/console.js"></script>
 
@@ -91,17 +91,17 @@ THE SOFTWARE.
                 GUI.addIcon(_parent, "ui-icon-info", "float:left;margin:3px;", "before").attr('id', 'iconStatus');
                 var clear = GUI.button("Clear", label, function(){
                     GUI.copyToClipboard(text.slice(15,-1));
-                    $('this').addTooltip({content:"copy completed!"});
+                    GUI.addTooltip({parent:$('this'),content:"copy completed!"});
                 });
                 clear.prop("id","copyButton");
                 clear.html('');
                 GUI.addIcon(clear, "ui-icon-copy", "", "before");
-                clear.addTooltip({content:"copy URL to clipboard"});
+                GUI.addTooltip({parent:clear ,content:"copy URL to clipboard"});
             }
         };
 
         window.loadCss = function (item) {
-            var link = "/themes/" + item + "/jquery-ui.css";
+            var link = "../gui/themes/" + item + "/jquery-ui.css";
             GUI.destroyCurrentCssTheme();
             GUI.loadCssFile(link);
             GUI.currentCssTheme = link;
@@ -114,7 +114,7 @@ THE SOFTWARE.
         function pleaseWait(_displayMode, _parent) {
             if (_displayMode == true) {
                 var mask = GUI.mask("mask-loading", "Please wait ...", _parent.jqueryObjectWest);
-                GUI.image($('#mask-loading'), "img-loading", "images/loading.gif", 30, 30, "before");
+                GUI.image($('#mask-loading'), "img-loading", "../gui/images/loading.gif", 30, 30, "before");
                 window.fl4reStatus('INFO', 'loading UI...', _parent.jqueryObjectSouth)
                 return mask;
             } else if (_displayMode == false) {
@@ -451,15 +451,15 @@ THE SOFTWARE.
         //------------------------------ all menu icons ---------------------------------------------------------------------------------------------
 
         // //add icons to the menu
-        GUI.image(menu.scenes.text, "img-scenes", "images/action.gif", 18, 18, "before");
-        GUI.image(menu.animation.text, "img-animation", "images/menu-animations.gif", 15, 15, "before");
-        GUI.image(menu.cameras.text, "img-cameras", "images/camera-anim.gif", 20, 20, "before");
-        GUI.image(menu.sound.text, "img-sound", "images/sound.gif", 10, 17, "before");
-        GUI.image(menu.light.text, "img-light", "images/lightbulb.png", 16, 16, "before");
-        GUI.image(menu.particle.text, "img-particles", "images/particles.gif", 15, 15, "before");
-        GUI.image(menu.settings.text, "img-settings", "images/icon-cog.png", 15, 15, "before");
-        GUI.image(menu.support.text, "img-help", "images/menu-help.png", 15, 15, "before");
-        GUI.image(menu.themes.text, "img-themes", "images/jquery.png", 15, 15, "before");
+        GUI.image(menu.scenes.text, "img-scenes", "../gui/images/action.gif", 18, 18, "before");
+        GUI.image(menu.animation.text, "img-animation", "../gui/images/menu-animations.gif", 15, 15, "before");
+        GUI.image(menu.cameras.text, "img-cameras", "../gui/images/camera-anim.gif", 20, 20, "before");
+        GUI.image(menu.sound.text, "img-sound", "../gui/images/sound.gif", 10, 17, "before");
+        GUI.image(menu.light.text, "img-light", "../gui/images/lightbulb.png", 16, 16, "before");
+        GUI.image(menu.particle.text, "img-particles", "../gui/images/particles.gif", 15, 15, "before");
+        GUI.image(menu.settings.text, "img-settings", "../gui/images/icon-cog.png", 15, 15, "before");
+        GUI.image(menu.support.text, "img-help", "../gui/images/menu-help.png", 15, 15, "before");
+        GUI.image(menu.themes.text, "img-themes", "../gui/images/jquery.png", 15, 15, "before");
         GUI.addIcon(menu.fullscreen.text, "ui-icon-arrow-4-diag", "position: relative !important; right:10px !important;bottom: 10px !important;", "before");
         menu.fullscreen.moveToRightFromLeft();
         menu.support.moveToRightFromLeft(25);
@@ -479,7 +479,7 @@ THE SOFTWARE.
         renderMenu.sortable();
         renderMenu.tabManager();
 
-        GUI.image(renderMenu.render.title, "img-render", "images/menu-render.png", 12, 14, "before");
+        GUI.image(renderMenu.render.title, "img-render", "../gui/images/menu-render.png", 12, 14, "before");
 
         GUI.label("fovSliderContent", "Camera, fov = ", renderMenu.render);
         var fovSliderText = GUI.label("fovSliderText", "60", renderMenu.render);
@@ -569,7 +569,7 @@ THE SOFTWARE.
 
         var play; var stop; var clear; var help; var save; var load;
 
-        GUI.image(renderMenu.script.title, "img-script", "images/script.png", 20, 14, "before");
+        GUI.image(renderMenu.script.title, "img-script", "../gui/images/script.png", 20, 14, "before");
         play = GUI.button("Play",  renderMenu.script ,function(){
             //window.unbindEventToConduit();
             window.runStatus();
@@ -586,7 +586,7 @@ THE SOFTWARE.
         });
         play.html('');
         GUI.addIcon(play, "ui-icon-play", "", "before");
-        play.addTooltip( {content : "Run script"});
+        GUI.addTooltip({parent: play, content : "Run script"});
         stop = GUI.button("Stop", renderMenu.script, function(){
             script.parent.off();
             //window.bindEventToConduit();
@@ -599,7 +599,7 @@ THE SOFTWARE.
         stop.addClass("disablehide");
         stop.html('');
         GUI.addIcon(stop, "ui-icon-stop", "", "before");
-        stop.addTooltip({content : "Stop script"});
+        GUI.addTooltip({parent:stop ,content : "Stop script"});
         clear = GUI.button("Clear", renderMenu.script, function(){
             script.parent.off();
             script.object.setValue(sample);
@@ -609,8 +609,7 @@ THE SOFTWARE.
         });
         clear.html('');
         GUI.addIcon(clear, "ui-icon-trash", "", "before");
-        clear.addTooltip({content : "Clear script"});
-        // var flagHelpNotif = false;
+        GUI.addTooltip({parent: clear, content : "Clear script"});
         help = GUI.button("Help", renderMenu.script, function(){
             var html = "<dl><dt>Ctrl-F / Cmd-F</dt><dd>Start searching</dd><dt>Ctrl-G / Cmd-G</dt><dd>Find next</dd><dt>Shift-Ctrl-G / Shift-Cmd-G</dt><dd>Find previous</dd><dt>Shift-Ctrl-F / Cmd-Option-F</dt><dd>Replace</dd> <dt>Shift-Ctrl-R / Shift-Cmd-Option-F</dt><dd>Replace all</dd><dt>Ctrl-Space / Cmd-Space</dt><dd>Auto-complete</dd></dl>"
             GUI.notification({title:"Script hotkeys", text: html, type:"notice"})
@@ -618,15 +617,15 @@ THE SOFTWARE.
         help.html('');
         help.prop('id',"helpScript");
         GUI.addIcon(help, "ui-icon-note", "", "before");
-        help.addTooltip({content : "Hotkeys"});
-
+        GUI.addTooltip({parent: help, content : "Hotkeys"});
+        
         save = GUI.button("Save",renderMenu.script,function(){
                
             })
         save.html('');
         save.prop('id',"saveScript");
         GUI.addIcon(save, "ui-icon-disk", "", "before");
-        save.addTooltip({content : "Save current script"});
+        GUI.addTooltip({parent: save, content : "Save current script"});
 
         var loadInput = GUI.input({id:"loadScript",parent:renderMenu.script,hide:true,extension:"application/javascript",mode:"readText",callback:function(FILE){
             script.object.setValue(FILE.target.result);
@@ -637,10 +636,10 @@ THE SOFTWARE.
         });
         load.html('');
         GUI.addIcon(load, "ui-icon-folder-open", "", "before");
-        load.addTooltip({content : "Load script"});
+        GUI.addTooltip({parent: load,content : "Load script"});
 
-        var runStatus = GUI.image(renderMenu.script, "traffic-light", "images/traffic-cone_blue.png", '20', '20');
-        runStatus.addTooltip({content : "Ready to run"})
+        var runStatus = GUI.image(renderMenu.script, "traffic-light", "../gui/images/traffic-cone_blue.png", '20', '20');
+        GUI.addTooltip({parent: runStatus, content : "Ready to run"})
 
         window.interprate = function(){
             //$('body').unbind();
@@ -662,20 +661,20 @@ THE SOFTWARE.
 
         window.readyStatus = function(){
             runStatus.remove();
-            runStatus = GUI.image(renderMenu.script, "traffic-light", "images/traffic-cone_blue.png", '20', '20');
-            runStatus.addTooltip({content:"Ready to run"})
+            runStatus = GUI.image(renderMenu.script, "traffic-light", "../gui/images/traffic-cone_blue.png", '20', '20');
+            GUI.addTooltip({parent:runStatus,content:"Ready to run"})
         }
 
         window.errorStatus = function(){
             runStatus.remove();
-            runStatus = GUI.image(renderMenu.script, "traffic-light", "images/traffic-cone_red.png", '20', '20');
-            runStatus.addTooltip({content:"Error detected into the script, please consult the console"});
+            runStatus = GUI.image(renderMenu.script, "traffic-light", "../gui/images/traffic-cone_red.png", '20', '20');
+            GUI.addTooltip({parent:runStatus,content:"Error detected into the script, please consult the console"});
         }
 
         window.runStatus = function(){
             runStatus.remove();
-            runStatus = GUI.image(renderMenu.script, "traffic-light", "images/traffic-cone_green.png", '20', '20');
-            runStatus.addTooltip({content:"Running..."});
+            runStatus = GUI.image(renderMenu.script, "traffic-light", "../gui/images/traffic-cone_green.png", '20', '20');
+            GUI.addTooltip({parent:runStatus,content:"Running..."});
         }
 
 
@@ -737,7 +736,7 @@ THE SOFTWARE.
         //--------------------------------------------------------------------------------------------------------------------
 
         layout.jqueryObject.sizePane("west", $(window).width() - 300);
-        setTimeout(function(){layout.jqueryObject.sizePane("west", $(window).width() - 299);},4000);
+        setTimeout(function(){layout.jqueryObject.sizePane("west", $(window).width() - 299);},1000);
 
         layout.jqueryObject.resizeAll();
         layout.jqueryObject.initContent("center");

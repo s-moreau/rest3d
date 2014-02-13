@@ -32,7 +32,7 @@
         var modeConsoleObject = $('#mode_console');
         CONSOLE.jqueryObject = consoleObject;
         consoleObject.hide();
-        GUI.image(toggle_button, "img-console", "images/console.png", '20', '30');
+        GUI.image(toggle_button, "img-console", "../gui/images/console.png", '20', '30');
         toggle_button.on('change', function (e) {
             if ($(this).is(':checked')) {
                 consoleObject.show();

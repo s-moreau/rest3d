@@ -183,11 +183,10 @@ if (window.TextureUtil === undefined)
       var devicePixelRatio = window.devicePixelRatio || 1;
  
       // set the size of the drawingBuffer based on the size it's displayed.
-      this.canvas.width = canvas.clientWidth * devicePixelRatio;
-      this.canvas.height = canvas.clientHeight * devicePixelRatio;
+      this.canvas.width = _canvas.clientWidth * devicePixelRatio;
+      this.canvas.height = _canvas.clientHeight * devicePixelRatio;
 
       var ctx = WebGLUtils.setupWebGL(this.canvas);
-
       // find extensions
       ext = (
         ctx.getExtension('WEBGL_lose_context') ||
