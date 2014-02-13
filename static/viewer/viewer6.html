@@ -27,7 +27,19 @@ THE SOFTWARE.
     <meta content="utf-8" http-equiv="encoding">
 
     <script type="text/javascript" src="../gui/gui6.js"></script>
-
+    <script type="text/javascript"> 
+    var mask;
+    function pleaseWait(_displayMode) {
+            if (_displayMode == true) {
+                mask = GUI.mask("mask-loading", "Please wait ...", $("body"));
+                GUI.image($('#mask-loading'), "img-loading", "../gui/images/loading.gif", 30, 30, "before");
+                return mask;
+            } else if (_displayMode == false) {
+                mask.remove();
+            }
+        };
+    pleaseWait(true);
+    </script>
     <script type="text/javascript" src="renderer.js"></script>
     <script type="text/javascript" src="/loaders/collada.js"></script>
     <script type="text/javascript" src="/loaders/gltf.js"></script>
@@ -94,22 +106,9 @@ THE SOFTWARE.
             }, 1000);
         }
 
-        function pleaseWait(_displayMode, _parent) {
-            if (_displayMode == true) {
-                var mask = GUI.mask("mask-loading", "Please wait ...", _parent.jqueryObjectWest);
-                GUI.image($('#mask-loading'), "img-loading", "../gui/images/loading.gif", 30, 30, "before");
-                window.fl4reStatus('INFO', 'loading UI...', _parent.jqueryObjectSouth)
-                return mask;
-            } else if (_displayMode == false) {
-                $('#mask-loading').remove();
-                window.fl4reStatus('CLEAR', '', _parent.jqueryObjectSouth);
-                // Conduit.viewportSetViewSize("default", layout.jqueryObjectWest.width() + 10, layout.jqueryObjectWest.height());
-            }
-        };
-
         var layout = GUI.Layout("mainLayout", 1);
 
-        pleaseWait(true, layout);
+
         window.loadCss("vader");
         GUI.label("auteur", "&copy; rest3d 2014", layout.jqueryObjectSouth);
         CONSOLE.open(layout);
@@ -1031,7 +1030,7 @@ THE SOFTWARE.
         layout.jqueryObject.initContent("west");
 
 
-        pleaseWait(false, layout);
+        pleaseWait(false);
 
         });
 
