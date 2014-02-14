@@ -1,4 +1,5 @@
 #!/bin/bash
-#4
+# this will be useless soon
 cd /git/apps/rest3d/server
 npm install
+
