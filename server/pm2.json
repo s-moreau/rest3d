@@ -1,6 +1,6 @@
 [{
   "name"      : "rest3d_static_server",
-  "script"    : "server/static_server.js",
+  "script"    : "static_server.js",
   "args"      : "['9000']",
   "env": {
       "NODE_ENV": "production",
