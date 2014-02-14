@@ -1064,6 +1064,8 @@ THE SOFTWARE.
             modal: true
         });
         $(".ui-dialog-titlebar").hide();
+        $("#"+ _id).parent().css("top","40%");
+        $("#"+ _id).parent().width("150px");
         return $("#" + _id, _parent);
     };
 
@@ -1838,11 +1840,12 @@ THE SOFTWARE.
                 var ii = 0;
                 var cssRule = false;
                 do {
+                    try{
                     if (styleSheet.cssRules) {
                         cssRule = styleSheet.cssRules[ii];
                     } else {
                         cssRule = styleSheet.rules[ii];
-                    }
+                    }}catch(err){}
                     if (cssRule) {
                         if (cssRule.selectorText == ruleName) {
                             if (deleteFlag == 'delete') {
@@ -1878,13 +1881,13 @@ THE SOFTWARE.
             var ss = document.styleSheets[i];
 
             var l = 0;
+            try{
             if (ss.cssRules) {
                 l = ss.cssRules.length;
             } else if (ss.rules) {
                 // IE
                 l = ss.rules.length;
             }
-            try{
             if (ss.insertRule) {
                 ss.insertRule(selector + ' {' + rule + '}', l);
             } else if (ss.addRule) {

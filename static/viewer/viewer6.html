@@ -25,21 +25,12 @@ THE SOFTWARE.
 <head>
     <meta content="text/html;charset=utf-8" http-equiv="Content-Type">
     <meta content="utf-8" http-equiv="encoding">
+    <script type="text/javascript"> 
+  
+    </script>
 
     <script type="text/javascript" src="../gui/gui6.js"></script>
-    <script type="text/javascript"> 
-    var mask;
-    function pleaseWait(_displayMode) {
-            if (_displayMode == true) {
-                mask = GUI.mask("mask-loading", "Please wait ...", $("body"));
-                GUI.image($('#mask-loading'), "img-loading", "../gui/images/loading.gif", 30, 30, "before");
-                return mask;
-            } else if (_displayMode == false) {
-                mask.remove();
-            }
-        };
-    pleaseWait(true);
-    </script>
+    
     <script type="text/javascript" src="renderer.js"></script>
     <script type="text/javascript" src="/loaders/collada.js"></script>
     <script type="text/javascript" src="/loaders/gltf.js"></script>
@@ -48,7 +39,10 @@ THE SOFTWARE.
     <script type="text/javascript">
     
     $("document").ready(function () {
-        "use strict";
+        "use strict";//
+          var mask;
+   
+
         if (!window.performance) {
             window.performance = {};
             window.performance.now = $.now
@@ -96,6 +90,7 @@ THE SOFTWARE.
         };
 
         window.loadCss = function (item) {
+             
             var link = "../gui/themes/" + item + "/jquery-ui.css";
             GUI.destroyCurrentCssTheme();
             GUI.loadCssFile(link);
@@ -103,13 +98,25 @@ THE SOFTWARE.
             setTimeout(function () {
                 GUI.setColorJqueryTheme();
                 GUI.refreshJqueryTheme();
-            }, 1000);
-        }
 
+            }, 10);
+
+        }
+         function pleaseWait(_displayMode) {
+            if (_displayMode == true) {
+                mask = GUI.mask("mask-loading", "Please wait ...", $("body"));
+                GUI.image($('#mask-loading'), "img-loading", "../gui/images/loading.gif", 30, 30, "before");
+                return mask;
+            } else if (_displayMode == false) {
+                mask.remove();
+            }
+        };
+        window.loadCss("vader");
+        pleaseWait(true);
         var layout = GUI.Layout("mainLayout", 1);
 
 
-        window.loadCss("vader");
+        
         GUI.label("auteur", "&copy; rest3d 2014", layout.jqueryObjectSouth);
         CONSOLE.open(layout);
 
@@ -193,7 +200,9 @@ THE SOFTWARE.
                 id: listThemes[lgt],
                 callback: function (theme) {
                     return function () {
+                        pleaseWait(true);
                         window.loadCss(theme);
+                         pleaseWait(false);
                     }
                 }(listThemes[lgt])
 
@@ -472,77 +481,109 @@ THE SOFTWARE.
             }
         });
 
-        GUI.button('duck rest3d', accordion.collada, function () {
+        GUI.button('duck rest3d(collada file broken?)', accordion.collada, function () {
+            pleaseWait(true);
             COLLADA.load("/rest3d/assets/duck/duck.dae", parse_dae);
+            pleaseWait(false);
         }).width("90%");
         accordion.collada.append("<hr></hr>");
         GUI.button('duck', accordion.collada, function () {
+            pleaseWait(true);
             COLLADA.load("/models/duck/duck.dae", parse_dae);
+            pleaseWait(false);
         }).width("90%");
         accordion.collada.append("<hr></hr>");
 
         GUI.button('creature', accordion.collada, function () {
+            pleaseWait(true);
             COLLADA.load("/models/Amahani/Amahani.dae", parse_dae);
+            pleaseWait(false);
         }).width("90%");
         accordion.collada.append("<hr></hr>");
 
         GUI.button('duck', accordion.gltf, function () {
+            pleaseWait(true);
             glTF.load("/models/duck/duck.json", parse_gltf);
+            pleaseWait(false);
         }).width("90%");
         accordion.gltf.append("<hr></hr>");
 
         GUI.button('rambler', accordion.gltf, function () {
+              pleaseWait(true);
             glTF.load("/models/rambler/Rambler.json", parse_gltf);
+            pleaseWait(false);
+
         }).width("90%");
         accordion.gltf.append("<hr></hr>");
 
-        GUI.button('rambler-min', accordion.collada, function () {
+        GUI.button('rambler-min(material.pass undef)', accordion.collada, function () {
+              pleaseWait(true);
             COLLADA.load("/models/rambler/Rambler-min.dae", parse_gltf);
+            pleaseWait(false);
+
         }).width("90%");
         accordion.collada.append("<hr></hr>");
 
         GUI.button('rambler', accordion.collada, function () {
+            pleaseWait(true);
             COLLADA.load("/models/rambler/Rambler.dae", parse_dae);
+            pleaseWait(false);
         }).width("90%");
         accordion.collada.append("<hr></hr>");
 
         GUI.button('supermurdoch', accordion.collada, function () {
+              pleaseWait(true);
             COLLADA.load("/models/SuperMurdoch/SuperMurdoch.dae", parse_dae);
+               pleaseWait(false);
         }).width("90%");
         accordion.collada.append("<hr></hr>");
 
         GUI.button('supermurdoch', accordion.gltf, function () {
+              pleaseWait(true);
             glTF.load("/models/SuperMurdoch/SuperMurdoch.json", parse_gltf);
+               pleaseWait(false);
         }).width("90%");
         accordion.gltf.append("<hr></hr>");
 
         GUI.button('wine', accordion.collada, function () {
+              pleaseWait(true);
             COLLADA.load("/models/wine/wine.dae", parse_dae);
+               pleaseWait(false);
         }).width("90%");
         accordion.collada.append("<hr></hr>");
 
         GUI.button('wine', accordion.gltf, function () {
+              pleaseWait(true);
             glTF.load("/models/wine/wine.json", parse_gltf);
+               pleaseWait(false);
         }).width("90%");
         accordion.gltf.append("<hr></hr>");
 
 
         GUI.button('uh-1n', accordion.collada, function () {
+              pleaseWait(true);
             COLLADA.load("/models/uh-1n/uh-1n.dae", parse_dae);
+               pleaseWait(false);
         }).width("90%");
         accordion.collada.append("<hr></hr>");
 
         GUI.button('uh-1n', accordion.gltf, function () {
+              pleaseWait(true);
             glTF.load("/models/uh-1n/uh-1n.json", parse_gltf);
+               pleaseWait(false);
         }).width("90%");
         accordion.gltf.append("<hr></hr>");
 
         GUI.button('cow', accordion.collada, function () {
+              pleaseWait(true);
             COLLADA.load("/models/cow/cow.dae", parse_dae);
+               pleaseWait(false);
         }).width("90%");
 
         GUI.button('cow', accordion.gltf, function () {
+              pleaseWait(true);
             glTF.load("/models/cow/cow.json", parse_gltf);
+               pleaseWait(false);
         }).width("90%");
 
 
@@ -774,6 +815,7 @@ THE SOFTWARE.
                         var material = materials[i];
 
                         // create a new state with this material override
+                        //console.debug(material.pass);
                         var state = State.fromPassAndOverrides(material.pass, material.overrides);
                         // fill up my primitive structure
                         var primitive = {};
@@ -1029,6 +1071,7 @@ THE SOFTWARE.
         layout.jqueryObject.initContent("center");
         layout.jqueryObject.initContent("west");
 
+        window.loadCss("vader");
 
         pleaseWait(false);
 
