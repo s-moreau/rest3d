@@ -4,6 +4,6 @@
   "args"      : "['9000']",
   "env": {
       "NODE_ENV": "production",
-      "AWESOME_SERVICE_API_TOKEN": "xxx"
+      "AWESOME_SERVICE_API_TOKEN": "xxxx"
   }
 }]
