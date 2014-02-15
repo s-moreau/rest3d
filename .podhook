@@ -1,5 +1,0 @@
-#!/bin/bash
-# d this will be useless soon
-cd /git/apps/rest3d/server
-npm install
-
