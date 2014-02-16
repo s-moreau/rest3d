@@ -4,6 +4,7 @@
   "args"      : "['9000']",
   "env": {
       "PM2_NODEJS_PORT": "9000",
-      "XML_SERVER" : "xml.fl4re.com"
+      "XML_SERVER" : "xml.fl4re.com",
+      "blabla" : "tt"
   }
 }]
