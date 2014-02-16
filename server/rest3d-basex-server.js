@@ -83,8 +83,7 @@ var platform = os.type().match(/^Win/) ? 'win' :
 				(os.type().match(/^Dar/) ? 'mac' : 'unix');
 
 console.log('host platform=',platform);
-var this_path = process.argv[1].replace(/^.*(\\|\/|\:)/, '');
-var static = path.join(this_path, '../static');
+var static = path.join(__dirname , '../static');
 
 console.log('static folder=',static);
 
@@ -109,8 +108,10 @@ function toJSON(o) {
 //
 var basex_system = "";
 
-var listenToPort = process.env['OPENSHIFT_NODEJS_PORT'] || 8000;
-var ip_address = process.env['OPENSHIFT_NODEJS_IP'] || '127.0.0.1';
+var listenToPort = process.env['OPENSHIFT_NODEJS_PORT'] || 
+                   process.env.PM2_NODEJS_PORT || 
+                   8000;
+var ip_address = process.env['OPENSHIFT_NODEJS_IP'] || null;
 
 var basex_port = process.env['DOTCLOUD_DATABASE_SERVERPORT_PORT'] || 1984;
 var basex_port_server = process.env['DOTCLOUD_DATABASE_SERVERPORT_HOST'];

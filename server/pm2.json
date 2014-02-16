@@ -1,9 +1,9 @@
 [{
-  "name"      : "rest3d_static_server",
-  "script"    : "static_server.js",
+  "name"      : "rest3d_basex_server",
+  "script"    : "rest3d_basex_server.js",
   "args"      : "['9000']",
   "env": {
-      "NODE_ENV": "production",
-      "AWESOME_SERVICE_API_TOKEN": "xxx"
+      "PM2_NODEJS_PORT": "9000",
+      "XML_SERVER" : "xml.fl4re.com"
   }
 }]
