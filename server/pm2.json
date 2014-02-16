@@ -1,10 +1,10 @@
 [{
-  "name"      : "rest3d_basex_server",
-  "script"    : "rest3d-basex-server.js",
+  "name"      : "rest3d_exists_server",
+  "script"    : "rest3d-exists-server.js",
   "args"      : "['9000']",
   "env": {
-      "PM2_NODEJS_PORT": "9000",
+      "PORT": "9000",
       "XML_SERVER" : "xml.fl4re.com",
-      "blabla" : "rtt"
+      "GLTF_PATH" : "/git/apps/glTF/converter/COLLADA2GLTF/bin"
   }
 }]

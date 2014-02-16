@@ -29,7 +29,7 @@ var http = require("http"),
     path = require("path"),
     fs = require("fs"),
     mime = require("mime");
-var port = process.argv[2] || process.env.OPENSHIFT_NODEJS_PORT || 8000;
+var port = process.env.PORT || process.env.OPENSHIFT_NODEJS_PORT || 8000;
 var ip_address = process.env.OPENSHIFT_NODEJS_IP || null;
 var static = path.join(__dirname , '../static');
  

@@ -1,5 +1,5 @@
 /*
-rest3d-basex-server.js
+rest3d-exists-server.js
 
 The MIT License (MIT)
 
