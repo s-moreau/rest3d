@@ -5,6 +5,6 @@
   "env": {
       "PORT": "9000",
       "XML_SERVER" : "xml.fl4re.com",
-      "GLTF_PATH" : "/git/apps/glTF/converter/COLLADA2GLTF/bin"
+      "GLTF_BIN_PATH" : "/git/apps/glTF/converter/COLLADA2GLTF/bin"
   }
 }]
