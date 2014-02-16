@@ -1,6 +1,6 @@
 [{
   "name"      : "rest3d_basex_server",
-  "script"    : "rest3d_basex_server.js",
+  "script"    : "rest3d-basex-server.js",
   "args"      : "['9000']",
   "env": {
       "PM2_NODEJS_PORT": "9000",
