@@ -1,0 +1,36 @@
+#!/bin/bash
+
+# update working tree
+cd /git/apps/rest3d
+unset GIT_DIR
+# save last commit
+LAST_COMMIT=`git log -1 | awk 'NR==1 {print $2}'`
+# this is basiclly a force pull
+# so even if you force pushed this can still work
+git fetch --all
+git reset --hard origin/master
+
+cd server
+npm install
+
+pm2 --silent stop all &
+#wait $!
+sleep 5s
+
+pm2 kill &
+#wait $!
+sleep 5s
+
+pm2 flush
+pm2 start pm2.json&
+#wait $!
+sleep 5s
+
+echo 'start log server'
+cd /home/git/Lockets
+pm2 --silent start lockets_pm2.json&
+#wait $!
+sleep 5s
+
+echo "you can Ctrl+C now"
+
