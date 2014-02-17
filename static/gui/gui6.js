@@ -39,43 +39,78 @@ THE SOFTWARE.
  * Load external script and return a promise
  * to be resolved when script is loaded
  */
-var dep = [
-        {link:"../deps/codemirror/css/eclipse.css"},
-        {link:"../deps/css/jquery-skinner.css"},
-        {link:"../deps/codemirror/css/codemirror.css"},
-        {link:"../deps/codemirror/css/show-hint.css"},
-        {link:"../deps/codemirror/css/dialog.css"},
-        {link:"../deps/css/bootstrap.icons.css"},
-        {link:"../deps/css/jquery.toolbars.css"},
-        {link:"../deps/css/jquery.terminal.css"},
-        {link:"../deps/css/jquery.pnotify.default.css"},
-        {link:"../deps/jquery-2.0.3.min.js",obj:"$('')"},
-        {link:"../deps/jquery-ui-1.9.2.min.js",obj:"$.ui"},
-        {link:"../deps/codemirror/codemirror.min.js",obj:"window.CodeMirror"},
-        {link:"../deps/jquery.layout-1.3.0.min.js",obj:"$.layout"},
-        {link:"../deps/jquery.jstree.js",obj:"$.vakata"},
-        {link:"../deps/jquery.toolbar.js",obj:"$.toolbar"},
-        {link:"../deps/jquery.terminal-0.7.10.min.js",obj:"$.omap "},
-        {link:"../deps/jquery.pnotify.min.js",obj:"$.pnotify"},
-        {link:"../deps/codemirror/javascript.js",obj:"indentUnit"},
-        {link:"../deps/codemirror/show-hint.js",obj:"CodeMirror.showHint"},
-        {link:"../deps/codemirror/javascript-hint.js"},
-        {link:"../deps/codemirror/dialog.js"},
-        {link:"../deps/codemirror/search.js"},
-        {link:"../deps/codemirror/search-cursor.js"},
-        {link:"../deps/jquery-skinner.js",obj:"$.skinner"}
-    ];
+var dep = [{
+    link: "../deps/codemirror/css/eclipse.css"
+}, {
+    link: "../deps/css/jquery-skinner.css"
+}, {
+    link: "../deps/codemirror/css/codemirror.css"
+}, {
+    link: "../deps/codemirror/css/show-hint.css"
+}, {
+    link: "../deps/codemirror/css/dialog.css"
+}, {
+    link: "../deps/css/bootstrap.icons.css"
+}, {
+    link: "../deps/css/jquery.toolbars.css"
+}, {
+    link: "../deps/css/jquery.terminal.css"
+}, {
+    link: "../deps/css/jquery.pnotify.default.css"
+}, {
+    link: "../deps/jquery-2.0.3.min.js",
+    obj: "$('')"
+}, {
+    link: "../deps/jquery-ui-1.9.2.min.js",
+    obj: "$.ui"
+}, {
+    link: "../deps/codemirror/codemirror.min.js",
+    obj: "window.CodeMirror"
+}, {
+    link: "../deps/jquery.layout-1.3.0.min.js",
+    obj: "$.layout"
+}, {
+    link: "../deps/jquery.jstree.js",
+    obj: "$.vakata"
+}, {
+    link: "../deps/jquery.toolbar.js",
+    obj: "$.toolbar"
+}, {
+    link: "../deps/jquery.terminal-0.7.10.min.js",
+    obj: "$.omap "
+}, {
+    link: "../deps/jquery.pnotify.min.js",
+    obj: "$.pnotify"
+}, {
+    link: "../deps/codemirror/javascript.js",
+    obj: "indentUnit"
+}, {
+    link: "../deps/codemirror/show-hint.js",
+    obj: "CodeMirror.showHint"
+}, {
+    link: "../deps/codemirror/javascript-hint.js"
+}, {
+    link: "../deps/codemirror/dialog.js"
+}, {
+    link: "../deps/codemirror/search.js"
+}, {
+    link: "../deps/codemirror/search-cursor.js"
+}, {
+    link: "../deps/jquery-skinner.js",
+    obj: "$.skinner"
+}];
 
 function loadGUI(callback) {
     var callback = callback;
+
     function result() {
         initGUI();
-        callback.apply();
+        if(callback){callback.apply();}
     }
     var flag = true;
-    var head = document.documentElement,
+    var head =  document.getElementsByTagName('head').item(0),
+    body =document.getElementsByTagName('body')[0],
         $script = null;
-    //  document.write('<script type="text/javascript" src="../deps/promise-3.2.0.js"><script>');
     var s = document.createElement('script');
     s.type = 'text/javascript';
     s.src = "../deps/q-0.9.6.js";
@@ -84,75 +119,117 @@ function loadGUI(callback) {
         var state = s.readyState;
         if (!state || /loaded|complete/.test(state)) {
             getScripts(dep);
+            console.debug("!!!" + s.src + " loaded");
+            addLog("!!!" + s.src + " loaded");
             removeScript();
             // return true;
         } else {
             removeScript();
         }
     };
-function UrlExists(url) {
-  var http = new XMLHttpRequest();
-  http.open('HEAD', url, false);
-  http.send();
-  return http.status != 404;
-}
+    function addProgress(){
+        var body = document.getElementsByTagName('body')[0];
+        var h2 = document.createElement("h2");
+        h2.style = "position:relative;left:42%;width:300px;";
+        h2.innerHTML = "Rest3d UI loading...";
+        var jump = document.createElement("p");
+        var container = document.createElement("div");
+        container.id="tmp";
+        container.style = "position:relative;left:12%;border:1px solid blue;width:76%;height:80%;overflow:auto";
+        var progress = document.createElement("progress");
+        progress.value = "22";
+        progress.max ="100";
+        progress.style ="position:relative;left:30%;width:500px;border:1px solid #333;position:relative;padding:3px;";
+        body.appendChild(h2);
+        body.appendChild(progress);
+        body.appendChild(jump);
+        jump.appendChild(container);
+    }
+
+    function addLog(TXT){
+        var newP = document.createElement("p");
+        var newT = document.createTextNode(TXT);
+        document.getElementById('tmp').appendChild(newP);
+        newP.appendChild(newT);
+    }
+    addProgress();
+    
+    
+
+    function UrlExists(url) {
+        var http = new XMLHttpRequest();
+        http.open('HEAD', url, false);
+        http.send();
+        return http.status != 404;
+    }
     // use body if available. more safe in IE
-    (document.body || head).appendChild(s);
+    head.appendChild(s);
     $script = s;
     var counter = 0;
 
     var injectScriptPromise = function (url) {
-         var deferred = Q.defer();
-         counter++;
-        if(url.hasOwnProperty('obj')){
-            try{
-            var condition = eval("typeof "+url.obj);}
-            catch(err){condition=='undefined';}
+        var deferred = Q.defer();
+        counter++;
+        if (url.hasOwnProperty('obj')) {
+            try {
+                var condition = eval("typeof " + url.obj);
+            } catch (err) {
+                condition == 'undefined';
+            }
         }
-        if(!condition||condition=='undefined'){
+        if (!condition || condition == 'undefined') {
             var ext = url.link.match(/\.[^.]+$/);
-            if(UrlExists(url.link)){
             if (ext[0] == ".js") {
-            var s = document.createElement('script');
-            s.type = 'text/javascript';
-            s.src = url.link;
-            s.async = true;
-            s.onreadystatechange = s.onload = function () {
-                var state = s.readyState;
-                if (!state || /loaded|complete/.test(state)) {
+                var s = document.createElement('script');
+                s.type = 'text/javascript';
+                s.src = url.link;
+                s.async = true;
+                var flagTimeout = true;
+                setTimeout(function () {
+                    if (flagTimeout) {
+                        deferred.reject(new Error(url.link + " cooldn't be loaded"))
+                    };
+                }, 1000);
+                s.onreadystatechange = s.onload = function () {
+                    var state = s.readyState;
+                    if (!state || /loaded|complete/.test(state)) {
+                        deferred.resolve(counter);
+                        console.debug("!!!" + s.src + " loaded");
+                         addLog("!!!" + s.src + " loaded");
+                        removeScript();
+                        flagTimeout = false;
+                    } else {
+                        removeScript();
+                        console.debug("fail!");
+                        deferred.reject(new Error(url.link + " cooldn't be loaded"));
+                        flagTimeout = false;
+                    }
+                };
+            } else if (ext[0] == ".css") {
+                if (UrlExists(url.link)) {
+                    var s = document.createElement('link');
+                    s.rel = 'stylesheet';
+                    s.href = url.link;
+                    console.debug("!!!" + s.href + " loaded");
+                    addLog("!!!" + s.href + " loaded");
                     deferred.resolve(counter);
-                    console.debug("!!!" + s.src + " loaded");
-                    removeScript();
                 } else {
-                    removeScript();
-                    console.debug("fail!")
+                    console.error("link 404 error: " + url.link);
                     deferred.reject(new Error(url.link + " cooldn't be loaded"));
                 }
-            };
-        } else if (ext[0] == ".css") {
-            var s = document.createElement('link');
-            s.rel = 'stylesheet';
-            s.href = url.link;  
-            setTimeout(function () {
-                console.debug("!!!" + s.href + " loaded");
-                deferred.resolve(counter);
-            }, 1); //Estimation of the link's loading time
-        }
-        // use body if available. more safe in IE
-        (document.body || head).appendChild(s);
-        $script = s;
-        }
-        else{
-            console.error("link 404 error: "+url.link)
-        }
-        }
-        else{
+            }
+            // use body if available. more safe in IE
+            head.appendChild(s);
+            $script = s;
+        } else {
             deferred.resolve(counter);
-            console.debug("XXX "+url.link.replace(/^.*[\\\/]/, '')+" already loaded")
+                         addLog("!!!" + s.src + " loaded");
+            console.debug("XXX " + url.link.replace(/^.*[\\\/]/, '') + " already loaded");
+            addLog("XXX " + url.link.replace(/^.*[\\\/]/, '') + " already loaded");
         }
         return deferred.promise;
     };
-    var removeScript = function (){
+    var  removeScript = function () {
         $script.onload = $script.onreadystatechange = null;
         // Remove the script
         if ($script.parentNode) {
