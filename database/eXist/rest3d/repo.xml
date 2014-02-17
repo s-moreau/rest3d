@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<meta xmlns="http://exist-db.org/xquery/repo">
+    <description>rest3d service</description>
+    <author>remi</author>
+    <website>https://rest3d.org</website>
+    <status>alpha</status>
+    <license>GNU-LGPL</license>
+    <copyright>true</copyright>
+    <type>application</type>
+    <target>rest3d</target>
+    <prepare>pre-install.xql</prepare>
+    <finish/>
+    <permissions user="rest3d" password="itsfl4r3rest3d" group="rest3d" mode="rw-rw-r--"/>
+</meta>
