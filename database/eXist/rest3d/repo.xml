@@ -10,5 +10,5 @@
     <target>rest3d</target>
     <prepare>pre-install.xql</prepare>
     <finish/>
-    <permissions user="rest3d" password="itsfl4r3rest3d" group="rest3d" mode="rw-rw-r--"/>
+    <deployed>2014-02-17T15:28:50.276-08:00</deployed>
 </meta>
