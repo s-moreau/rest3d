@@ -1,4 +1,0 @@
-#!/bin/bash
-#4
-cd /git/apps/rest3d/server
-npm install

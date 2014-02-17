@@ -1,5 +1,5 @@
 /*
-rest3d-basex-server.js
+rest3d-exists-server.js
 
 The MIT License (MIT)
 
@@ -124,7 +124,9 @@ var basex_rest_pass = 'admin';
 var openshift = process.env['OPENSHIFT_DATA_DIR'];
 var collada2gltf = 'collada2gltf';
 if (openshift) 
-	collada2gltf = openshift + 'bin/collada2gltf-latest';
+    collada2gltf = openshift + 'bin/collada2gltf-latest';
+if (process.env.GLTF_BIN_PATH)
+    collada2gltf = process.env.GLTF_BIN_PATH+'/collada2gltf';
 
 if (basex_port_server === undefined)
 {

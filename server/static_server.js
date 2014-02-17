@@ -29,10 +29,9 @@ var http = require("http"),
     path = require("path"),
     fs = require("fs"),
     mime = require("mime");
-var port = process.argv[2] || process.env.OPENSHIFT_NODEJS_PORT || 8000;
+var port = process.env.PORT || process.env.OPENSHIFT_NODEJS_PORT || 8000;
 var ip_address = process.env.OPENSHIFT_NODEJS_IP || null;
-var this_path = process.argv[1].replace(/^.*(\\|\/|\:)/, '');
-var static = path.join(this_path, '../static');
+var static = path.join(__dirname , '../static');
  
 http.createServer(function(request, response) {
  

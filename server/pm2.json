@@ -1,9 +1,10 @@
 [{
-  "name"      : "rest3d_static_server",
-  "script"    : "./static_server.js",
+  "name"      : "rest3d_exists_server",
+  "script"    : "rest3d-exists-server.js",
   "args"      : "['9000']",
   "env": {
-      "NODE_ENV": "production",
-      "AWESOME_SERVICE_API_TOKEN": "xxx"
+      "PORT": "9000",
+      "XML_SERVER" : "xml.fl4re.com",
+      "GLTF_BIN_PATH" : "/git/apps/glTF/converter/COLLADA2GLTF/bin"
   }
 }]
