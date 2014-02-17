@@ -20,7 +20,6 @@
 **************************************************************************
 *************************************************************************/
 
-(function($) {
 	$.fn.skinner = function(opt){
 		var cfg = {'type':'block','width':'auto','textwrap':false,'maxitem':'6'};    
 	    if(opt){$.extend(cfg,opt);}
@@ -118,4 +117,3 @@
 		skin.selectskinned(element);		
 		return this;	
 	}
-})(jQuery);

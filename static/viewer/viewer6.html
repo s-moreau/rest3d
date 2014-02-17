@@ -25,12 +25,8 @@ THE SOFTWARE.
 <head>
     <meta content="text/html;charset=utf-8" http-equiv="Content-Type">
     <meta content="utf-8" http-equiv="encoding">
-    <script type="text/javascript"> 
-  
-    </script>
-
     <script type="text/javascript" src="../gui/gui6.js"></script>
-    
+    <!--  <script type="text/javascript" src="../deps/jquery-2.0.3.min.js"></script> -->
     <script type="text/javascript" src="renderer.js"></script>
     <script type="text/javascript" src="/loaders/collada.js"></script>
     <script type="text/javascript" src="/loaders/gltf.js"></script>
@@ -38,11 +34,12 @@ THE SOFTWARE.
     <script type="text/javascript" src="../deps/console.js"></script>
     <script type="text/javascript">
     
+    function INIT(){
     $("document").ready(function () {
         "use strict";//
           var mask;
-   
-
+        var win =$('');
+          
         if (!window.performance) {
             window.performance = {};
             window.performance.now = $.now
@@ -90,7 +87,6 @@ THE SOFTWARE.
         };
 
         window.loadCss = function (item) {
-             
             var link = "../gui/themes/" + item + "/jquery-ui.css";
             GUI.destroyCurrentCssTheme();
             GUI.loadCssFile(link);
@@ -98,8 +94,8 @@ THE SOFTWARE.
             setTimeout(function () {
                 GUI.setColorJqueryTheme();
                 GUI.refreshJqueryTheme();
-
             }, 10);
+
 
         }
          function pleaseWait(_displayMode) {
@@ -108,10 +104,10 @@ THE SOFTWARE.
                 GUI.image($('#mask-loading'), "img-loading", "../gui/images/loading.gif", 30, 30, "before");
                 return mask;
             } else if (_displayMode == false) {
-                mask.remove();
+                setTimeout(function(){mask.remove();},500);
             }
         };
-        window.loadCss("vader");
+        window.loadCss("got-luv");
         pleaseWait(true);
         var layout = GUI.Layout("mainLayout", 1);
 
@@ -121,7 +117,6 @@ THE SOFTWARE.
         CONSOLE.open(layout);
 
          ////////////
-         // MAIN MENU
 
         var menu = GUI.menu({
             id: "menu",
@@ -440,7 +435,6 @@ THE SOFTWARE.
         var scenes = [];
 
 
-        var win = null;
         var canvas = null;
         var channel = null;
 
@@ -452,10 +446,9 @@ THE SOFTWARE.
             renderMenu.render.append("<br></br>");
         }
 
-        renderMenu.render.append("<h4>Welcome to rest3d's viewer!</h4>");
+        // renderMenu.render.append("<h4>Welcome to rest3d's viewer!</h4>");
 
-        GUI.label('welcome', "We are proposing a new version of our viewer elaborated with gui6. Thus, you are able to display below some model samples in COLLADA or glTF format:", renderMenu.render, "", "justify");
-        jumpLine();
+        GUI.label('welcome', "Please load models among those accordions:", renderMenu.render, "", "justify");
         var accordion = GUI.accordion({
             id: "menu-render",
             parent: renderMenu.render,
@@ -471,6 +464,23 @@ THE SOFTWARE.
 
         jumpLine();
 
+        function notif(object){
+            win.parent().parent().find(".ui-icon-close").click();
+            win.remove();
+            GUI.notification({
+                title: object + " successfuly loaded",
+                text: "<div id='informationDisplay'></div>",
+                type: "notice",
+            });
+            win = $('#informationDisplay');
+            GUI.label( "zoom", "currentZoom is 1", win);win.append('</br>');
+            GUI.label('rot', 'rotation goes here', win);win.append('</br>');
+            GUI.label('loadtimer', 'loading time: 0', win);win.append('</br>');
+            GUI.label('rdm1','Initializing canvas mouse events', win);win.append('</br>');
+            GUI.label('rdm12','Use left mouse click to rotate', win);win.append('</br>');
+            GUI.label('rdm13','Use mouse wheel to zoom', win);
+        }
+
         var button1 = GUI.button('Simulate Context Loss', renderMenu.render, function () {
             if ($(this).find('.ui-button-text').text() == "Simulate Context Loss") {
                 channel.forceContextLoss();
@@ -483,42 +493,54 @@ THE SOFTWARE.
 
         GUI.button('duck rest3d(collada file broken?)', accordion.collada, function () {
             pleaseWait(true);
-            COLLADA.load("/rest3d/assets/duck/duck.dae", parse_dae);
+            var url = "/rest3d/assets/duck/duck.dae";
+            COLLADA.load(url, parse_dae);
+            notif(url);
             pleaseWait(false);
         }).width("90%");
         accordion.collada.append("<hr></hr>");
         GUI.button('duck', accordion.collada, function () {
             pleaseWait(true);
-            COLLADA.load("/models/duck/duck.dae", parse_dae);
+            var url = "/models/duck/duck.dae"
+            COLLADA.load(url, parse_dae);
+            notif(url);
             pleaseWait(false);
         }).width("90%");
         accordion.collada.append("<hr></hr>");
 
         GUI.button('creature', accordion.collada, function () {
             pleaseWait(true);
-            COLLADA.load("/models/Amahani/Amahani.dae", parse_dae);
+            var url = "/models/Amahani/Amahani.dae";
+            COLLADA.load(url, parse_dae);
+            notif(url);
             pleaseWait(false);
         }).width("90%");
         accordion.collada.append("<hr></hr>");
 
         GUI.button('duck', accordion.gltf, function () {
             pleaseWait(true);
-            glTF.load("/models/duck/duck.json", parse_gltf);
+            var url = "/models/duck/duck.json"
+            glTF.load(url, parse_gltf);
+            notif(url);
             pleaseWait(false);
         }).width("90%");
         accordion.gltf.append("<hr></hr>");
 
         GUI.button('rambler', accordion.gltf, function () {
               pleaseWait(true);
-            glTF.load("/models/rambler/Rambler.json", parse_gltf);
+            var url = "/models/rambler/Rambler.json";
+            glTF.load(url, parse_gltf);
+            notif(url);
             pleaseWait(false);
 
         }).width("90%");
         accordion.gltf.append("<hr></hr>");
 
         GUI.button('rambler-min(material.pass undef)', accordion.collada, function () {
-              pleaseWait(true);
-            COLLADA.load("/models/rambler/Rambler-min.dae", parse_gltf);
+            pleaseWait(true);
+            var url = "/models/rambler/Rambler-min.dae";
+            COLLADA.load(url, parse_gltf);
+            notif(url);
             pleaseWait(false);
 
         }).width("90%");
@@ -526,35 +548,45 @@ THE SOFTWARE.
 
         GUI.button('rambler', accordion.collada, function () {
             pleaseWait(true);
-            COLLADA.load("/models/rambler/Rambler.dae", parse_dae);
+            var url = "/models/rambler/Rambler.dae";
+            COLLADA.load(url, parse_dae);
+            notif(url);
             pleaseWait(false);
         }).width("90%");
         accordion.collada.append("<hr></hr>");
 
         GUI.button('supermurdoch', accordion.collada, function () {
               pleaseWait(true);
-            COLLADA.load("/models/SuperMurdoch/SuperMurdoch.dae", parse_dae);
+              var url = "/models/SuperMurdoch/SuperMurdoch.dae";
+            COLLADA.load(url, parse_dae);
+            notif(url);
                pleaseWait(false);
         }).width("90%");
         accordion.collada.append("<hr></hr>");
 
         GUI.button('supermurdoch', accordion.gltf, function () {
               pleaseWait(true);
-            glTF.load("/models/SuperMurdoch/SuperMurdoch.json", parse_gltf);
+              var url = "/models/SuperMurdoch/SuperMurdoch.json";
+            glTF.load(url, parse_gltf);
+            notif(url);
                pleaseWait(false);
         }).width("90%");
         accordion.gltf.append("<hr></hr>");
 
         GUI.button('wine', accordion.collada, function () {
               pleaseWait(true);
-            COLLADA.load("/models/wine/wine.dae", parse_dae);
+              var url = "/models/wine/wine.dae";
+            COLLADA.load(url, parse_dae);
+            notif(url);
                pleaseWait(false);
         }).width("90%");
         accordion.collada.append("<hr></hr>");
 
         GUI.button('wine', accordion.gltf, function () {
               pleaseWait(true);
-            glTF.load("/models/wine/wine.json", parse_gltf);
+              var url = "/models/wine/wine.json";
+            glTF.load(url, parse_gltf);
+            notif(url);
                pleaseWait(false);
         }).width("90%");
         accordion.gltf.append("<hr></hr>");
@@ -562,27 +594,35 @@ THE SOFTWARE.
 
         GUI.button('uh-1n', accordion.collada, function () {
               pleaseWait(true);
-            COLLADA.load("/models/uh-1n/uh-1n.dae", parse_dae);
+              var url = "/models/uh-1n/uh-1n.dae"
+              COLLADA.load(url, parse_dae);
+            notif(url);
                pleaseWait(false);
         }).width("90%");
         accordion.collada.append("<hr></hr>");
 
         GUI.button('uh-1n', accordion.gltf, function () {
               pleaseWait(true);
-            glTF.load("/models/uh-1n/uh-1n.json", parse_gltf);
+              var url = "/models/uh-1n/uh-1n.json";
+            glTF.load(url, parse_gltf);
+            notif(url);
                pleaseWait(false);
         }).width("90%");
         accordion.gltf.append("<hr></hr>");
 
         GUI.button('cow', accordion.collada, function () {
               pleaseWait(true);
-            COLLADA.load("/models/cow/cow.dae", parse_dae);
+              var url = "/models/cow/cow.dae"
+            COLLADA.load(url, parse_dae);
+            notif(url);
                pleaseWait(false);
         }).width("90%");
 
         GUI.button('cow', accordion.gltf, function () {
               pleaseWait(true);
-            glTF.load("/models/cow/cow.json", parse_gltf);
+              var url = "/models/cow/cow.json";
+            glTF.load(url, parse_gltf);
+            notif(url);
                pleaseWait(false);
         }).width("90%");
 
@@ -882,12 +922,6 @@ THE SOFTWARE.
 
 
         function initCanvasUI() {
-
-            GUI.label("currentZoom is 1", win, "zoom")
-            GUI.label('rotation goes here', win, 'rot')
-            GUI.label('loading time: 0', win, 'loadtimer');
-
-            GUI.label('Initializing canvas mouse events', win);
             var mouseDown = false;
             var lastX, lastY = 0;
             // attach mouse events to canvas
@@ -938,9 +972,6 @@ THE SOFTWARE.
             canvas.addEventListener("mousemove", mouseMoveHandler, false);
             canvas.addEventListener("mouseup", mouseUpHandler, false);
             canvas.addEventListener("mousewheel", mouseWheelHandler, false);
-
-            GUI.label('Use left mouse click to rotate', win);
-            GUI.label('Use mouse wheel to zoom', win);
             // redraw on resize
 
             $(canvas).resize(function (evt) {
@@ -996,7 +1027,7 @@ THE SOFTWARE.
 
 
             $('#zoom').text('currentZoom is ' + currentZoom);
-            $('#rot').text('currentRotation is ' + currentRotationX + ',' + currentRotationY);
+            $('#rot').text('currentRotation is ' + currentRotationX.toFixed(2) + ',' + currentRotationY.toFixed(2));
 
             var devicePixelRatio = window.devicePixelRatio || 1;
 
@@ -1071,13 +1102,19 @@ THE SOFTWARE.
         layout.jqueryObject.initContent("center");
         layout.jqueryObject.initContent("west");
 
-        window.loadCss("vader");
+         GUI.notification({
+                title: "Welcome to rest3d's viewer!",
+                text: "We are proposing a new version of our viewer elaborated with gui6. You are able to display some model samples in COLLADA/glTF format or explore 3D warehouse for displaying your favorite objects.",
+                type: "notice"
+            })
+
+        window.loadCss("dot-luv");
 
         pleaseWait(false);
 
         });
-
-        
+}
+        loadGUI(INIT);
          </script>
 </head>
 <body oncontextmenu="return false"></body>

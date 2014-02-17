@@ -25,57 +25,168 @@ THE SOFTWARE.
 
  GUI.js needs jquery, jqueryUI and jqueryUI layout
 */
-
 /***
   Require Underscore, if we're on the server, and it's not already present.
   var _ = root._;
   if (!_ && (typeof require !== 'undefined')) _ = require('underscore')._;
 ***/
 // UI library
+// Initial Setup
+// -------------
+// Save a reference to the global object (`window` in the browser, `exports`
+// on the server).
+/**
+ * Load external script and return a promise
+ * to be resolved when script is loaded
+ */
+var dep = [
+        {link:"../deps/codemirror/css/eclipse.css"},
+        {link:"../deps/css/jquery-skinner.css"},
+        {link:"../deps/codemirror/css/codemirror.css"},
+        {link:"../deps/codemirror/css/show-hint.css"},
+        {link:"../deps/codemirror/css/dialog.css"},
+        {link:"../deps/css/bootstrap.icons.css"},
+        {link:"../deps/css/jquery.toolbars.css"},
+        {link:"../deps/css/jquery.terminal.css"},
+        {link:"../deps/css/jquery.pnotify.default.css"},
+        {link:"../deps/jquery-2.0.3.min.js",obj:"$('')"},
+        {link:"../deps/jquery-ui-1.9.2.min.js",obj:"$.ui"},
+        {link:"../deps/codemirror/codemirror.min.js",obj:"window.CodeMirror"},
+        {link:"../deps/jquery.layout-1.3.0.min.js",obj:"$.layout"},
+        {link:"../deps/jquery.jstree.js",obj:"$.vakata"},
+        {link:"../deps/jquery.toolbar.js",obj:"$.toolbar"},
+        {link:"../deps/jquery.terminal-0.7.10.min.js",obj:"$.omap "},
+        {link:"../deps/jquery.pnotify.min.js",obj:"$.pnotify"},
+        {link:"../deps/codemirror/javascript.js",obj:"indentUnit"},
+        {link:"../deps/codemirror/show-hint.js",obj:"CodeMirror.showHint"},
+        {link:"../deps/codemirror/javascript-hint.js"},
+        {link:"../deps/codemirror/dialog.js"},
+        {link:"../deps/codemirror/search.js"},
+        {link:"../deps/codemirror/search-cursor.js"},
+        {link:"../deps/jquery-skinner.js",obj:"$.skinner"}
+    ];
 
-
-
-    if (window.$ === undefined) {
-    // Initial Setup
-    // -------------
-    // Save a reference to the global object (`window` in the browser, `exports`
-    // on the server).
-    document.write('<script type="text/javascript" src="../deps/jquery-2.0.3.min.js"></script>');
-    document.write('<script type="text/javascript" src="../deps/jquery-ui-1.9.2.min.js"></script>');                
-    document.write('<script type="text/javascript" src="../deps/jquery.layout-1.3.0.min.js"></script> ');       
-                    
-    document.write('<script type="text/javascript" src="../deps/jquery.jstree.js"></script>');
-    document.write('<script type="text/javascript" src="../deps/jquery.toolbar.js"></script>');
-    document.write('<script type="text/javascript" src="../deps/jquery.terminal-0.7.10.min.js"></script>'); 
-    document.write('<script type="text/javascript" src="../deps/jquery.pnotify.min.js"></script>');
-
-    //<!-- skinner plugin -->
-    document.write('<link href="../deps/css/jquery-skinner.css" rel="stylesheet" />');
-    document.write('<script src="../deps/jquery-skinner.js" type="text/javascript"></script>');
-
-    //<!-- codemirror plugin -->
-    document.write('<script type="text/javascript" src="../deps/codemirror/codemirror.min.js"></script>');
-    document.write('<script type="text/javascript" src="../deps/codemirror/javascript.js"></script>');
-    document.write('<script type="text/javascript" src="../deps/codemirror/show-hint.js"></script>');
-    document.write('<script type="text/javascript" src="../deps/codemirror/javascript-hint.js"></script>');
-    document.write('<script type="text/javascript" src="../deps/codemirror/dialog.js"></script>');
-    document.write('<script type="text/javascript" src="../deps/codemirror/search.js"></script>');
-    document.write('<script type="text/javascript" src="../deps/codemirror/search-cursor.js"></script>');
-
-    document.write('<link rel="stylesheet" href="../deps/codemirror/css/eclipse.css"/>');
-    document.write('<link rel="stylesheet" href="../deps/codemirror/css/codemirror.css"/>');
-    document.write('<link rel="stylesheet" href="../deps/codemirror/css/show-hint.css"/>');     
-    document.write('<link rel="stylesheet" href="../deps/codemirror/css/dialog.css"/>');    
-  
-    document.write('<link rel="stylesheet" href="../deps/css/bootstrap.icons.css"/>');
-    document.write('<link rel="stylesheet" href="../deps/css/jquery.toolbars.css"/>');
-    document.write('<link rel="stylesheet" href="../deps/css/jquery.terminal.css"/>'); 
-    document.write('<link rel="stylesheet" href="../deps/css/jquery.pnotify.default.css"/>');
+function loadGUI(callback) {
+    var callback = callback;
+    function result() {
+        initGUI();
+        callback.apply();
+    }
+    var flag = true;
+    var head = document.documentElement,
+        $script = null;
+    //  document.write('<script type="text/javascript" src="../deps/promise-3.2.0.js"><script>');
+    var s = document.createElement('script');
+    s.type = 'text/javascript';
+    s.src = "../deps/q-0.9.6.js";
+    s.async = true;
+    s.onreadystatechange = s.onload = function () {
+        var state = s.readyState;
+        if (!state || /loaded|complete/.test(state)) {
+            getScripts(dep);
+            removeScript();
+            // return true;
+        } else {
+            removeScript();
+        }
+    };
+function UrlExists(url) {
+  var http = new XMLHttpRequest();
+  http.open('HEAD', url, false);
+  http.send();
+  return http.status != 404;
 }
-    (function () {
+    // use body if available. more safe in IE
+    (document.body || head).appendChild(s);
+    $script = s;
+    var counter = 0;
 
+    var injectScriptPromise = function (url) {
+         var deferred = Q.defer();
+         counter++;
+        if(url.hasOwnProperty('obj')){
+            try{
+            var condition = eval("typeof "+url.obj);}
+            catch(err){condition=='undefined';}
+        }
+        if(!condition||condition=='undefined'){
+            var ext = url.link.match(/\.[^.]+$/);
+            if(UrlExists(url.link)){
+            if (ext[0] == ".js") {
+            var s = document.createElement('script');
+            s.type = 'text/javascript';
+            s.src = url.link;
+            s.async = true;
+            s.onreadystatechange = s.onload = function () {
+                var state = s.readyState;
+                if (!state || /loaded|complete/.test(state)) {
+                    deferred.resolve(counter);
+                    console.debug("!!!" + s.src + " loaded");
+                    removeScript();
+                } else {
+                    removeScript();
+                    console.debug("fail!")
+                    deferred.reject(new Error(url.link + " cooldn't be loaded"));
+                }
+            };
+        } else if (ext[0] == ".css") {
+            var s = document.createElement('link');
+            s.rel = 'stylesheet';
+            s.href = url.link;  
+            setTimeout(function () {
+                console.debug("!!!" + s.href + " loaded");
+                deferred.resolve(counter);
+            }, 1); //Estimation of the link's loading time
+        }
+        // use body if available. more safe in IE
+        (document.body || head).appendChild(s);
+        $script = s;
+        }
+        else{
+            console.error("link 404 error: "+url.link)
+        }
+        }
+        else{
+            deferred.resolve(counter);
+            console.debug("XXX "+url.link.replace(/^.*[\\\/]/, '')+" already loaded")
+        }
+        return deferred.promise;
+    };
+    var removeScript = function (){
+        $script.onload = $script.onreadystatechange = null;
+        // Remove the script
+        if ($script.parentNode) {
+            $script.parentNode.removeChild($script);
+        }
+    };
+    var getScripts = function (files) {
+        var file = files;
+        var promise_chain = Q.fcall(function () {
+            return 0
+        });
+        var tabChar = [];
+
+        for (var i = 0; i < file.length; i++) {
+            var tmp = file[i];
+            var promise_link = function (tmp) {
+                var tefa = file[tmp];
+                return injectScriptPromise(tefa);
+            }
+            tabChar[i] = promise_link;
+            delete tmp, promise_link;
+        }
+
+        tabChar.forEach(function (f) {
+            promise_chain = promise_chain.then(f);
+        });
+        promise_chain.done(result);
+    };
+}
+
+function initGUI() {
     // The top-level namespace. All public GUI classes and modules will
     // be attached to this. Exported for both CommonJS and the browser.
+
     var GUI;
     if (typeof exports !== 'undefined') GUI = exports;
     else {
@@ -96,7 +207,7 @@ THE SOFTWARE.
             e.preventDefault();
         })
     };
-// add button
+    // add button
     GUI.button = function (_txt, _parent, _callback, _x1, _y1, _x2, _y2, _textEnabled, _icon) {
         var $button = $('<button></button>');
         var callback = _callback;
@@ -149,13 +260,13 @@ THE SOFTWARE.
             if (_id) label += ' id= "p' + _id;
             label += '" >';
         }
-        if(_mode == "justify"){
+        if (_mode == "justify") {
             label += '<div style="text-align: justify">';
         }
         label += '<span style="' + _style;
         if (_id) label += '" id= "' + _id;
         label += '">' + _txt + '</span>';
-        if(_mode == "justify"){
+        if (_mode == "justify") {
             label += '</div>';
         }
         if (_mode == "isolate") {
@@ -302,21 +413,21 @@ THE SOFTWARE.
         return $tree;
     };
 
-    GUI.canvas = function(_parent) {
+    GUI.canvas = function (_parent) {
         $canvas = $(
             '<canvas id="tmp" class="ui-resize-me" style="padding: 0; margin: 0;" ></canvas>');
         if (!_parent)
             $('body').append($canvas);
         else {
-        
-            $parent=$(_parent);
+
+            $parent = $(_parent);
             $parent.append($canvas);
         }
         return $canvas[0];
     };
 
     //----------------------------------------------------------------------------------------------------------------------------------------
-   
+
 
     GUI.time = function () {
         var html = '';
@@ -465,17 +576,17 @@ THE SOFTWARE.
                         var check = Math.round(-Math.log(precision) / Math.LN10);
                         var value = input.val();
                         var valueNum = parseFloat(value);
-                         var finalVal = valueNum.toFixed(check);
-                         if (valueNum > max && value != '') {
-                             finalVal = max;
-                         }
-                         if (valueNum < min && value != '') {
-                             finalVal = min;
-                         }
-                         input.val(finalVal);
-                         if ($(this).data("changeCallback") != undefined) {
-                             $(this).data("changeCallback")();
-                         }
+                        var finalVal = valueNum.toFixed(check);
+                        if (valueNum > max && value != '') {
+                            finalVal = max;
+                        }
+                        if (valueNum < min && value != '') {
+                            finalVal = min;
+                        }
+                        input.val(finalVal);
+                        if ($(this).data("changeCallback") != undefined) {
+                            $(this).data("changeCallback")();
+                        }
                     }
                     if (charCode > 31 && (charCode < 48 || charCode > 57) && charCode != 46) {
                         if (charCode == 45) {
@@ -488,10 +599,10 @@ THE SOFTWARE.
                     }
                 })
                 input.on('blur', function () {
-                      var check = Math.round(-Math.log(precision) / Math.LN10);
-                      var value = input.val();
-                      var valueNum = parseFloat(value);
-                      if (valueNum > max && value != '') {
+                    var check = Math.round(-Math.log(precision) / Math.LN10);
+                    var value = input.val();
+                    var valueNum = parseFloat(value);
+                    if (valueNum > max && value != '') {
                         $(this).val(max);
                         return;
                     }
@@ -526,8 +637,8 @@ THE SOFTWARE.
     }
 
 
-      GUI.accordion = function (_json) {
-        function Accordion(_json) {     
+    GUI.accordion = function (_json) {
+        function Accordion(_json) {
             this.idObject = _json.id;
             this.parent = _json.parent;
             this.items = [];
@@ -535,28 +646,30 @@ THE SOFTWARE.
             this.id = [];
             this.listJqueryObjectElement = [];
             var stock = this;
-            for(var nbItem = 0; nbItem<_json.item.length;nbItem++){
+            for (var nbItem = 0; nbItem < _json.item.length; nbItem++) {
                 this.items[nbItem] = _json.item[nbItem].text;
                 this.id[nbItem] = _json.item[nbItem].id;
-                if( _json.item[nbItem].hasOwnProperty("content")){
+                if (_json.item[nbItem].hasOwnProperty("content")) {
                     this.links[nbItem] = _json.item[nbItem].content;
+                } else {
+                    this.links[nbItem] = false;
                 }
-                else{this.links[nbItem] = false;}
             }
 
-            this.init = function(){
+            this.init = function () {
                 this.html = '<div id="' + this.idObject + '" >'
                 for (var i = 0; i < this.items.length; i++) {
-                    this.html += '<h3 id="' + this.id[i]+'_header">' + this.items[i] + '</h3><div id="' + this.id[i] + '" >';
+                    this.html += '<h3 id="' + this.id[i] + '_header">' + this.items[i] + '</h3><div id="' + this.id[i] + '" >';
                     if (this.links[i]) {
                         this.html += this.links[i];
                     }
-                    this.html += '</div>';}
-                
-                this.html += '</div>';
-               }
+                    this.html += '</div>';
+                }
 
-            this.create = function(){                
+                this.html += '</div>';
+            }
+
+            this.create = function () {
                 this.jqueryObjectRoot = this.parent.append(this.html);
                 this.jqueryObjectRoot.accordion({
                     header: "h3",
@@ -564,7 +677,8 @@ THE SOFTWARE.
                     collapsible: true,
                     active: false,
                     heightStyle: "content"
-                });}
+                });
+            }
 
 
             this.refresh = function () {
@@ -573,9 +687,9 @@ THE SOFTWARE.
             }
 
             this.createJqueryObjects = function () {
-                for(var nbId=0; nbId<this.id.length; nbId++){
+                for (var nbId = 0; nbId < this.id.length; nbId++) {
                     this[this.id[nbId]] = $("#" + this.id[nbId]);
-                    this[this.id[nbId]]["header"] = $("#" + this.id[nbId]+"_header");
+                    this[this.id[nbId]]["header"] = $("#" + this.id[nbId] + "_header");
                     this.listJqueryObjectElement[nbItem] = this[this.id[nbId]];
                 }
             }
@@ -586,13 +700,13 @@ THE SOFTWARE.
             $.fn.recallItem = function (id) {
                 this.removeJqueryObjectA();
                 this.removeAttr('id');
-                this.prop("id",id);
-                stock[id] = $('#'+id);
+                this.prop("id", id);
+                stock[id] = $('#' + id);
                 this.header.removeJqueryObjectA();
                 this.header.removeAttr('id');
-                this.header.prop("id",id+"_header");
-                stock[id]["header"] =  $('#'+id+'_header');
-                }
+                this.header.prop("id", id + "_header");
+                stock[id]["header"] = $('#' + id + '_header');
+            }
 
             $.fn.removeItem = function () {
                 this.removeJqueryObjectA();
@@ -606,8 +720,8 @@ THE SOFTWARE.
                 this.refresh();
                 this.jqueryObjectRoot.remove();
                 this.refresh();
-                for (var key in this){
-                     delete this[key];
+                for (var key in this) {
+                    delete this[key];
                 }
                 delete this;
             }
@@ -615,36 +729,41 @@ THE SOFTWARE.
 
             this.addItem = function (_json) {
                 this.html = '';
-                this.html += '<h3 id="' + _json.id +'_header">' + _json.text + '</h3><div id="' + _json.id + '" >';
-                    if (_json.content) {
-                        this.html += _json.content;
-                    }
-                    this.html += '</div>';
-                
+                this.html += '<h3 id="' + _json.id + '_header">' + _json.text + '</h3><div id="' + _json.id + '" >';
+                if (_json.content) {
+                    this.html += _json.content;
+                }
                 this.html += '</div>';
 
-                if(_json.hasOwnProperty("before")&&_json.before){
-                    if(_json.hasOwnProperty("position")){
-                        this[_json.position]["header"].before(this.html);}
-                    else{this.jqueryObjectRoot.before(this.html);}
+                this.html += '</div>';
+
+                if (_json.hasOwnProperty("before") && _json.before) {
+                    if (_json.hasOwnProperty("position")) {
+                        this[_json.position]["header"].before(this.html);
+                    } else {
+                        this.jqueryObjectRoot.before(this.html);
+                    }
                 } else {
-                    if(_json.hasOwnProperty("position")){
-                        this[_json.position].after(this.html);}
-                     else{this.jqueryObjectRoot.after(this.html);}
+                    if (_json.hasOwnProperty("position")) {
+                        this[_json.position].after(this.html);
+                    } else {
+                        this.jqueryObjectRoot.after(this.html);
+                    }
                 }
 
                 this.refresh();
-                this[_json.id]=$('#'+_json.id);
-                this[_json.id]["header"] = $("#" + _json.id +"_header");
+                this[_json.id] = $('#' + _json.id);
+                this[_json.id]["header"] = $("#" + _json.id + "_header");
                 this["listJqueryObjectElement"].push(stock[_json.id]);
             }
-           
+
             $.fn.onClick = function (_callback) {
                 this.header.on("click", function (event) {
                     _callback.call();
-                    });}
+                });
+            }
 
-            this.allOpenable = function(){
+            this.allOpenable = function () {
                 this.jqueryObjectRoot.on("accordionbeforeactivate", function (event, ui) {
                     if ((($.trim($(ui.newPanel).html()).length == 0) && ($(ui.oldHeader).length == 0)) || (($.trim($(ui.newPanel).html()).length == 0) && ($(ui.newHeader).length))) {
                         event.preventDefault();
@@ -670,24 +789,26 @@ THE SOFTWARE.
                     }
                     return false;
                 });
-                }
+            }
             this.autoScrollDown = function () {
                 $(".ui-accordion-header").on("click", function (event, ui) {
                     var buffer = this;
                     var container = $("#renderMenus_content"),
-                    scrollTo = $(this);
+                        scrollTo = $(this);
                     setTimeout(function () {
-                    // console.debug(scrollTo.offset().top + "  " +scrollTo.next().height()+"  "+container.height())
-                    if(scrollTo.offset().top+scrollTo.next().height()>container.height()){
-                    container.scrollTop(
-                        scrollTo.offset().top - container.offset().top + container.scrollTop()
-                    );} }, 300);
-                
-                });
-                }
+                        // console.debug(scrollTo.offset().top + "  " +scrollTo.next().height()+"  "+container.height())
+                        if (scrollTo.offset().top + scrollTo.next().height() > container.height()) {
+                            container.scrollTop(
+                                scrollTo.offset().top - container.offset().top + container.scrollTop()
+                            );
+                        }
+                    }, 300);
 
+                });
             }
-        
+
+        }
+
         var tmp = new Accordion(_json);
         tmp.init();
         tmp.create();
@@ -696,34 +817,36 @@ THE SOFTWARE.
         return tmp;
     };
 
-     GUI.script = function(_json){
-        function Script(_json){
+    GUI.script = function (_json) {
+        function Script(_json) {
             this.idObject = _json.id;
             this.parent = _json.parent;
             this.content = _json.content;
             var stock = this;
-            this.init = function(){
+            this.init = function () {
                 this.html = '';
-                this.html += '<form><textarea id="'+ this.idObject +'" name="'+this.idObject+'">'+this.content+'</textarea></form>';
+                this.html += '<form><textarea id="' + this.idObject + '" name="' + this.idObject + '">' + this.content + '</textarea></form>';
             }
-            this.create = function(){
+            this.create = function () {
                 this.jqueryObjectRoot = this.parent.append(this.html);
-                CodeMirror.commands.autocomplete = function(cm) {
-                         CodeMirror.showHint(cm, CodeMirror.hint.javascript);
-                     };
+                CodeMirror.commands.autocomplete = function (cm) {
+                    CodeMirror.showHint(cm, CodeMirror.hint.javascript);
+                };
                 this.object = CodeMirror.fromTextArea(document.getElementById(stock.idObject), {
                     lineNumbers: true,
                     styleActiveLine: true,
                     matchBrackets: true,
-                    mode:  "javascript",
+                    mode: "javascript",
                     autofocus: true,
-                    extraKeys: {"Ctrl-Space": "autocomplete"},
+                    extraKeys: {
+                        "Ctrl-Space": "autocomplete"
+                    },
                     smartIndent: false,
                 });
-                this.form = $("#"+this.idObject).parent();
+                this.form = $("#" + this.idObject).parent();
             }
-            this.refresh = function(){
-                $('.CodeMirror').each(function(i, el){
+            this.refresh = function () {
+                $('.CodeMirror').each(function (i, el) {
                     el.CodeMirror.refresh();
                 });
             }
@@ -734,63 +857,68 @@ THE SOFTWARE.
         return tmp;
     }
 
-    GUI.tab = function(_json){
-        function Tab (_json){
+    GUI.tab = function (_json) {
+        function Tab(_json) {
             this.idObject = _json.id;
             this.parent = _json.parent;
             this.item = _json.item;
             this.json = _json;
             this.listJqueryObjectElement = [];
-            this.id=[];
+            this.id = [];
             this.listTab = [];
-            for(var nbItem = 0; nbItem<_json.item.length;nbItem++){
-                this.id[nbItem] = _json.item[nbItem].id;}
+            for (var nbItem = 0; nbItem < _json.item.length; nbItem++) {
+                this.id[nbItem] = _json.item[nbItem].id;
+            }
             var stock = this;
             this.listUnchecked = [];
             this.optionManager = false;
 
-            this.init = function(){
-                this.html = '<ul id="'+this.idObject+'_header" ><li><a href="#' + this.item[0].id + '">' + this.item[0].text + '</a></li></ul>';
-                this.html += '<div id="'+this.idObject+'_content" class="ui-widget-content ui-layout-content ui-corner-top" >';
+            this.init = function () {
+                this.html = '<ul id="' + this.idObject + '_header" ><li><a href="#' + this.item[0].id + '">' + this.item[0].text + '</a></li></ul>';
+                this.html += '<div id="' + this.idObject + '_content" class="ui-widget-content ui-layout-content ui-corner-top" >';
                 this.html += '<div id="' + this.item[0].id + '" class="content">';
-                if (this.item[0].hasOwnProperty('content')){
-                this.html += this.item[0].content;
+                if (this.item[0].hasOwnProperty('content')) {
+                    this.html += this.item[0].content;
                 }
                 this.html += '</div></div>'
             }
 
-            this.children = function(){
-                for(var nbItem = 1; nbItem<_json.item.length;nbItem++){
+            this.children = function () {
+                for (var nbItem = 1; nbItem < _json.item.length; nbItem++) {
                     this.addTab(_json.item[nbItem])
                 }
             }
 
-            this.create = function(){
+            this.create = function () {
                 this.jqueryObjectRoot = this.parent.append(this.html);
-                this.jqueryObjectRoot = this.jqueryObjectRoot.tabs(
-                    {activate:function(event,ui){                                                       
-                                   $('.CodeMirror').each(function(i, el){
-                                        el.CodeMirror.refresh();});                                                
-                            } });}
-
-            this.createJqueryObjects = function () {
-                this['header'] = $('#'+this.idObject+'_header');
-                this['content'] = $('#'+this.idObject+'_content');
-                this[this.id[0]] = $('#'+this.idObject+'_content').find(".content");
-                this[this.id[0]]["title"] = $('#'+this.idObject+'_header').find("li:nth-child(1) a");
-                this.listJqueryObjectElement[0] = this[this.id[0]];
-                for(var nbId=1; nbId<this.id.length; nbId++){
-                    this[this.id[nbId]] = $("#" + this.id[nbId]);
-                    this[this.id[nbId]]["title"] = $('#'+this.idObject+'_header').find("li:nth-child("+(nbId+3)+") a");
-                    this.listJqueryObjectElement[nbItem] = this[this.id[nbId]];
-                }}
-
-            this.refresh = function () {
-               this.jqueryObjectRoot.tabs("refresh");
-               stock = this;
+                this.jqueryObjectRoot = this.jqueryObjectRoot.tabs({
+                    activate: function (event, ui) {
+                        $('.CodeMirror').each(function (i, el) {
+                            el.CodeMirror.refresh();
+                        });
+                    }
+                });
             }
 
-            this.addTab = function(_json){
+            this.createJqueryObjects = function () {
+                this['header'] = $('#' + this.idObject + '_header');
+                this['content'] = $('#' + this.idObject + '_content');
+                this[this.id[0]] = $('#' + this.idObject + '_content').find(".content");
+                this[this.id[0]]["title"] = $('#' + this.idObject + '_header').find("li:nth-child(1) a");
+                this.listJqueryObjectElement[0] = this[this.id[0]];
+                for (var nbId = 1; nbId < this.id.length; nbId++) {
+                    this[this.id[nbId]] = $("#" + this.id[nbId]);
+                    this[this.id[nbId]]["title"] = $('#' + this.idObject + '_header').find("li:nth-child(" + (nbId + 3) + ") a");
+                    this.listJqueryObjectElement[nbItem] = this[this.id[nbId]];
+                }
+            }
+
+            this.refresh = function () {
+                this.jqueryObjectRoot.tabs("refresh");
+                stock = this;
+            }
+
+            this.addTab = function (_json) {
                 this.html = '';
                 this.html += '<li><a href="#' + _json.id + '">' + _json.text + '</a></li>';
                 this.header.append(this.html);
@@ -804,7 +932,9 @@ THE SOFTWARE.
                 this.id.push(_json.id);
                 this.refresh();
                 this.createJqueryObjects();
-                if(_json.text.trim() != "Material" && this.optionManager){this.manager();}
+                if (_json.text.trim() != "Material" && this.optionManager) {
+                    this.manager();
+                }
             }
 
             $.fn.removeTab = function (_idTabWindow, id) {
@@ -816,102 +946,120 @@ THE SOFTWARE.
             }
 
             $.fn.removeJqueryObjectTab = function () {
-                try{delete stock[this.prop("id")].title;}catch(err){};
+                try {
+                    delete stock[this.prop("id")].title;
+                } catch (err) {};
                 delete stock[this.prop("id")];
                 var result = true;
-                while(result){
+                while (result) {
                     result = stock.id.lastIndexOf(this.prop("id"));
-                    if(result==-1){result=false;break;}
-                    stock.id.splice(result,1)
+                    if (result == -1) {
+                        result = false;
+                        break;
+                    }
+                    stock.id.splice(result, 1)
                 }
                 stock.refresh();
             }
 
-            this.sortable = function(){
-                this.jqueryObjectRoot.find( ".ui-tabs-nav" ).sortable({
+            this.sortable = function () {
+                this.jqueryObjectRoot.find(".ui-tabs-nav").sortable({
                     axis: "x",
-                    stop: function() {
+                    stop: function () {
                         stock.refresh();
-                        }
-                        });
-            }   
+                    }
+                });
+            }
 
-            this.refreshTabList = function(){
+            this.refreshTabList = function () {
                 this.listTab = [];
                 var buffer = this;
-                this.jqueryObjectRoot.find("ul>li").each(function(index){
+                this.jqueryObjectRoot.find("ul>li").each(function (index) {
                     var text = $(this).find('a').text();
                     var json = {};
-                    json["index"]=index;
-                    json["text"]=text;
-                    if(text){buffer.listTab.push(json)};
+                    json["index"] = index;
+                    json["text"] = text;
+                    if (text) {
+                        buffer.listTab.push(json)
+                    };
                 });
-                }
+            }
 
-            this.manager = function (){
+            this.manager = function () {
                 $('#tabManager').remove();
                 var html = '<div id="tabManager"><div>';
                 $('body').append(html);
                 this.refreshTabList();
                 var buffer = this;
-                var indexII = -1; var check = '';
-                for(var i = 0; i<this.listTab.length; i++){
+                var indexII = -1;
+                var check = '';
+                for (var i = 0; i < this.listTab.length; i++) {
                     var indexII = this.listTab[i].index;
-                    var check = GUI.addCheckBox("tabindex_"+indexII,this.listTab[i].text.trim(),$('#tabManager')).find('input').prop('checked', true);
+                    var check = GUI.addCheckBox("tabindex_" + indexII, this.listTab[i].text.trim(), $('#tabManager')).find('input').prop('checked', true);
                     check.on('change', function (e) {
                         var indexI = $(this).parent().prop("id").substr(9);
-                        if($(this).is(":checked")){
-                            buffer.jqueryObjectRoot.tabs('enable',indexI*1);
-                            buffer.jqueryObjectRoot.tabs("option", "active",indexI*1);
-                            var posit=buffer.listUnchecked.indexOf(indexI*1);
-                            while(posit!=-1){
-                                posit = buffer.listUnchecked.indexOf(indexI*1);
-                                if(posit!=-1){
-                                buffer.listUnchecked.splice(posit,1);}}
-                        }
-                        else{
-                            buffer.jqueryObjectRoot.tabs('disable',indexI*1);
-                            buffer.listUnchecked.push(indexI*1);
-                            for(var j=0;j<6;j++){
-                                buffer.jqueryObjectRoot.tabs("option", "active",j);}
+                        if ($(this).is(":checked")) {
+                            buffer.jqueryObjectRoot.tabs('enable', indexI * 1);
+                            buffer.jqueryObjectRoot.tabs("option", "active", indexI * 1);
+                            var posit = buffer.listUnchecked.indexOf(indexI * 1);
+                            while (posit != -1) {
+                                posit = buffer.listUnchecked.indexOf(indexI * 1);
+                                if (posit != -1) {
+                                    buffer.listUnchecked.splice(posit, 1);
+                                }
+                            }
+                        } else {
+                            buffer.jqueryObjectRoot.tabs('disable', indexI * 1);
+                            buffer.listUnchecked.push(indexI * 1);
+                            for (var j = 0; j < 6; j++) {
+                                buffer.jqueryObjectRoot.tabs("option", "active", j);
+                            }
                         }
                         buffer.hidePanel();
-                        
-                });
-                for(var z=0;z<buffer.listUnchecked.length;z++){
-                    $('#'+"tabindex_"+buffer.listUnchecked[z]).find("input").prop("checked", false);
-                }
+
+                    });
+                    for (var z = 0; z < buffer.listUnchecked.length; z++) {
+                        $('#' + "tabindex_" + buffer.listUnchecked[z]).find("input").prop("checked", false);
+                    }
                 }
                 $('#tabManager').addClass('ui-widget-header');
                 $('#tabManager').hide();
             }
 
-            this.hidePanel = function(){
-                var disabled = this.jqueryObjectRoot.tabs( "option", "disabled" );
+            this.hidePanel = function () {
+                var disabled = this.jqueryObjectRoot.tabs("option", "disabled");
                 var buffer = this;
-                if(disabled.toString()=="true"){
+                if (disabled.toString() == "true") {
                     $("#tab").remove();
                     $('#mainLayout-center').hide();
                     $('.ui-layout-resizer-west').hide();
                     GUI.flagResize = false;
                     $('#tabManager').hide();
-                    GUI.mainMenu.addElement({id:'tab',text:'Tabs',position:'settings'}); 
+                    GUI.mainMenu.addElement({
+                        id: 'tab',
+                        text: 'Tabs',
+                        position: 'settings'
+                    });
                     var array = [];
                     var json = {};
-                    for(var i = 0; i<this.listTab.length; i++){
+                    for (var i = 0; i < this.listTab.length; i++) {
                         var json = {};
-                        json['id']= this.listTab[i].text.trim()+"_check";
-                        json['text']= this.listTab[i].text.trim();
-                        json['type']= "checkbox";
+                        json['id'] = this.listTab[i].text.trim() + "_check";
+                        json['text'] = this.listTab[i].text.trim();
+                        json['type'] = "checkbox";
                         array.push(json);
-                     }   
-                    var menu = GUI.menu({id:'tabs-menu',parent:GUI.mainMenu.tab,item:array});
+                    }
+                    var menu = GUI.menu({
+                        id: 'tabs-menu',
+                        parent: GUI.mainMenu.tab,
+                        item: array
+                    });
                     GUI.image(GUI.mainMenu.tab.text, "img-tab", "../gui/images/icon-cog.png", 15, 15, "before");
                     menu.jqueryObjectRoot.find("li").each(function (index) {
                         $(this).on('change', 'input[type=checkbox]', function (e) {
-                            var position = $(this).parent().prop("id").replace('_check','');
-                            $('#tabManager').find("li").each(function(index){
-                                if($(this).text()==position){
+                            var position = $(this).parent().prop("id").replace('_check', '');
+                            $('#tabManager').find("li").each(function (index) {
+                                if ($(this).text() == position) {
                                     $(this).find('input').click();
                                     buffer.showPanel();
                                     GUI.container.sizePane("west", $(window).width() - 300);
@@ -924,45 +1072,52 @@ THE SOFTWARE.
                     });
                 }
                 GUI.flagResize = false;
-                }
+            }
 
-             this.showPanel = function(){
-                var disabled = this.jqueryObjectRoot.tabs( "option", "disabled" );
-                if(disabled.toString()!="true"){
+            this.showPanel = function () {
+                var disabled = this.jqueryObjectRoot.tabs("option", "disabled");
+                if (disabled.toString() != "true") {
                     $('#tab').remove();
                     $('#mainLayout-center').show();
                     $('.ui-layout-resizer-west').show();
-                    for(var j=0;j<6;j++){
-                            this.jqueryObjectRoot.tabs("option", "active",j);}
+                    for (var j = 0; j < 6; j++) {
+                        this.jqueryObjectRoot.tabs("option", "active", j);
+                    }
                     GUI.resize();
                     GUI.flagResize = true;
                 }
             }
 
-            this.tabManager = function(){
+            this.tabManager = function () {
                 this.optionManager = true;
-                var buffer =this;
-                this.closeButton = GUI.button("closeTab", this.header, function(){
+                var buffer = this;
+                this.closeButton = GUI.button("closeTab", this.header, function () {
                     var activeTab = buffer.jqueryObjectRoot.tabs('option', 'active');
                     var condition = buffer.jqueryObjectRoot.find("ul>li").eq(activeTab).text().trim();
-                    if(condition!="Material"){
+                    if (condition != "Material") {
                         buffer.jqueryObjectRoot.tabs('disable', activeTab);
-                        $("#tabindex_"+activeTab).find('input').prop('checked',false)
-                        for(var j=0;j<6;j++){
-                            buffer.jqueryObjectRoot.tabs("option", "active",j);}
+                        $("#tabindex_" + activeTab).find('input').prop('checked', false)
+                        for (var j = 0; j < 6; j++) {
+                            buffer.jqueryObjectRoot.tabs("option", "active", j);
+                        }
                         buffer.hidePanel();
-                }
-            });
-                this.closeButton.prop("id","closeTab");
+                    }
+                });
+                this.closeButton.prop("id", "closeTab");
                 this.closeButton.html('');
                 GUI.addIcon(this.closeButton, "ui-icon-squaresmall-close", "", "before");
                 var flagPanel = false;
-                this.menuButton = GUI.button("menuTab", this.header, function(){
-                    if(!flagPanel){$('#tabManager').show();flagPanel= true;}
-                    else if(flagPanel){$('#tabManager').hide();flagPanel= false;}
+                this.menuButton = GUI.button("menuTab", this.header, function () {
+                    if (!flagPanel) {
+                        $('#tabManager').show();
+                        flagPanel = true;
+                    } else if (flagPanel) {
+                        $('#tabManager').hide();
+                        flagPanel = false;
+                    }
 
-        });
-                this.menuButton.prop("id","menuTab");
+                });
+                this.menuButton.prop("id", "menuTab");
                 this.menuButton.html('');
                 GUI.addIcon(this.menuButton, "ui-icon-squaresmall-plus", "", "before");
 
@@ -970,9 +1125,9 @@ THE SOFTWARE.
 
             }
         }
-        
 
-        var tmp = new Tab (_json);
+
+        var tmp = new Tab(_json);
         tmp.init();
         tmp.create();
         tmp.createJqueryObjects();
@@ -1064,8 +1219,8 @@ THE SOFTWARE.
             modal: true
         });
         $(".ui-dialog-titlebar").hide();
-        $("#"+ _id).parent().css("top","40%");
-        $("#"+ _id).parent().width("150px");
+        $("#" + _id).parent().css("top", "40%");
+        $("#" + _id).parent().width("150px");
         return $("#" + _id, _parent);
     };
 
@@ -1147,65 +1302,68 @@ THE SOFTWARE.
     };
 
     GUI.addCheckBox = function (_id, _text, _parent, checked) {
-         // /var debugShowSoundOverlay = GUI.addCheckBox("debugShowSoundOverlay", "Show sound overlay", soundTab);
-        if(!_text && !_parent){
-            var Checkbox = function(_id){
+        // /var debugShowSoundOverlay = GUI.addCheckBox("debugShowSoundOverlay", "Show sound overlay", soundTab);
+        if (!_text && !_parent) {
+            var Checkbox = function (_id) {
                 this.json = _id;
                 this.idObject = this.json.id;
                 this.html = '';
                 this.text = this.json.text;
-                if(this.json.hasOwnProperty('parent')){
+                if (this.json.hasOwnProperty('parent')) {
                     this.parent = this.json.parent;
                 }
-                if(this.json.hasOwnProperty('tooltip')){
+                if (this.json.hasOwnProperty('tooltip')) {
                     this.tooltip = this.json.tooltip;
                 }
-                if(this.json.hasOwnProperty('change')){
+                if (this.json.hasOwnProperty('change')) {
                     this.change = this.json.change;
                 }
-                if(this.json.hasOwnProperty('isChecked')){
+                if (this.json.hasOwnProperty('isChecked')) {
                     this.isChecked = this.json.isChecked;
                 }
-                if(this.json.hasOwnProperty('noChecked')){
+                if (this.json.hasOwnProperty('noChecked')) {
                     this.noChecked = this.json.noChecked;
                 }
-                if(this.json.hasOwnProperty('state')){
+                if (this.json.hasOwnProperty('state')) {
                     this.state = this.json.state;
                 }
-                this.generateHTML = function(){
+                this.generateHTML = function () {
                     this.html = '<li id="' + this.idObject + '" style="list-style:none;" class="checkbox" ><input type="checkbox"';
                     if (this.state)
                         this.html += ' checked="true"';
                     this.html += '><span>' + this.text + '</span></li>';
                 }
-                this.create = function(){
-                    if(this.parent){
+                this.create = function () {
+                    if (this.parent) {
                         this.parent.append(this.html);
                         this.link();
                     }
                 }
-                this.link = function(){
-                    this.selector = $('#'+this.idObject);
-                    this.input = $('#'+this.idObject).find('input');
-                    this.title = $('#'+this.idObject).find('span');
+                this.link = function () {
+                    this.selector = $('#' + this.idObject);
+                    this.input = $('#' + this.idObject).find('input');
+                    this.title = $('#' + this.idObject).find('span');
                     var stock = this;
-                    this.selector.on('change',function(){
-                        if(stock.change){
-                            stock.change.call();}
-                        if(stock.isChecked){
-                            if($(this).find('input').prop("checked")==true){
+                    this.selector.on('change', function () {
+                        if (stock.change) {
+                            stock.change.call();
+                        }
+                        if (stock.isChecked) {
+                            if ($(this).find('input').prop("checked") == true) {
                                 stock.isChecked.call();
-                            }}
-                        if(stock.noChecked){
-                            if($(this).find('input').prop("checked")==false){
+                            }
+                        }
+                        if (stock.noChecked) {
+                            if ($(this).find('input').prop("checked") == false) {
                                 stock.noChecked.call();
-                            }}
-                        });
-                    if(this.tooltip){
+                            }
+                        }
+                    });
+                    if (this.tooltip) {
                         this.selector.addTooltip(this.tooltip);
                     }
                 }
-                this.queryState = function(){
+                this.queryState = function () {
                     return this.input.is(':checked');
                 }
 
@@ -1217,7 +1375,7 @@ THE SOFTWARE.
 
         } else {
             var checkBox = '<li id="' + _id + '" style="list-style:none;" class="checkbox" ><input type="checkbox"';
-            if ( checked )
+            if (checked)
                 checkBox += ' checked="true"';
             checkBox += '><span>' + _text + '</span></li>';
             if (_parent) {
@@ -1226,7 +1384,8 @@ THE SOFTWARE.
                 return $checkBox;
             } else {
                 return checkBox;
-            }}
+            }
+        }
     };
 
     // checked except mod vertical  
@@ -1283,28 +1442,30 @@ THE SOFTWARE.
         html += "</div>";
         $(_parent).append(html);
         var jquerySelect = $('#' + _id);
-        
+
         jquerySelect.skinner();
-        if (_callback != undefined){jquerySelect.change(_callback);}
+        if (_callback != undefined) {
+            jquerySelect.change(_callback);
+        }
         $('.select-skinned-cont').addClass('ui-widget-header');
-        jquerySelect.change(function(){
+        jquerySelect.change(function () {
             $('.select-skinned-cont').addClass('ui-widget-header');
         });
-        jquerySelect.parent().click(function(){
+        jquerySelect.parent().click(function () {
             //console.debug($(this).parent().html())
             // var heightArea = $(this).parent().position().top;
             var childPos = $(this).parent().offset();
             var parentPos = $(this).parent().parent().offset();
             var heightArea = childPos.top - parentPos.top;
             var height = $(this).parent().parent().height();
-            $(".select-skinned ul").css("max-height",height - heightArea - 10);
+            $(".select-skinned ul").css("max-height", height - heightArea - 10);
         })
         return jquerySelect;
     }
 
     GUI.addRadioList = function (_position, _id, _value, _text, _parent) {
-        if(!_id && !_value && !_text && !_parent){
-            var Radio = function(_json){
+        if (!_id && !_value && !_text && !_parent) {
+            var Radio = function (_json) {
                 this.html = "";
                 this.items = [];
                 this.links = [];
@@ -1315,27 +1476,28 @@ THE SOFTWARE.
                 this.json = _json;
                 this.idObject = _json.id;
                 this.header = '';
-                if( _json.hasOwnProperty("parent")){
+                if (_json.hasOwnProperty("parent")) {
                     this.parent = _json.parent;
-                    }
-                if( _json.hasOwnProperty("change")){
+                }
+                if (_json.hasOwnProperty("change")) {
                     this.change = _json.change;
                 }
-                for(var nbItem = 0; nbItem<_json.item.length;nbItem++){
+                for (var nbItem = 0; nbItem < _json.item.length; nbItem++) {
                     this.items[nbItem] = _json.item[nbItem].text;
                     this.id[nbItem] = _json.item[nbItem].value;
-                    if( _json.item[nbItem].hasOwnProperty("tooltip")){
-                        this.tooltips[nbItem] = _json.item[nbItem].tooltip;}
-                    if( _json.item[nbItem].hasOwnProperty("callback")){
+                    if (_json.item[nbItem].hasOwnProperty("tooltip")) {
+                        this.tooltips[nbItem] = _json.item[nbItem].tooltip;
+                    }
+                    if (_json.item[nbItem].hasOwnProperty("callback")) {
                         this.links[nbItem] = _json.item[nbItem].callback;
                     }
-                    if( _json.item[nbItem].hasOwnProperty("state")){
+                    if (_json.item[nbItem].hasOwnProperty("state")) {
                         this.state[nbItem] = _json.item[nbItem].state;
                     }
                 }
-                this.generateHTML = function(){
+                this.generateHTML = function () {
                     this.html = '<li id=' + this.idObject + ' style="list-style:none;display: block;float: left;white-space: nowrap;">';
-                    var tefa = "Z" +  Math.floor((Math.random()*100000)+1);
+                    var tefa = "Z" + Math.floor((Math.random() * 100000) + 1);
                     for (var i = 0; i < this.id.length; i++) {
                         var tmp = "";
                         if (true == this.state[i]) {
@@ -1344,79 +1506,85 @@ THE SOFTWARE.
                         this.html += '<div class="radio_contain"><input type="radio" name="' + tefa + '" value="' + this.id[i] + '" ' + tmp + ' ></div><span style="bottom: 2px;">' + this.items[i] + '</span><br>';
                     }
                     this.html += '</li>';
-                    }
+                }
 
-                this.create = function(){  
+                this.create = function () {
                     if (this.parent) {
                         this.parent.append(this.html);
                         this.link();
-                        };
+                    };
                 }
-                this.link = function(){
-                    this.header = $("#"+this.idObject);
-                    if(this.change){
+                this.link = function () {
+                    this.header = $("#" + this.idObject);
+                    if (this.change) {
                         var call = this.change;
-                        
-                            this.header.on('change',function(e){
-                                call.call();
-                            });
+
+                        this.header.on('change', function (e) {
+                            call.call();
+                        });
                     }
                     var stock = this;
-                    this.header.find('input').each(function(index){
+                    this.header.find('input').each(function (index) {
                         stock[stock.id[index]] = $(this);
                         stock[stock.id[index]]["text"] = $(this).parent().next();
-                        if(stock.tooltips[index]){
-                            $(this).parent().next().addTooltip(stock.tooltips[index]);}
-                        if(stock.links[index]){
+                        if (stock.tooltips[index]) {
+                            $(this).parent().next().addTooltip(stock.tooltips[index]);
+                        }
+                        if (stock.links[index]) {
                             var call = stock.links[index];
                             $(this).on('change', function (e) {
                                 call.call();
-                            });}
-                        })
+                            });
+                        }
+                    })
                 }
-                }
+            }
 
-        var tmp = new Radio(_position);
-        tmp.generateHTML();
-        tmp.create();
-        return tmp;
-        } else{
-        var radioList = '<li id=' + _id + ' style="list-style:none;display: block;float: left;white-space: nowrap;">';
-        for (var i = 0; i < _text.length; i++) {
-            var tmp = "";
-            if (i == _position - 1) {
-                tmp = "checked";
-            }
-            if (!(_id instanceof Array)) {
-                radioList += '<div class="radio_contain"><input type="radio" name="' + _id + '" value="' + _value[i] + '" ' + tmp + ' ></div><span style="bottom: 2px;">' + _text[i] + '</span><br>';
-            } else {
-                radioList += '<div class="radio_contain"><input type="radio" name="' + _id[0] + '" value="' + _value[i] + '"' + tmp + '></div><span style="bottom: 2px;">' + _text[i] + '</span><br>';
-            }
-        }
-        radioList += '</li>';
-        if (_parent) {
-            var $radioList = $(radioList);
-            _parent.append($radioList);
-            return $radioList;
+            var tmp = new Radio(_position);
+            tmp.generateHTML();
+            tmp.create();
+            return tmp;
         } else {
-            return radioList;
+            var radioList = '<li id=' + _id + ' style="list-style:none;display: block;float: left;white-space: nowrap;">';
+            for (var i = 0; i < _text.length; i++) {
+                var tmp = "";
+                if (i == _position - 1) {
+                    tmp = "checked";
+                }
+                if (!(_id instanceof Array)) {
+                    radioList += '<div class="radio_contain"><input type="radio" name="' + _id + '" value="' + _value[i] + '" ' + tmp + ' ></div><span style="bottom: 2px;">' + _text[i] + '</span><br>';
+                } else {
+                    radioList += '<div class="radio_contain"><input type="radio" name="' + _id[0] + '" value="' + _value[i] + '"' + tmp + '></div><span style="bottom: 2px;">' + _text[i] + '</span><br>';
+                }
+            }
+            radioList += '</li>';
+            if (_parent) {
+                var $radioList = $(radioList);
+                _parent.append($radioList);
+                return $radioList;
+            } else {
+                return radioList;
 
             }
         }
     };
 
-   GUI.listMenu = [];
+    GUI.listMenu = [];
 
-    GUI.menu = function (_json){
-        if(_json.hasOwnProperty('replace')){
-                    var soundMenu = _json.replace;
-                    if(soundMenu){
-                        soundMenu.removeAllMenu();
-                        soundMenu = GUI.appendMenu(_json);
-                        return soundMenu;}
-                    else{console.error("'replace' property is wrong");}}
-        else{var tmp = GUI.appendMenu(_json);
-            return tmp;}
+    GUI.menu = function (_json) {
+        if (_json.hasOwnProperty('replace')) {
+            var soundMenu = _json.replace;
+            if (soundMenu) {
+                soundMenu.removeAllMenu();
+                soundMenu = GUI.appendMenu(_json);
+                return soundMenu;
+            } else {
+                console.error("'replace' property is wrong");
+            }
+        } else {
+            var tmp = GUI.appendMenu(_json);
+            return tmp;
+        }
 
     }
 
@@ -1429,29 +1597,34 @@ THE SOFTWARE.
             this.rightItems = [];
             this.id = [];
             this.idObject = _json.id;
-            for(var nbItem = 0; nbItem<_json.item.length;nbItem++){
-                if( _json.item[nbItem].hasOwnProperty("text")){
-                    this.items[nbItem] = _json.item[nbItem].text;}
-                if( _json.item[nbItem].hasOwnProperty("id")){
-                    this.id[nbItem] = _json.item[nbItem].id;}
-                if( _json.item[nbItem].hasOwnProperty("tooltip")){
-                    if(_json.item[nbItem].type != "checkbox"){
-                        this.tooltips[nbItem] = {content: _json.item[nbItem].tooltip, id:_json.item[nbItem].id};}
+            for (var nbItem = 0; nbItem < _json.item.length; nbItem++) {
+                if (_json.item[nbItem].hasOwnProperty("text")) {
+                    this.items[nbItem] = _json.item[nbItem].text;
                 }
-                if( _json.item[nbItem].hasOwnProperty("callback")){
+                if (_json.item[nbItem].hasOwnProperty("id")) {
+                    this.id[nbItem] = _json.item[nbItem].id;
+                }
+                if (_json.item[nbItem].hasOwnProperty("tooltip")) {
+                    if (_json.item[nbItem].type != "checkbox") {
+                        this.tooltips[nbItem] = {
+                            content: _json.item[nbItem].tooltip,
+                            id: _json.item[nbItem].id
+                        };
+                    }
+                }
+                if (_json.item[nbItem].hasOwnProperty("callback")) {
                     this.links[nbItem] = _json.item[nbItem].callback;
-                }
-                else{
-                    this.links[nbItem] ="#";
+                } else {
+                    this.links[nbItem] = "#";
                 }
             }
             this.json = _json;
-           
+
             this.parent = _json.parent;
             this.html = '';
             this.listJqueryObjectElement = [];
             this.jqueryObjectHead = $(".head-menu");
-            this.tmp =[];
+            this.tmp = [];
             this.checkRadio = [];
             this.checkBox = [];
             var stock = this;
@@ -1461,16 +1634,15 @@ THE SOFTWARE.
                     this.html += ' class="head-menu"';
                 }
                 this.html += '>';
-                 var buffer1 = function(){};
+                var buffer1 = function () {};
                 for (var i = 0; i < this.json.item.length; i++) {
-                    if ( ((typeof this.json.item[i])=="string") || (typeof this.json.item[i] instanceof String) ) {
+                    if (((typeof this.json.item[i]) == "string") || (typeof this.json.item[i] instanceof String)) {
                         this.html += this.json.item[i];
-                    }
-                    else if (this.json.item[i].type == "checkbox") {
+                    } else if (this.json.item[i].type == "checkbox") {
                         delete this.json.item[i].parent;
                         var checked = null;
-                        if ( this.json.item[i].hasOwnProperty('checked') )
-                            this.json.item[i]['state']=true;
+                        if (this.json.item[i].hasOwnProperty('checked'))
+                            this.json.item[i]['state'] = true;
                         var object = GUI.addCheckBox(this.json.item[i]);
                         this.checkBox.push(object);
                         this.html += object.html;
@@ -1480,29 +1652,31 @@ THE SOFTWARE.
                             delete this.json.item[i].parent;
                             var tmp = GUI.addRadioList(this.json.item[i]);
                             this.checkRadio.push(tmp);
-                            this.html += tmp.html;}
-                        else{
-                            this.html += GUI.addRadioList(1, this.id[i], this.items[i], this.items[i]);}
+                            this.html += tmp.html;
+                        } else {
+                            this.html += GUI.addRadioList(1, this.id[i], this.items[i], this.items[i]);
+                        }
                     } else if (this.json.item[i].type == "menu") {
                         this.html += '<li id="' + this.id[i] + '">';
                         this.html += '<a href="';
                         if (this.links[i] != "#") {
                             buffer1 = this.links[i];
-                            if(typeof buffer1!= "string"){
-                                var num = Math.floor((Math.random()*100000)+1);
-                                window["x"+num]=buffer1;
-                                window["z"+num]=function(item){
-                                    window["x"+item].call();}
-                                this.html += "javascript:window.z"+num +"("+num+");";}
-                            else{
-                                this.html += "javascript:" + this.links[i] +";";
+                            if (typeof buffer1 != "string") {
+                                var num = Math.floor((Math.random() * 100000) + 1);
+                                window["x" + num] = buffer1;
+                                window["z" + num] = function (item) {
+                                    window["x" + item].call();
+                                }
+                                this.html += "javascript:window.z" + num + "(" + num + ");";
+                            } else {
+                                this.html += "javascript:" + this.links[i] + ";";
                             }
                         } else {
                             this.html += '#"';
                         }
                         this.html += '">' + this.items[i] + '</a>';
                         this.html += '</li>';
-                        this.json.item[i].json["parent"] = $("#"+this.id[i]);
+                        this.json.item[i].json["parent"] = $("#" + this.id[i]);
                         this.tmp.push(this.json.item[i].json);
                     } else if (this.json.item[i].type == "separator") {
                         this.html += "<span class='separator' ><hr></hr></span>";
@@ -1511,14 +1685,15 @@ THE SOFTWARE.
                         this.html += '<a href="';
                         if (this.links[i] != "#") {
                             buffer1 = this.links[i];
-                            if(typeof buffer1!= "string"){
-                                var num = Math.floor((Math.random()*100000)+1);
-                                window["x"+num]=buffer1;
-                                window["z"+num]=function(item){
-                                    window["x"+item].call();}
-                                this.html += "javascript:window.z"+num +"("+num+");";}
-                            else{
-                                this.html += "javascript:" + this.links[i] +";";
+                            if (typeof buffer1 != "string") {
+                                var num = Math.floor((Math.random() * 100000) + 1);
+                                window["x" + num] = buffer1;
+                                window["z" + num] = function (item) {
+                                    window["x" + item].call();
+                                }
+                                this.html += "javascript:window.z" + num + "(" + num + ");";
+                            } else {
+                                this.html += "javascript:" + this.links[i] + ";";
                             }
                         } else {
                             this.html += '#"';
@@ -1546,46 +1721,48 @@ THE SOFTWARE.
                     this.refresh();
                 }
                 GUI.listMenu.push(this.jqueryObjectRoot);
-                this.jqueryObjectRoot.area = this.jqueryObjectRoot.find('ul'); 
+                this.jqueryObjectRoot.area = this.jqueryObjectRoot.find('ul');
                 var buffer1 = this.parent;
-                $('#menu').find('> li').each(function(index){
+                $('#menu').find('> li').each(function (index) {
                     $(this).find('> a > span').removeClass();
                     $(this).find('> a > span').addClass('ui-menu-icon ui-icon ui-icon-carat-1-s');
                 })
-                this.parent.beforeShow(function(){
+                this.parent.beforeShow(function () {
                     var tmp = buffer1.parent();
-                    if(tmp.prop("tagName") == "UL"){
-                    tmp = tmp.parent();
-                    if(tmp.prop("tagName") == "LI"){
+                    if (tmp.prop("tagName") == "UL") {
                         tmp = tmp.parent();
-                        if(tmp.prop("id") == "menu"){
-                            var left = buffer1.parent().width()+2;
-                            var top = buffer1.position().top;
-                            buffer1.find('ul').attr('style',"position: absolute !important; left: "+left+"px !important; top: "+top+"!important;");
-                            buffer1.find('ul').hide(); //buffer1
+                        if (tmp.prop("tagName") == "LI") {
+                            tmp = tmp.parent();
+                            if (tmp.prop("id") == "menu") {
+                                var left = buffer1.parent().width() + 2;
+                                var top = buffer1.position().top;
+                                buffer1.find('ul').attr('style', "position: absolute !important; left: " + left + "px !important; top: " + top + "!important;");
+                                buffer1.find('ul').hide(); //buffer1
+                            }
                         }
-                    }   
-                }});
-                if(this.parent.parent().hasClass("head-menu")){
-                    var width = this.parent.find('ul').width()+40;
-                    this.parent.find('ul li a').css("width",width);}
-                for(var f=0;f<this.checkRadio.length;f++){
+                    }
+                });
+                if (this.parent.parent().hasClass("head-menu")) {
+                    var width = this.parent.find('ul').width() + 40;
+                    this.parent.find('ul li a').css("width", width);
+                }
+                for (var f = 0; f < this.checkRadio.length; f++) {
                     this.checkRadio[f].link();
                 }
-                for(var c=0;c<this.checkBox.length;c++){
+                for (var c = 0; c < this.checkBox.length; c++) {
                     this.checkBox[c].link();
                 }
             }
 
-            this.applyTooltip = function(){
-                for(var z =0; z<this.tooltips.length; z++){
+            this.applyTooltip = function () {
+                for (var z = 0; z < this.tooltips.length; z++) {
                     this[this.tooltips[z].id].addTooltip(this.tooltips[z].content);
                 }
             }
 
-            this.callSubmenu = function (){
+            this.callSubmenu = function () {
                 var example = '';
-                for (var leng=0;leng<this.tmp.length;leng++){
+                for (var leng = 0; leng < this.tmp.length; leng++) {
                     example = this.tmp[leng]
                     GUI.menu(example);
                 }
@@ -1596,16 +1773,16 @@ THE SOFTWARE.
                 stock = this;
             }
             this.createJqueryObjects = function () {
-                for(var nbId=0; nbId<this.id.length; nbId++){
+                for (var nbId = 0; nbId < this.id.length; nbId++) {
                     this[this.id[nbId]] = $("#" + this.id[nbId]);
                     this[this.id[nbId]]["text"] = $("#" + this.id[nbId]).find('>a');
                     this[this.id[nbId]]["icon"] = $("#" + this.id[nbId]).find('>span');
                     this["listJqueryObjectElement"][nbItem] = this[this.id[nbId]];
                 }
-                for(var t=0;t<this.checkRadio.length;t++){
+                for (var t = 0; t < this.checkRadio.length; t++) {
                     this[this.checkRadio[t].idObject] = this.checkRadio[t];
                 }
-                for(var x=0;x<this.checkBox.length;x++){
+                for (var x = 0; x < this.checkBox.length; x++) {
                     this[this.checkBox[x].idObject] = this.checkBox[x];
                 }
             }
@@ -1616,13 +1793,13 @@ THE SOFTWARE.
             $.fn.recall = function (id) {
                 this.removeJqueryObject();
                 this.removeAttr('id');
-                this.prop("id",id);
+                this.prop("id", id);
                 stock[id] = this;
                 this.text.removeJqueryObject();
                 stock[id]['text'] = this.find('>a');
                 this.icon.removeJqueryObject();
                 stock[id]['icon'] = this.find('>span');
-                }
+            }
             $.fn.removeElement = function () {
                 this.removeJqueryObject();
                 this.remove();
@@ -1633,8 +1810,8 @@ THE SOFTWARE.
                 this.parent.find("ul").remove();
                 this.parent.find("span").remove();
                 this.refresh();
-                for (var key in this){
-                     delete this[key];
+                for (var key in this) {
+                    delete this[key];
                 }
                 delete this;
             }
@@ -1643,8 +1820,8 @@ THE SOFTWARE.
                 this.parent.find("ul").remove();
                 this.parent.find("span").remove();
                 this.refresh();
-                 for (var key in this){
-                     delete this[key];
+                for (var key in this) {
+                    delete this[key];
                 }
 
             }
@@ -1660,18 +1837,19 @@ THE SOFTWARE.
                     element += checkbox.html;
                 } else if (_json.type == "radioList") {
                     if (!_json.hasOwnProperty("text")) {
-                            delete _json.type;
-                            delete _json.parent;
-                            var tmp = GUI.addRadioList(_json);
-                            radioList= tmp;
-                            element += tmp.html;}
-                    else{
-                        element += GUI.addRadioList(1, _json.id,_json.text, _json.text);}
+                        delete _json.type;
+                        delete _json.parent;
+                        var tmp = GUI.addRadioList(_json);
+                        radioList = tmp;
+                        element += tmp.html;
+                    } else {
+                        element += GUI.addRadioList(1, _json.id, _json.text, _json.text);
+                    }
                 } else {
                     element += '<li id="' + _json.id + '" class="ui-menu-item" role="presentation">';
                     element += '<a href="';
                     if (_json.hasOwnProperty("callback")) {
-                        element += "javascript:"+_json.callback+";";
+                        element += "javascript:" + _json.callback + ";";
                     } else {
                         element += '#"';
                     }
@@ -1679,21 +1857,25 @@ THE SOFTWARE.
                     element += '</li>';
                 }
 
-                if(_json.hasOwnProperty("before")&&_json.before){
-                    if(_json.hasOwnProperty("position")){
-                        this[_json.position].before(element);}
-                    else{this.jqueryObjectRoot.before(element);}
+                if (_json.hasOwnProperty("before") && _json.before) {
+                    if (_json.hasOwnProperty("position")) {
+                        this[_json.position].before(element);
+                    } else {
+                        this.jqueryObjectRoot.before(element);
+                    }
                 } else {
-                    if(_json.hasOwnProperty("position")){
-                        this[_json.position].after(element);}
-                     else{this.jqueryObjectRoot.after(element);}
+                    if (_json.hasOwnProperty("position")) {
+                        this[_json.position].after(element);
+                    } else {
+                        this.jqueryObjectRoot.after(element);
+                    }
                 }
 
                 radioList.link();
                 checkbox.link();
 
                 this.refresh();
-                this[_json.id]=$('#'+_json.id);
+                this[_json.id] = $('#' + _json.id);
                 this[_json.id]["text"] = $("#" + _json.id).find('>a');
                 this[_json.id]["icon"] = $("#" + _json.id).find('>span');
 
@@ -1717,18 +1899,22 @@ THE SOFTWARE.
                 });
             }
             $.fn.attachCallback = function (_callback) {
-                this.text.attr("href", "javascript:" + _callback +";");
+                this.text.attr("href", "javascript:" + _callback + ";");
             }
             $.fn.detachCallback = function (_callback) {
                 this.text.attr("href", '#');
             }
 
-            $.fn.moveToRightFromLeft = function(pixels){
-                var width =0;
-                if(!pixels){
-                    if(stock.rightItems.length != 0){width = stock.rightItems.slice(-1)[0]+90;}}
-                else if(pixels){width=pixels;}
-                this.attr("style","position: absolute !important; right: "+width+"px !important;");
+            $.fn.moveToRightFromLeft = function (pixels) {
+                var width = 0;
+                if (!pixels) {
+                    if (stock.rightItems.length != 0) {
+                        width = stock.rightItems.slice(-1)[0] + 90;
+                    }
+                } else if (pixels) {
+                    width = pixels;
+                }
+                this.attr("style", "position: absolute !important; right: " + width + "px !important;");
                 stock.rightItems.push(width);
             }
 
@@ -1747,8 +1933,8 @@ THE SOFTWARE.
                         wrap.css("height", height - heightArea - 65);
                         $(window).on('resize orientationChanged', function () {
                             var heightBis = "innerHeight" in window ? window.innerHeight : document.documentElement.offsetHeight;
-                            elem.css("max-height",heightBis - heightArea - 65);
-                            wrap.css("height",heightBis - heightArea - 65); //88
+                            elem.css("max-height", heightBis - heightArea - 65);
+                            wrap.css("height", heightBis - heightArea - 65); //88
                         });
                         wrap.scroll(function () {
                             var value = wrap.scrollTop();
@@ -1759,18 +1945,18 @@ THE SOFTWARE.
                     }
                 });
             }
-            this.closeAll = function(){
-                $(".head-menu").menu("collapseAll", null, true );
+            this.closeAll = function () {
+                $(".head-menu").menu("collapseAll", null, true);
             }
-            this.setSentivityFocus=function(_time_ms){
+            this.setSentivityFocus = function (_time_ms) {
                 var blurTimer;
-                var blurTimeAbandoned = _time_ms;  // time in ms for when menu is consider no longer in focus
-                $(".head-menu").on('menufocus', function() {
+                var blurTimeAbandoned = _time_ms; // time in ms for when menu is consider no longer in focus
+                $(".head-menu").on('menufocus', function () {
                     clearTimeout(blurTimer);
                 });
-                $(".head-menu").on('menublur', function(event) {
-                    blurTimer = setTimeout(function() {
-                        $(".head-menu").menu("collapseAll", null, true );
+                $(".head-menu").on('menublur', function (event) {
+                    blurTimer = setTimeout(function () {
+                        $(".head-menu").menu("collapseAll", null, true);
                     }, blurTimeAbandoned);
                 });
 
@@ -1787,7 +1973,7 @@ THE SOFTWARE.
         tmp.init();
         tmp.create();
         tmp.createJqueryObjects();
-        if(tmp.tmp != 0){
+        if (tmp.tmp != 0) {
             tmp.callSubmenu();
         }
         tmp.applyTooltip();
@@ -1820,7 +2006,7 @@ THE SOFTWARE.
         return result;
     };
     //---------------------------------------------------------------------------------------------------------------------------------------
-  GUI.getCSSRule = function (className) {
+    GUI.getCSSRule = function (className) {
         for (var i = 0; i < document.styleSheets.length; i++) {
             var classes = document.styleSheets[i].rules || document.styleSheets[i].cssRules
             for (var x = 0; x < classes.length; x++) {
@@ -1840,12 +2026,13 @@ THE SOFTWARE.
                 var ii = 0;
                 var cssRule = false;
                 do {
-                    try{
-                    if (styleSheet.cssRules) {
-                        cssRule = styleSheet.cssRules[ii];
-                    } else {
-                        cssRule = styleSheet.rules[ii];
-                    }}catch(err){}
+                    try {
+                        if (styleSheet.cssRules) {
+                            cssRule = styleSheet.cssRules[ii];
+                        } else {
+                            cssRule = styleSheet.rules[ii];
+                        }
+                    } catch (err) {}
                     if (cssRule) {
                         if (cssRule.selectorText == ruleName) {
                             if (deleteFlag == 'delete') {
@@ -1881,20 +2068,20 @@ THE SOFTWARE.
             var ss = document.styleSheets[i];
 
             var l = 0;
-            try{
-            if (ss.cssRules) {
-                l = ss.cssRules.length;
-            } else if (ss.rules) {
-                // IE
-                l = ss.rules.length;
-            }
-            if (ss.insertRule) {
-                ss.insertRule(selector + ' {' + rule + '}', l);
-            } else if (ss.addRule) {
-                // IE
-                ss.addRule(selector, rule, l);
-            }}
-            catch(ERR){};
+            try {
+                if (ss.cssRules) {
+                    l = ss.cssRules.length;
+                } else if (ss.rules) {
+                    // IE
+                    l = ss.rules.length;
+                }
+                if (ss.insertRule) {
+                    ss.insertRule(selector + ' {' + rule + '}', l);
+                } else if (ss.addRule) {
+                    // IE
+                    ss.addRule(selector, rule, l);
+                }
+            } catch (ERR) {};
         }
     };
 
@@ -1957,18 +2144,22 @@ THE SOFTWARE.
         $("link[href='" + GUI.currentCssTheme + "']").remove();
     }
 
-    GUI.addTooltip = function(_json){
+    GUI.addTooltip = function (_json) {
         var content = _json.content;
         var parent = _json.parent;
-        parent.prop('title',content);
+        parent.prop('title', content);
         parent.tooltip();
-        if(_json.hasOwnProperty("hide")){
+        if (_json.hasOwnProperty("hide")) {
             var hide = _json.hide;
-            parent.tooltip( "option", "hide", { delay: hide })
+            parent.tooltip("option", "hide", {
+                delay: hide
+            })
         }
-        if(_json.hasOwnProperty("show")){
+        if (_json.hasOwnProperty("show")) {
             var show = _json.show;
-            parent.tooltip( "option", "show", { delay: show })
+            parent.tooltip("option", "show", {
+                delay: show
+            })
         }
     }
 
@@ -2222,14 +2413,14 @@ THE SOFTWARE.
 
         GUI.container = obj.jqueryObject;
         $(window).on('resize orientationChanged', function () {
-            if(GUI.flagResize){
+            if (GUI.flagResize) {
                 obj.jqueryObject.sizePane("west", $(window).width() - 300);
                 GUI.container.resizeAll();
                 GUI.container.initContent("center");
-                GUI.container.initContent("west");}
-            else{}
+                GUI.container.initContent("west");
+            } else {}
         });
-        
+
         obj.jqueryObjectWest.append("<div id='support-layout' class='ui-layout-center' style='height:100%;width:100%'></div>");
         obj.jqueryObject.sizePane("north", 37);
         obj.jqueryObject.allowOverflow("north");
@@ -2237,22 +2428,23 @@ THE SOFTWARE.
         return obj;
     }
     // does not work without this
-    GUI.offset=false;
+    GUI.offset = false;
 
     GUI.resize = function () {
 
     };
 
-    GUI.copyToClipboard = function(text) {  
-        $('body').append('<textarea id="clipboardholder" style="display:none;"></textarea>');         
-        var clipboardholder= document.getElementById("clipboardholder"); 
-        clipboardholder.style.display = "block"; 
-        clipboardholder.value = text; 
-        clipboardholder.select(); 
-        document.execCommand("Copy"); 
-        clipboardholder.style.display = "none";} 
+    GUI.copyToClipboard = function (text) {
+        $('body').append('<textarea id="clipboardholder" style="display:none;"></textarea>');
+        var clipboardholder = document.getElementById("clipboardholder");
+        clipboardholder.style.display = "block";
+        clipboardholder.value = text;
+        clipboardholder.select();
+        document.execCommand("Copy");
+        clipboardholder.style.display = "none";
+    }
 
-/*  role : it shows up a notification, it is automatically removed from the DOM when hidden/closed
+    /*  role : it shows up a notification, it is automatically removed from the DOM when hidden/closed
     function : GUI.notification(_json);
     parameter : 
         type : json
@@ -2276,23 +2468,39 @@ THE SOFTWARE.
     Example : GUI.notification({title:"tefa",text:"text",time:"4000"})
             GUI.notification({text:"jajajaaaaa",type:"notice"})*/
 
-    GUI.notification = function(_json){
-        function Notification(_json){
+    GUI.notification = function (_json) {
+        function Notification(_json) {
             this.text = _json.text;
-            if(_json.hasOwnProperty("title")){this.title = _json.title;}
-            else{this.title=false;}
+            if (_json.hasOwnProperty("title")) {
+                this.title = _json.title;
+            } else {
+                this.title = false;
+            }
             this.json = _json;
-            this.create = function(){
+            this.create = function () {
                 $.pnotify.defaults.styling = "jqueryui";
                 $.pnotify.defaults.history = false;
-                var entry = {title: this.title,text: this.text,sticker: false,remove: true}
-                if(this.json.hasOwnProperty("time")){entry["delay"]=this.json.time;entry["closer"]=false;entry["hide"]=true;}
-                else{entry["hide"]=false;entry["closer"]=true;}
-                if(this.json.hasOwnProperty("type")){entry["type"]=this.json.type;}
+                var entry = {
+                    title: this.title,
+                    text: this.text,
+                    sticker: false,
+                    remove: true
+                }
+                if (this.json.hasOwnProperty("time")) {
+                    entry["delay"] = this.json.time;
+                    entry["closer"] = false;
+                    entry["hide"] = true;
+                } else {
+                    entry["hide"] = false;
+                    entry["closer"] = true;
+                }
+                if (this.json.hasOwnProperty("type")) {
+                    entry["type"] = this.json.type;
+                }
                 $.pnotify(entry);
             }
             // this.disableHistory = function(){
-                
+
             // }
             // this.enableHistory = function(){
             //     $.pnotify.defaults.history = true;
@@ -2304,96 +2512,98 @@ THE SOFTWARE.
         return tmp;
     }
 
-    GUI.hideAllNotifications = function(){
+    GUI.hideAllNotifications = function () {
         $(".ui-pnotify").remove();
         $(".ui-pnotify").hide();
     }
 
 
-    GUI.searchBox = function(_json){
-        function Search (_json){
+    GUI.searchBox = function (_json) {
+        function Search(_json) {
             this.parent = _json.parent;
             this.id = _json.id;
-            this.create = function(){
-                this.input = GUI.addInput(this.id,"",this.parent);
+            this.create = function () {
+                this.input = GUI.addInput(this.id, "", this.parent);
                 this.input.css("float:right;top:0px;")
             }
-            this.search = function(){
+            this.search = function () {
                 var stock = this;
-                var buffer = $(''), scrollTo=$(''), container=$('#help'), index =0;
-                this.input.keyup(function(event){
-                // console.debug($("#help").find( ".ui-tabs-panel" )[$('#help').tabs( "option", "active" )])
-                if(event.keyCode == 13){
-                    index ++;
-                    scrollTo.css("background-color"," #CCCCCC")
-                    scrollTo=$('.highlight').eq(index);
-                    if(scrollTo.length){
-                    container.scrollTop(
-                            scrollTo.offset().top - container.offset().top + container.scrollTop() - 80
-                        );
-                    scrollTo.css("background-color","yellow")
-                  }
-                    else{
-                        index = 0;
-                        if(scrollTo.length){
-                            container.scrollTop(
-                            scrollTo.offset().top - container.offset().top + container.scrollTop() - 80
-                        );
-                        scrollTo.css("background-color","yellow")
-                  }
-
-                    }
-                }
-              else{
-                  $('#help').removeHighlight();
-                  $($("#help").find( ".ui-tabs-panel" )[$('#help').tabs( "option", "active" )]).highlight(this.value);
-                  if($('.highlight').length){
+                var buffer = $(''),
+                    scrollTo = $(''),
+                    container = $('#help'),
                     index = 0;
-                    scrollTo=$('.highlight').eq(index);
-                    container.scrollTop(
-                            scrollTo.offset().top - container.offset().top + container.scrollTop() - 80
-                        );
-                    scrollTo.css("background-color","yellow")
-                    }
-                }});}
+                this.input.keyup(function (event) {
+                    // console.debug($("#help").find( ".ui-tabs-panel" )[$('#help').tabs( "option", "active" )])
+                    if (event.keyCode == 13) {
+                        index++;
+                        scrollTo.css("background-color", " #CCCCCC")
+                        scrollTo = $('.highlight').eq(index);
+                        if (scrollTo.length) {
+                            container.scrollTop(
+                                scrollTo.offset().top - container.offset().top + container.scrollTop() - 80
+                            );
+                            scrollTo.css("background-color", "yellow")
+                        } else {
+                            index = 0;
+                            if (scrollTo.length) {
+                                container.scrollTop(
+                                    scrollTo.offset().top - container.offset().top + container.scrollTop() - 80
+                                );
+                                scrollTo.css("background-color", "yellow")
+                            }
 
-        $.fn.highlight = function(pat) {
-             function innerHighlight(node, pat) {
-              var skip = 0;
-              if (node.nodeType == 3) {
-               var pos = node.data.toUpperCase().indexOf(pat);
-               if (pos >= 0) {
-                var spannode = document.createElement('span');
-                spannode.className = 'highlight';
-                var middlebit = node.splitText(pos);
-                var endbit = middlebit.splitText(pat.length);
-                var middleclone = middlebit.cloneNode(true);
-                spannode.appendChild(middleclone);
-                middlebit.parentNode.replaceChild(spannode, middlebit);
-                skip = 1;
-               }
-              }
-              else if (node.nodeType == 1 && node.childNodes && !/(script|style)/i.test(node.tagName)) {
-               for (var i = 0; i < node.childNodes.length; ++i) {
-                i += innerHighlight(node.childNodes[i], pat);
-               }
-              }
-              return skip;
-             }
-             return this.length && pat && pat.length ? this.each(function() {
-              innerHighlight(this, pat.toUpperCase());
-             }) : this;
+                        }
+                    } else {
+                        $('#help').removeHighlight();
+                        $($("#help").find(".ui-tabs-panel")[$('#help').tabs("option", "active")]).highlight(this.value);
+                        if ($('.highlight').length) {
+                            index = 0;
+                            scrollTo = $('.highlight').eq(index);
+                            container.scrollTop(
+                                scrollTo.offset().top - container.offset().top + container.scrollTop() - 80
+                            );
+                            scrollTo.css("background-color", "yellow")
+                        }
+                    }
+                });
+            }
+
+            $.fn.highlight = function (pat) {
+                function innerHighlight(node, pat) {
+                    var skip = 0;
+                    if (node.nodeType == 3) {
+                        var pos = node.data.toUpperCase().indexOf(pat);
+                        if (pos >= 0) {
+                            var spannode = document.createElement('span');
+                            spannode.className = 'highlight';
+                            var middlebit = node.splitText(pos);
+                            var endbit = middlebit.splitText(pat.length);
+                            var middleclone = middlebit.cloneNode(true);
+                            spannode.appendChild(middleclone);
+                            middlebit.parentNode.replaceChild(spannode, middlebit);
+                            skip = 1;
+                        }
+                    } else if (node.nodeType == 1 && node.childNodes && !/(script|style)/i.test(node.tagName)) {
+                        for (var i = 0; i < node.childNodes.length; ++i) {
+                            i += innerHighlight(node.childNodes[i], pat);
+                        }
+                    }
+                    return skip;
+                }
+                return this.length && pat && pat.length ? this.each(function () {
+                    innerHighlight(this, pat.toUpperCase());
+                }) : this;
             };
 
-          $.fn.removeHighlight = function() {
-             return this.find("span.highlight").each(function() {
-              this.parentNode.firstChild.nodeName;
-              with(this.parentNode) {
-               replaceChild(this.firstChild, this);
-               normalize();
-              }
-             }).end();
-        };
+            $.fn.removeHighlight = function () {
+                return this.find("span.highlight").each(function () {
+                    this.parentNode.firstChild.nodeName;
+                    with(this.parentNode) {
+                        replaceChild(this.firstChild, this);
+                        normalize();
+                    }
+                }).end();
+            };
 
         }
         var tmp = new Search(_json);
@@ -2402,63 +2612,66 @@ THE SOFTWARE.
         return tmp;
     }
 
-    GUI.input = function(_json){
-        function InputDialog (_json){
+    GUI.input = function (_json) {
+        function InputDialog(_json) {
             this.json = _json;
             this.parent = this.json.parent;
             this.idObject = this.json.id;
             var stock = this;
-            if(this.json.hasOwnProperty('callback')){
+            if (this.json.hasOwnProperty('callback')) {
                 this.callback = this.json.callback;
             }
-            if(this.json.hasOwnProperty('hide')){
+            if (this.json.hasOwnProperty('hide')) {
                 this.hide = this.json.hide;
             }
-            if(this.json.hasOwnProperty('extension')){
+            if (this.json.hasOwnProperty('extension')) {
                 this.extension = this.json.extension;
             }
             this.mode = '';
-            if(this.json.hasOwnProperty('mode')){
+            if (this.json.hasOwnProperty('mode')) {
                 this.mode = this.json.mode;
+            } else {
+                this.mode = "none";
             }
-            else{this.mode="none";}
-            this.generateHTML = function (){
-                this.html = '<input type="file" id="'+this.idObject+'" name="files[]"';
-                if(this.extension){
-                    this.html += ' accept="'+this.extension+'"';}
+            this.generateHTML = function () {
+                this.html = '<input type="file" id="' + this.idObject + '" name="files[]"';
+                if (this.extension) {
+                    this.html += ' accept="' + this.extension + '"';
+                }
                 this.html += ' multiple ';
-                if(this.mode=='readText'){
-                    this.html += ' onchange="window.readFile(this.files)"/>';}
+                if (this.mode == 'readText') {
+                    this.html += ' onchange="window.readFile(this.files)"/>';
+                }
             }
-            this.create = function (){
+            this.create = function () {
                 this.parent.append(this.html);
-                this.header = $('#'+this.idObject);
+                this.header = $('#' + this.idObject);
                 var stock = this;
-                if(this.hide){
+                if (this.hide) {
                     this.header.hide();
                 }
                 stock = this;
-                this.header.on("change",function () {
+                this.header.on("change", function () {
                     this.value = null;
                 });
             }
-            window.readFile = function(files){
-                 for (i = 0; i < files.length; i++) {
+            window.readFile = function (files) {
+                for (i = 0; i < files.length; i++) {
                     var file = files[i];
                     var reader = new FileReader();
                     var ret = [];
-                    reader.onload = function(e) {
-                      stock.callback.call(undefined,e);
+                    reader.onload = function (e) {
+                        stock.callback.call(undefined, e);
                     }
-                    reader.onerror = function(stuff) {
-                      console.log("error", stuff)
-                      console.log (stuff.getMessage())
+                    reader.onerror = function (stuff) {
+                        console.log("error", stuff)
+                        console.log(stuff.getMessage())
                     }
                     reader.readAsText(file);
                     delete reader;
-                  }
+                }
             }
-            this.click = function(){
+            this.click = function () {
                 this.header.click();
             }
         }
@@ -2468,5 +2681,4 @@ THE SOFTWARE.
         return tmp;
 
     }
-
-    }).call(this);
+}
