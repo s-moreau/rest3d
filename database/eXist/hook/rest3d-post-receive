@@ -3,6 +3,7 @@
 # update working tree
 cd /git/apps/rest3d
 unset GIT_DIR
+export EXIST_HOME=/git/apps/exist
 # save last commit
 LAST_COMMIT=`git log -1 | awk 'NR==1 {print $2}'`
 echo 'TODO: update apps, models , ...'
@@ -12,14 +13,8 @@ git fetch --all
 git reset --hard origin/master
 
 
-#build rest3d package
-cd /git/apps/rest3d/database/eXist/rest3d
-ant
-
-cp /git/apps/rest3d/database/eXist/rest3d/build/rest3d-*.xar /git/apps/exist/autodeploy/
-
-#run exist hook
-#this is because I need package to be installed, but don't know how
-/git/repos/exist.git/hooks/post-receive
+#copy rest3d app
+cd /git/apps/rest3d/database/eXist/ant
+ant -f install-rest3d.xml
 
 

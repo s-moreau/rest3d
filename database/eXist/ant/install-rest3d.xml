@@ -12,7 +12,14 @@
          uri="${rest3d.coll}"
          collections ="true" outputproperty="check"/>
        <echo message="${check}"/>
+</target>
 
+<target name="chmod">
+    <xdb:chmod
+        uri="${rest3d.uri}"
+        resource="test.xml"
+        mode="group=+read,other=+read"
+        user="${rest3d.user}" password="${rest3d.password}"/>
 </target>
 
 <target name="install" >
@@ -24,6 +31,7 @@
     createsubcollections="true">
     <fileset dir="${rest3d.path}">
       <exclude name="**/repo.xml"/>
+      <exclude name="**/.*"/>
     </fileset>
   </xdb:store>
 
