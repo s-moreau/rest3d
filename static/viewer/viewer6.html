@@ -25,13 +25,20 @@ THE SOFTWARE.
 <head>
     <meta content="text/html;charset=utf-8" http-equiv="Content-Type">
     <meta content="utf-8" http-equiv="encoding">
-    <link rel="stylesheet" href="../gui/gui6.css"/>  
     <script type="text/javascript" src="../gui/gui6.js"></script>
+    <script type="text/javascript">
+    console.debug("in");
+    dep.push({link:"/loaders/collada.js"});
+    dep.push({link:"/loaders/gltf.js"});
+    dep.push({link:"../deps/console.js"});
+    dep.push({link:"/deps/webgl-utils.js"});
+    dep.push({link:"/deps/webgl-debug.js"});
+    dep.push({link:"/deps/gl-matrix.js"});
+    dep.push({link:"/loaders/gl-matrix-ext.js"});
+    dep.push({link:"renderer.js"});
+    </script>
     <!--  <script type="text/javascript" src="../deps/jquery-2.0.3.min.js"></script> -->
-    <script type="text/javascript" src="renderer.js"></script>
-    <script type="text/javascript" src="/loaders/collada.js"></script>
-    <script type="text/javascript" src="/loaders/gltf.js"></script> 
-    <script type="text/javascript" src="../deps/console.js"></script>
+
 </head>
 <body oncontextmenu="return false">
 <script type="text/javascript">
@@ -110,7 +117,6 @@ THE SOFTWARE.
             }
         };
         window.loadCss("got-luv");
-        pleaseWait(true);
         var layout = GUI.Layout("mainLayout", 1);
 
 
@@ -1112,7 +1118,6 @@ THE SOFTWARE.
 
         window.loadCss("dot-luv");
 
-        pleaseWait(false);
 
         });
 }

@@ -55,7 +55,11 @@ var dep = [{
     link: "../deps/css/jquery.toolbars.css"
 }, {
     link: "../deps/css/jquery.terminal.css"
-}, {
+},
+    {
+    link: "../gui/gui6.css"
+},
+    {
     link: "../deps/css/jquery.pnotify.default.css"
 }, {
     link: "../deps/jquery-2.0.3.min.js",
@@ -91,12 +95,11 @@ var dep = [{
     link: "../deps/codemirror/javascript-hint.js"
 }, {
     link: "../deps/codemirror/dialog.js"
-}, {
+}, 
+ {
     link: "../deps/codemirror/search.js"
-}, {
-    link: "../deps/codemirror/search-cursor.js"
-}, {
-    link: "../deps/jquery-skinner.js",
+}, {link: "../deps/codemirror/search-cursor.js"}, 
+{link: "../deps/jquery-skinner.js",
     obj: "$.skinner"
 }];
 
@@ -106,7 +109,15 @@ function loadGUI(callback) {
     function result() {
         initGUI();
         if(callback){callback.apply();}
+        h2.parentNode.removeChild(h2);
+        progress.parentNode.removeChild(progress);
+        container.parentNode.removeChild(container);
+        jump.parentNode.removeChild(jump);
     }
+    var h2;
+    var container;
+    var progress;
+    var jump;
     var flag = true;
     var head =  document.getElementsByTagName('head').item(0),
     body =document.getElementsByTagName('body')[0],
@@ -119,8 +130,8 @@ function loadGUI(callback) {
         var state = s.readyState;
         if (!state || /loaded|complete/.test(state)) {
             getScripts(dep);
-            console.debug("!!!" + s.src + " loaded");
-            addLog("!!!" + s.src + " loaded");
+            console.debug(s.src + " loaded");
+            addLog(s.src + " loaded");
             removeScript();
             // return true;
         } else {
@@ -129,26 +140,42 @@ function loadGUI(callback) {
     };
     function addProgress(){
         var body = document.getElementsByTagName('body')[0];
-        var h2 = document.createElement("h2");
-        h2.style = "position:relative;left:42%;width:300px;";
+        h2 = document.createElement("h2");
+        h2.style.position = "relative";
+        h2.style.left = "43%";
         h2.innerHTML = "Rest3d UI loading...";
-        var jump = document.createElement("p");
-        var container = document.createElement("div");
+        jump = document.createElement("p");
+        container = document.createElement("div");
         container.id="tmp";
         container.style = "position:relative;left:12%;border:1px solid blue;width:76%;height:80%;overflow:auto";
-        var progress = document.createElement("progress");
-        progress.value = "22";
+        container.style.position = "relative";
+        container.style.left = "12%";
+        container.style.border = '1px solid blue';
+        container.style.height='80%';
+        container.style.width='76%'
+        container.style.overflow = "auto";
+        progress = document.createElement("progress");
+        progress.value = "0";
         progress.max ="100";
-        progress.style ="position:relative;left:30%;width:500px;border:1px solid #333;position:relative;padding:3px;";
+        progress.id = "progress";
+        progress.style.position = "relative";
+        progress.style.width='76%'
+        progress.style.left = "12%";
         body.appendChild(h2);
         body.appendChild(progress);
         body.appendChild(jump);
         jump.appendChild(container);
     }
 
-    function addLog(TXT){
+    function progressBar(){
+        var scale = 100/(dep.length-1);
+        progress.value = progress.value +scale;
+    }
+
+    function addLog(TXT,fl){
         var newP = document.createElement("p");
         var newT = document.createTextNode(TXT);
+        if(fl){newP.style.color="red";}
         document.getElementById('tmp').appendChild(newP);
         newP.appendChild(newT);
     }
@@ -187,21 +214,23 @@ function loadGUI(callback) {
                 var flagTimeout = true;
                 setTimeout(function () {
                     if (flagTimeout) {
-                        deferred.reject(new Error(url.link + " cooldn't be loaded"))
+                        addLog(url.link +" couldn't be loaded",true);
+                        deferred.reject(new Error(url.link + " couldn't be loaded"));
                     };
                 }, 1000);
                 s.onreadystatechange = s.onload = function () {
                     var state = s.readyState;
                     if (!state || /loaded|complete/.test(state)) {
                         deferred.resolve(counter);
-                        console.debug("!!!" + s.src + " loaded");
-                         addLog("!!!" + s.src + " loaded");
-                        removeScript();
+                        console.debug( s.src + " loaded");
+                         addLog(s.src + " loaded");
+                        removeScript();progressBar();
                         flagTimeout = false;
                     } else {
                         removeScript();
                         console.debug("fail!");
-                        deferred.reject(new Error(url.link + " cooldn't be loaded"));
+                        deferred.reject(new Error(url.link + " couldn't be loaded"));
+                        addLog(url.link +" couldn't be loaded",true)
                         flagTimeout = false;
                     }
                 };
@@ -210,22 +239,24 @@ function loadGUI(callback) {
                     var s = document.createElement('link');
                     s.rel = 'stylesheet';
                     s.href = url.link;
-                    console.debug("!!!" + s.href + " loaded");
-                    addLog("!!!" + s.href + " loaded");
+                    console.debug(s.href + " loaded");
+                    addLog(s.href + " loaded");
+                    progressBar();
                     deferred.resolve(counter);
                 } else {
                     console.error("link 404 error: " + url.link);
-                    deferred.reject(new Error(url.link + " cooldn't be loaded"));
+                    deferred.reject(new Error(url.link + " couldn't be loaded"));
+                    addLog(url.link +" couldn't be loaded",true)
                 }
             }
             // use body if available. more safe in IE
-            head.appendChild(s);
+            try{head.appendChild(s);}catch(err){addLog(url.link +" couldn't be loaded",true)}
             $script = s;
         } else {
             deferred.resolve(counter);
-                         addLog("!!!" + s.src + " loaded");
-            console.debug("XXX " + url.link.replace(/^.*[\\\/]/, '') + " already loaded");
-            addLog("XXX " + url.link.replace(/^.*[\\\/]/, '') + " already loaded");
+            // addLog("!!!" + s.src + " loaded");
+            console.warn(url.link.replace(/^.*[\\\/]/, '') + " already loaded");
+            addLog( url.link.replace(/^.*[\\\/]/, '') + " already loaded",true);
         }
         return deferred.promise;
     };
