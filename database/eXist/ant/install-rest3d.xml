@@ -17,12 +17,16 @@
 <target name="chmod">
     <xdb:chmod
         uri="${rest3d.uri}"
-        resource="test.xml"
-        mode="group=+read,other=+read"
+        resource="controller.xql"
+        permissions='rwxr-xr-x'
         user="${rest3d.user}" password="${rest3d.password}"/>
 </target>
 
-<target name="install" >
+<target name="copy" >
+
+  <!-- remove folder !-->
+  <!-- create new folder !-->
+  <!-- copy files !-->
 
   <xdb:store uri="${rest3d.uri}"
     user="${rest3d.user}"
@@ -35,7 +39,10 @@
     </fileset>
   </xdb:store>
 
+
 </target>
+
+<target name="install" depends="copy, chmod" />
 
 
 </project>
