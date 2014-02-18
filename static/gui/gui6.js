@@ -118,6 +118,7 @@ function loadGUI(callback) {
     var container;
     var progress;
     var jump;
+    var countLog=0;
     var flag = true;
     var head =  document.getElementsByTagName('head').item(0),
     body =document.getElementsByTagName('body')[0],
@@ -146,7 +147,6 @@ function loadGUI(callback) {
         h2.innerHTML = "Rest3d UI loading...";
         jump = document.createElement("p");
         container = document.createElement("div");
-        container.id="tmp";
         container.style = "position:relative;left:12%;border:1px solid blue;width:76%;height:80%;overflow:auto";
         container.style.position = "relative";
         container.style.left = "12%";
@@ -173,11 +173,15 @@ function loadGUI(callback) {
     }
 
     function addLog(TXT,fl){
-        var newP = document.createElement("p");
+        var newP=document.createElement("p");
+        newP.id='par_'+countLog;
         var newT = document.createTextNode(TXT);
         if(fl){newP.style.color="red";}
-        document.getElementById('tmp').appendChild(newP);
+        if(countLog==0){container.appendChild(newP);}
+        else{container.insertBefore(newP,document.getElementById('par_'+(countLog-1)));console.debug("allo")}
+        bufferElement=newP;
         newP.appendChild(newT);
+        countLog++;
     }
     addProgress();
     
