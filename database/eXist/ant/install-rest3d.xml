@@ -1,0 +1,34 @@
+<?xml version='1.0'?>
+<project name="install-rest3d" default="install" xmlns:xdb="http://exist-db.org/ant">
+<description>install rest3d package</description>
+
+    <import file="common.xml"/>
+
+
+<target name="list" >
+   <xdb:list xmlns:xdb="http://exist-db.org/ant"
+         initdb="true"
+         user="${rest3d.user}" password="${rest3d.password}"
+         uri="${rest3d.coll}"
+         collections ="true" outputproperty="check"/>
+       <echo message="${check}"/>
+
+</target>
+
+<target name="install" >
+
+  <xdb:store uri="${rest3d.uri}"
+    user="${rest3d.user}"
+    password="${rest3d.password}"
+    createcollection="true"
+    createsubcollections="true">
+    <fileset dir="${rest3d.path}">
+      <exclude name="**/repo.xml"/>
+    </fileset>
+  </xdb:store>
+
+</target>
+
+
+</project>
+        
