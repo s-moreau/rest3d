@@ -27,7 +27,6 @@ THE SOFTWARE.
     <meta content="utf-8" http-equiv="encoding">
     <script type="text/javascript" src="../gui/gui6.js"></script>
     <script type="text/javascript">
-    console.debug("in");
     dep.push({link:"/loaders/collada.js"});
     dep.push({link:"/loaders/gltf.js"});
     dep.push({link:"../deps/console.js"});
@@ -1081,7 +1080,7 @@ THE SOFTWARE.
             for (var j = 0; j < _nodes.length; j++) {
                 var node = _nodes[j];
 
-                var nodebb = aabb.empty();;
+                var nodebb = aabb.empty();
                 if (node.children && node.children.length !== 0)
                     aabb.add(nodebb, nodebb,
                         build_scene(node.children, _callback));

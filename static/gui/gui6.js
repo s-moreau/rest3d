@@ -178,7 +178,7 @@ function loadGUI(callback) {
         var newT = document.createTextNode(TXT);
         if(fl){newP.style.color="red";}
         if(countLog==0){container.appendChild(newP);}
-        else{container.insertBefore(newP,document.getElementById('par_'+(countLog-1)));console.debug("allo")}
+        else{container.insertBefore(newP,document.getElementById('par_'+(countLog-1)));}
         bufferElement=newP;
         newP.appendChild(newT);
         countLog++;
@@ -2563,7 +2563,7 @@ function initGUI() {
         attributes :
             text : 
                 type : string
-                role : text of the notification (required)
+                role : text of the 33`1 hn21¡™®   (required)
             title :
                 type : string
                 role : title of the notification
