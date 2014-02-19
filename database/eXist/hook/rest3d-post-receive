@@ -16,6 +16,7 @@ git reset --hard origin/master
 #copy rest3d app
 cd /git/apps/rest3d/database/eXist/ant
 ant -f install-rest3d.xml
-cp /git/apps/rest3d/database/eXist/controller.xql /git/apps/exists/webapp/controller.xql
+#make rest3d app the main page
+cp /git/apps/rest3d/database/eXist/controller.xql /git/apps/exist/webapp/controller.xql
 
 
