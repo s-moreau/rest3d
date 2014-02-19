@@ -1,0 +1,98 @@
+<?xml version='1.0'?>
+<project name="install-rest3d" default="install" xmlns:xdb="http://exist-db.org/ant">
+<description>install rest3d package</description>
+
+    <import file="common.xml"/>
+
+<target name="install" >
+
+  <!-- remove app !-->
+  <xdb:remove xmlns:xdb="http://exist-db.org/ant"
+    uri="${exist.apps}"
+    user="${exist.user}"
+    password="${exist.password}"
+    collection="rest3d"
+  />
+  <!-- create new folder !-->
+  <xdb:create xmlns:xdb="http://exist-db.org/ant"
+    uri="${exist.apps}"
+    user="${exist.user}"
+    password="${exist.password}"
+    collection="rest3d"  
+  />
+  <!-- chown rest3d !-->
+  <xdb:chown xmlns:xdb="http://exist-db.org/ant"
+    uri="${rest3d.uri}"
+    user="${exist.user}"
+    password="${exist.password}"
+    name="rest3d"
+    group="rest3d"
+  />
+  <!-- chmod rest3d !-->
+  <xdb:chmod xmlns:xdb="http://exist-db.org/ant"
+    uri="${rest3d.uri}"
+    user="${rest3d.user}"
+    password="${rest3d.password}"
+    permissions='rwxr-xr-x'
+  />
+  <!-- copy files !-->
+  <xdb:store uri="${rest3d.uri}"
+    user="${rest3d.user}"
+    password="${rest3d.password}"
+    createcollection="true"
+    createsubcollections="true">
+    <fileset dir="${rest3d.path}">
+      <exclude name="**/.*"/>
+    </fileset>
+  </xdb:store>
+
+  <!-- chomd files 
+    use chmod.xml from bash script
+  !-->
+  <!-- chmod rest3d !-->
+  <xdb:chmod xmlns:xdb="http://exist-db.org/ant"
+    uri="${rest3d.uri}"
+    user="${rest3d.user}"
+    password="${rest3d.password}"
+    permissions='rwxr-xr-x'
+    resource='controller.xql'
+  />
+  <xdb:chmod xmlns:xdb="http://exist-db.org/ant"
+    uri="${rest3d.uri}"
+    user="${rest3d.user}"
+    password="${rest3d.password}"
+    permissions='rwx------'
+    resource='hello.xql'
+  />
+  <xdb:chmod xmlns:xdb="http://exist-db.org/ant"
+    uri="${rest3d.uri}/modules"
+    user="${rest3d.user}"
+    password="${rest3d.password}"
+    permissions='rwxr-xr-x'
+  />
+  <xdb:chmod xmlns:xdb="http://exist-db.org/ant"
+    uri="${rest3d.uri}/modules"
+    user="${rest3d.user}"
+    password="${rest3d.password}"
+    permissions='rwxr-xr-x'
+    resource='view.xql'
+  />
+ <xdb:chmod xmlns:xdb="http://exist-db.org/ant"
+    uri="${rest3d.uri}/modules"
+    user="${rest3d.user}"
+    password="${rest3d.password}"
+    permissions='rwxr-xr-x'
+    resource='app.xql'
+  />
+ <xdb:chmod xmlns:xdb="http://exist-db.org/ant"
+    uri="${rest3d.uri}/modules"
+    user="${rest3d.user}"
+    password="${rest3d.password}"
+    permissions='rwxr-xr-x'
+    resource='config.xqm'
+  />
+
+</target>
+
+</project>
+        

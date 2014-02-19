@@ -6,6 +6,7 @@
 #  <oldrev> <newrev> <refname>
 # For example:
 #  aa453216d1b3e49e7f6f98441fa56946ddcd6a20 68f7abf4e6f922807889f52bc043ecd31b79f814 refs/heads/master
+#
 
 # update working tree
 cd /git/apps/exist
@@ -20,16 +21,21 @@ git reset --hard origin/master
 #build
 ./build.sh
 
+#remove eXide from autodeploy
+rm /git/apps/exist/autodeploy/eXide*
+
 #restart
 cd bin
 export JAVA_HOME=/usr/lib/jvm/jre-1.6.0-openjdk
-pm2 stop startup.sh
+pm2 delete startup.sh
 killall java
-pm2 start -x startup.sh 
+sleep 10
+pm2 start -x startup.sh -o /git/apps/exist/webapp/WEB-INF/logs/eXist-stdout.log -e /git/apps/exist/webapp/WEB-INF/logs/eXist-stderr.log
 
 #get the logs
 cd /git/apps/Lockets
-pm2 --silent stop lockets_pm2.json
+pm2 --silent delete lockets_pm2.json
 pm2 flush
 pm2 --silent start lockets_pm2.json
+
 

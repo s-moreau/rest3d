@@ -1,0 +1,82 @@
+<?xml version='1.0'?>
+<project name="install-rest3d" default="install" xmlns:xdb="http://exist-db.org/ant">
+<description>install public (read-only) models</description>
+
+    <import file="common.xml"/>
+
+<target name="create_projects" if="project_does_not_exists" >
+  <!-- create projects in case it does not exists !-->
+  <xdb:create xmlns:xdb="http://exist-db.org/ant"
+    uri="${exist.uri}/db"
+    user="${exist.user}"
+    password="${exist.password}"
+    collection="projects"  
+  />
+  <!-- chmod 777 !-->
+  <xdb:chmod xmlns:xdb="http://exist-db.org/ant"
+    uri="${exist.projects}"
+    user="${exist.user}"
+    password="${exist.password}"
+    permissions='rwxrwxrwx'
+  />
+</target>
+<target name="remove_public" if="public_exists"> 
+  <!-- remove public models !-->
+  <xdb:remove xmlns:xdb="http://exist-db.org/ant"
+    uri="${exist.projects}"
+    user="${exist.user}"
+    password="${exist.password}"
+    collection="public"
+  />
+</target>
+
+<condition property="public_exists">
+   <xdb:exist xmlns:xdb="http://exist-db.org/ant"
+     uri="${public.uri}"/>
+</condition>
+
+<condition property="project_does_not_exists">
+   <not>
+     <xdb:exist xmlns:xdb="http://exist-db.org/ant"
+       uri="${exist.projects}"/>
+   </not>
+</condition>
+
+<target name="install" depends="create_projects, remove_public">
+  <!-- create public folder !-->
+  <xdb:create xmlns:xdb="http://exist-db.org/ant"
+    uri="${exist.projects}"
+    user="${exist.user}"
+    password="${exist.password}"
+    collection="public"  
+  />
+  <!-- chown rest3d !-->
+  <xdb:chown xmlns:xdb="http://exist-db.org/ant"
+    uri="${public.uri}"
+    user="${exist.user}"
+    password="${exist.password}"
+    name="rest3d"
+    group="rest3d"
+  />
+  <!-- copy files !-->
+  <xdb:store uri="${public.uri}"
+    user="${rest3d.user}"
+    password="${rest3d.password}"
+    createcollection="false"
+    createsubcollections="true">
+    <fileset dir="${public.path}">
+      <exclude name="**/.*"/>
+    </fileset>
+  </xdb:store>
+  <!-- chmod read-only !-->
+  <xdb:chmod xmlns:xdb="http://exist-db.org/ant"
+    uri="${public.uri}"
+    user="${rest3d.user}"
+    password="${rest3d.password}"
+    permissions='r-xr-xr-x'
+  />
+
+</target>
+
+</project>
+        

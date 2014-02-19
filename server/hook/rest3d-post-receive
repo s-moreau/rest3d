@@ -13,24 +13,13 @@ git reset --hard origin/master
 cd server
 npm install
 
-pm2 --silent stop all &
-#wait $!
-sleep 5s
-
-pm2 kill &
-#wait $!
-sleep 5s
+pm2 --silent delete all
 
 pm2 flush
-pm2 start pm2.json&
-#wait $!
-sleep 5s
+pm2 start pm2.json
 
 echo 'start log server'
-cd /home/git/Lockets
-pm2 --silent start lockets_pm2.json&
-#wait $!
-sleep 5s
+cd /git/apps/Lockets
+pm2 --silent start lockets_pm2.json
 
-echo "you can Ctrl+C now"
 
