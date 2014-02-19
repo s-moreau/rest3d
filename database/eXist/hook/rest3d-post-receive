@@ -19,4 +19,7 @@ ant -f install-rest3d.xml
 #make rest3d app the main page
 cp /git/apps/rest3d/database/eXist/controller.xql /git/apps/exist/webapp/controller.xql
 
+#install static models
+ant -f install-models.xml
+
 
