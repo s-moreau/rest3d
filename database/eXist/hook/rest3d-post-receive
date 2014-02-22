@@ -1,4 +1,5 @@
 #!/bin/bash
+source ~/.bash_profile
 
 # update working tree
 cd /git/apps/rest3d
