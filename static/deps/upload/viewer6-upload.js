@@ -36,8 +36,8 @@ var url = '/rest3d/upload',
                     .prop('disabled',true)
                 // user rest to convert dae into glTF
                 var callback = function(data) {
-                    console.debug(data.result.output);
-                    console.debug(data.result.code);
+                    console.debug("output "+data.result.output);
+                    console.debug("input "+data.result.code);
                     $this.remove();
                     if (data.error){
                         var span = $('<p><span><b>Error code='+data.error.code+' :: '+data.error.message+'</b></span></p>');
