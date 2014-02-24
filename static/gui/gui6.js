@@ -56,6 +56,15 @@ var dep = [{
 }, {
     link: "../deps/css/jquery.terminal.css"
 },
+//    {
+//     link:"../deps/upload/css/jquery.fileupload-ui.css"
+// },
+//    {
+//    link:"../deps/upload/css/bootstrap-responsive.min.css"
+// },
+//    {
+//    link:"../deps/upload/css/bootstrap.min.css"
+// },
     {
     link: "../gui/gui6.css"
 },
@@ -73,10 +82,7 @@ var dep = [{
 }, {
     link: "../deps/jquery.layout-1.3.0.min.js",
     obj: "$.layout"
-}, {
-    link: "../deps/jquery.jstree.js",
-    obj: "$.vakata"
-}, {
+},{
     link: "../deps/jquery.toolbar.js",
     obj: "$.toolbar"
 }, {
@@ -101,7 +107,13 @@ var dep = [{
 }, {link: "../deps/codemirror/search-cursor.js"}, 
 {link: "../deps/jquery-skinner.js",
     obj: "$.skinner"
-}];
+},
+{link:"/deps/jstree/jquery.jstree.js"},
+{link:"/deps/upload/jquery.iframe-transport.js"},
+{link:"/deps/upload/jquery.fileupload.js"},
+{link:"/deps/upload/jquery.fileupload-process.js"},
+{link:"/deps/upload/jquery.fileupload-validate.js"},
+];
 
 function loadGUI(callback) {
     var callback = callback;
@@ -131,7 +143,6 @@ function loadGUI(callback) {
         var state = s.readyState;
         if (!state || /loaded|complete/.test(state)) {
             getScripts(dep);
-            console.debug(s.src + " loaded");
             addLog(s.src + " loaded");
             removeScript();
             // return true;
@@ -226,7 +237,6 @@ function loadGUI(callback) {
                     var state = s.readyState;
                     if (!state || /loaded|complete/.test(state)) {
                         deferred.resolve(counter);
-                        console.debug( s.src + " loaded");
                          addLog(s.src + " loaded");
                         removeScript();progressBar();
                         flagTimeout = false;
@@ -243,7 +253,6 @@ function loadGUI(callback) {
                     var s = document.createElement('link');
                     s.rel = 'stylesheet';
                     s.href = url.link;
-                    console.debug(s.href + " loaded");
                     addLog(s.href + " loaded");
                     progressBar();
                     deferred.resolve(counter);
@@ -319,6 +328,8 @@ function initGUI() {
             e.preventDefault();
         })
     };
+
+
     // add button
     GUI.button = function (_txt, _parent, _callback, _x1, _y1, _x2, _y2, _textEnabled, _icon) {
         var $button = $('<button></button>');
@@ -393,6 +404,295 @@ function initGUI() {
             $(_parent).append($label);
         return $label;
     };
+
+    GUI.progress = function(_json){
+        function Progress(_json){
+            this.id = _json.id;
+            this.parent = _json.parent;
+            this.generateHTML = function(){
+                this.html = '<progress id="'+this.id+'" value=0 max=100 />';
+            }
+            this.createWidget = function(){
+                this.parent.append(this.html);
+                this.createJqueryObject();
+            }
+            this.createJqueryObject = function(){
+                this[this.id]=$("#"+this.id);
+            }
+        }
+        var tmp = new Progress(_json);
+        tmp.generateHTML();
+        tmp.createWidget();
+        return tmp;
+    }
+
+    GUI.upload = function(_json){
+        function Upload(_json){
+            this.id = _json.id;
+            this.parent = _json.parent;
+            this.url = _json.url;
+            this.generateHTML = function(){
+                this.html = "<div id='"+this.id+"' class='container'>";
+                this.html+="<input id='fileupload_"+this.id+"' style='display:none;' type='file' name='files[]' multiple>"
+                //this.html +=  '<span class="btn btn-success fileinput-button"><i class="icon-plus icon-white"></i><span>Add files...</span><input id="'+this.id+'_upload" type="file" name="files[]" multiple></span><div id="'+this.id+'_progress" class="progress progress-success progress-striped"><div class="bar"></div></div></div>'
+            }
+            this.createWidget = function(){   
+                this.parent.append(this.html);
+                this.createJqueryObject();
+                var stock=this;
+                this.button = GUI.button("Add files...",this[this.id],function(){
+                    stock.upload1.click();
+                });
+                // this[this.id].append("<br></br>")
+                this[this.id].append("<hr>");
+                //GUI.image = function (_parent, _id, _url, _width, _height, _position) {
+
+                this.dropzone = GUI.image(this[this.id],"image_"+this.id,"../gui/images/upload_d.png","90%","100px");
+                GUI.addTooltip({
+                        parent: this.dropzone,
+                        content: "Drag&drop area",
+                    });
+                this[this.id].css("text-align","center");
+                this[this.id].append("<hr>");
+                // this[this.id].append("<div style='border: 2px black solid;width:85%;height:70px'></div>");
+
+                this.progress = GUI.progress({
+                    id:"progress_"+this.id,
+                    parent:this[this.id],
+                });
+                this[this.id].append('<div id="fileArea_'+this.id+'" ></div>');
+            }
+            this.jqueryUpload = function(){
+
+                var url = '/rest3d/upload',
+        uploadButton = $('<button/>')
+            .addClass('btn')
+            .prop('disabled', true)
+            .text('Uploading...')
+            .on('click', function () {
+                var $this = $(this),
+                    data = $this.data();
+                $this
+                    .off('click')
+                    .text('Abort')
+                    .on('click', function () {
+                        $this.remove();
+                        data.abort();
+                    });
+                data.submit().always(function () {
+                    $this.remove();
+                });
+        }),
+        // show the name of the file nicely
+        formatName = function(data,file){
+            var i = file.name.lastIndexOf('/');
+            return file.name.substring(i+1);
+        },
+        convertButton = $('<button/>')
+            .addClass('btn')
+            .prop('disabled', true)
+            .text('Converting...')
+            .on('click', function () {
+                var $this = $(this),
+                    data = $this.data();
+                $this
+                    .off('click')
+                    .text('Converting...')
+                    .prop('disabled',true)
+                // user rest to convert dae into glTF
+                var callback = function(data) {
+                    $this.remove();
+                    if (data.error){
+                        var span = $('<p><span><b>Error code='+data.error.code+' :: '+data.error.message+'</b></span></p>');
+                        data.context.append(span);
+                    } else {
+                        // ennumerate all resulting files
+                        $.each(data.result.files, function (index, file) {
+
+                            var span = '<p><span><a href="'+decodeURIComponent(file.url)+'" target="_blank"><p><span>'+formatName(data,file)+'</a>';
+                            // endsWith
+                            if (file.url.indexOf('.json', file.url.length - '.json'.length) !== -1) {
+                                var url='/viewer/viewer4.html?file=/rest3d/upload/'+decodeURIComponent(file.name);
+                                span += ' -> <a href="'+url+'" target="_blank"> View '+formatName(data,file)+'</a>';
+                            }
+                            span += '</span></p>';
+                            data.context.append($(span));
+                        });
+                    }
+                }
+
+                rest3d.convert(data,callback);
+            });
+
+
+
+    var stock = this;                                                                                                                                                                        
+     this.upload1.fileupload({
+        url: stock.url,
+        dataType: 'json',
+        autoUpload: false,
+        acceptFileTypes: /(\.|\/)(dae|png)$/i,
+        maxFileSize: 100000000, // 100 MB
+        loadImageMaxFileSize: 15000000, // 15MB
+        disableImageResize: false,
+        previewMaxWidth: 100,
+        previewMaxHeight: 100,
+        previewCrop: true,
+        dropZone: stock.dropzone,
+                }).on('fileuploadadd', function (e, data) {
+        console.debug("hi file upload add"+stock.filesArea);
+        data.context = $('<div/>').appendTo(stock.filesArea);
+        $.each(data.files, function (index, file) {
+            var node = $('<p/>')
+                    .append($('<span/>').text(file.name));
+            if (!index) {
+                node
+                    .append('<br>')
+                    .append(uploadButton.clone(true).data(data));
+            }
+            node.appendTo(data.context);
+        });
+    }).on('fileuploadprocessalways', function (e, data) {
+         console.debug("hi process always");
+        var index = data.index,
+            file = data.files[index],
+            node = $(data.context.children()[index]);
+        if (file.preview) {
+            node
+                .prepend('<br>')
+                .prepend(file.preview);
+        }
+        if (file.error) {
+            node
+                .append('<br>')
+                .append(file.error);
+        }
+        if (index + 1 === data.files.length) {
+            data.context.find('button')
+                .text('Upload')
+                .prop('disabled', !!data.files.error);
+        }
+    }).on('fileuploadprogressall', function (e, data) {
+         console.debug("hi progressall");
+        var progress = parseInt(data.loaded / data.total * 100, 10);
+        $('#progress .bar').css(
+            'width',
+            progress + '%'
+        );
+    }).on('fileuploaddone', function (e, data) {
+         console.debug("hiAddOne");
+        $.each(data.result.files, function (index, file) {
+            var link = $('<a>')
+                .attr('target', '_blank')
+                .prop('href', file.url);
+            $(data.context.children()[index])
+                .find('span').text(file.name);
+
+            $(data.context.children()[index])  
+                .wrap(link);
+            file.assetName = data.result.files[index].name;
+            var $node = convertButton.clone(true).data({file: file, context: data.context})
+                .text('Convert')
+                .prop('disabled', !/dae$/i.test(file.url));
+            $(data.context.children()[index]).parent() // the <a>
+                .append($node);
+        });
+    }).on('fileuploadfail', function (e, data) {
+         console.debug("hi uplaod fail");
+        if (!data.result) {
+            $(data.context.children()[0])
+                .append('<br>')
+                .append('error communicating with server')
+                .find('button').remove();
+        } else
+        $.each(data.result.files, function (index, file) {
+            var error = $('<span/>').text(file.error);
+            $(data.context.children()[index])
+                .append('<br>')
+                .append(error)
+                .find('button').remove();
+        });
+    });
+
+               
+            }
+
+
+            this.createJqueryObject = function(){
+                this[this.id]=$('#'+this.id);
+                this.upload1 = $('#fileupload_'+this.id);
+                this.filesArea = $('#fileArea_'+this.id);
+            }
+        }   
+        var tmp = new Upload(_json);
+        tmp.generateHTML();
+        tmp.createWidget();
+        tmp.createJqueryObject();
+        tmp.jqueryUpload();
+        return tmp;
+    }
+
+    GUI.treeBis = function(_json){
+        function Tree(_json){
+            this.json=_json;
+            this.id=_json.id;
+            this.parent=_json.parent;
+            if(_json.hasOwnProperty("json")){
+                this.jsonData = _json.json;
+                this.mode= 1;
+            }
+            else if(_json.hasOwnProperty("html")){
+                this.htmlInput = _json.html;
+                this.mode= 2;
+            }
+            else if(_json.hasOwnProperty("xml")){
+                this.xml = _json.xml;
+                this.mode= 3;
+            }
+            else{
+                console.error("No data type precised");}
+            this.generateHTML = function(){
+                this.html = "<div id="+this.id+"></div>";
+                this.parent.append(this.html);
+                if(this.mode=="html"){
+                    $("#"+this.id).append(this.htmlInput);
+                }
+            }
+            this.generateJSON = function(){
+                this.jsonInput={};
+                if(this.json.hasOwnProperty("themes")){
+                    this.jsonInput["themes"]=this.json.themes;}
+                if(this.json.hasOwnProperty("plugin")){
+                    this.jsonInput["plugins"]=this.json.plugin;
+                }
+                else{
+                    this.jsonInput["plugins"]=["themes", "json_data", "ui", "types", "sort", "dnd"];
+                }
+
+            }
+            this.createJqueryObject = function(){
+                this[this.id] =$("#"+this.id);
+            }
+            this.createWidget = function(){
+                switch(this.mode){
+                    case 1:
+                        this.jsonInput["json_data"]=this.jsonData;
+                        this[this.id].jstree(this.jsonInput);
+                        break;
+                    case 2:
+                        break;
+                    case 3:
+                        break;
+                }
+            }
+        }
+        var tmp = new Tree(_json);
+        tmp.generateHTML();
+        tmp.createJqueryObject();
+        tmp.generateJSON();
+        tmp.createWidget();
+        return tmp;
+    }
 
     GUI.tree = function (_tree, _parent, _callback, _id) {
         var cb = _callback;
@@ -782,7 +1082,8 @@ function initGUI() {
             }
 
             this.create = function () {
-                this.jqueryObjectRoot = this.parent.append(this.html);
+                this.parent.append(this.html);
+                this.jqueryObjectRoot =  $("#"+this.idObject);
                 this.jqueryObjectRoot.accordion({
                     header: "h3",
                     navigation: true,
@@ -1020,7 +1321,7 @@ function initGUI() {
                 this.listJqueryObjectElement[0] = this[this.id[0]];
                 for (var nbId = 1; nbId < this.id.length; nbId++) {
                     this[this.id[nbId]] = $("#" + this.id[nbId]);
-                    this[this.id[nbId]]["title"] = $('#' + this.idObject + '_header').find("li:nth-child(" + (nbId + 3) + ") a");
+                    this[this.id[nbId]]["title"] = $('#' + this.idObject + '_header').find("li[aria-controls='"+this.id[nbId]+"'] a");
                     this.listJqueryObjectElement[nbItem] = this[this.id[nbId]];
                 }
             }
@@ -2055,6 +2356,10 @@ function initGUI() {
                             if (value == maxScrollTop) {}
                         })
                     }
+                    else{
+                        //elem.css("max-height", height);
+                        // wrap.css("height", height - heightArea);
+                    }
                 });
             }
             this.closeAll = function () {
@@ -2563,7 +2868,7 @@ function initGUI() {
         attributes :
             text : 
                 type : string
-                role : text of the 33`1 hn21¡™®   (required)
+                role : text of the 33`1 hn21¡  (required)
             title :
                 type : string
                 role : title of the notification

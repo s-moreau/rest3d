@@ -35,6 +35,8 @@ THE SOFTWARE.
     dep.push({link:"/deps/gl-matrix.js"});
     dep.push({link:"/loaders/gl-matrix-ext.js"});
     dep.push({link:"renderer.js"});
+    dep.push({link:"/deps/rest3d.js"});
+    // dep.push({link:"/deps/tree/themes/default/style.min.css"});
     </script>
     <!--  <script type="text/javascript" src="../deps/jquery-2.0.3.min.js"></script> -->
 
@@ -56,6 +58,7 @@ THE SOFTWARE.
         var renderMenu = $('');
         var flagStatus = false;
         var url = "http://www.google.com/custom?q=fl4re&btnG=Search";
+        var bufferGen = $("");
 
         window.fl4reStatus = function (type, text, _parent) {
             $('#copyButton').remove();
@@ -237,17 +240,45 @@ THE SOFTWARE.
                     text: "  Load DAE/glTF"
                 }, {
                     id: "tree",
-                    text: "  Explore warehouse"
+                    text: "  Warehouse"
                 },
 
             ]
         })
 
-         renderMenu.sortable();
+        renderMenu.sortable();
         renderMenu.tabManager();
 
+        GUI.treeBis({
+            id:'treeViewDiv',
+            parent: renderMenu.tree,
+            json: {
+                        "data":[
+                            {
+                                "data" : "Search engines",
+                                "children" :[
+                                             {"data":"Yahoo", "metadata":{"href":"http://www.yahoo.com"}},
+                                             {"data":"Bing", "metadata":{"href":"http://www.bing.com"}},
+                                             {"data":"Google", "children":[{"data":"Youtube", "metadata":{"href":"http://youtube.com"}},{"data":"Gmail", "metadata":{"href":"http://www.gmail.com"}},{"data":"Orkut","metadata":{"href":"http://www.orkut.com"}}], "metadata" : {"href":"http://youtube.com"}}
+                                            ],
+                                "state" : "open"
+                            },
+                            {
+                                "data" : "Networking sites",
+                                "children" :[
+                                    {"data":"Facebook", "metadata":{"href":"http://www.fb.com"}},
+                                    {"data":"Twitter", "metadata":{"href":"http://twitter.com"}}
+                                ]
+                            }
+                        ]
+                    },
+            themes:{
+            "theme":"apple",
+            },
+    })
         GUI.image(renderMenu.render.title, "img-render", "../gui/images/menu-render.png", 12, 14, "before");
-
+        GUI.image(renderMenu.tree.title, "img-render", "../gui/images/menu-render.png", 12, 14, "before");
+    
          //---------- SCRIPT tab --------------------------------------------------------------------------------------
 
         renderMenu.addTab({
@@ -453,9 +484,29 @@ THE SOFTWARE.
             renderMenu.render.append("<br></br>");
         }
 
-        // renderMenu.render.append("<h4>Welcome to rest3d's viewer!</h4>");
+        GUI.label('welcome1', "Upload your own model:", renderMenu.render);
+        jumpLine();
 
-        GUI.label('welcome', "Please load models among those accordions:", renderMenu.render, "", "justify");
+        // renderMenu.render.append("<h4>Welcome to rest3d's viewer!</h4>");
+        var accordionUp = GUI.accordion({
+            id: "Upload",
+            parent: renderMenu.render,
+            item: [{
+                id: "upload",
+                text: "Upload"
+            }]
+        })
+
+        var upload = GUI.upload({parent:accordionUp.upload, id:"upModel", url:'/rest3d/upload'});
+        upload.button.width("85%")
+        upload.progress.progress_upModel.width("100%");
+        //$.getScript("../deps/upload/viewer6-upload.js");
+        bufferGen=upload;
+
+        jumpLine();
+        GUI.label('welcome', "Load some sample models among those accordions:", renderMenu.render);
+        jumpLine();
+
         var accordion = GUI.accordion({
             id: "menu-render",
             parent: renderMenu.render,
@@ -1098,7 +1149,7 @@ THE SOFTWARE.
          /////////////////////////////////////////////////////////////////////////////////////
 
         $('#tabindex_2').find('input').click();
-        $('#tabindex_1').find('input').click();
+        // $('#tabindex_1').find('input').click();
 
         layout.jqueryObject.sizePane("west", $(window).width() - 300);
         setTimeout(function () {
