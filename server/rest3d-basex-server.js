@@ -1318,6 +1318,9 @@ server.post(/^\/rest3d\/convert.*/,function(_req,_res,_next){
 
      	var cmd = collada2gltf+" -p -f \"upload/" + params.name+"\" -o \""+'upload/'+output_dir+'/'+output_file+"\"";
      	console.log('exec '+cmd);
+
+     	var outputC2J;
+     	var codeC2J;
      	// todo -> manage progress !!!
 		exec(cmd, function(code, output){
 
@@ -1325,6 +1328,8 @@ server.post(/^\/rest3d\/convert.*/,function(_req,_res,_next){
 				handleError(req,res,{error: 'collada2gltf returned an error='+code+'\n'+output});
 				return next();
 			}
+			codeC2J= 'Exit code: '+code;
+			outputC2J = 'Program output: '+output;
 			console.log('Exit code:', code);
 	  		console.log('Program output:', output);
 					
@@ -1359,7 +1364,7 @@ server.post(/^\/rest3d\/convert.*/,function(_req,_res,_next){
                     	console.log('timeout !! upload/'+output_dir+'/ was deleted');
                     }
                     setTimeout(function() { timeout()},5 * 60 * 1000);
-		        handleResult(req, res, {files: files});
+		        handleResult(req, res, {files: files, code:codeC2J, output:outputC2J});
 		    });
 
 		   

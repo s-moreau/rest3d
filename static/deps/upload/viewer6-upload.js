@@ -1,14 +1,10 @@
-    // rest3d convert API
-    // this is draft -> should create a convert request, and then do a long pull for query status
-    
-      console.debug("laslas");   
-    // Change this to the location of your server-side upload handler:
-    var url = '/rest3d/upload',
+setViewer6Upload=function(upload){
+var url = '/rest3d/upload',
         uploadButton = $('<button/>')
             .addClass('btn')
             .prop('disabled', true)
             .text('Uploading...')
-            .on('click', function () {
+            .on('click', function (){
                 var $this = $(this),
                     data = $this.data();
                 $this
@@ -40,6 +36,8 @@
                     .prop('disabled',true)
                 // user rest to convert dae into glTF
                 var callback = function(data) {
+                    console.debug(data.result.output);
+                    console.debug(data.result.code);
                     $this.remove();
                     if (data.error){
                         var span = $('<p><span><b>Error code='+data.error.code+' :: '+data.error.message+'</b></span></p>');
@@ -63,12 +61,11 @@
                 rest3d.convert(data,callback);
             });
 
- 
 
-                                                                                                                                                                                 
-    bufferGen.upload1.on('fileuploadadd', function (e, data) {
-        console.debug(upload);
-        data.context = $('<div/>').appendTo(bufferGen.filesArea);
+    console.debug(upload.object);
+    upload.object.on('fileuploadadd', function (e, data) {
+        console.debug("hi file upload add"+upload.filesArea);
+        data.context = $('<div/>').appendTo(upload.filesArea);
         $.each(data.files, function (index, file) {
             var node = $('<p/>')
                     .append($('<span/>').text(file.name));
@@ -80,6 +77,7 @@
             node.appendTo(data.context);
         });
     }).on('fileuploadprocessalways', function (e, data) {
+         console.debug("hi process always");
         var index = data.index,
             file = data.files[index],
             node = $(data.context.children()[index]);
@@ -99,12 +97,11 @@
                 .prop('disabled', !!data.files.error);
         }
     }).on('fileuploadprogressall', function (e, data) {
+         console.debug("hi progressall");
         var progress = parseInt(data.loaded / data.total * 100, 10);
-        $('#progress .bar').css(
-            'width',
-            progress + '%'
-        );
+        upload.progress.setValue(progress);
     }).on('fileuploaddone', function (e, data) {
+         console.debug("hiAddOne");
         $.each(data.result.files, function (index, file) {
             var link = $('<a>')
                 .attr('target', '_blank')
@@ -122,6 +119,7 @@
                 .append($node);
         });
     }).on('fileuploadfail', function (e, data) {
+         console.debug("hi uplaod fail");
         if (!data.result) {
             $(data.context.children()[0])
                 .append('<br>')
@@ -136,3 +134,4 @@
                 .find('button').remove();
         });
     });
+}
