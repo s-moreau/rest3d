@@ -412,6 +412,9 @@ function initGUI() {
             this.generateHTML = function(){
                 this.html = '<progress id="'+this.id+'" value=0 max=100 />';
             }
+            this.setValue = function(x){
+                this[this.id].prop("value",x);
+            }
             this.createWidget = function(){
                 this.parent.append(this.html);
                 this.createJqueryObject();
@@ -575,10 +578,11 @@ function initGUI() {
     }).on('fileuploadprogressall', function (e, data) {
          console.debug("hi progressall");
         var progress = parseInt(data.loaded / data.total * 100, 10);
-        $('#progress .bar').css(
-            'width',
-            progress + '%'
-        );
+        stock.progress.setValue(progress);
+        // $('#progress .bar').css(
+        //     'width',
+        //     progress + '%'
+        // );
     }).on('fileuploaddone', function (e, data) {
          console.debug("hiAddOne");
         $.each(data.result.files, function (index, file) {
