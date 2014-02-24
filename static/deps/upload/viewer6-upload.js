@@ -36,13 +36,14 @@ var url = '/rest3d/upload',
                     .prop('disabled',true)
                 // user rest to convert dae into glTF
                 var callback = function(data) {
-                    console.debug("output "+data.result.output);
-                    console.debug("input "+data.result.code);
                     $this.remove();
                     if (data.error){
                         var span = $('<p><span><b>Error code='+data.error.code+' :: '+data.error.message+'</b></span></p>');
                         data.context.append(span);
                     } else {
+                        console.debug("output "+data.result.output);
+                        console.debug("input "+data.result.code);
+                        console.debug("in "+data.result);
                         // ennumerate all resulting files
                         $.each(data.result.files, function (index, file) {
 
