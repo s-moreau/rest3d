@@ -1,6 +1,6 @@
 [{
-  "name"      : "rest3d_exists_server",
-  "script"    : "rest3d-exists-server.js",
+  "name"      : "rest3d_basex_server",
+  "script"    : "rest3d-basex-server.js",
   "args"      : "['-toto','3']",
   "env": {
       "PORT": "9000",
