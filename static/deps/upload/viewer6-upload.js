@@ -37,8 +37,8 @@ var url = '/rest3d/upload',
                 // user rest to convert dae into glTF
                 var callback = function(data) {
                     $this.remove();
-                    console.debug("output "+data.result.output);
-                        console.debug("input "+data.result.code);
+                    if(data.result.output){console.debug(data.result.output);}
+                    if(data.result.code){console.debug("Exit code: "+data.result.code);}
                     if (data.error){
                         var span = $('<p><span><b>Error code='+data.error.code+' :: '+data.error.message+'</b></span></p>');
                         data.context.append(span);
@@ -62,9 +62,8 @@ var url = '/rest3d/upload',
             });
 
 
-    console.debug(upload.object);
     upload.object.on('fileuploadadd', function (e, data) {
-        console.debug("hi file upload add"+upload.filesArea);
+        upload.object=$(this);
         data.context = $('<div/>').appendTo(upload.filesArea);
         $.each(data.files, function (index, file) {
             var node = $('<p/>')
@@ -77,7 +76,6 @@ var url = '/rest3d/upload',
             node.appendTo(data.context);
         });
     }).on('fileuploadprocessalways', function (e, data) {
-         console.debug("hi process always");
         var index = data.index,
             file = data.files[index],
             node = $(data.context.children()[index]);
@@ -97,11 +95,9 @@ var url = '/rest3d/upload',
                 .prop('disabled', !!data.files.error);
         }
     }).on('fileuploadprogressall', function (e, data) {
-         console.debug("hi progressall");
         var progress = parseInt(data.loaded / data.total * 100, 10);
         upload.progress.setValue(progress);
     }).on('fileuploaddone', function (e, data) {
-         console.debug("hiAddOne");
         $.each(data.result.files, function (index, file) {
             var link = $('<a>')
                 .attr('target', '_blank')
@@ -119,7 +115,6 @@ var url = '/rest3d/upload',
                 .append($node);
         });
     }).on('fileuploadfail', function (e, data) {
-         console.debug("hi uplaod fail");
         if (!data.result) {
             $(data.context.children()[0])
                 .append('<br>')

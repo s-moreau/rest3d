@@ -437,18 +437,15 @@ function initGUI() {
             this.generateHTML = function(){
                 this.html = "<div id='"+this.id+"' class='container'>";
                 this.html+="<input id='fileupload_"+this.id+"' style='display:none;' type='file' name='files[]' multiple>"
-                //this.html +=  '<span class="btn btn-success fileinput-button"><i class="icon-plus icon-white"></i><span>Add files...</span><input id="'+this.id+'_upload" type="file" name="files[]" multiple></span><div id="'+this.id+'_progress" class="progress progress-success progress-striped"><div class="bar"></div></div></div>'
             }
             this.createWidget = function(){   
                 this.parent.append(this.html);
                 this.createJqueryObject();
                 var stock=this;
                 this.button = GUI.button("Add files...",this[this.id],function(){
-                    stock.upload1.click();
+                    $('#fileupload_'+stock.id).click();
                 });
-                // this[this.id].append("<br></br>")
                 this[this.id].append("<hr>");
-                //GUI.image = function (_parent, _id, _url, _width, _height, _position) {
 
                 this.dropzone = GUI.image(this[this.id],"image_"+this.id,"../gui/images/upload_d.png","90%","100px");
                 GUI.addTooltip({
@@ -457,7 +454,6 @@ function initGUI() {
                     });
                 this[this.id].css("text-align","center");
                 this[this.id].append("<hr>");
-                // this[this.id].append("<div style='border: 2px black solid;width:85%;height:70px'></div>");
 
                 this.progress = GUI.progress({
                     id:"progress_"+this.id,
@@ -466,161 +462,24 @@ function initGUI() {
                 this[this.id].append('<div id="fileArea_'+this.id+'" ></div>');
             }
             this.jqueryUpload = function(){
-
-        //         var url = '/rest3d/upload',
-        // uploadButton = $('<button/>')
-        //     .addClass('btn')
-        //     .prop('disabled', true)
-        //     .text('Uploading...')
-        //     .on('click', function () {
-        //         var $this = $(this),
-        //             data = $this.data();
-        //         $this
-        //             .off('click')
-        //             .text('Abort')
-        //             .on('click', function () {
-        //                 $this.remove();
-        //                 data.abort();
-        //             });
-        //         data.submit().always(function () {
-        //             $this.remove();
-        //         });
-        // }),
-        // // show the name of the file nicely
-        // formatName = function(data,file){
-        //     var i = file.name.lastIndexOf('/');
-        //     return file.name.substring(i+1);
-        // },
-        // convertButton = $('<button/>')
-        //     .addClass('btn')
-        //     .prop('disabled', true)
-        //     .text('Converting...')
-        //     .on('click', function () {
-        //         var $this = $(this),
-        //             data = $this.data();
-        //         $this
-        //             .off('click')
-        //             .text('Converting...')
-        //             .prop('disabled',true)
-        //         // user rest to convert dae into glTF
-        //         var callback = function(data) {
-        //             $this.remove();
-        //             if (data.error){
-        //                 var span = $('<p><span><b>Error code='+data.error.code+' :: '+data.error.message+'</b></span></p>');
-        //                 data.context.append(span);
-        //             } else {
-        //                 // ennumerate all resulting files
-        //                 $.each(data.result.files, function (index, file) {
-
-        //                     var span = '<p><span><a href="'+decodeURIComponent(file.url)+'" target="_blank"><p><span>'+formatName(data,file)+'</a>';
-        //                     // endsWith
-        //                     if (file.url.indexOf('.json', file.url.length - '.json'.length) !== -1) {
-        //                         var url='/viewer/viewer4.html?file=/rest3d/upload/'+decodeURIComponent(file.name);
-        //                         span += ' -> <a href="'+url+'" target="_blank"> View '+formatName(data,file)+'</a>';
-        //                     }
-        //                     span += '</span></p>';
-        //                     data.context.append($(span));
-        //                 });
-        //             }
-        //         }
-
-        //         rest3d.convert(data,callback);
-        //     });
-
-
-
-    var stock = this;                                                                                                                                                                        
-    this.object =this.upload1.fileupload({
-        url: stock.url,
-        dataType: 'json',
-        autoUpload: false,
-        acceptFileTypes: /(\.|\/)(dae|png|tga)$/i,
-        maxFileSize: 100000000, // 100 MB
-        loadImageMaxFileSize: 15000000, // 15MB
-        disableImageResize: false,
-        previewMaxWidth: 100,
-        previewMaxHeight: 100,
-        previewCrop: true,
-        dropZone: stock.dropzone,
-                })
-    //  .on('fileuploadadd', function (e, data) {
-    //     console.debug("hi file upload add"+stock.filesArea);
-    //     data.context = $('<div/>').appendTo(stock.filesArea);
-    //     $.each(data.files, function (index, file) {
-    //         var node = $('<p/>')
-    //                 .append($('<span/>').text(file.name));
-    //         if (!index) {
-    //             node
-    //                 .append('<br>')
-    //                 .append(uploadButton.clone(true).data(data));
-    //         }
-    //         node.appendTo(data.context);
-    //     });
-    // })
-    //             .on('fileuploadprocessalways', function (e, data) {
-    //      console.debug("hi process always");
-    //     var index = data.index,
-    //         file = data.files[index],
-    //         node = $(data.context.children()[index]);
-    //     if (file.preview) {
-    //         node
-    //             .prepend('<br>')
-    //             .prepend(file.preview);
-    //     }
-    //     if (file.error) {
-    //         node
-    //             .append('<br>')
-    //             .append(file.error);
-    //     }
-    //     if (index + 1 === data.files.length) {
-    //         data.context.find('button')
-    //             .text('Upload')
-    //             .prop('disabled', !!data.files.error);
-    //     }
-    // }).on('fileuploadprogressall', function (e, data) {
-    //      console.debug("hi progressall");
-    //     var progress = parseInt(data.loaded / data.total * 100, 10);
-    //     stock.progress.setValue(progress);
-    //     // $('#progress .bar').css(
-    //     //     'width',
-    //     //     progress + '%'
-    //     // );
-    // }).on('fileuploaddone', function (e, data) {
-    //      console.debug("hiAddOne");
-    //     $.each(data.result.files, function (index, file) {
-    //         var link = $('<a>')
-    //             .attr('target', '_blank')
-    //             .prop('href', file.url);
-    //         $(data.context.children()[index])
-    //             .find('span').text(file.name);
-
-    //         $(data.context.children()[index])  
-    //             .wrap(link);
-    //         file.assetName = data.result.files[index].name;
-    //         var $node = convertButton.clone(true).data({file: file, context: data.context})
-    //             .text('Convert')
-    //             .prop('disabled', !/dae$/i.test(file.url));
-    //         $(data.context.children()[index]).parent() // the <a>
-    //             .append($node);
-    //     });
-    // }).on('fileuploadfail', function (e, data) {
-    //      console.debug("hi uplaod fail");
-    //     if (!data.result) {
-    //         $(data.context.children()[0])
-    //             .append('<br>')
-    //             .append('error communicating with server')
-    //             .find('button').remove();
-    //     } else
-    //     $.each(data.result.files, function (index, file) {
-    //         var error = $('<span/>').text(file.error);
-    //         $(data.context.children()[index])
-    //             .append('<br>')
-    //             .append(error)
-    //             .find('button').remove();
-    //     });
-    // });
-
-               
+                var stock = this;                                                                                                                                                                        
+                this.object = this.upload1.fileupload({
+                    url: stock.url,
+                    dataType: 'json',
+                    autoUpload: false,
+                    acceptFileTypes: /(\.|\/)(dae|png|tga)$/i,
+                    maxFileSize: 100000000, // 100 MB
+                    loadImageMaxFileSize: 15000000, // 15MB
+                    disableImageResize: false,
+                    previewMaxWidth: 100,
+                    previewMaxHeight: 100,
+                    previewCrop: true,
+                    dropZone: stock.dropzone,
+                    // add: function () {
+                    //     console.debug("___ "+stock.object);
+                    //     stock.object = $(this);}
+                    //         })            
+            });
             }
 
 
@@ -870,7 +729,6 @@ function initGUI() {
     }
 
     GUI.InputInteractive = function (_parent, _id, _min, _max, _defaultValue, _precision, _sensibility, _newLine) {
-
         function Object(_parent, _id, _min, _max, _defaultValue, _precision, _sensibility) {
             this.parent = _parent;
             this.id = _id;
