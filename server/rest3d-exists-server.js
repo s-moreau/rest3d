@@ -1330,8 +1330,8 @@ server.post(/^\/rest3d\/convert.*/,function(_req,_res,_next){
 				handleError(req,res,{error: 'collada2gltf returned an error='+code+'\n'+output});
 				return next();
 			}
-			codeC2J= 'Exit code: '+code;
-			outputC2J = 'Program output: '+output;
+			codeC2J= code;
+			outputC2J = output;
 			console.log('Exit code:', code);
 	  		console.log('Program output:', output);
 					
