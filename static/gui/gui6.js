@@ -198,12 +198,12 @@ function loadGUI(callback) {
     
     
 
-    function UrlExists(url) {
-        var http = new XMLHttpRequest();
-        http.open('HEAD', url, false);
-        http.send();
-        return http.status != 404;
-    }
+    // function UrlExists(url) {
+    //     var http = new XMLHttpRequest();
+    //     http.open('HEAD', url, false);
+    //     http.send();
+    //     return http.status != 404;
+    // }
     // use body if available. more safe in IE
     head.appendChild(s);
     $script = s;
@@ -232,7 +232,7 @@ function loadGUI(callback) {
                         addLog(url.link +" couldn't be loaded",true);
                         deferred.reject(new Error(url.link + " couldn't be loaded"));
                     };
-                }, 1000);
+                }, 1500);
                 s.onreadystatechange = s.onload = function () {
                     var state = s.readyState;
                     if (!state || /loaded|complete/.test(state)) {
@@ -249,18 +249,12 @@ function loadGUI(callback) {
                     }
                 };
             } else if (ext[0] == ".css") {
-                if (UrlExists(url.link)) {
                     var s = document.createElement('link');
                     s.rel = 'stylesheet';
                     s.href = url.link;
                     addLog(s.href + " loaded");
                     progressBar();
                     deferred.resolve(counter);
-                } else {
-                    console.error("link 404 error: " + url.link);
-                    deferred.reject(new Error(url.link + " couldn't be loaded"));
-                    addLog(url.link +" couldn't be loaded",true)
-                }
             }
             // use body if available. more safe in IE
             try{head.appendChild(s);}catch(err){addLog(url.link +" couldn't be loaded",true)}
@@ -459,7 +453,10 @@ function initGUI() {
                     id:"progress_"+this.id,
                     parent:this[this.id],
                 });
-                this[this.id].append('<div id="fileArea_'+this.id+'" ></div>');
+                this[this.id].append('<br></br>');
+                this[this.id].append('<div id="fileArea_'+this.id+'"></div>');
+                
+               // $('#fileArea_'+this.id).append('<div style="border: 1px solid grey; border-top: none; width:100%;" ><span style="float:left !important;">Fildsdsdsdsde</span></div>');
             }
             this.jqueryUpload = function(){
                 var stock = this;                                                                                                                                                                        
@@ -474,19 +471,36 @@ function initGUI() {
                     previewMaxWidth: 100,
                     previewMaxHeight: 100,
                     previewCrop: true,
-                    dropZone: stock.dropzone,
-                    // add: function () {
-                    //     console.debug("___ "+stock.object);
-                    //     stock.object = $(this);}
-                    //         })            
+                    dropZone: stock.dropzone       
             });
             }
-
-
             this.createJqueryObject = function(){
                 this[this.id]=$('#'+this.id);
                 this.upload1 = $('#fileupload_'+this.id);
                 this.filesArea = $('#fileArea_'+this.id);
+            }
+            function htmlSpan(percentage,html){
+                    return '<span style="display:inline-block !important; width:'+percentage+'% !important;">'+html+'</span>';
+                }
+            function htmlDiv(head){
+                    if(head){return '<div style="border: 1px solid grey; width:100%;"></div>';}
+                    else{return '<div style="border: 1px solid grey; width:100%;"></div>';}
+                }
+            this.createInfo = function(name,href,button){
+                $bis = this.filesArea.append(htmlDiv(true));
+                $bis.children().append(htmlSpan(88,"Upload "+GUI.time(true)));
+                var $j = "<button>X</button>"
+                $bis.children().append(htmlSpan(12,$j));
+                $bis1 = this.filesArea.append(htmlDiv());
+                $bis1.children().append(htmlSpan(25,"sample.dae.tga"));
+                $bis1.children().append(htmlSpan(25,$j));
+                $bis1.children().append(htmlSpan(25,$j));
+                $bis1.children().append(htmlSpan(25,$j));
+                
+              
+                //this.filesArea.append('<div style="border: 1px solid grey; width:100%;" ><span style="display:inline-block !important; width:90% !important;">Fildsdsdsdsde</span><span style="display:inline-block !important; width:25% !important;">gagner</span><span style="display:inline-block !important; width:25% !important;">gagner</span><span style="display:inline-block !important; width:25% !important;"><button>fdd</button></span></div>');
+               //this.filesArea.append('<div style="border: 1px solid grey; width:100%;" ><span style="display:inline-block !important; width:25% !important;">Fildsdsdsdsde</span><span style="display:inline-block !important; width:25% !important;">gagner</span><span style="display:inline-block !important; width:25% !important;">gagner</span><span style="display:inline-block !important; width:25% !important;"><button>fdd</button></span></div>');
+
             }
         }   
         var tmp = new Upload(_json);
@@ -494,6 +508,7 @@ function initGUI() {
         tmp.createWidget();
         tmp.createJqueryObject();
         tmp.jqueryUpload();
+        tmp.createInfo("gagner","gagner","<button>lalal</button>");
         return tmp;
     }
 
@@ -706,12 +721,13 @@ function initGUI() {
     //----------------------------------------------------------------------------------------------------------------------------------------
 
 
-    GUI.time = function () {
+    GUI.time = function (ms) {
         var html = '';
         var a = new Date();
         var myDate = a.toTimeString().replace(/.*(\d{2}:\d{2}:\d{2}).*/, "$1");
-        var ms = '.' + String((a.getUTCMilliseconds() / 1000).toFixed(3)).slice(2, 5)
-        html += myDate + ms;
+        html += myDate;
+        if(!ms){var ms = '.' + String((a.getUTCMilliseconds() / 1000).toFixed(3)).slice(2, 5);
+        html +=  ms;}
         return html;
     }
 

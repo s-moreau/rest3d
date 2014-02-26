@@ -104,7 +104,6 @@ var url = '/rest3d/upload',
                 .prop('href', file.url);
             $(data.context.children()[index])
                 .find('span').text(file.name);
-
             $(data.context.children()[index])  
                 .wrap(link);
             file.assetName = data.result.files[index].name;
