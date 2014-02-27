@@ -4,7 +4,6 @@ setViewer6Upload=function(upload){
     var buttonToReplace;
     upload.callOnClick(function(){
         header = upload.header();
-        console.debug(header.html());
         index=0;
     });
     var url = '/rest3d/upload',
@@ -55,15 +54,17 @@ setViewer6Upload=function(upload){
                     } else {
                         // ennumerate all resulting files
                         $.each(data.result.files, function (index, file) {
-
-                            var span = '<p><span><a href="'+decodeURIComponent(file.url)+'" target="_blank"><p><span>'+formatName(data,file)+'</a>';
-                            // endsWith
-                            if (file.url.indexOf('.json', file.url.length - '.json'.length) !== -1) {
-                                var url='/viewer/viewer4.html?file=/rest3d/upload/'+decodeURIComponent(file.name);
-                                span += ' -> <a href="'+url+'" target="_blank"> View '+formatName(data,file)+'</a>';
-                            }
-                            span += '</span></p>';
-                            data.context.append($(span));
+                            // function(parent,link,button1,button2,button3){
+                            console.debug(convertButton.parent().html());
+                            upload.convert(convertButton.parent(),formatName(data,file),$("<button>Dialog</button>"),$("<button>Display</button>"),$("<button>Downlo</button>"));
+                            // var span = '<p><span><a href="'+decodeURIComponent(file.url)+'" target="_blank"><p><span>'+formatName(data,file)+'</a>';
+                            // // endsWith
+                            // if (file.url.indexOf('.json', file.url.length - '.json'.length) !== -1) {
+                            //     var url='/viewer/viewer4.html?file=/rest3d/upload/'+decodeURIComponent(file.name);
+                            //     span += ' -> <a href="'+url+'" target="_blank"> View '+formatName(data,file)+'</a>';
+                            // }
+                            // span += '</span></p>';
+                            // data.context.append($(span));
                         });
                     }
                 }
@@ -76,17 +77,10 @@ setViewer6Upload=function(upload){
         upload.object=$(this);
         data.context = header;
         $.each(data.files, function (index, file) {
-            // var node = $('<p/>')
-            //         .append($('<span/>').text(file.name));
-            
             if (!index) {
                 upload.upload(header,file.name,uploadButton.clone(true).data(data));
-                // node
-                //     .append('<br>')
-                //     .append(uploadButton.clone(true).data(data));
             }
             else{this.upload(header,file.name);}
-            //node.appendTo(data.context);
         });
     }).on('fileuploadprocessalways', function (e, data) {
             var indexI = data.index,
@@ -104,7 +98,6 @@ setViewer6Upload=function(upload){
                 });
         }
         if (indexI + 1 === data.files.length) {
-            console.debug("in");
             node.find('button')
                 .text('Upload')
                 .prop('disabled', !!data.files.error);
@@ -115,14 +108,6 @@ setViewer6Upload=function(upload){
         upload.progress.setValue(progress);
     }).on('fileuploaddone', function (e, data) {
         $.each(data.result.files, function (index, file) {
-            // var link = $('<a>')
-            //     .attr('target', '_blank')
-            //     .prop('href', file.url);
-            // $(data.context.children()[index])
-            //     .find('span').text(file.name);
-            // $(data.context.children()[index])  
-            //     .wrap(link);
-            console.debug(index+" res = "+file.name);
             file.assetName = data.result.files[index].name;
             var $node = convertButton.clone(true).data({file: file, context: data.context})
                 .text('Convert')
