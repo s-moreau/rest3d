@@ -90,12 +90,12 @@ setViewer6Upload=function(upload){
                         if(ext==".json"){
                             var $dialog = $("<button>Launch</button>").on("click",function(){
                                 glTF.load(url, viewer.parse_gltf);
-                                notif(url);
+                                window.notif(url);
                             });
                                 upload.convert($conve,formatName(data,file),$dialog,$download);
                         }
                         else{
-                            upload.upload($conve,formatName(data,file),$dialog);//
+                            upload.upload($conve,formatName(data,file),$download);//
                         }
                         });
                     }

@@ -516,7 +516,7 @@ THE SOFTWARE.
 
         jumpLine();
 
-        function notif(object){
+        window.notif = function(object){
             win.parent().parent().find(".ui-icon-close").click();
             win.remove();
             GUI.notification({
@@ -547,7 +547,7 @@ THE SOFTWARE.
             pleaseWait(true);
             var url = "/rest3d/assets/duck/duck.dae";
             COLLADA.load(url, viewer.parse_dae);
-            notif(url);
+            window.notif(url);
             pleaseWait(false);
         }).width("90%");
         accordion.collada.append("<hr></hr>");
@@ -556,7 +556,7 @@ THE SOFTWARE.
             pleaseWait(true);
             var url = "/models/duck/duck.dae"
             COLLADA.load(url, viewer.parse_dae);
-            notif(url);
+            window.notif(url);
             pleaseWait(false);
         }).width("90%");
         accordion.collada.append("<hr></hr>");
@@ -565,7 +565,7 @@ THE SOFTWARE.
             pleaseWait(true);
             var url = "/models/Amahani/Amahani.dae";
             COLLADA.load(url, viewer.parse_dae);
-            notif(url);
+            window.notif(url);
             pleaseWait(false);
         }).width("90%");
         accordion.collada.append("<hr></hr>");
@@ -574,7 +574,7 @@ THE SOFTWARE.
             pleaseWait(true);
             var url = "/models/Amahani/Amahani.json";
             glTF.load(url, viewer.parse_gltf);
-            notif(url);
+            window.notif(url);
             pleaseWait(false);
         }).width("90%");
         accordion.gltf.append("<hr></hr>");
@@ -583,7 +583,7 @@ THE SOFTWARE.
             pleaseWait(true);
             var url = "/models/duck-glft/duck_triangulate.json"
             glTF.load(url, viewer.parse_gltf);
-            notif(url);
+            window.notif(url);
             pleaseWait(false);
         }).width("90%");
         accordion.gltf.append("<hr></hr>");
@@ -592,7 +592,7 @@ THE SOFTWARE.
               pleaseWait(true);
             var url = "/models/rambler/Rambler.json";
             glTF.load(url, viewer.parse_gltf);
-            notif(url);
+            window.notif(url);
             pleaseWait(false);
 
         }).width("90%");
@@ -602,7 +602,7 @@ THE SOFTWARE.
             pleaseWait(true);
             var url = "/models/rambler/Rambler-min.dae";
             COLLADA.load(url, viewer.parse_dae);
-            notif(url);
+            window.notif(url);
             pleaseWait(false);
 
         }).width("90%");
@@ -612,7 +612,7 @@ THE SOFTWARE.
             pleaseWait(true);
             var url = "/models/rambler/Rambler.dae";
             COLLADA.load(url, viewer.parse_dae);
-            notif(url);
+            window.notif(url);
             pleaseWait(false);
         }).width("90%");
         accordion.collada.append("<hr></hr>");
@@ -621,7 +621,7 @@ THE SOFTWARE.
               pleaseWait(true);
               var url = "/models/SuperMurdoch/SuperMurdoch.dae";
             COLLADA.load(url, viewer.parse_dae);
-            notif(url);
+            window.notif(url);
                pleaseWait(false);
         }).width("90%");
         accordion.collada.append("<hr></hr>");
@@ -630,7 +630,7 @@ THE SOFTWARE.
               pleaseWait(true);
               var url = "/models/SuperMurdoch/SuperMurdoch.json";
             glTF.load(url, viewer.parse_gltf);
-            notif(url);
+            window.notif(url);
                pleaseWait(false);
         }).width("90%");
         accordion.gltf.append("<hr></hr>");
@@ -639,7 +639,7 @@ THE SOFTWARE.
               pleaseWait(true);
               var url = "/models/wine/wine.dae";
             COLLADA.load(url, viewer.parse_dae);
-            notif(url);
+            window.notif(url);
                pleaseWait(false);
         }).width("90%");
         accordion.collada.append("<hr></hr>");
@@ -648,7 +648,7 @@ THE SOFTWARE.
               pleaseWait(true);
               var url = "/models/wine/wine.json";
             glTF.load(url, viewer.parse_gltf);
-            notif(url);
+            window.notif(url);
                pleaseWait(false);
         }).width("90%");
         accordion.gltf.append("<hr></hr>");
@@ -658,7 +658,7 @@ THE SOFTWARE.
               pleaseWait(true);
               var url = "/models/uh-1n/uh-1n.dae"
               COLLADA.load(url, viewer.parse_dae);
-            notif(url);
+            window.notif(url);
                pleaseWait(false);
         }).width("90%");
         accordion.collada.append("<hr></hr>");
@@ -667,7 +667,7 @@ THE SOFTWARE.
               pleaseWait(true);
               var url = "/models/uh-1n/uh-1n.json";
             glTF.load(url, viewer.parse_gltf);
-            notif(url);
+            window.notif(url);
                pleaseWait(false);
         }).width("90%");
         accordion.gltf.append("<hr></hr>");
@@ -676,7 +676,7 @@ THE SOFTWARE.
               pleaseWait(true);
               var url = "/models/cow/cow.dae"
             COLLADA.load(url, viewer.parse_dae);
-            notif(url);
+            window.notif(url);
                pleaseWait(false);
         }).width("90%");
 
@@ -684,7 +684,7 @@ THE SOFTWARE.
               pleaseWait(true);
               var url = "/models/cow/cow.json";
             glTF.load(url, viewer.parse_gltf);
-            notif(url);
+            window.notif(url);
                pleaseWait(false);
         }).width("90%");
 
