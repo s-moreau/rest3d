@@ -21,7 +21,8 @@ setViewer6Upload=function(upload){
                         $this.remove();
                         data.abort();
                     });
-                // data.submit().always(function () {
+                data.submit();
+                //.always(function () {
                 //     $this.remove();
                 // });
         }),
