@@ -95,7 +95,7 @@ setViewer6Upload=function(upload){
                                 upload.convert($conve,formatName(data,file),$dialog,$download);
                         }
                         else{
-                            upload.upload($conve,formatName(data,file),$dialog)
+                            upload.upload($conve,formatName(data,file),$dialog);//
                         }
                         });
                     }
