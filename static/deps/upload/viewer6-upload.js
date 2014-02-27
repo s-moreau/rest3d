@@ -64,7 +64,8 @@ setViewer6Upload=function(upload){
                                 height: 600,
                                 open: function (ev, ui) {
                                     $('#myIframe').attr('src', decodeURIComponent(file.url));
-                                }
+                                },
+                            })
                             })
                             // function(parent,link,button1,button2,button3){
                             upload.convert($conve,formatName(data,file),$dialog,$("<button>Display</button>"),$("<button>Downlo</button>"));
