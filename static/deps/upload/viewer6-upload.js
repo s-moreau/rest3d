@@ -92,20 +92,11 @@ setViewer6Upload=function(upload){
                                 glTF.load(url, viewer.parse_gltf);
                                 notif(url);
                             });
-                                // function(parent,link,button1,button2,button3){
                                 upload.convert($conve,formatName(data,file),$dialog,$download);
                         }
                         else{
                             upload.upload($conve,formatName(data,file),$dialog)
                         }
-                            // var span = '<p><span><a href="'+decodeURIComponent(file.url)+'" target="_blank"><p><span>'+formatName(data,file)+'</a>';
-                            // // endsWith
-                            // if (file.url.indexOf('.json', file.url.length - '.json'.length) !== -1) {
-                            //     var url='/viewer/viewer4.html?file=/rest3d/upload/'+decodeURIComponent(file.name);
-                            //     span += ' -> <a href="'+url+'" target="_blank"> View '+formatName(data,file)+'</a>';
-                            // }
-                            // span += '</span></p>';
-                            // data.context.append($(span));
                         });
                     }
                 }
