@@ -523,16 +523,16 @@ function initGUI() {
                 var $spanButton = htmlSpan($newLine,24);
                 $spanButton.append(button);
             }
-            this.convert = function(parent,link,button1,button2,button3){
+            this.convert = function(parent,link,button1/*,button2,button3*/){
                 var $newLine = htmlDiv(parent,false);
-                var $span = htmlSpan($newLine,25,link);
+                var $span = htmlSpan($newLine,65,link);
                 $span.css("text-align","left");
-                var $spanButton1 = htmlSpan($newLine,25);
+                var $spanButton1 = htmlSpan($newLine,35);
                 $spanButton1.append(button1);
-                 var $spanButton2 = htmlSpan($newLine,25);
-                $spanButton2.append(button2);
-                 var $spanButton3= htmlSpan($newLine,25);
-                $spanButton3.append(button3);
+                //  var $spanButton2 = htmlSpan($newLine,25);
+                // $spanButton2.append(button2);
+                //  var $spanButton3= htmlSpan($newLine,25);
+                // $spanButton3.append(button3);
             }
             // this.createInfo = function(name,href,button){
             //     var tmp = this.header();
