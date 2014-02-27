@@ -1,9 +1,5 @@
 {
-    "animations": {},
-    "asset": {
-        "generator": "collada2gltf@8ae8287733692262ba19fe32cd5da48fd1732473"
-    },
-    "attributes": {
+    "accessors": {
         "attribute_23": {
             "bufferView": "bufferView_29",
             "byteOffset": 0,
@@ -19,7 +15,7 @@
                 -0.606159,
                 -0.0156466
             ],
-            "type": "FLOAT_VEC3"
+            "type": 35665
         },
         "attribute_25": {
             "bufferView": "bufferView_29",
@@ -36,7 +32,7 @@
                 -0.998498,
                 -0.999914
             ],
-            "type": "FLOAT_VEC3"
+            "type": 35665
         },
         "attribute_27": {
             "bufferView": "bufferView_29",
@@ -51,27 +47,41 @@
                 0.003906,
                 0.00120699
             ],
-            "type": "FLOAT_VEC2"
+            "type": 35664
+        },
+        "indices_21": {
+            "bufferView": "bufferView_30",
+            "byteOffset": 0,
+            "count": 1614,
+            "type": 5123
         }
+    },
+    "animations": {},
+    "asset": {
+        "extras": {
+            "premultipliedAlpha": true
+        },
+        "generator": "collada2gltf@179215ff9b43db75f7841f48e94de7883ea400ef"
     },
     "bufferViews": {
         "bufferView_29": {
-            "buffer": "cow.bin",
+            "buffer": "cow",
             "byteLength": 11776,
             "byteOffset": 0,
-            "target": "ARRAY_BUFFER"
+            "target": 34962
         },
         "bufferView_30": {
-            "buffer": "cow.bin",
+            "buffer": "cow",
             "byteLength": 3228,
             "byteOffset": 11776,
-            "target": "ELEMENT_ARRAY_BUFFER"
+            "target": 34963
         }
     },
     "buffers": {
-        "cow.bin": {
+        "cow": {
             "byteLength": 15004,
-            "path": "cow.bin"
+            "path": "cow.bin",
+            "type": "arraybuffer"
         }
     },
     "images": {
@@ -79,24 +89,13 @@
             "path": "Cow.png"
         }
     },
-    "indices": {
-        "indices_21": {
-            "bufferView": "bufferView_30",
-            "byteOffset": 0,
-            "count": 1614,
-            "type": "UNSIGNED_SHORT"
-        }
-    },
     "materials": {
-        "material.0": {
+        "material0-fx": {
             "instanceTechnique": {
-                "technique": "technique1",
-                "values": [
-                    {
-                        "parameter": "diffuse",
-                        "value": "texture_image_0"
-                    }
-                ]
+                "technique": "technique0",
+                "values": {
+                    "diffuse": "texture_image_0"
+                }
             },
             "name": "material0"
         }
@@ -106,14 +105,14 @@
             "name": "geom",
             "primitives": [
                 {
-                    "indices": "indices_21",
-                    "material": "material.0",
-                    "primitive": "TRIANGLES",
-                    "semantics": {
+                    "attributes": {
                         "NORMAL": "attribute_25",
                         "POSITION": "attribute_23",
                         "TEXCOORD_0": "attribute_27"
-                    }
+                    },
+                    "indices": "indices_21",
+                    "material": "material0-fx",
+                    "primitive": 4
                 }
             ]
         }
@@ -145,19 +144,24 @@
             "name": "vsn-mats"
         }
     },
-    "profile": "WebGL 1.0",
+    "profile": "WebGL 1.0.2",
     "programs": {
         "program_0": {
+            "attributes": [
+                "a_normal",
+                "a_position",
+                "a_texcoord0"
+            ],
             "fragmentShader": "cow0FS",
             "vertexShader": "cow0VS"
         }
     },
     "samplers": {
         "sampler_0": {
-            "magFilter": "LINEAR",
-            "minFilter": "LINEAR_MIPMAP_LINEAR",
-            "wrapS": "REPEAT",
-            "wrapT": "REPEAT"
+            "magFilter": 9729,
+            "minFilter": 9987,
+            "wrapS": 10497,
+            "wrapT": 10497
         }
     },
     "scene": "defaultScene",
@@ -170,47 +174,67 @@
     },
     "shaders": {
         "cow0FS": {
-            "path": "cow0FS.glsl"
+            "path": "cow0FS.glsl",
+            "type": 35632
         },
         "cow0VS": {
-            "path": "cow0VS.glsl"
+            "path": "cow0VS.glsl",
+            "type": 35633
         }
     },
     "skins": {},
     "techniques": {
-        "technique1": {
+        "technique0": {
             "parameters": {
                 "diffuse": {
-                    "type": "SAMPLER_2D"
+                    "type": 35678
+                },
+                "modelViewMatrix": {
+                    "semantic": "MODELVIEW",
+                    "type": 35676
                 },
                 "normal": {
                     "semantic": "NORMAL",
-                    "type": "FLOAT_VEC3"
+                    "type": 35665
                 },
                 "normalMatrix": {
-                    "semantic": "WORLDVIEWINVERSETRANSPOSE",
-                    "type": "FLOAT_MAT3"
+                    "semantic": "MODELVIEWINVERSETRANSPOSE",
+                    "type": 35675
                 },
                 "position": {
                     "semantic": "POSITION",
-                    "type": "FLOAT_VEC3"
+                    "type": 35665
                 },
                 "projectionMatrix": {
                     "semantic": "PROJECTION",
-                    "type": "FLOAT_MAT4"
+                    "type": 35676
                 },
                 "texcoord0": {
                     "semantic": "TEXCOORD_0",
-                    "type": "FLOAT_VEC2"
-                },
-                "worldViewMatrix": {
-                    "semantic": "WORLDVIEW",
-                    "type": "FLOAT_MAT4"
+                    "type": 35664
                 }
             },
             "pass": "defaultPass",
             "passes": {
                 "defaultPass": {
+                    "details": {
+                        "commonProfile": {
+                            "extras": {
+                                "doubleSided": false
+                            },
+                            "lightingModel": "Blinn",
+                            "parameters": [
+                                "diffuse",
+                                "modelViewMatrix",
+                                "normalMatrix",
+                                "projectionMatrix"
+                            ],
+                            "texcoordBindings": {
+                                "diffuse": "TEXCOORD_0"
+                            }
+                        },
+                        "type": "COLLADA-1.4.1/commonProfile"
+                    },
                     "instanceProgram": {
                         "attributes": {
                             "a_normal": "normal",
@@ -220,16 +244,16 @@
                         "program": "program_0",
                         "uniforms": {
                             "u_diffuse": "diffuse",
+                            "u_modelViewMatrix": "modelViewMatrix",
                             "u_normalMatrix": "normalMatrix",
-                            "u_projectionMatrix": "projectionMatrix",
-                            "u_worldViewMatrix": "worldViewMatrix"
+                            "u_projectionMatrix": "projectionMatrix"
                         }
                     },
                     "states": {
-                        "blendEnable": false,
-                        "cullFaceEnable": true,
-                        "depthMask": true,
-                        "depthTestEnable": true
+                        "blendEnable": 0,
+                        "cullFaceEnable": 1,
+                        "depthMask": 1,
+                        "depthTestEnable": 1
                     }
                 }
             }
@@ -237,11 +261,12 @@
     },
     "textures": {
         "texture_image_0": {
-            "format": "RGBA",
-            "internalFormat": "RGBA",
+            "format": 6408,
+            "internalFormat": 6408,
             "sampler": "sampler_0",
             "source": "image_0",
-            "target": "TEXTURE_2D"
+            "target": 3553,
+            "type": 5121
         }
     }
 }
