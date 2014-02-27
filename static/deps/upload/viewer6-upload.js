@@ -56,7 +56,7 @@ setViewer6Upload=function(upload){
                         var $conve = upload.header(data.file.name);
                         $.each(data.result.files, function (index, file) {
                             var $download = $("<button>Downl..</button>").on("click",function(){
-                                var gitHtml = $('<iframe id="myIframe" src="'+decodeURIComponent(file.url))+'" style="height:99% !important; width:99% !important; border:0px;"></iframe></div>');
+                                var gitHtml = $('<iframe id="myIframe" src="'+decodeURIComponent(file.url)+'" style="height:99% !important; width:99% !important; border:0px;"></iframe>');
                                 gitPanel = $('body').append(gitHtml);
                             });
                             var $dialog = $("<button>Dialog</button>").on("click",function(){
