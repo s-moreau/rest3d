@@ -1,9 +1,16 @@
 setViewer6Upload=function(upload){
-var url = '/rest3d/upload',
+    var header;
+    var index;
+    upload.callOnClick(function(){
+        header = upload.header();
+        console.debug(header.html());
+        index=0;
+    });
+    var url = '/rest3d/upload',
         uploadButton = $('<button/>')
             .addClass('btn')
             .prop('disabled', true)
-            .text('Uploading...')
+            .text('Upload')
             .on('click', function (){
                 var $this = $(this),
                     data = $this.data();
@@ -64,36 +71,45 @@ var url = '/rest3d/upload',
 
     upload.object.on('fileuploadadd', function (e, data) {
         upload.object=$(this);
-        data.context = $('<div/>').appendTo(upload.filesArea);
+        data.context = header;
+        console.debug(header);
         $.each(data.files, function (index, file) {
-            var node = $('<p/>')
-                    .append($('<span/>').text(file.name));
+            // var node = $('<p/>')
+            //         .append($('<span/>').text(file.name));
+            
             if (!index) {
-                node
-                    .append('<br>')
-                    .append(uploadButton.clone(true).data(data));
+                upload.upload(header,file.name,uploadButton.clone(true).data(data));
+                // node
+                //     .append('<br>')
+                //     .append(uploadButton.clone(true).data(data));
             }
-            node.appendTo(data.context);
+            else{this.upload(header,file.name);}
+            //node.appendTo(data.context);
         });
     }).on('fileuploadprocessalways', function (e, data) {
-        var index = data.index,
-            file = data.files[index],
-            node = $(data.context.children()[index]);
+        //console.debug("data"+data.context.children('div')[index+1].html());
+        console.debug("alala "+data.files);
+            var indexI = data.index,
+            file = data.files[indexI],
+             node = $(data.context.children('div')[index+1]);
         if (file.preview) {
             node
                 .prepend('<br>')
                 .prepend(file.preview);
         }
         if (file.error) {
-            node
-                .append('<br>')
-                .append(file.error);
+          GUI.addTooltip({
+                    parent: node.find('button'),
+                    content: file.error,
+                });
         }
-        if (index + 1 === data.files.length) {
-            data.context.find('button')
+        if (indexI + 1 === data.files.length) {
+            console.debug("in");
+            node.find('button')
                 .text('Upload')
                 .prop('disabled', !!data.files.error);
         }
+        index++;
     }).on('fileuploadprogressall', function (e, data) {
         var progress = parseInt(data.loaded / data.total * 100, 10);
         upload.progress.setValue(progress);

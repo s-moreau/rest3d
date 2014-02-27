@@ -453,10 +453,14 @@ function initGUI() {
                     id:"progress_"+this.id,
                     parent:this[this.id],
                 });
-                this[this.id].append('<br></br>');
                 this[this.id].append('<div id="fileArea_'+this.id+'"></div>');
                 
                // $('#fileArea_'+this.id).append('<div style="border: 1px solid grey; border-top: none; width:100%;" ><span style="float:left !important;">Fildsdsdsdsde</span></div>');
+            }
+            this.callOnClick = function(cb){
+                this.button.on('click',function(){
+                    cb.call();
+                })
             }
             this.jqueryUpload = function(){
                 var stock = this;                                                                                                                                                                        
@@ -479,36 +483,65 @@ function initGUI() {
                 this.upload1 = $('#fileupload_'+this.id);
                 this.filesArea = $('#fileArea_'+this.id);
             }
-            function htmlSpan(percentage,html){
-                    return '<span style="display:inline-block !important; width:'+percentage+'% !important;">'+html+'</span>';
+            function htmlSpan(parent,percentage,html){
+                    if(!html){html="";}
+                    var $result = $('<span style="display:inline-block !important; width:'+percentage+'% !important;">'+html+'</span>');
+                    parent.append($result);
+                    return $result;
                 }
-            function htmlDiv(head){
-                    if(head){return '<div style="border: 1px solid grey; width:100%;"></div>';}
-                    else{return '<div style="border: 1px solid grey; width:100%;"></div>';}
-                }
-            this.createInfo = function(name,href,button){
-                $bis = this.filesArea.append(htmlDiv(true));
-                $bis.children().append(htmlSpan(88,"Upload "+GUI.time(true)));
-                var $j = "<button>X</button>"
-                $bis.children().append(htmlSpan(12,$j));
-                $bis1 = this.filesArea.append(htmlDiv());
-                $bis1.children().append(htmlSpan(25,"sample.dae.tga"));
-                $bis1.children().append(htmlSpan(25,$j));
-                $bis1.children().append(htmlSpan(25,$j));
-                $bis1.children().append(htmlSpan(25,$j));
-                
-              
-                //this.filesArea.append('<div style="border: 1px solid grey; width:100%;" ><span style="display:inline-block !important; width:90% !important;">Fildsdsdsdsde</span><span style="display:inline-block !important; width:25% !important;">gagner</span><span style="display:inline-block !important; width:25% !important;">gagner</span><span style="display:inline-block !important; width:25% !important;"><button>fdd</button></span></div>');
-               //this.filesArea.append('<div style="border: 1px solid grey; width:100%;" ><span style="display:inline-block !important; width:25% !important;">Fildsdsdsdsde</span><span style="display:inline-block !important; width:25% !important;">gagner</span><span style="display:inline-block !important; width:25% !important;">gagner</span><span style="display:inline-block !important; width:25% !important;"><button>fdd</button></span></div>');
 
+            function htmlDiv(parent,head){
+                    if(head){
+                        var $result = $('<div style="border: 1px solid grey; width:100%;"></div>');}
+                    else{
+                        var $result = $('<div style="border: 1px solid grey; border-top:none; width:100%;"></div>');}
+                    parent.append($result);
+                    return $result;
+                }
+
+            this.header = function(){
+                this.filesArea.append('<br>');
+                var $frame = $('<div class="upload_header"></div>');
+                this.filesArea.append($frame);
+                var $head = htmlDiv($frame,true);
+                var $span = htmlSpan($head,88,"Upload "+GUI.time(true));
+                $span.css("font-weight","bold");
+                var $spanButton = htmlSpan($head,12);
+                var $j = $("<button>X</button>").on('click', function (){
+                    $frame.hide();
+                });
+                $spanButton.append($j);
+                return $frame;
+            };
+            this.upload = function(parent,link,button){
+                var $newLine = htmlDiv(parent,false);
+                var $span = htmlSpan($newLine,76,link);
+                $span.css("text-align","left");
+                var $spanButton = htmlSpan($newLine,24);
+                $spanButton.append(button);
             }
+            this.convert = function(parent,link,button1,button2,button3){
+                var $newLine = htmlDiv(parent,false);
+                var $span = htmlSpan($newLine,25,link);
+                $span.css("text-align","left");
+                var $spanButton1 = htmlSpan($newLine,25);
+                $spanButton1.append(button1);
+                 var $spanButton2 = htmlSpan($newLine,25);
+                $spanButton2.append(button2);
+                 var $spanButton3= htmlSpan($newLine,25);
+                $spanButton3.append(button3);
+            }
+            // this.createInfo = function(name,href,button){
+            //     var tmp = this.header();
+            //     this.upload(tmp,"tefa.js",$("<button>Upload</button>"))
+            //     this.convert(tmp,"tefadsssss.js",$("<button>Dialog</button>"),$("<button>Display</button>"),$("<button>Downlo</button>"))
+            // }
         }   
         var tmp = new Upload(_json);
         tmp.generateHTML();
         tmp.createWidget();
         tmp.createJqueryObject();
         tmp.jqueryUpload();
-        tmp.createInfo("gagner","gagner","<button>lalal</button>");
         return tmp;
     }
 
