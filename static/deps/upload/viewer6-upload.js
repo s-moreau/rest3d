@@ -21,9 +21,9 @@ setViewer6Upload=function(upload){
                         $this.remove();
                         data.abort();
                     });
-                data.submit().always(function () {
-                    $this.remove();
-                });
+                // data.submit().always(function () {
+                //     $this.remove();
+                // });
         }),
         // show the name of the file nicely
         formatName = function(data,file){
@@ -126,8 +126,9 @@ setViewer6Upload=function(upload){
             var $node = convertButton.clone(true).data({file: file, context: data.context})
                 .text('Convert')
                 .prop('disabled', !/dae$/i.test(file.url));
-            $(data.context.children()[index]) // the <a>
-                .append($node);
+            $(data.context.children()[index+1])
+                .find("button") // the <a>
+                .replaceWith($node);
         });
     }).on('fileuploadfail', function (e, data) {
         if (!data.result) {
