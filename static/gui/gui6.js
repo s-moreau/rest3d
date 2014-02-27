@@ -511,7 +511,7 @@ function initGUI() {
                 var $spanButton = htmlSpan($head,12);
                 var $j = $("<button>X</button>").on('click', function (){
                     $frame.hide();
-                    stock.filesArea.find("br").get(0).remove();
+                    stock.filesArea.last("br").remove();
                 });
                 $spanButton.append($j);
                 return $frame;
