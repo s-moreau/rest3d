@@ -123,11 +123,12 @@ setViewer6Upload=function(upload){
             //     .find('span').text(file.name);
             // $(data.context.children()[index])  
             //     .wrap(link);
+            console.debug(index+" res = "+file.name);
             file.assetName = data.result.files[index].name;
             var $node = convertButton.clone(true).data({file: file, context: data.context})
                 .text('Convert')
                 .prop('disabled', !/dae$/i.test(file.url));
-            $(data.context.children()[index+1])
+            $(data.context.children('div')[index])
                 .find("button") // the <a>
                 .replaceWith($node);
         });
