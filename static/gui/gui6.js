@@ -523,7 +523,7 @@ function initGUI() {
                 var $spanButton = htmlSpan($newLine,24);
                 $spanButton.append(button);
             }
-            this.convert = function(parent,link,button1/*,button2,button3*/){
+            this.convert = function(parent,link,button1,button2,button3){
                 var $newLine = htmlDiv(parent,false);
                 var $span = htmlSpan($newLine,76,link);
                 $span.css("text-align","left");
