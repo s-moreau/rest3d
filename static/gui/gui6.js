@@ -505,8 +505,8 @@ function initGUI() {
                 var $frame = $('<div class="upload_header"></div>');
                 this.filesArea.append($frame);
                 var $head = htmlDiv($frame,true);
-                if(flag){var $span = htmlSpan($head,88,"Convert "+GUI.time(true));}
-                else{var $span = htmlSpan($head,88,"Upload "+GUI.time(true));}
+                if(flag){var $span = htmlSpan($head,88,GUI.time(true)+" convert "+flag);}
+                else{var $span = htmlSpan($head,88,GUI.time(true)+" Upload");}
                 $span.css("font-weight","bold");
                 var $spanButton = htmlSpan($head,12);
                 var $j = $("<button>X</button>").on('click', function (){

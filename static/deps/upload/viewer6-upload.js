@@ -45,7 +45,7 @@ setViewer6Upload=function(upload){
                     .prop('disabled',true)
                 // user rest to convert dae into glTF
                 var callback = function(data) {
-                    $this.remove();
+                    $this.prop('disabled',true);
                     if(data.result.output){console.debug(data.result.output);}
                     if(data.result.code){console.debug("Exit code: "+data.result.code);}
                     if (data.error){
@@ -53,7 +53,7 @@ setViewer6Upload=function(upload){
                         data.context.append(span);
                     } else {
                         // ennumerate all resulting files
-                        var $conve = upload.header(true);
+                        var $conve = upload.header(data.file);
                         $.each(data.result.files, function (index, file) {
                             // function(parent,link,button1,button2,button3){
                             upload.convert($conve,formatName(data,file),$("<button>Dialog</button>"),$("<button>Display</button>"),$("<button>Downlo</button>"));
