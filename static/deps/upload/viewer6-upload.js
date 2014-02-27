@@ -115,18 +115,18 @@ setViewer6Upload=function(upload){
         upload.progress.setValue(progress);
     }).on('fileuploaddone', function (e, data) {
         $.each(data.result.files, function (index, file) {
-            var link = $('<a>')
-                .attr('target', '_blank')
-                .prop('href', file.url);
-            $(data.context.children()[index])
-                .find('span').text(file.name);
-            $(data.context.children()[index])  
-                .wrap(link);
+            // var link = $('<a>')
+            //     .attr('target', '_blank')
+            //     .prop('href', file.url);
+            // $(data.context.children()[index])
+            //     .find('span').text(file.name);
+            // $(data.context.children()[index])  
+            //     .wrap(link);
             file.assetName = data.result.files[index].name;
             var $node = convertButton.clone(true).data({file: file, context: data.context})
                 .text('Convert')
                 .prop('disabled', !/dae$/i.test(file.url));
-            $(data.context.children()[index]).parent() // the <a>
+            $(data.context.children()[index]) // the <a>
                 .append($node);
         });
     }).on('fileuploadfail', function (e, data) {
