@@ -85,7 +85,7 @@ setViewer6Upload=function(upload){
                             });
 
                         var url = decodeURIComponent(file.url);
-                        var ext = url.link.match(/\.[^.]+$/);
+                        var ext = url.match(/\.[^.]+$/);
                         console.debug(ext);
                         if(ext==".json"){
                             var $dialog = $("<button>Launch</button>").on("click",function(){
