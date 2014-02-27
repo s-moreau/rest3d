@@ -41,7 +41,7 @@ setViewer6Upload=function(upload){
                     data = $this.data();
                 $this
                     .off('click')
-                    .text('Converting...')
+                    .text('Convert')
                     .prop('disabled',true)
                 // user rest to convert dae into glTF
                 var callback = function(data) {
@@ -56,14 +56,14 @@ setViewer6Upload=function(upload){
                         var $conve = upload.header(data.file.name);
                         $.each(data.result.files, function (index, file) {
                             var $dialog = $("<button>Dialog</button>").on("click",function(){
-                                var gitHtml = '<div id="'+file.name+'"><iframe id="myIframe" src="" style="height:99% !important; width:99% !important; border:0px;"></iframe></div>';
+                                var gitHtml = $('<div><iframe id="myIframe" src="" style="height:99% !important; width:99% !important; border:0px;"></iframe></div>');
                                 gitPanel = $('body').append(gitHtml);
-                                $("#"+file.name).dialog({
+                                gitHtml.dialog({
                                 autoOpen: true,
                                 width: 800,
                                 height: 600,
                                 open: function (ev, ui) {
-                                    $('#myIframe').attr('src', decodeURIComponent(file.url));
+                                    gitHtml.find('iframe').attr('src', decodeURIComponent(file.url));
                                 },
                             })
                             })
