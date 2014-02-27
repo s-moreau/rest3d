@@ -515,7 +515,7 @@ padding-right: 5px !important;
 }
 
 #themes ul{
-    width: 100px !important;
+    height: auto !important;
 }
 #themes ul li{
     width: 100% !important;
@@ -658,7 +658,7 @@ padding: 2px 2px 2px 2px;
     margin-bottom: 20px !important;
 }
 
-#collada{
+#collada, #upload{
     width: herit !important;
 }
 
@@ -669,4 +669,15 @@ padding: 2px 2px 2px 2px;
 
 #theme-menu{
     overflow: auto !important;
+}
+
+#selector{
+    background-color: white !important;
+}
+
+#jstree a{
+color: inherit !important;}
+
+#treeViewDiv a{
+    color: #000!important;
 }

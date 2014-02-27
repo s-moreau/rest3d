@@ -39,43 +39,102 @@ THE SOFTWARE.
  * Load external script and return a promise
  * to be resolved when script is loaded
  */
-var dep = [
-        {link:"../deps/codemirror/css/eclipse.css"},
-        {link:"../deps/css/jquery-skinner.css"},
-        {link:"../deps/codemirror/css/codemirror.css"},
-        {link:"../deps/codemirror/css/show-hint.css"},
-        {link:"../deps/codemirror/css/dialog.css"},
-        {link:"../deps/css/bootstrap.icons.css"},
-        {link:"../deps/css/jquery.toolbars.css"},
-        {link:"../deps/css/jquery.terminal.css"},
-        {link:"../deps/css/jquery.pnotify.default.css"},
-        {link:"../deps/jquery-2.0.3.min.js",obj:"$('')"},
-        {link:"../deps/jquery-ui-1.9.2.min.js",obj:"$.ui"},
-        {link:"../deps/codemirror/codemirror.min.js",obj:"window.CodeMirror"},
-        {link:"../deps/jquery.layout-1.3.0.min.js",obj:"$.layout"},
-        {link:"../deps/jquery.jstree.js",obj:"$.vakata"},
-        {link:"../deps/jquery.toolbar.js",obj:"$.toolbar"},
-        {link:"../deps/jquery.terminal-0.7.10.min.js",obj:"$.omap "},
-        {link:"../deps/jquery.pnotify.min.js",obj:"$.pnotify"},
-        {link:"../deps/codemirror/javascript.js",obj:"indentUnit"},
-        {link:"../deps/codemirror/show-hint.js",obj:"CodeMirror.showHint"},
-        {link:"../deps/codemirror/javascript-hint.js"},
-        {link:"../deps/codemirror/dialog.js"},
-        {link:"../deps/codemirror/search.js"},
-        {link:"../deps/codemirror/search-cursor.js"},
-        {link:"../deps/jquery-skinner.js",obj:"$.skinner"}
-    ];
+var dep = [{
+    link: "../deps/codemirror/css/eclipse.css"
+}, {
+    link: "../deps/css/jquery-skinner.css"
+}, {
+    link: "../deps/codemirror/css/codemirror.css"
+}, {
+    link: "../deps/codemirror/css/show-hint.css"
+}, {
+    link: "../deps/codemirror/css/dialog.css"
+}, {
+    link: "../deps/css/bootstrap.icons.css"
+}, {
+    link: "../deps/css/jquery.toolbars.css"
+}, {
+    link: "../deps/css/jquery.terminal.css"
+},
+//    {
+//     link:"../deps/upload/css/jquery.fileupload-ui.css"
+// },
+//    {
+//    link:"../deps/upload/css/bootstrap-responsive.min.css"
+// },
+//    {
+//    link:"../deps/upload/css/bootstrap.min.css"
+// },
+    {
+    link: "../gui/gui6.css"
+},
+    {
+    link: "../deps/css/jquery.pnotify.default.css"
+}, {
+    link: "../deps/jquery-2.0.3.min.js",
+    obj: "$('')"
+}, {
+    link: "../deps/jquery-ui-1.9.2.min.js",
+    obj: "$.ui"
+}, {
+    link: "../deps/codemirror/codemirror.min.js",
+    obj: "window.CodeMirror"
+}, {
+    link: "../deps/jquery.layout-1.3.0.min.js",
+    obj: "$.layout"
+},{
+    link: "../deps/jquery.toolbar.js",
+    obj: "$.toolbar"
+}, {
+    link: "../deps/jquery.terminal-0.7.10.min.js",
+    obj: "$.omap "
+}, {
+    link: "../deps/jquery.pnotify.min.js",
+    obj: "$.pnotify"
+}, {
+    link: "../deps/codemirror/javascript.js",
+    obj: "indentUnit"
+}, {
+    link: "../deps/codemirror/show-hint.js",
+    obj: "CodeMirror.showHint"
+}, {
+    link: "../deps/codemirror/javascript-hint.js"
+}, {
+    link: "../deps/codemirror/dialog.js"
+}, 
+ {
+    link: "../deps/codemirror/search.js"
+}, {link: "../deps/codemirror/search-cursor.js"}, 
+{link: "../deps/jquery-skinner.js",
+    obj: "$.skinner"
+},
+{link:"/deps/jstree/jquery.jstree.js"},
+{link:"/deps/upload/jquery.iframe-transport.js"},
+{link:"/deps/upload/jquery.fileupload.js"},
+{link:"/deps/upload/jquery.fileupload-process.js"},
+{link:"/deps/upload/jquery.fileupload-validate.js"},
+];
 
 function loadGUI(callback) {
     var callback = callback;
+
     function result() {
         initGUI();
-        callback.apply();
+        if(callback){callback.apply();}
+        h2.parentNode.removeChild(h2);
+        progress.parentNode.removeChild(progress);
+        container.parentNode.removeChild(container);
+        jump.parentNode.removeChild(jump);
     }
+    var h2;
+    var container;
+    var progress;
+    var jump;
+    var countLog=0;
     var flag = true;
-    var head = document.documentElement,
+    var head =  document.getElementsByTagName('head').item(0),
+    body =document.getElementsByTagName('body')[0],
         $script = null;
-    //  document.write('<script type="text/javascript" src="../deps/promise-3.2.0.js"><script>');
     var s = document.createElement('script');
     s.type = 'text/javascript';
     s.src = "../deps/q-0.9.6.js";
@@ -84,75 +143,131 @@ function loadGUI(callback) {
         var state = s.readyState;
         if (!state || /loaded|complete/.test(state)) {
             getScripts(dep);
+            addLog(s.src + " loaded");
             removeScript();
             // return true;
         } else {
             removeScript();
         }
     };
-function UrlExists(url) {
-  var http = new XMLHttpRequest();
-  http.open('HEAD', url, false);
-  http.send();
-  return http.status != 404;
-}
+    function addProgress(){
+        var body = document.getElementsByTagName('body')[0];
+        h2 = document.createElement("h2");
+        h2.style.position = "relative";
+        h2.style.left = "43%";
+        h2.innerHTML = "Rest3d UI loading...";
+        jump = document.createElement("p");
+        container = document.createElement("div");
+        container.style = "position:relative;left:12%;border:1px solid blue;width:76%;height:80%;overflow:auto";
+        container.style.position = "relative";
+        container.style.left = "12%";
+        container.style.border = '1px solid blue';
+        container.style.height='80%';
+        container.style.width='76%'
+        container.style.overflow = "auto";
+        progress = document.createElement("progress");
+        progress.value = "0";
+        progress.max ="100";
+        progress.id = "progress";
+        progress.style.position = "relative";
+        progress.style.width='76%'
+        progress.style.left = "12%";
+        body.appendChild(h2);
+        body.appendChild(progress);
+        body.appendChild(jump);
+        jump.appendChild(container);
+    }
+
+    function progressBar(){
+        var scale = 100/(dep.length-1);
+        progress.value = progress.value +scale;
+    }
+
+    function addLog(TXT,fl){
+        var newP=document.createElement("p");
+        newP.id='par_'+countLog;
+        var newT = document.createTextNode(TXT);
+        if(fl){newP.style.color="red";}
+        if(countLog==0){container.appendChild(newP);}
+        else{container.insertBefore(newP,document.getElementById('par_'+(countLog-1)));}
+        bufferElement=newP;
+        newP.appendChild(newT);
+        countLog++;
+    }
+    addProgress();
+    
+    
+
+    // function UrlExists(url) {
+    //     var http = new XMLHttpRequest();
+    //     http.open('HEAD', url, false);
+    //     http.send();
+    //     return http.status != 404;
+    // }
     // use body if available. more safe in IE
-    (document.body || head).appendChild(s);
+    head.appendChild(s);
     $script = s;
     var counter = 0;
 
     var injectScriptPromise = function (url) {
-         var deferred = Q.defer();
-         counter++;
-        if(url.hasOwnProperty('obj')){
-            try{
-            var condition = eval("typeof "+url.obj);}
-            catch(err){condition=='undefined';}
+        var deferred = Q.defer();
+        counter++;
+        if (url.hasOwnProperty('obj')) {
+            try {
+                var condition = eval("typeof " + url.obj);
+            } catch (err) {
+                condition == 'undefined';
+            }
         }
-        if(!condition||condition=='undefined'){
+        if (!condition || condition == 'undefined') {
             var ext = url.link.match(/\.[^.]+$/);
-            if(UrlExists(url.link)){
             if (ext[0] == ".js") {
-            var s = document.createElement('script');
-            s.type = 'text/javascript';
-            s.src = url.link;
-            s.async = true;
-            s.onreadystatechange = s.onload = function () {
-                var state = s.readyState;
-                if (!state || /loaded|complete/.test(state)) {
+                var s = document.createElement('script');
+                s.type = 'text/javascript';
+                s.src = url.link;
+                s.async = true;
+                var flagTimeout = true;
+                setTimeout(function () {
+                    if (flagTimeout) {
+                        addLog(url.link +" couldn't be loaded",true);
+                        deferred.reject(new Error(url.link + " couldn't be loaded"));
+                    };
+                }, 1500);
+                s.onreadystatechange = s.onload = function () {
+                    var state = s.readyState;
+                    if (!state || /loaded|complete/.test(state)) {
+                        deferred.resolve(counter);
+                         addLog(s.src + " loaded");
+                        removeScript();progressBar();
+                        flagTimeout = false;
+                    } else {
+                        removeScript();
+                        console.debug("fail!");
+                        deferred.reject(new Error(url.link + " couldn't be loaded"));
+                        addLog(url.link +" couldn't be loaded",true)
+                        flagTimeout = false;
+                    }
+                };
+            } else if (ext[0] == ".css") {
+                    var s = document.createElement('link');
+                    s.rel = 'stylesheet';
+                    s.href = url.link;
+                    addLog(s.href + " loaded");
+                    progressBar();
                     deferred.resolve(counter);
-                    console.debug("!!!" + s.src + " loaded");
-                    removeScript();
-                } else {
-                    removeScript();
-                    console.debug("fail!")
-                    deferred.reject(new Error(url.link + " cooldn't be loaded"));
-                }
-            };
-        } else if (ext[0] == ".css") {
-            var s = document.createElement('link');
-            s.rel = 'stylesheet';
-            s.href = url.link;  
-            setTimeout(function () {
-                console.debug("!!!" + s.href + " loaded");
-                deferred.resolve(counter);
-            }, 1); //Estimation of the link's loading time
-        }
-        // use body if available. more safe in IE
-        (document.body || head).appendChild(s);
-        $script = s;
-        }
-        else{
-            console.error("link 404 error: "+url.link)
-        }
-        }
-        else{
+            }
+            // use body if available. more safe in IE
+            try{head.appendChild(s);}catch(err){addLog(url.link +" couldn't be loaded",true)}
+            $script = s;
+        } else {
             deferred.resolve(counter);
-            console.debug("XXX "+url.link.replace(/^.*[\\\/]/, '')+" already loaded")
+            // addLog("!!!" + s.src + " loaded");
+            console.warn(url.link.replace(/^.*[\\\/]/, '') + " already loaded");
+            addLog( url.link.replace(/^.*[\\\/]/, '') + " already loaded",true);
         }
         return deferred.promise;
     };
-    var removeScript = function (){
+    var  removeScript = function () {
         $script.onload = $script.onreadystatechange = null;
         // Remove the script
         if ($script.parentNode) {
@@ -207,6 +322,8 @@ function initGUI() {
             e.preventDefault();
         })
     };
+
+
     // add button
     GUI.button = function (_txt, _parent, _callback, _x1, _y1, _x2, _y2, _textEnabled, _icon) {
         var $button = $('<button></button>');
@@ -281,6 +398,217 @@ function initGUI() {
             $(_parent).append($label);
         return $label;
     };
+
+    GUI.progress = function(_json){
+        function Progress(_json){
+            this.id = _json.id;
+            this.parent = _json.parent;
+            this.generateHTML = function(){
+                this.html = '<progress id="'+this.id+'" value=0 max=100 />';
+            }
+            this.setValue = function(x){
+                this[this.id].prop("value",x);
+            }
+            this.createWidget = function(){
+                this.parent.append(this.html);
+                this.createJqueryObject();
+            }
+            this.createJqueryObject = function(){
+                this[this.id]=$("#"+this.id);
+            }
+        }
+        var tmp = new Progress(_json);
+        tmp.generateHTML();
+        tmp.createWidget();
+        return tmp;
+    }
+
+    GUI.upload = function(_json){
+        function Upload(_json){
+            this.id = _json.id;
+            this.parent = _json.parent;
+            this.url = _json.url;
+            this.generateHTML = function(){
+                this.html = "<div id='"+this.id+"' class='container'>";
+                this.html+="<input id='fileupload_"+this.id+"' style='display:none;' type='file' name='files[]' multiple>"
+            }
+            this.createWidget = function(){   
+                this.parent.append(this.html);
+                this.createJqueryObject();
+                var stock=this;
+                this.button = GUI.button("Add files...",this[this.id],function(){
+                    $('#fileupload_'+stock.id).click();
+                });
+                this[this.id].append("<hr>");
+
+                this.dropzone = GUI.image(this[this.id],"image_"+this.id,"../gui/images/upload_d.png","90%","100px");
+                GUI.addTooltip({
+                        parent: this.dropzone,
+                        content: "Drag&drop area",
+                    });
+                this[this.id].css("text-align","center");
+                this[this.id].append("<hr>");
+
+                this.progress = GUI.progress({
+                    id:"progress_"+this.id,
+                    parent:this[this.id],
+                });
+                this[this.id].append('<div id="fileArea_'+this.id+'"></div>');
+                
+               // $('#fileArea_'+this.id).append('<div style="border: 1px solid grey; border-top: none; width:100%;" ><span style="float:left !important;">Fildsdsdsdsde</span></div>');
+            }
+            this.callOnClick = function(cb){
+                this.button.on('click',function(){
+                    cb.call();
+                })
+            }
+            this.jqueryUpload = function(){
+                var stock = this;                                                                                                                                                                        
+                this.object = this.upload1.fileupload({
+                    url: stock.url,
+                    dataType: 'json',
+                    autoUpload: false,
+                    acceptFileTypes: /(\.|\/)(dae|png|tga)$/i,
+                    maxFileSize: 100000000, // 100 MB
+                    loadImageMaxFileSize: 15000000, // 15MB
+                    disableImageResize: false,
+                    previewMaxWidth: 100,
+                    previewMaxHeight: 100,
+                    previewCrop: true,
+                    dropZone: stock.dropzone       
+            });
+            }
+            this.createJqueryObject = function(){
+                this[this.id]=$('#'+this.id);
+                this.upload1 = $('#fileupload_'+this.id);
+                this.filesArea = $('#fileArea_'+this.id);
+            }
+            function htmlSpan(parent,percentage,html){
+                    if(!html){html="";}
+                    var $result = $('<span style="display:inline-block !important; width:'+percentage+'% !important;">'+html+'</span>');
+                    parent.append($result);
+                    return $result;
+                }
+
+            function htmlDiv(parent,head){
+                    if(head){
+                        var $result = $('<div style="border: 1px solid grey; width:100%;"></div>');}
+                    else{
+                        var $result = $('<div style="border: 1px solid grey; border-top:none; width:100%;"></div>');}
+                    parent.append($result);
+                    return $result;
+                }
+
+            this.header = function(flag){
+                var stock = this;
+                this.filesArea.append('<br>');
+                var $frame = $('<div class="upload_header"></div>');
+                this.filesArea.append($frame);
+                var $head = htmlDiv($frame,true);
+                if(flag){var $span = htmlSpan($head,88,GUI.time(true)+" convert "+flag);}
+                else{var $span = htmlSpan($head,88,GUI.time(true)+" Upload");}
+                $span.css("font-weight","bold");
+                var $spanButton = htmlSpan($head,12);
+                var $j = $("<button>X</button>").on('click', function (){
+                    $frame.hide();
+                    stock.filesArea.find("br").remove();
+                });
+                $spanButton.append($j);
+                return $frame;
+            };
+            this.upload = function(parent,link,button){
+                var $newLine = htmlDiv(parent,false);
+                var $span = htmlSpan($newLine,76,link);
+                $span.css("text-align","left");
+                var $spanButton = htmlSpan($newLine,24);
+                $spanButton.append(button);
+            }
+            this.convert = function(parent,link,button1/*,button2,button3*/){
+                var $newLine = htmlDiv(parent,false);
+                var $span = htmlSpan($newLine,76,link);
+                $span.css("text-align","left");
+                var $spanButton1 = htmlSpan($newLine,24);
+                $spanButton1.append(button1);
+                //  var $spanButton2 = htmlSpan($newLine,25);
+                // $spanButton2.append(button2);
+                //  var $spanButton3= htmlSpan($newLine,25);
+                // $spanButton3.append(button3);
+            }
+            // this.createInfo = function(name,href,button){
+            //     var tmp = this.header();
+            //     this.upload(tmp,"tefa.js",$("<button>Upload</button>"))
+            //     this.convert(tmp,"tefadsssss.js",$("<button>Dialog</button>"),$("<button>Display</button>"),$("<button>Downlo</button>"))
+            // }
+        }   
+        var tmp = new Upload(_json);
+        tmp.generateHTML();
+        tmp.createWidget();
+        tmp.createJqueryObject();
+        tmp.jqueryUpload();
+        return tmp;
+    }
+
+    GUI.treeBis = function(_json){
+        function Tree(_json){
+            this.json=_json;
+            this.id=_json.id;
+            this.parent=_json.parent;
+            if(_json.hasOwnProperty("json")){
+                this.jsonData = _json.json;
+                this.mode= 1;
+            }
+            else if(_json.hasOwnProperty("html")){
+                this.htmlInput = _json.html;
+                this.mode= 2;
+            }
+            else if(_json.hasOwnProperty("xml")){
+                this.xml = _json.xml;
+                this.mode= 3;
+            }
+            else{
+                console.error("No data type precised");}
+            this.generateHTML = function(){
+                this.html = "<div id="+this.id+"></div>";
+                this.parent.append(this.html);
+                if(this.mode=="html"){
+                    $("#"+this.id).append(this.htmlInput);
+                }
+            }
+            this.generateJSON = function(){
+                this.jsonInput={};
+                if(this.json.hasOwnProperty("themes")){
+                    this.jsonInput["themes"]=this.json.themes;}
+                if(this.json.hasOwnProperty("plugin")){
+                    this.jsonInput["plugins"]=this.json.plugin;
+                }
+                else{
+                    this.jsonInput["plugins"]=["themes", "json_data", "ui", "types", "sort", "dnd"];
+                }
+
+            }
+            this.createJqueryObject = function(){
+                this[this.id] =$("#"+this.id);
+            }
+            this.createWidget = function(){
+                switch(this.mode){
+                    case 1:
+                        this.jsonInput["json_data"]=this.jsonData;
+                        this[this.id].jstree(this.jsonInput);
+                        break;
+                    case 2:
+                        break;
+                    case 3:
+                        break;
+                }
+            }
+        }
+        var tmp = new Tree(_json);
+        tmp.generateHTML();
+        tmp.createJqueryObject();
+        tmp.generateJSON();
+        tmp.createWidget();
+        return tmp;
+    }
 
     GUI.tree = function (_tree, _parent, _callback, _id) {
         var cb = _callback;
@@ -429,12 +757,13 @@ function initGUI() {
     //----------------------------------------------------------------------------------------------------------------------------------------
 
 
-    GUI.time = function () {
+    GUI.time = function (ms) {
         var html = '';
         var a = new Date();
         var myDate = a.toTimeString().replace(/.*(\d{2}:\d{2}:\d{2}).*/, "$1");
-        var ms = '.' + String((a.getUTCMilliseconds() / 1000).toFixed(3)).slice(2, 5)
-        html += myDate + ms;
+        html += myDate;
+        if(!ms){var ms = '.' + String((a.getUTCMilliseconds() / 1000).toFixed(3)).slice(2, 5);
+        html +=  ms;}
         return html;
     }
 
@@ -452,7 +781,6 @@ function initGUI() {
     }
 
     GUI.InputInteractive = function (_parent, _id, _min, _max, _defaultValue, _precision, _sensibility, _newLine) {
-
         function Object(_parent, _id, _min, _max, _defaultValue, _precision, _sensibility) {
             this.parent = _parent;
             this.id = _id;
@@ -670,7 +998,8 @@ function initGUI() {
             }
 
             this.create = function () {
-                this.jqueryObjectRoot = this.parent.append(this.html);
+                this.parent.append(this.html);
+                this.jqueryObjectRoot =  $("#"+this.idObject);
                 this.jqueryObjectRoot.accordion({
                     header: "h3",
                     navigation: true,
@@ -908,7 +1237,7 @@ function initGUI() {
                 this.listJqueryObjectElement[0] = this[this.id[0]];
                 for (var nbId = 1; nbId < this.id.length; nbId++) {
                     this[this.id[nbId]] = $("#" + this.id[nbId]);
-                    this[this.id[nbId]]["title"] = $('#' + this.idObject + '_header').find("li:nth-child(" + (nbId + 3) + ") a");
+                    this[this.id[nbId]]["title"] = $('#' + this.idObject + '_header').find("li[aria-controls='"+this.id[nbId]+"'] a");
                     this.listJqueryObjectElement[nbItem] = this[this.id[nbId]];
                 }
             }
@@ -1943,6 +2272,10 @@ function initGUI() {
                             if (value == maxScrollTop) {}
                         })
                     }
+                    else{
+                        //elem.css("max-height", height);
+                        // wrap.css("height", height - heightArea);
+                    }
                 });
             }
             this.closeAll = function () {
@@ -2451,7 +2784,7 @@ function initGUI() {
         attributes :
             text : 
                 type : string
-                role : text of the notification (required)
+                role : text of the 33`1 hn21¡  (required)
             title :
                 type : string
                 role : title of the notification

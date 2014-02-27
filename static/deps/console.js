@@ -145,10 +145,10 @@
                 }
 
             }, {
-                greetings: 'Welcome to the fl4re console',
+                greetings: 'Welcome to the rest3d console',
                 name: 'js_command',
                 width: 150,
-                prompt: 'fl4re> ',
+                prompt: 'rest3d> ',
                 outputLimit: -1,
             });
 
@@ -189,7 +189,7 @@
                 checkVisible = true;
                 consoleObject.show();
             }
-            CONSOLE.terminal.echo("fl4re_ERROR> " + GUI.time() + ", line: " + linenumber + ", " + message + " url: " + url);
+            CONSOLE.terminal.echo("rest3d_ERROR> " + GUI.time() + ", line: " + linenumber + ", " + message + " url: " + url);
             if (checkVisible) {
                 consoleObject.hide();
             }
@@ -208,7 +208,7 @@
                 checkVisible = true;
                 consoleObject.show();
             }
-            CONSOLE.terminal.echo("fl4re_ALERT> " + GUI.time() + ": " + message);
+            CONSOLE.terminal.echo("rest3d_ALERT> " + GUI.time() + ": " + message);
             if (checkVisible) {
                 consoleObject.hide();
             }
@@ -227,7 +227,7 @@
                 checkVisible = true;
                 consoleObject.show();
             }
-            CONSOLE.terminal.echo("fl4re_DEBUG> " + GUI.time() + ": " + message);
+            CONSOLE.terminal.echo("rest3d_DEBUG> " + GUI.time() + ": " + message);
             if (checkVisible) {
                 consoleObject.hide();
             }
@@ -246,7 +246,7 @@
                 checkVisible = true;
                 consoleObject.show();
             }
-            CONSOLE.terminal.echo("fl4re_LOG> " + GUI.time() + ": " + message);
+            CONSOLE.terminal.echo("rest3d_LOG> " + GUI.time() + ": " + message);
             if (checkVisible) {
                 consoleObject.hide();
             }
@@ -265,7 +265,7 @@
                 checkVisible = true;
                 consoleObject.show();
             }
-            CONSOLE.terminal.echo("fl4re_ERROR> " + GUI.time() + ": " + message);
+            CONSOLE.terminal.echo("rest3d_ERROR> " + GUI.time() + ": " + message);
             if (checkVisible) {
                 consoleObject.hide();
             }
@@ -285,7 +285,7 @@
                 checkVisible = true;
                 consoleObject.show();
             }
-            CONSOLE.terminal.echo("fl4re_WARNING> " + GUI.time() + ": " + message);
+            CONSOLE.terminal.echo("rest3d_WARNING> " + GUI.time() + ": " + message);
             if (checkVisible) {
                 consoleObject.hide();
             }
@@ -313,19 +313,19 @@
 
             $("div.terminal-output > div").each(function (index) {
                 var tmp = $(this).find('div').text();
-                if (tmp.match("fl4re_DEBUG")) {
+                if (tmp.match("rest3d_DEBUG")) {
                     $(this).find('div').css('color', 'white');
                 }
-                if (tmp.match("fl4re_ERROR")) {
+                if (tmp.match("rest3d_ERROR")) {
                     $(this).find('div').css('color', 'red');
                 }
-                if (tmp.match("fl4re_ALERT")) {
+                if (tmp.match("rest3d_ALERT")) {
                     $(this).find('div').css('color', 'red');
                 }
-                if (tmp.match("fl4re_WARNING")) {
+                if (tmp.match("rest3d_WARNING")) {
                     $(this).find('div').css('color', 'yellow');
                 }
-                if (tmp.match("fl4re_LOG")) {
+                if (tmp.match("rest3dLOG")) {
                     $(this).find('div').css('color', '#2e7db2');
                 }
             });
@@ -334,19 +334,19 @@
         function hideELements(error, debug, log, warn) {
             $("div.terminal-output > div").each(function (index) {
                 var tmp = $(this).find('div').text();
-                if (tmp.match("fl4re_DEBUG") && debug) {
+                if (tmp.match("rest3d_DEBUG") && debug) {
                     $(this).hide();
                 }
-                if (tmp.match("fl4re_ERROR") && error) {
+                if (tmp.match("rest3d_ERROR") && error) {
                     $(this).hide();
                 }
-                if (tmp.match("fl4re_ALERT") && error) {
+                if (tmp.match("rest3d_ALERT") && error) {
                     $(this).hide();
                 }
-                if (tmp.match("fl4re_WARNING") && warn) {
+                if (tmp.match("rest3d_WARNING") && warn) {
                     $(this).hide();
                 }
-                if (tmp.match("fl4re_LOG") && log) {
+                if (tmp.match("rest3d_LOG") && log) {
                     $(this).hide();
                 }
             });
@@ -355,19 +355,19 @@
         function showELements(error, debug, log, warn) {
             $("div.terminal-output > div").each(function (index) {
                 var tmp = $(this).find('div').text();
-                if (tmp.match("fl4re_DEBUG") && debug) {
+                if (tmp.match("rest3d_DEBUG") && debug) {
                     $(this).show();
                 }
-                if (tmp.match("fl4re_ERROR") && error) {
+                if (tmp.match("rest3d_ERROR") && error) {
                     $(this).show();
                 }
-                if (tmp.match("fl4re_ALERT") && error) {
+                if (tmp.match("rest3d_ALERT") && error) {
                     $(this).show();
                 }
-                if (tmp.match("fl4re_WARNING") && warn) {
+                if (tmp.match("rest3d_WARNING") && warn) {
                     $(this).show();
                 }
-                if (tmp.match("fl4re_LOG") && log) {
+                if (tmp.match("rest3d_LOG") && log) {
                     $(this).show();
                 }
             });

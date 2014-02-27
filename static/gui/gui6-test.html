@@ -27,11 +27,14 @@ THE SOFTWARE.
     <meta content="text/html;charset=utf-8" http-equiv="Content-Type">
     <meta content="utf-8" http-equiv="encoding">
 
-    <link rel="stylesheet" href="../gui/gui6.css"/>   
     <script type="text/javascript" src="../gui/gui6.js"></script>
     <script type="text/javascript" src="../deps/console.js"></script>
-
-     <script type="text/javascript">
+    <script type="text/javascript">
+    dep.push({link:"/deps/tree/themes/default/style.min.css"});
+    </script>
+    </head>
+<body>
+    <script type="text/javascript">
 
     function INIT(){
         var listThemes = ["black-tie", "blitzer", "cupertino", "dark-hive", "dot-luv", "eggplant", "excite-bike", "flick", "hot-sneaks", "humanity", "le-frog", "mint-choc", "overcast", "pepper-grinder", "redmond", "smoothness", "south-street", "start", "sunny", "swanky-purse", "trontastic", "ui-darkness", "ui-lightness", "vader"];
@@ -708,6 +711,24 @@ THE SOFTWARE.
         layout.jqueryObject.sizePane("west", $(window).width() - 300);
         setTimeout(function(){layout.jqueryObject.sizePane("west", $(window).width() - 299);},1000);
 
+        //layout.jqueryObjectWest.append("<div id='selector'><ul><li><a>Team A's Projects</a><ul><li><a>Iteration 1</a><ul><li><a>Story A</a></li><li><a>Story B</a></li><li><a>Story C</a></li></ul></li><li><a>Iteration 2</a><ul><li><a>Story D</a></li></ul></li></ul></li></ul></div>")
+        renderMenu.render.append("<div id='treeViewDiv'></div>");
+        $("#treeViewDiv").jstree({
+                    "json_data" : {
+                        "data":[
+                            {
+                                "data" : "Search engines"
+                            },
+                            {
+                                "data" : "Networking sites"
+                            }
+                        ]
+                    },
+                    "plugins" : [ "themes", "json_data", "ui" ]
+                });
+          
+
+
         layout.jqueryObject.resizeAll();
         layout.jqueryObject.initContent("center");
         layout.jqueryObject.initContent("west");
@@ -718,5 +739,4 @@ THE SOFTWARE.
       loadGUI(INIT);
         
          </script>
-         </head>
-<body></body>
+</body>
