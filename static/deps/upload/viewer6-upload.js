@@ -1,6 +1,7 @@
 setViewer6Upload=function(upload){
     var header;
     var index;
+    var buttonToReplace;
     upload.callOnClick(function(){
         header = upload.header();
         console.debug(header.html());
@@ -22,6 +23,7 @@ setViewer6Upload=function(upload){
                         data.abort();
                     });
                 data.submit();
+                buttonToReplace=$(this);
                 //.always(function () {
                 //     $this.remove();
                 // });
@@ -73,7 +75,6 @@ setViewer6Upload=function(upload){
     upload.object.on('fileuploadadd', function (e, data) {
         upload.object=$(this);
         data.context = header;
-        console.debug(header);
         $.each(data.files, function (index, file) {
             // var node = $('<p/>')
             //         .append($('<span/>').text(file.name));
@@ -88,8 +89,6 @@ setViewer6Upload=function(upload){
             //node.appendTo(data.context);
         });
     }).on('fileuploadprocessalways', function (e, data) {
-        //console.debug("data"+data.context.children('div')[index+1].html());
-        console.debug("alala "+data.files);
             var indexI = data.index,
             file = data.files[indexI],
              node = $(data.context.children('div')[index+1]);
@@ -128,8 +127,7 @@ setViewer6Upload=function(upload){
             var $node = convertButton.clone(true).data({file: file, context: data.context})
                 .text('Convert')
                 .prop('disabled', !/dae$/i.test(file.url));
-            $(data.context.children('div')[index])
-                .find("button") // the <a>
+            buttonToReplace
                 .replaceWith($node);
         });
     }).on('fileuploadfail', function (e, data) {
