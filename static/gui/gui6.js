@@ -500,6 +500,7 @@ function initGUI() {
                 }
 
             this.header = function(){
+                var stock = this;
                 this.filesArea.append('<br>');
                 var $frame = $('<div class="upload_header"></div>');
                 this.filesArea.append($frame);
@@ -509,6 +510,7 @@ function initGUI() {
                 var $spanButton = htmlSpan($head,12);
                 var $j = $("<button>X</button>").on('click', function (){
                     $frame.hide();
+                    stock.filesArea.find("br:last-child").remove();
                 });
                 $spanButton.append($j);
                 return $frame;
