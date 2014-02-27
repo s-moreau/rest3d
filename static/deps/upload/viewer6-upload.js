@@ -55,20 +55,18 @@ setViewer6Upload=function(upload){
                         // ennumerate all resulting files
                         var $conve = upload.header(data.file.name);
                         $.each(data.result.files, function (index, file) {
-                            var $dialog = $("<button>Dialog</button>").on("click",function(){
-                                var gitHtml = $('<div><iframe id="myIframe" src="" style="height:99% !important; width:99% !important; border:0px;"></iframe></div>');
+                            var $download = $("<button>Downl..</button>").on("click",function(){
+                                var gitHtml = $('<iframe id="myIframe" src="'+decodeURIComponent(file.url))+'" style="height:99% !important; width:99% !important; border:0px;"></iframe></div>');
                                 gitPanel = $('body').append(gitHtml);
-                                gitHtml.dialog({
-                                autoOpen: true,
-                                width: 800,
-                                height: 600,
-                                open: function (ev, ui) {
-                                    gitHtml.find('iframe').attr('src', decodeURIComponent(file.url));
-                                },
-                            })
-                            })
+                            });
+                            var $dialog = $("<button>Dialog</button>").on("click",function(){
+                                var callback = function(data){
+                                    console.debug(data);
+                                }
+                                rest3d.getFileConverted(decodeURIComponent(file.url),callback);
+                            });
                             // function(parent,link,button1,button2,button3){
-                            upload.convert($conve,formatName(data,file),$dialog,$("<button>Display</button>"),$("<button>Downlo</button>"));
+                            upload.convert($conve,formatName(data,file),$dialog,$("<button>Display</button>"),$download);
                             // var span = '<p><span><a href="'+decodeURIComponent(file.url)+'" target="_blank"><p><span>'+formatName(data,file)+'</a>';
                             // // endsWith
                             // if (file.url.indexOf('.json', file.url.length - '.json'.length) !== -1) {

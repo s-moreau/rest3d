@@ -13,3 +13,17 @@ rest3d.convert = function(_params, _cb) {
         if (cb) cb(params);
     });
 };
+
+rest3d.getFileConverted = function(_file, _cb){
+    var params="";
+    var cb=_cb;
+
+    $.get(_file)
+    .done(function(data) {
+      if (data) params = data; 
+      if (cb) cb(params);
+    }).fail(function(data) {
+        console.log("Error Converting "+params.file.name);
+        params.error = JSON.parse(data.error().responseText);
+    });
+};

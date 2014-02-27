@@ -504,7 +504,7 @@ THE SOFTWARE.
         $.getScript("../deps/upload/viewer6-upload.js").done(function( script, textStatus ) {
             setViewer6Upload(upload);
           }).fail(function(err){
-            console.error(err);
+            console.error("upload external script failed to load");
           });
 
         jumpLine();
