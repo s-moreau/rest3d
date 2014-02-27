@@ -40,6 +40,7 @@ if (window.mat4 === undefined)
     document.write('<script src="/deps/gl-matrix.js"><\/'+'script>');
     document.write('<script src="/loaders/gl-matrix-ext.js"><\/'+'script>');
 }
+
 /*
 if (window.TextureUtil === undefined)
 {
@@ -425,56 +426,61 @@ if (window.TextureUtil === undefined)
       }
 
     // allocate shadred uniforms
-    // also from rendermonkey:
-    // ViewDirection, ViewPosition, ViewSideVector, ViewUpVector, FOV, NearClipPlane, FarClipPlane
+    // MODEL - mat4 or mat3 - Transforms from model to world coordinates using the transform's node and all of its parents.
+    // VIEW - mat4 or mat3 - Transforms from world to view coordinates using the active camera node.
+    // PROJECTION - mat4 or mat3 - Transforms from view to clip coordinates using the active camera node.
+    // MODELVIEW - mat4 or mat3 - Combined MODEL and VIEW.
+    // MODELVIEWPROJECTION - mat4 or mat3 - Combined MODEL, VIEW, and PROJECTION.
+    
+    //Inverses
+    
+    // MODELINVERSE - mat4 or mat3 - Inverse of MODEL.
+    // VIEWINVERSE - mat4 or mat3 - Inverse of VIEW.
+    // ROJECTIONINVERSE - mat4 or mat3 - Inverse of PROJECTION.
+    // MODELVIEWINVERSE - mat4 or mat3 - Inverse of MODELVIEW.
+    // MODELVIEWPROJECTIONINVERSE - mat4 or mat3 - Inverse of MODELVIEWPROJECTION.
+    
+    //Inverse transposes
+    
+    // MODELINVERSETRANSPOSE - mat3 or mat2 - The inverse-transpose of MODEL without the translation. This translates normals in model coordinates to world coordinates.
+    // MODELVIEWINVERSETRANSPOSE - mat3 or mat2 - The inverse-transpose of MODELVIEW without the translation. This translates normals in model coordinates to eye coordinates.
 
       State.Uniforms = {
-        WORLD: mat4.create(),
-        WORLDINVERSE: mat4.create(),
-        WORLDTRANSPOSE: mat4.create(),
-        WORLDINVERSETRANSPOSE: mat4.create(),
+        MODEL: mat4.create(),
+        MODELINVERSE: mat4.create(),
 
         VIEW: mat4.create(),
         VIEWINVERSE: mat4.create(),
-        VIEWTRANSPOSE: mat4.create(),
-        VIEWINVERSETRANSPOSE: mat4.create(),
 
         PROJECTION: mat4.create(),
         PROJECTIONINVERSE: mat4.create(),
-        PROJECTIONTRANSPOSE: mat4.create(),
-        PROJECTIONINVERSETRANSPOSE: mat4.create(),
 
-        WORLDVIEW: mat4.create(),
-        WORLDVIEWINVERSE: mat4.create(),
-        WORLDVIEWTRANSPOSE: mat4.create(),
-        WORLDVIEWINVERSETRANSPOSE: mat4.create(),
+        MODELVIEW: mat4.create(),
+        MODELVIEWINVERSE: mat4.create(),
 
-        VIEWPROJECTION: mat4.create(),
-        VIEWPROJECTIONINVERSE: mat4.create(),
-        VIEWPROJECTIONTRANSPOSE: mat4.create(),
-        VIEWPROJECTIONINVERSETRANSPOSE: mat4.create(),
+        MODELVIEWPROJECTION: mat4.create(),
+        MODELVIEWPROJECTIONINVERSE: mat4.create(),
 
-        WORLDVIEWPROJECTION: mat4.create(),
-        WORLDVIEWPROJECTIONINVERSE: mat4.create(),
-        WORLDVIEWPROJECTIONTRANSPOSE: mat4.create(),
-        WORLDVIEWPROJECTIONINVERSETRANSPOSE: mat4.create(),
-
-        NORMAL: mat3.create(), // 3x3 version of WORLDVIEWINVERSETRANSPOSE
+        MODELINVERSETRANSPOSE: mat3.create(),
+        MODELVIEWINVERSETRANSPOSE: mat3.create(), // NORMAL
 
       };
-      State.formatEnum = {
-        FLOAT: {type: _gl.FLOAT, size:3},
-        FLOAT_VEC2: {type: _gl.FLOAT, size:2},
-        FLOAT_VEC3: {type: _gl.FLOAT, size:3},
-        FLOAT_VEC4: {type: _gl.FLOAT, size:4}
-      };
 
-      State.formatFn = {
-        FLOAT: _gl.vertexAttrib1f,
-        FLOAT_VEC2: _gl.vertexAttrib2fv,
-        FLOAT_VEC3: _gl.vertexAttrib3fv,
-        FLOAT_VEC4: _gl.vertexAttrib4fv,
-      };
+      // convert from complex types to simple types
+      State.formatEnum = {};
+        State.formatEnum[WebGLRenderingContext.FLOAT] =  {type: _gl.FLOAT, size:1};
+        State.formatEnum[WebGLRenderingContext.FLOAT_VEC2] = {type: _gl.FLOAT, size:2},
+        State.formatEnum[WebGLRenderingContext.FLOAT_VEC3] = {type: _gl.FLOAT, size:3},
+        State.formatEnum[WebGLRenderingContext.FLOAT_VEC4] = {type: _gl.FLOAT, size:4}
+    
+
+
+      State.formatFn = {};
+        State.formatFn[WebGLRenderingContext.FLOAT] = _gl.vertexAttrib1f;
+        State.formatFn[WebGLRenderingContext.FLOAT_VEC2] = _gl.vertexAttrib2fv;
+        State.formatFn[WebGLRenderingContext.FLOAT_VEC3] =_gl.vertexAttrib3fv;
+        State.formatFn[WebGLRenderingContext.FLOAT_VEC4] =  _gl.vertexAttrib4fv;
+
 
       // utilities
 
@@ -932,7 +938,8 @@ if (window.TextureUtil === undefined)
       var override = _overrides[overrideID];
       if (state.program.uniforms[overrideID]) {
         // convert strings into gl enums
-       if (override.type === 'SAMPLER_2D') {
+        /*
+       if (override.type === WebGLRenderingContext.SAMPLER_2D) {
           for (var key in override.value) {
             // only parameters of type 'string'
             if (typeof override.value[key] === 'string'){
@@ -944,6 +951,7 @@ if (window.TextureUtil === undefined)
             } 
           }
         }
+        */
         State.setUniform(state,state.program.uniforms[overrideID], override.value);
       } else if (state.program.attributes[overrideID]) {
         RENDERER.logError('ERROR - need to write override of attributes')
@@ -956,13 +964,13 @@ if (window.TextureUtil === undefined)
     var state = State.create(); // this state is not attached to a context
     state.program = {};
 
-    state.program.vertexShader = _pass.vertexShader;
-    state.program.fragmentShader = _pass.fragmentShader;
+    state.program.vertexShader = _pass.program.vertexShader.str;
+    state.program.fragmentShader = _pass.program.fragmentShader.str;
 
     state.program.compileMe = true;
     state.program.glProgram = null;
 
-    state.program.attributes = _pass.attributes;
+    state.program.attributes = _pass.program.attributes;
     /*
     for (var key in attributes) {
       var attribute = attributes[key];
@@ -975,7 +983,7 @@ if (window.TextureUtil === undefined)
     // todo - those can have a default value ?
     // todo -  move this to a function -> allocate uniformss
 
-    State.allocateUniforms(state,_pass.uniforms);
+    State.allocateUniforms(state,_pass.program.uniforms);
 
     // now take care of the gl states
     for (var key in _pass.states) {
@@ -1017,10 +1025,7 @@ if (window.TextureUtil === undefined)
       var type = uniform.type; 
       var value = uniform.value; 
 
-      // special case because of glTF current state
-      if (semantic === 'WORLDVIEWINVERSETRANSPOSE' && type === 'FLOAT_MAT3') 
-        semantic = 'NORMAL';
-
+      
       _state.program.uniforms[semantic] = {};
 
       // see if this is a special shared uniform
@@ -1032,25 +1037,25 @@ if (window.TextureUtil === undefined)
         // TODO -- what about a new shared uniform?
 
         switch (type) {
-          case 'FLOAT':
+          case WebGLRenderingContext.FLOAT:
             if (!value) value = 0;
             break;
-          case 'FLOAT_VEC2':
+          case WebGLRenderingContext.FLOAT_VEC2:
             if (!value) value=vec2.create(); else value=vec2.clone(value);
             break;
-          case 'FLOAT_VEC3':
+          case WebGLRenderingContext.FLOAT_VEC3:
             if (!value) value=vec3.create(); else value=vec3.clone(value);
             break;
-          case 'FLOAT_VEC4':
+          case WebGLRenderingContext.FLOAT_VEC4:
             if (!value) value=vec4.create(); else value=vec4.clone(value);
             break;
-          case 'FLOAT_MAT3':
+          case WebGLRenderingContext.FLOAT_MAT3:
             if (!value) value=mat3.create(); else value=mat3.clone(value);
             break;
-          case 'FLOAT_MAT4':
+          case WebGLRenderingContext.FLOAT_MAT4:
             if (!value) value=mat4.create(); else value=mat4.clone(value);
             break;
-          case 'SAMPLER_2D':
+          case WebGLRenderingContext.SAMPLER_2D:
             // assign a texture unit, setUniform will create the glTexture
             // TODO - is there a (value) passed in?
             if (value && value.textureUnit) {
@@ -1124,16 +1129,16 @@ if (window.TextureUtil === undefined)
     state.program.compileMe = true;
     state.program.glProgram = null;
 
-    state.program.attributes = [ { semantic: 'POSITION', symbol: 'aVertex', type: 'FLOAT_VEC3' },
-                                 { semantic: 'NORMAL', symbol: 'aNormal', type: 'FLOAT_VEC3'} ,
-                                 { semantic: 'TEXCOORD_0', symbol: 'aTexCoord0', type: 'FLOAT_VEC2'},
-                                 { semantic: 'COLOR', symbol: 'aColor', type: 'FLOAT_VEC4'}];
+    state.program.attributes = { 'POSITION' : { semantic: 'POSITION', symbol: 'aVertex', type: WebGLRenderingContext.FLOAT_VEC3 },
+                                 'NORMAL' : { semantic: 'NORMAL', symbol: 'aNormal', type: WebGLRenderingContext.FLOAT_VEC3} ,
+                                 'TEXCOORD_0' : { semantic: 'TEXCOORD_0', symbol: 'aTexCoord0', type: WebGLRenderingContext.FLOAT_VEC2},
+                                 'COLOR' : { semantic: 'COLOR', symbol: 'aColor', type: WebGLRenderingContext.FLOAT_VEC4}};
 
-    var uniforms = [ { semantic: 'WORLDVIEW', symbol: 'uMVMatrix' , type: 'FLOAT_MAT4' },
-                     { semantic: 'PROJECTION',  symbol: 'uPMatrix' , type: 'FLOAT_MAT4' },
-                     { semantic: 'NORMAL', symbol: 'uNMatrix', type: 'FLOAT_MAT3'},
-                     { semantic: 'diffuse', symbol: 'uTexture0', type: 'SAMPLER_2D' },
-                     { semantic: 'alphaScale', symbol: 'uAlphaScale', type: 'FLOAT', value: 1}];
+    var uniforms = [ { semantic: 'MODELVIEW', symbol: 'uMVMatrix' , type: WebGLRenderingContext.FLOAT_MAT4 },
+                     { semantic: 'PROJECTION',  symbol: 'uPMatrix' , type: WebGLRenderingContext.FLOAT_MAT4 },
+                     { semantic: 'MODELVIEWINVERSETRANSPOSE', symbol: 'uNMatrix', type: WebGLRenderingContext.FLOAT_MAT3},
+                     { semantic: 'diffuse', symbol: 'uTexture0', type: WebGLRenderingContext.SAMPLER_2D },
+                     { semantic: 'alphaScale', symbol: 'uAlphaScale', type: WebGLRenderingContext.FLOAT, value: 1}];
 
     State.allocateUniforms(state,uniforms);
 
@@ -1157,16 +1162,16 @@ if (window.TextureUtil === undefined)
       var program = {};
       program.compileMe = _state.program.compileMe;
       program.glProgram = _state.program.glProgram;
-      program.attributes = [];
+      program.attributes = {};
       // copy everything except values?
-      for (var i =0; i<_state.program.attributes.length;i++) {
-          var attribute = _state.program.attributes[i];
+      for (var semantic in _state.program.attributes) {
+          var attribute = _state.program.attributes[semantic];
           var newattribute = {}
           newattribute.location = attribute.location;
           newattribute.semantic = attribute.semantic;
           newattribute.symbol = attribute.symbol;
           newattribute.type = attribute.type;
-          program.attributes.push(newattribute);
+          program.attributes[semantic] = newattribute;
       }
       var uniforms = _state.program.uniforms;
     
@@ -1243,8 +1248,8 @@ if (window.TextureUtil === undefined)
         }
         // copy only what we need, so we don't erase Material specifics values
         _state.program.glProgram = program.glProgram;
-        for (var i=0;i<program.attributes.length;i++) {
-          _state.program.attributes[i].location = program.attributes[i].location;
+        for (var semantic in program.attributes) {
+          _state.program.attributes[semantic].location = program.attributes[semantic].location;
           //if (program.value) _state.program.attributes[i].value = program.value;
         }
 
@@ -1287,10 +1292,10 @@ if (window.TextureUtil === undefined)
     program.uniforms = _state.program.uniforms;
     program.attributes = _state.program.attributes;
 
-    for (var i=0;i<program.attributes.length;i++)
+    for (var semantic in program.attributes)
     {
-      var attribute = program.attributes[i];
-      program.attributes[i].location = gl.getAttribLocation(glProgram, attribute.symbol);
+      var attribute = program.attributes[semantic];
+      attribute.location = gl.getAttribLocation(glProgram, attribute.symbol);
     }
       
     // find uniforms location
@@ -1314,43 +1319,43 @@ if (window.TextureUtil === undefined)
 
     var gl=_state.gl;
     switch (type){
-      case 'FLOAT_VEC2':
+      case WebGLRenderingContext.FLOAT_VEC2:
         if (_uniform.value !== _value) {
           vec2.copy(_uniform.value, _value);    
           if (gl && _uniform.location) gl.uniform2fv(_uniform.location, _value);  
         }
         break;
-      case 'FLOAT_VEC3':
+      case WebGLRenderingContext.FLOAT_VEC3:
         if (_uniform.value !== _value) {
           vec3.copy(_uniform.value, _value);
           if (gl && _uniform.location) gl.uniform3fv(_uniform.location, _value);
         }
         break;
-      case 'FLOAT_VEC4':
+      case WebGLRenderingContext.FLOAT_VEC4:
         if (_uniform.value !== _value) {
           vec4.copy(_uniform.value, _value);
           if (gl && _uniform.location) gl.uniform4fv(_uniform.location, _value);
         }
         break;
-      case 'FLOAT_MAT4':
+      case WebGLRenderingContext.FLOAT_MAT4:
         if (_uniform.value !== _value) {
           mat4.copy(_uniform.value, _value);
           if (gl && _uniform.location) gl.uniformMatrix4fv(_uniform.location, false, _value);
         }
         break;
-      case 'FLOAT_MAT3':
+      case WebGLRenderingContext.FLOAT_MAT3:
         if (_uniform.value !== _value) { 
           mat3.copy(_uniform.value, _value);
           if (gl && _uniform.location) gl.uniformMatrix3fv(_uniform.location, false, _value);
         }
         break;
-      case 'FLOAT':
+      case WebGLRenderingContext.FLOAT:
         if (_uniform.value !== _value) {
           _uniform.value = _value;
           if (gl && _uniform.location) gl.uniform1f(_uniform.location, _value);
         }
         break;
-      case 'SAMPLER_2D':
+      case WebGLRenderingContext.SAMPLER_2D:
       /*  value is this object:
           "image": document.images[parameter.image],
           "magFilter": parameter.magFilter,
@@ -1397,30 +1402,30 @@ if (window.TextureUtil === undefined)
       var type = _uniform.type;
 
       switch (type){
-        case 'FLOAT_VEC2':
+        case WebGLRenderingContext.FLOAT_VEC2:
           gl.uniform2fv(_uniform.location, _value);
           
           break;
-        case 'FLOAT_VEC3':
+        case WebGLRenderingContext.FLOAT_VEC3:
           gl.uniform3fv(_uniform.location, _value);
           
           break;
-        case 'FLOAT_VEC4':
+        case WebGLRenderingContext.FLOAT_VEC4:
           gl.uniform4fv(_uniform.location, _value);
           
           break;
-        case 'FLOAT_MAT4':
+        case WebGLRenderingContext.FLOAT_MAT4:
              gl.uniformMatrix4fv(_uniform.location, false, _value);
           break;
-        case 'FLOAT_MAT3':
+        case WebGLRenderingContext.FLOAT_MAT3:
               gl.uniformMatrix3fv(_uniform.location, false, _value);
           
           break;
-        case 'FLOAT':
+        case WebGLRenderingContext.FLOAT:
              gl.uniform1f(_uniform.location, _value);
           
           break;
-        case 'SAMPLER_2D':
+        case WebGLRenderingContext.SAMPLER_2D:
           if (_uniform.value.glTexture) {
             gl.activeTexture(gl.TEXTURE0 + _uniform.value.textureUnit);
             gl.bindTexture(gl.TEXTURE_2D, _uniform.value.glTexture); 
@@ -1493,12 +1498,12 @@ if (window.TextureUtil === undefined)
     var tmpmat3 = new Float32Array(9);
 
     return function (_state, _mv)  {
-        State.setUniform(_state, _state.program.uniforms.WORLDVIEW, _mv);
+        State.setUniform(_state, _state.program.uniforms.MODELVIEW, _mv);
 
         mat3.fromMat4(tmpmat3, _mv)
         mat3.transpose(tmpmat3,mat3.invert(tmpmat3,tmpmat3))
-        if (_state.program.uniforms.NORMAL) 
-          State.setUniform(_state,_state.program.uniforms.NORMAL, tmpmat3);
+        if (_state.program.uniforms.MODELVIEWINVERSETRANSPOSE) 
+          State.setUniform(_state,_state.program.uniforms.MODELVIEWINVERSETRANSPOSE, tmpmat3);
 
       return _state;
     }
@@ -1808,13 +1813,13 @@ RENDERER.primitive.prototype = {
     createAttributeBuffers: function(_state){
       var gl=_state.gl;
       if (!gl) return _state;
-      for (var i=0,len = _state.program.attributes.length; i<len;i++){
-        var attribute = _state.program.attributes[i];
-        if (this.buffer[attribute.semantic])
+      for (var semantic in _state.program.attributes)
+      {
+        if (this.buffer[semantic])
         {
-          this.glBuffer[attribute.semantic] = gl.createBuffer();
-          gl.bindBuffer(gl.ARRAY_BUFFER, this.glBuffer[attribute.semantic]);
-          gl.bufferData(gl.ARRAY_BUFFER, this.buffer[attribute.semantic], gl.STATIC_DRAW);
+          this.glBuffer[semantic] = gl.createBuffer();
+          gl.bindBuffer(gl.ARRAY_BUFFER, this.glBuffer[semantic]);
+          gl.bufferData(gl.ARRAY_BUFFER, this.buffer[semantic], gl.STATIC_DRAW);
         } 
       }
       // special case for indexes, they are not referenced by the program directly
@@ -1836,12 +1841,10 @@ RENDERER.primitive.prototype = {
       var gl = _state.gl;
       if (!gl) return _state;
 
-      for (var i=0,len=_state.program.attributes;i<len;i++)
-      {
-        var attribute = _state.program.attributes[i];
-        if (this.glBuffer[attribute.semantic] ) {
-           gl.bindBuffer(gl.ARRAY_BUFFER, this.glBuffer[attribute.semantic]);
-           gl.bufferSubData(gl.ARRAY_BUFFER, 0, this.buffer[attribute.semantic]);
+      for (var semantic in _state.program.attributes){
+        if (this.glBuffer[semantic] ) {
+           gl.bindBuffer(gl.ARRAY_BUFFER, this.glBuffer[semantic]);
+           gl.bufferSubData(gl.ARRAY_BUFFER, 0, this.buffer[semantic]);
         } 
       }
       // special case for index
@@ -1870,12 +1873,12 @@ RENDERER.primitive.prototype = {
           // deal with attributes, they point to the primitive buffers
           // need to add possible override ?
 
-          for (var i=0,len=_channel.state.program.attributes.length;i<len;i++) {
-            var attribute = _channel.state.program.attributes[i];
+          for (var semantic in _channel.state.program.attributes) {
+            var attribute = _channel.state.program.attributes[semantic];
             if (attribute.location>=0) {
               // if this attribute is connected to an array
-              if (this.glBuffer[attribute.semantic]) {            
-                gl.bindBuffer(gl.ARRAY_BUFFER, this.glBuffer[attribute.semantic]);
+              if (this.glBuffer[semantic]) {            
+                gl.bindBuffer(gl.ARRAY_BUFFER, this.glBuffer[semantic]);
                 gl.enableVertexAttribArray(attribute.location);
                 gl.vertexAttribPointer(attribute.location, State.formatEnum[attribute.type].size, State.formatEnum[attribute.type].type, false, 0, 0);
               
@@ -1884,7 +1887,7 @@ RENDERER.primitive.prototype = {
                  State.formatFn[attribute.type](attribute.location, attribute.value);
               // get value from the primitive
               } else {
-                State.formatFn[attribute.type](attribute.location,this.value[attribute.semantic]); 
+                State.formatFn[attribute.type](attribute.location,this.value[semantic]); 
               }
             }        
           }
@@ -1896,11 +1899,13 @@ RENDERER.primitive.prototype = {
           } else
               gl.drawArrays(this.prim, 0, this.numVertices);
 
-          for (var i=0,len=state.program.attributes.length;i<len;i++)
-            gl.disableVertexAttribArray(i);
+          for (var semantic in _channel.state.program.attributes) {
+            var attribute = _channel.state.program.attributes[semantic];
+            gl.disableVertexAttribArray(attribute.location);
+          }
         }
 
-    },
+    }
 };
 
 }).call(this);

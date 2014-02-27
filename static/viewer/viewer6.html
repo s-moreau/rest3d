@@ -43,10 +43,11 @@ THE SOFTWARE.
 
 </head>
 <body oncontextmenu="return false">
+
 <script type="text/javascript">
     
     function INIT(){
-    $("document").ready(function () {
+    
         "use strict";//
           var mask;
         var win =$('');
@@ -553,7 +554,7 @@ THE SOFTWARE.
             }
         });
 
-        GUI.button('duck rest3d(collada file broken?)', accordion.collada, function () {
+        GUI.button('duck rest3d(need database)', accordion.collada, function () {
             pleaseWait(true);
             var url = "/rest3d/assets/duck/duck.dae";
             COLLADA.load(url, parse_dae);
@@ -561,6 +562,7 @@ THE SOFTWARE.
             pleaseWait(false);
         }).width("90%");
         accordion.collada.append("<hr></hr>");
+
         GUI.button('duck', accordion.collada, function () {
             pleaseWait(true);
             var url = "/models/duck/duck.dae"
@@ -579,9 +581,18 @@ THE SOFTWARE.
         }).width("90%");
         accordion.collada.append("<hr></hr>");
 
+        GUI.button('skinned creature (fix me!!)', accordion.gltf, function () {
+            pleaseWait(true);
+            var url = "/models/Amahani/Amahani.json";
+            glTF.load(url, parse_gltf);
+            notif(url);
+            pleaseWait(false);
+        }).width("90%");
+        accordion.gltf.append("<hr></hr>");
+
         GUI.button('duck', accordion.gltf, function () {
             pleaseWait(true);
-            var url = "/models/duck/duck.json"
+            var url = "/models/duck-glft/duck_triangulate.json"
             glTF.load(url, parse_gltf);
             notif(url);
             pleaseWait(false);
@@ -598,10 +609,10 @@ THE SOFTWARE.
         }).width("90%");
         accordion.gltf.append("<hr></hr>");
 
-        GUI.button('rambler-min(material.pass undef)', accordion.collada, function () {
+        GUI.button('rambler-min', accordion.collada, function () {
             pleaseWait(true);
             var url = "/models/rambler/Rambler-min.dae";
-            COLLADA.load(url, parse_gltf);
+            COLLADA.load(url, parse_dae);
             notif(url);
             pleaseWait(false);
 
@@ -795,8 +806,8 @@ THE SOFTWARE.
                             var set = bind_vertex_input.input_set || 0;
                             var input_semantic = bind_vertex_input.input_semantic + '_' + set;
                             var search = null;
-                            for (var j = 0; j < state.program.attributes.length; j++) {
-                                if (state.program.attributes[j].semantic === input_semantic) {
+                            for (var attribute in state.program.attributes) {
+                                if (state.program.attributes[attribute].semantic === input_semantic) {
                                     search = bind_vertex_input.semantic;
                                     break;
                                 }
@@ -805,8 +816,8 @@ THE SOFTWARE.
                             input_semantic = bind_vertex_input.input_semantic + '_0';
 
                             if (!search) {
-                                for (var j = 0; j < state.program.attributes.length; j++) {
-                                    if (state.program.attributes[j].semantic === input_semantic) {
+                                for (var attribute in state.program.attributes) {
+                                    if (state.program.attributes[attribute].semantic === input_semantic) {
                                         search = bind_vertex_input.semantic;
                                         break;
                                     }
@@ -823,9 +834,9 @@ THE SOFTWARE.
                             var diffuse = material.parameters.diffuse;
                             if (!diffuse.texcoord) {
                                 search = null;
-                                for (var j = 0; j < state.program.attributes.length; j++) {
-                                    if (state.program.attributes[j].semantic === 'COLOR') {
-                                        search = state.program.attributes[j];
+                                for (var attribute in state.program.attributes) {
+                                    if (state.program.attributes[attribute].semantic === 'COLOR') {
+                                        search = state.program.attributes[attribute];
                                         break;
                                     }
                                 }
@@ -908,7 +919,7 @@ THE SOFTWARE.
 
                     // let's store the Type Arrays in each primitives
 
-                    var primitives = geometry.mesh;
+                    var primitives = geometry.meshes;
                     var materials = geometry.materials;
 
                     for (var i = 0; i < primitives.length; i++) {
@@ -1067,7 +1078,7 @@ THE SOFTWARE.
                 var node = _nodes[j];
 
                 pushMatrix();
-                mat4.multiply(mvMatrix, mvMatrix, node.mat4);
+                mat4.multiply(mvMatrix, mvMatrix, node.mat4 || node.local) ;
                 //State.setModelView(this.state,mvMatrix);
 
                 if (node.children)
@@ -1143,7 +1154,7 @@ THE SOFTWARE.
                 aabb.add(nodebb, nodebb,
                     _callback.call(node));
 
-                aabb.transform(nodebb, nodebb, node.mat4);
+                aabb.transform(nodebb, nodebb, node.mat4 || node.local);
                 aabb.add(bounds, bounds, nodebb);
             }
             return bounds;
@@ -1174,7 +1185,7 @@ THE SOFTWARE.
         window.loadCss("dot-luv");
 
 
-        });
+       
 }
         loadGUI(INIT);
          </script>

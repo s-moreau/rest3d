@@ -1,5 +1,5 @@
 /*
- gltf.js 
+gltf.js -  a simple glTF loader   
 
 The MIT License (MIT)
 
@@ -23,32 +23,35 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 
- gltf.js needs gl-matrix.js and its extensions
+ gltf.js needs gl-matrix.js gl-matrix-ext.js and glproperties.js
 */
 
-if (window.mat4 === undefined)
-{
-	document.write('<script src="../deps/gl-matrix-min.js"><\/'+'script>');
-	document.write('<script src="../src/gl-matrix-ext.js"><\/'+'script>');
-}
+(function(_global) {
+  "use strict";
 
-(function(){
-	// Initial Setup
-	// -------------
+  var shim = {};
+  if (typeof(exports) === 'undefined') {
+    if(typeof define == 'function' && typeof define.amd == 'object' && define.amd) {
+      shim.exports = {};
+      define(function() {
+        return shim.exports;
+      });
+    } else {
+      // gl-matrix lives in a browser, define its namespaces in global
+      shim.exports = typeof(window) !== 'undefined' ? window : _global;
+    }
+  }
+  else {
+    // gl-matrix lives in commonjs, define its namespaces in exports
+    shim.exports = exports;
+  }
 
-	// Save a reference to the global object (`window` in the browser, `exports`
-	// on the server).
-	var root = this;
-	// The top-level namespace. All public glTF classes and modules will
-	// be attached to this. Exported for both CommonJS and the browser.
-	var glTF;
-	if (typeof exports !== 'undefined') {
-		glTF = exports;
-	} else {
-		glTF = root.glTF = {};
-	}
-	// TODO: Current version of the library. Keep in sync with `package.json`.
-	glTF.VERSION = '0.0.1';
+  (function(exports) {
+  	var glTF={};
+
+  	glTF.glProperties={};
+     for (var property in WebGLRenderingContext)
+       glTF.glProperties[WebGLRenderingContext[property]] = property;
 
 	glTF.log = function(msg){
 		if (console && console.log) console.log(msg);
@@ -64,8 +67,8 @@ if (window.mat4 === undefined)
 	glTF.document.prototype = {
 		// this gets all referenced files (binary shaders, shader programs)
 		parse_glTF: function(_callback){
-			var cb = _callback;
 			var document=this;
+			document.callback = _callback;
 			// now find the buffers and load them
 			var count= Object.keys(this.json.buffers).length;
 			document.buffers={};
@@ -86,7 +89,7 @@ if (window.mat4 === undefined)
 							count --;
 
 							if (count ===0)
-								document.gotAllBuffers(cb);
+								document.gotAllBuffers();
 						};
 					}
 					xhr.open("GET", document._path+buffer.path, true);
@@ -97,16 +100,21 @@ if (window.mat4 === undefined)
 
 			}
 		},
-		gotAllBuffers: function(_callback){
+		gotAllBuffers: function(){
 
-			var cb = _callback;
 			var document=this;
 			// get default scene 
 			this.sceneID = this.json.scene;
 
+			// per object type dictionaries
 			this.meshes = {};
-			this.geometries = [];
+			this.geometries = {};
+			this.lights = {};
+			this.cameras = {};
 			this.shaders = {};
+			this.transforms = {};
+			this.images = {};
+			this.materials = {};
 
 			// ok, now load all the shaders
 			var shaders = this.json.shaders;
@@ -121,7 +129,8 @@ if (window.mat4 === undefined)
 								if (xhr.responseText == null) 
 									glTF.log("Error loading "+shader.path+" [most likely a cross origin issue]");
 								else 
-									document.shaders[key]=xhr.responseText;
+									document.shaders[key]={};
+								    document.shaders[key].str=xhr.responseText;
 							}
 							else {
 								glTF.log("Error Loading "+shader.path+" [http request status="+xhr.status+"]");
@@ -129,7 +138,7 @@ if (window.mat4 === undefined)
 							count --;
 
 							if (count ===0)
-								document.gotShaderProgram(cb);
+								document.gotAllShaderPrograms();
 						};
 					};
 					xhr.open("GET", document._path+shader.path, true);
@@ -138,7 +147,47 @@ if (window.mat4 === undefined)
 				})(new XMLHttpRequest(),key,shader);
 			}
 		},
-		gotShaderProgram: function(_callback){
+		getItemSize: function(_type) {
+			switch(_type) {
+				case WebGLRenderingContext.FLOAT_VEC2:
+					return 2;
+				case WebGLRenderingContext.FLOAT_VEC3:
+					return 3;
+				case WebGLRenderingContext.FLOAT_VEC4:
+					return 4;
+				default:
+					glTF.logError('unkown type=\"'+_type+'['+glTF.glProperties[_type]+']\"');
+			}
+		},
+		gotAllShaderPrograms: function(){
+
+			// copy the programs
+			// Note: a shader is either a vertex or a fragment shader
+            // spec should be changed so shader type is in 'shaders'
+            // also, spec should be changed so shader could be embedded as string
+			this.programs = {};
+			var _programs = this.json.programs;
+			for (var programID in _programs){
+				this.programs[programID]={};
+				var vertexShaderID = _programs[programID].vertexShader;
+				var vertexShader = this.shaders[vertexShaderID];
+				var fragmentShaderID = _programs[programID].fragmentShader;
+				var fragmentShader = this.shaders[fragmentShaderID];
+				this.programs[programID].vertexShader = this.shaders[vertexShaderID];
+				this.programs[programID].fragmentShader = this.shaders[fragmentShaderID];
+
+				if (!this.programs[programID].vertexShader) {
+					glTF.logError('Could not find vertex shader = '+_programs[programID].vertexShader);
+					return;
+				}
+				if (!this.programs[programID].fragmentShader) {
+					glTF.logError('Could not find fragment shader = '+_programs[programID].fragmentShader);
+					return;
+				}
+					
+				this.shaders[vertexShaderID].type='vertex';
+				this.shaders[fragmentShaderID].type='fragment';
+			}
 
 			// ok, now let's load the techniques
 			var techniques = this.json.techniques;
@@ -152,47 +201,47 @@ if (window.mat4 === undefined)
                 	var pass_json = technique_json.passes[passID];
                 	var pass={};
                 	var instance_program = pass_json.instanceProgram;
-                	pass.vertexShader = this.shaders[this.json.programs[instance_program.program].vertexShader];
-  					pass.fragmentShader = this.shaders[this.json.programs[instance_program.program].fragmentShader];
-  					if (!pass.vertexShader)
-  						glTF.logError('Could not find vertex shader = '+pass_json.program["VERTEX_SHADER"]);
-  					if (!pass.fragmentShader)
-  						glTF.logError('Could not find fragment shader = '+pass_json.program["FRAGMENT_SHADER"]);
 
-  					pass.attributes = [];
+                	pass.program = this.programs[pass_json.instanceProgram.program];
+               
+  					pass.program.attributes = {};
   					for (var symbol in instance_program.attributes) {
-  						var paramID = instance_program.attributes[symbol];
+  						var _parameters = technique_json.parameters[instance_program.attributes[symbol]];
   						var attribute = {};
   						/*
   						        "semantic": "NORMAL",
-                                "symbol": "a_normal",
                                 "type": "FLOAT_VEC3"
                          */
-                         attribute.semantic = technique_json.parameters[paramID].semantic; // this correspond to the mesh attribute
+                         attribute.semantic = _parameters.semantic; // this correspond to the mesh attribute
                          attribute.symbol = symbol; // this correspond the symbol in the program
-                         attribute.type = technique_json.parameters[paramID].type; // this is the type of one element of the attribute
-                         pass.attributes.push(attribute);
+                         attribute.type = _parameters.type; // this is the type of one element of the attribute
+                         attribute.itemSize = this.getItemSize(attribute.type);
+                         pass.program.attributes[attribute.semantic]=(attribute);
   					}
 
-  					pass.uniforms = [];
+  					pass.program.uniforms = {};
   					for (var symbol in instance_program.uniforms) {
-  						var uniforID = instance_program.uniforms[symbol]
 
   						var uniform = {};
+  						var _parameters = technique_json.parameters[instance_program.uniforms[symbol]]
   						/*
   						        "semantic": "WORLDVIEWINVERSETRANSPOSE",
-                                "symbol": "u_normalMatrix",
                                 "type": "FLOAT_MAT3"
-							OR !!
-                              NO SEMANTIC
-                                "symbol": "u_diffuseTexture",
+							OR 
                                 "type": "SAMPLER_2D"
+                            OR 
+                    			"source": "Lamp",
+                    			"type": "FLOAT_MAT4"
+                    		OR
+                    			"value":
+                    			"type"
                          */
-                         uniform.semantic = technique_json.parameters[uniforID].semantic || uniforID; // this correspond to the engine parameter
-                         uniform.symbol = symbol; // this correspond the symbol in the program
-                         uniform.type = technique_json.parameters[uniforID].type;; // this is the type of the uniform
-
-                         pass.uniforms.push(uniform);
+                         if (_parameters.semantic) uniform.semantic = _parameters.semantic  // this correspond to the engine internal parameters
+                         uniform.symbol = symbol; // this is the symbol in the program
+                         uniform.type = _parameters.type; // this is the type of the uniform
+                         if (_parameters.source) uniform.source = _parameters.source; // this points to another object in the scene
+                         if (_parameters.value) uniform.value = this.cloneValue(_parameters.value,_parameters.type); // this provides a default value
+                         pass.program.uniforms[instance_program.uniforms[symbol]]=(uniform);
   					}
 
   					var states = {};
@@ -281,54 +330,98 @@ if (window.mat4 === undefined)
             }
 
 
-			if (_callback)
-				_callback(this);
+			if (this.callback) this.callback(this);
 			return this;
 		},
 		parse_camera: function(_cameraID){
 			var _camera= this.json.cameras[_cameraID];
-			camera = {};
+			var camera = {};
+			if (!_camera.aspect_ratio)
+				_camera=_camera[_camera.type];
             camera.aspect_ratio = _camera.aspect_ratio;
             camera.projection = _camera.projection;
-            camera.yfov = _camera.yfov;
+            if (_camera.xfov) {
+            	camera.xfov = _camera.xfov;
+            	camera.yfov = camera.xfov*camera.aspect_ratio;
+            } else {
+            	camera.yfov = _camera.yfov;
+            	camera.xfov = camera.yfov/camera.aspect_ratio;
+            }
             camera.zfar = _camera.zfar;
             camera.znear = _camera.znear;
 
+            this.cameras[_cameraID]=(camera);
             return camera;
+		}, // only load point lights for now
+		parse_light: function(_lightID){
+			var _light = this.json.lights[_lightID];
+			var light = {};
+			light.id = _lightID;
+			if (_light.point){
+				light.type = "point";
+				light.color = _light.point.color.slice(0); // clone array
+				light.constantAttenuation = _light.point.constantAttenuation;
+				light.linearAttenuation = _light.point.linearAttenuation;
+				light.quadraticAttenuation = _light.point.quadraticAttenuation;
+			}
+
+			this.lights[_lightID]=(light);
+			return light;
 		},
-		parse_node: function(_nodeID) {
-			var node = this.json.nodes[_nodeID];
+		parse_node: function(_nodeID, _transform) {
+			var _node = this.json.nodes[_nodeID];
 			var transform = {};
 			transform.id = _nodeID; 
-            if (node.name) transform.name = node.name;
-            if (node.tags) transform.tags = node.tags; 
+			var bb = undefined; 
+            if (_node.name) transform.name = _node.name;
+            if (_node.tags) transform.tags = _node.tags; 
 
-			for (var i=0, len=node.children.length; i<len; i++) {
-				var childID=node.children[i];
-				var childTransform = this.parse_node(childID);
-				if (!transform.children) transform.children=[];
-                transform.children.push(childTransform);
-                childTransform.parent = transform;
+            transform.local=mat4.create();
+			if (_node.matrix) 
+				mat4.copy(transform.local,_node.matrix);
+
+            transform.global=mat4.create();
+            mat4.multiply(transform.global,transform.global,transform.local);
+
+
+            if (_node.children && _node.children.length>0) {
+            	transform.children=[];
+				for (var i=0, len=_node.children.length; i<len; i++) {
+					var childTransform = this.parse_node(_node.children[i],transform.global);
+					if (childTransform.bounds){
+						if (!bb) bb=aabb.create();
+					 	aabb.add(bb, bb,childTransform.bounds);
+					 }
+	                transform.children.push(childTransform);
+	                childTransform.parent = transform;
+	            }
 			}
-			var mat=mat4.create();
-			if (node.matrix)  {
-				mat4.copy(mat,node.matrix);
-			}
-			transform.mat4 = mat;
 
-            if (node.camera) transform.camera = this.parse_camera(node.camera);
+            if (_node.camera) {
+            	var camera = this.parse_camera(_node.camera);
+            	camera.transform = transform;
+            	transform.camera = camera;
 
+            }
+
+            if (_node.light ) {
+            	var light = this.parse_light(_node.light);
+            	light.transform = transform;
+            	transform.light=light;
+            }
             // note - as discussed, geometry will be its own separate object in the future
-            if (node.meshes) {
-            	for (var i=0, l2=node.meshes.length; i<l2; i++) {
-            		var meshID = node.meshes[i];
-            		if (!transform.geometries) transform.geometries=[];
-            		transform.geometries.push(this.instance_geometry(meshID));
+            if (_node.meshes && _node.meshes.length>0) {
+            	transform.geometries=[];
+            	if (!bb) bb=aabb.create();
+            	for (var i=0, len=_node.meshes.length; i<len; i++) {
+            		var geo = this.instance_geometry(_node.meshes[i]);
+            		geo.transform = transform;
+            		transform.geometries.push(geo);
+            		aabb.add(bb,bb,geo.bounds);
             	}
             };
-
-			if (!this.transforms) this.transforms=[];
-			this.transforms.push(transform);
+            if (bb) transform.bounds=bb;
+			this.transforms[_nodeID]=(transform);
 
 			return transform;
 
@@ -338,23 +431,25 @@ if (window.mat4 === undefined)
 		instance_geometry: function(_meshID)
 		{
 			var geometry = {};
-            geometry.mesh = this.meshes[_meshID];
-        	if (!geometry.mesh) geometry.mesh=this.parse_geometry(_meshID);
+            geometry.meshes = this.meshes[_meshID];
+            geometry.bounds = aabb.create();
+        	if (!geometry.meshes) geometry.meshes=this.parse_geometry(_meshID);
 
         	// find all the materials
-        	materials = [];
-        	for (var i=0,len=geometry.mesh.length;i<len;i++){
-        		var primitive = geometry.mesh[i];
-        		var mat = primitive.material;
+        	// and geometry bounds
+        	var json_mesh = this.json.meshes[_meshID];
+
+        	var materials = [];
+        	for (var i=0; i<geometry.meshes.length;i++){
+        		var primitive = geometry.meshes[i];
+        		var mat = json_mesh.primitives[i].material;
         		materials.push(this.parse_material(mat));
+        		aabb.add(geometry.bounds, geometry.bounds, geometry.meshes.bounds);
         	}
             geometry.materials = materials;
 
-            this.geometries.push(geometry);
+            this.geometries[_meshID]=(geometry);
             return geometry;
-
-
-
 
 		},
 		parse_material: function(_matID) {
@@ -370,11 +465,10 @@ if (window.mat4 === undefined)
                 var overrides = {};
                 var parameters_json = technique_json.parameters;
                 
-                for (var i=0; i< material_json.instanceTechnique.values.length; i++) {
-
-                	var value = material_json.instanceTechnique.values[i];
+                for (var parameterID in material_json.instanceTechnique.values) {
+                	var value = material_json.instanceTechnique.values[parameterID];
                     
-                    var parameterID = value.parameter;
+                  
                 	// check if this is a texture or a value
                 	// create an override as propose for glTF spec
                 	// { semantic, value }
@@ -383,48 +477,67 @@ if (window.mat4 === undefined)
                 	if (technique_json.parameters[parameterID]) {
                 		overrides[parameterID] = {};
 	                	overrides[parameterID].type = technique_json.parameters[parameterID].type;
-	                	if (overrides[parameterID].type  !== "SAMPLER_2D")
-	                		overrides[parameterID].value=value.value;
-	                	else {
-				            // kick off image loading
-				            if (!document.images) document.images={};
-
-				            var textureID = value.value;
-	                        var imageID = this.json.textures[textureID].source;
-			                var imagePath = this.json.images[imageID].path;
-	                        var samplerID = this.json.textures[textureID].sampler;
-	                        var sampler = this.json.samplers[samplerID];
-	                        
-			                var uri = document._path+imagePath;
-			                if (!document.images[imageID]) {
-				                document.images[imageID] = new Image();
-				                if (this.onload) this.images[imageID].onload = this.onload;
-				                document.images[imageID].src = uri;
-				            }
-				            overrides[parameterID].value={ 
-	                            "path": imagePath,
-	                            "image": document.images[imageID],
-	                            "magFilter": (sampler.magFilter ? sampler.magFilter : "LINEAR"),
-	                            "minFilter": (sampler.minFilter ? sampler.minFilter : "LINEAR_MIPMAP_LINEAR"),
-	                            "wrapS": (sampler.wrapS ? sampler.wrapS : 'REPEAT'),
-	                            "wrapT": (sampler.wrapT ? sampler.wrapT : 'REPEAT')
-	                        };
-	                    }
-                	}
+	                	overrides[parameterID].value = this.cloneValue(value,overrides[parameterID].type);	
+                	} else
+                	glTF.log("Error loading "+document.url+" expected technique parameter="+parameterID)
                 	
             }
             var material = { pass: this.techniques[techniqueID].defaultPass, overrides: overrides, id: _matID};
-            //if (!this.materials) this.materials={};
+
             this.materials[_matID] = material;
             return material;
 		},
+		cloneValue: function(_value,_type)
+		{
+			var document = this;
+			if (!_value) {
+				return undefined;
+			}else if (!isNaN(_value)) {
+        		// this is a number
+        		return _value;
+        	}else if (_type  === WebGLRenderingContext.SAMPLER_2D) {
+	            // kick off image loading
+
+	            var textureID = _value;
+                var imageID = this.json.textures[textureID].source;
+                var imagePath = this.json.images[imageID].path;
+                var samplerID = this.json.textures[textureID].sampler;
+                var sampler = this.json.samplers[samplerID];
+                
+                var uri = this._path+imagePath;
+                if (!this.images[imageID]) {
+	                this.images[imageID] = new Image();
+	                if (this.onload) this.images[imageID].onload = this.onload;
+	                this.images[imageID].src = uri;
+	            }
+	            return { 
+                    "path": imagePath,
+                    "image": this.images[imageID],
+                    "magFilter": (sampler.magFilter ? sampler.magFilter : WebGLRenderingContext.LINEAR),
+                    "minFilter": (sampler.minFilter ? sampler.minFilter : WebGLRenderingContext.LINEAR_MIPMAP_LINEAR),
+                    "wrapS": (sampler.wrapS ? sampler.wrapS : WebGLRenderingContext.REPEAT),
+                    "wrapT": (sampler.wrapT ? sampler.wrapT : WebGLRenderingContext.REPEAT)
+                };
+            } else {
+            	// this must be an array, clone it
+            	return _value.slice(0);
+            }
+		},
 		parse_visual_scene: function(_sceneID)
 		{
-
 			var roots = this.json.scenes[_sceneID].nodes;
+			// scene is an array so we keep nodes in order
 			var scene = [];
-			for (i=0; i< roots.length; i++)
-				scene.push(this.parse_node(roots[i]));
+			var bb=aabb.create();
+			var identity=mat4.create();
+			for (var i=0; i< roots.length; i++){
+				var node = this.parse_node(roots[i],identity);
+				scene.push(node);
+				if (node.bounds) aabb.add(bb,bb,node.bounds);
+			}
+			this.bounds=bb; // do not add bounds to scene, incase there is a node called bounds
+			this.scene=scene;
+			this.upAxis = vec3.fromValues(0,1,0); // gltf is always Y_up
 			return scene;
 		} ,
 		// parse the mesh id="_mesh"
@@ -437,11 +550,11 @@ if (window.mat4 === undefined)
 
 			triangles.bounds = aabb.create();
 
-			for (var primID in json_mesh.primitives){
+			for (var i=0; i< json_mesh.primitives.length; i++){
 				var mesh={};
-			    prim = json_mesh.primitives[primID];
+			    prim = json_mesh.primitives[i];
 			    // get indices
-			    attr = this.json.indices[prim.indices];
+			    attr = this.json.accessors[prim.indices];
 			    bufferview = this.json.bufferViews[attr.bufferView];
 			    buffer = this.buffers[bufferview.buffer];
 			    count = attr.count;
@@ -449,15 +562,15 @@ if (window.mat4 === undefined)
 			    byteStride = attr.byteStride;
 
 			    switch (attr.type){
-			    	case 'UNSIGNED_SHORT':
+			    	case WebGLRenderingContext.UNSIGNED_SHORT:
 			   			mesh.INDEX = new Int16Array(buffer,offset,count);
 			    		break;
 			    	default:
-			    		glTF.log('indices '+attr.type+' is not allowed');
+			    		glTF.log('indices '+attr.type+'['+glTF.glProperties[attr.type]+'] is not allowed');
 			    }
 
-			    for (var semantic in prim.semantics) {
-			    	attr = this.json.attributes[prim.semantics[semantic]];
+			    for (var semantic in prim.attributes) {
+			    	attr = this.json.accessors[prim.attributes[semantic]];
 			    	bufferview = this.json.bufferViews[attr.bufferView];
 			    	buffer = this.buffers[bufferview.buffer];
 			    	count = attr.count;
@@ -465,10 +578,10 @@ if (window.mat4 === undefined)
 
 			    	offset = attr.byteOffset+this.json.bufferViews[attr.bufferView].byteOffset;
 			    	switch (attr.type) {
-			    		case 'FLOAT_VEC3':
+			    		case WebGLRenderingContext.FLOAT_VEC3:
 			    			mesh[semantic] = new Float32Array(buffer,offset,count*3);
 			    			break;
-			    		case 'FLOAT_VEC2':
+			    		case WebGLRenderingContext.FLOAT_VEC2:
 			    			mesh[semantic] = new Float32Array(buffer,offset,count*2);
 			    			break;
 			    		default:
@@ -480,8 +593,7 @@ if (window.mat4 === undefined)
 			    		aabb.add(triangles.bounds,triangles.bounds,lbound);
 			    	}
 			    }
-			    // one material per primitive.
-			    mesh.material = prim.material;
+
 			    triangles.push(mesh);
 			}
 			this.meshes[_meshID] = triangles;
@@ -489,16 +601,16 @@ if (window.mat4 === undefined)
 		}
 	};
 
-	glTF.load = function(url, callback) {
+	glTF.load = function(_url, _callback) {
 		var document = new glTF.document();
-		var cb=callback;
+		var cb = _callback;
 
-		document.url = url;
-		document.baseURI = url.substring(0,url.lastIndexOf('/'));
+		document.url = _url;
+		document.baseURI = _url.substring(0,_url.lastIndexOf('/'));
 
-		var lastslash = url.lastIndexOf('/');
-		if (lastslash > 0)
-		document._path = url.substring(0,lastslash+1);
+		var lastslash = _url.lastIndexOf('/');
+
+		document._path = _url.substring(0,lastslash+1);
 		var xhr = new XMLHttpRequest();
 		xhr.onreadystatechange = function (aEvt){
 			
@@ -522,10 +634,18 @@ if (window.mat4 === undefined)
 			}
 		};
 
-		xhr.open("GET", url, true);
+		xhr.open("GET", _url, true);
 
 	    xhr.send(null);
 	    return document;
 	};
 	
-}).call(this);
+	if(typeof(exports) !== 'undefined') {
+	    exports.glTF = glTF;
+	};
+
+
+
+  })(shim.exports);
+})(this);
+
