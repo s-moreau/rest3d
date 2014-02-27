@@ -61,11 +61,9 @@ setViewer6Upload=function(upload){
                             });
                         console.debug(decodeURIComponent(file.url))
                         var $dialog = $("<button>Launch</button>").on("click",function(){
-                            pleaseWait(true);
                             var url = decodeURIComponent(file.url);
                             glTF.load(url, parse_gltf);
-                            notif(url);
-                            pleaseWait(false);
+                            // notif(url);
                         });
                             // function(parent,link,button1,button2,button3){
                             upload.convert($conve,formatName(data,file),$dialog,$("<button>Display</button>"),$download);
