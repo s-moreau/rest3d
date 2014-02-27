@@ -532,7 +532,7 @@ function initGUI() {
                  var $spanButton2 = htmlSpan($newLine,25);
                 $spanButton2.append(button2);
                  var $spanButton3= htmlSpan($newLine,25);
-                $spanButton3.append(button3);
+                $spanButton3.append(button3);//here
             }
             // this.createInfo = function(name,href,button){
             //     var tmp = this.header();
