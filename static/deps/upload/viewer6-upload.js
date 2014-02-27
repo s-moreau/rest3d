@@ -59,14 +59,16 @@ setViewer6Upload=function(upload){
                                 var gitHtml = $('<iframe id="myIframe" src="'+decodeURIComponent(file.url)+'" style="height:99% !important; width:99% !important; border:0px;"></iframe>');
                                 gitPanel = $('body').append(gitHtml);
                             });
-                            // var $dialog = $("<button>Dialog</button>").on("click",function(){
-                            //     var callback = function(data){
-                            //         console.debug(data);
-                            //     }
-                            //     rest3d.getFileConverted(decodeURIComponent(file.url),callback);
-                            // });
+                        console.debug(decodeURIComponent(file.url))
+                        var $dialog = $("<button>Launch</button>").on("click",function(){
+                            pleaseWait(true);
+                            var url = decodeURIComponent(file.url);
+                            glTF.load(url, parse_gltf);
+                            notif(url);
+                            pleaseWait(false);
+                        });
                             // function(parent,link,button1,button2,button3){
-                            upload.convert($conve,formatName(data,file),/*$dialog,$("<button>Display</button>"),*/$download);
+                            upload.convert($conve,formatName(data,file),$dialog,$("<button>Display</button>"),$download);
                             // var span = '<p><span><a href="'+decodeURIComponent(file.url)+'" target="_blank"><p><span>'+formatName(data,file)+'</a>';
                             // // endsWith
                             // if (file.url.indexOf('.json', file.url.length - '.json'.length) !== -1) {

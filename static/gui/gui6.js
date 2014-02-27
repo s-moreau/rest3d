@@ -511,7 +511,7 @@ function initGUI() {
                 var $spanButton = htmlSpan($head,12);
                 var $j = $("<button>X</button>").on('click', function (){
                     $frame.hide();
-                    stock.filesArea.last("br").remove();
+                    stock.filesArea.children("br").last().remove();
                 });
                 $spanButton.append($j);
                 return $frame;
@@ -529,10 +529,10 @@ function initGUI() {
                 $span.css("text-align","left");
                 var $spanButton1 = htmlSpan($newLine,24);
                 $spanButton1.append(button1);
-                //  var $spanButton2 = htmlSpan($newLine,25);
-                // $spanButton2.append(button2);
-                //  var $spanButton3= htmlSpan($newLine,25);
-                // $spanButton3.append(button3);
+                 var $spanButton2 = htmlSpan($newLine,25);
+                $spanButton2.append(button2);
+                 var $spanButton3= htmlSpan($newLine,25);
+                $spanButton3.append(button3);
             }
             // this.createInfo = function(name,href,button){
             //     var tmp = this.header();
