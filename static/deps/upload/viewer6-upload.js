@@ -83,14 +83,21 @@ setViewer6Upload=function(upload){
                                 var gitHtml = $('<iframe id="myIframe" src="'+decodeURIComponent(file.url)+'" style="height:99% !important; width:99% !important; border:0px;"></iframe>');
                                 gitPanel = $('body').append(gitHtml);
                             });
-                        console.debug(decodeURIComponent(file.url))
-                        var $dialog = $("<button>Launch</button>").on("click",function(){
-                            var url = decodeURIComponent(file.url);
-                            glTF.load(url, viewer.parse_gltf);
-                            // notif(url);
-                        });
-                            // function(parent,link,button1,button2,button3){
-                            upload.convert($conve,formatName(data,file),$dialog,$("<button>Display</button>"),$download);
+
+                        var url = decodeURIComponent(file.url);
+                        var ext = url.link.match(/\.[^.]+$/);
+                        console.debug(ext);
+                        if(ext==".json"){
+                            var $dialog = $("<button>Launch</button>").on("click",function(){
+                                glTF.load(url, viewer.parse_gltf);
+                                notif(url);
+                            });
+                                // function(parent,link,button1,button2,button3){
+                                upload.convert($conve,formatName(data,file),$dialog,$download);
+                        }
+                        else{
+                            upload.upload($conve,formatName(data,file),$dialog)
+                        }
                             // var span = '<p><span><a href="'+decodeURIComponent(file.url)+'" target="_blank"><p><span>'+formatName(data,file)+'</a>';
                             // // endsWith
                             // if (file.url.indexOf('.json', file.url.length - '.json'.length) !== -1) {
