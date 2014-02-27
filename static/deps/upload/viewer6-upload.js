@@ -53,10 +53,10 @@ setViewer6Upload=function(upload){
                         data.context.append(span);
                     } else {
                         // ennumerate all resulting files
+                        var $conve = upload.header(true);
                         $.each(data.result.files, function (index, file) {
                             // function(parent,link,button1,button2,button3){
-                            console.debug($(this).parent().parent().html());
-                            upload.convert($(this).parent().parent(),formatName(data,file),$("<button>Dialog</button>"),$("<button>Display</button>"),$("<button>Downlo</button>"));
+                            upload.convert($conve,formatName(data,file),$("<button>Dialog</button>"),$("<button>Display</button>"),$("<button>Downlo</button>"));
                             // var span = '<p><span><a href="'+decodeURIComponent(file.url)+'" target="_blank"><p><span>'+formatName(data,file)+'</a>';
                             // // endsWith
                             // if (file.url.indexOf('.json', file.url.length - '.json'.length) !== -1) {
