@@ -1,0 +1,160 @@
+<!DOCTYPE HTML PUBLIC "-//IETF//DTD HTML//EN">
+<!-- 
+The MIT License (MIT)
+
+Copyright (c) 2013 Rémi Arnaud - Advanced Micro Devices, Inc.
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in
+all copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+THE SOFTWARE.
+ -->
+<head>
+  <meta content="text/html;charset=utf-8" http-equiv="Content-Type">
+  <meta content="utf-8" http-equiv="encoding">
+  <script type="text/javascript" src="../deps/jquery-2.0.3.min.js"></script>
+  <script type="text/javascript" src="../deps/webgl-utils.js"></script>
+  <script type="text/javascript" src="../deps/webgl-debug.js"></script>
+  <script type="text/javascript" src="renderer.js"></script>
+  <script type="text/javascript" src="../loaders/gltf.js"></script>
+  <script type="text/javascript" src="../loaders/collada.js"></script>
+  <script type="text/javascript" src="viewer.js"></script>
+  <script type="text/javascript" src="camera.js"></script>
+  <script type="text/javascript" src="channel.js"></script>
+  <script type="text/javascript" src="state.js"></script>
+</head>
+<body oncontextmenu="return false">
+<script type="text/javascript">
+ "use strict";
+ var $canvas;
+$(document).ready(function(){
+
+if (!window.performance) {
+    window.performance = {};
+    window.performance.now = $.now
+};
+function args() {
+          // This function is anonymous, is executed immediately and 
+          // the return value is assigned to QueryString!
+          var query_string = {};
+          var query = window.location.search.substring(1);
+          var vars = query.split("&");
+          for (var i=0;i<vars.length;i++) {
+            var pair = vars[i].split("=");
+                // If first entry with this name
+            if (typeof query_string[pair[0]] === "undefined") {
+              query_string[pair[0]] = pair[1];
+                // If second entry with this name
+            } else if (typeof query_string[pair[0]] === "string") {
+              var arr = [ query_string[pair[0]], pair[1] ];
+              query_string[pair[0]] = arr;
+                // If third or later entry with this name
+            } else {
+              query_string[pair[0]].push(pair[1]);
+            }
+          } 
+            return query_string;
+        };
+var $background = $('<div style="position: absolute; top: 0px; bottom: 0px; right:0px; left:0px; height: 100%; width:100%; background-color: black;">'); 
+$('body').append($background);
+$canvas = $('<canvas id="tmp" class="ui-resize-me" style="position: absolute; top: 0px; bottom: 0px; right:0px; margins: 10px;height: 100%; width:100%; " ></canvas>');
+$background.append($canvas);
+// initialize webGL
+channel = Channel.create($canvas[0], true); // debug context please
+
+initCanvasUI();
+
+function initCanvasUI() {
+	canvas=$canvas[0];
+	//$("#tmp").removeEventListener("mousedown", mouseDownHandler, false);
+    var mouseDown = false;
+    var lastX, lastY = 0;
+    // attach mouse events to canvas
+
+    function mouseDownHandler(ev) {
+        mouseDown = true;
+        lastX = ev.screenX;
+        lastY = ev.screenY;
+        return true;
+    }
+
+    function mouseMoveHandler(ev) {
+        if (!mouseDown) return false;
+
+        currentZoom = 1;
+        var mdelta = ev.screenX - lastX;
+        lastX = ev.screenX;
+        currentRotationX -= mdelta / 2.5;
+
+
+        var mdelta = ev.screenY - lastY;
+        lastY = ev.screenY;
+        currentRotationY -= mdelta / 2.5;
+
+
+        viewer.draw();
+        return true;
+    }
+
+    function mouseUpHandler(ev) {
+        mouseDown = false;
+    }
+
+    function mouseWheelHandler(ev) {
+
+        var mdelta = ev.wheelDelta;
+        currentZoom = Math.exp(mdelta / 2500);
+
+        viewer.draw();
+        return true;
+    }
+
+    canvas.removeEventListener("mousedown", mouseDownHandler, false);
+    canvas.removeEventListener("mousemove", mouseMoveHandler, false);
+    canvas.removeEventListener("mouseup", mouseUpHandler, false);
+    canvas.removeEventListener("mousewheel", mouseWheelHandler, false);
+    canvas.addEventListener("mousedown", mouseDownHandler, false);
+    canvas.addEventListener("mousemove", mouseMoveHandler, false);
+    canvas.addEventListener("mouseup", mouseUpHandler, false);
+    canvas.addEventListener("mousewheel", mouseWheelHandler, false);
+    // redraw on resize
+
+    $(canvas).resize(function (evt) {
+        viewer.draw();
+    });
+};
+var arg = args();
+if (arg.file) {
+	var ext = arg.file.match(/\.[^.]+$/);
+    if(ext==".json"){
+    glTF.load(arg.file,  viewer.parse_gltf);
+} 
+	else if(ext==".dae"){
+	COLLADA.load(arg.file, viewer.parse_dae)
+	}
+	else{
+		console.log("This file couldn't be loaded. Please make sure the file specified is a dae or json model");
+	}
+}
+	else{
+		console.log("any file specified in url for loading");
+	}
+});
+
+
+</script>
+</body>
+
