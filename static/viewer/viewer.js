@@ -346,7 +346,7 @@ viewer.render_scene = function(_nodes, _callback) {
                 var node = _nodes[j];
 
                 viewer.pushMatrix();
-                mat4.multiply(mvMatrix, mvMatrix, node.mat4 || node.local) ;
+                mat4.multiply(mvMatrix, mvMatrix, node.local) ;
                 //State.setModelView(this.state,mvMatrix);
 
                 if (node.children)
@@ -422,7 +422,7 @@ viewer.build_scene = function(_nodes, _callback) {
                 aabb.add(nodebb, nodebb,
                     _callback.call(node));
 
-                aabb.transform(nodebb, nodebb, node.mat4 || node.local);
+                aabb.transform(nodebb, nodebb, node.local);
                 aabb.add(bounds, bounds, nodebb);
             }
             return bounds;

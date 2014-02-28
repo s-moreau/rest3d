@@ -64,13 +64,7 @@ if (window.TextureUtil === undefined)
   } 
 
 
-  // extend math library with deg2rad if needed
-
-  if (!Math.deg2rad) {
-    Math.deg2rad = function (_deg) {
-      return .0174532925 * _deg;
-    }
-  }
+  
   // log wrapper
   RENDERER.log = function(_msg) { 
     if (console && console.log) console.log(_msg);
@@ -84,7 +78,6 @@ if (window.TextureUtil === undefined)
     */
   }
 
-/// need state !?!
 RENDERER.primitive = function(_vertices, _colors, _normals, _binormals, _texcoords, _indices, _state) { 
 
     this.clear();

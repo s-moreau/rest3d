@@ -95,6 +95,7 @@ State = {};
         }
       }
 
+      // move this to channel
       State.canvasWidth = function(size) {
         if (!size) return _gl.canvas.width;
         else _gl.canvas.width = size;
@@ -1032,43 +1033,44 @@ State = {};
   State.setUniform=function(_state,_uniform,_value){
     // _semantic needs to match a semantic in the program
     var type = _uniform.type;
+    var apply = false;
 
-    var gl=_state.gl;
+
     switch (type){
       case WebGLRenderingContext.FLOAT_VEC2:
         if (_uniform.value !== _value) {
           vec2.copy(_uniform.value, _value);    
-          if (gl && _uniform.location) gl.uniform2fv(_uniform.location, _value);  
+          apply=true; 
         }
         break;
       case WebGLRenderingContext.FLOAT_VEC3:
         if (_uniform.value !== _value) {
           vec3.copy(_uniform.value, _value);
-          if (gl && _uniform.location) gl.uniform3fv(_uniform.location, _value);
+          apply=true;
         }
         break;
       case WebGLRenderingContext.FLOAT_VEC4:
         if (_uniform.value !== _value) {
           vec4.copy(_uniform.value, _value);
-          if (gl && _uniform.location) gl.uniform4fv(_uniform.location, _value);
+          apply=true;
         }
         break;
       case WebGLRenderingContext.FLOAT_MAT4:
         if (_uniform.value !== _value) {
           mat4.copy(_uniform.value, _value);
-          if (gl && _uniform.location) gl.uniformMatrix4fv(_uniform.location, false, _value);
+          apply=true;
         }
         break;
       case WebGLRenderingContext.FLOAT_MAT3:
         if (_uniform.value !== _value) { 
           mat3.copy(_uniform.value, _value);
-          if (gl && _uniform.location) gl.uniformMatrix3fv(_uniform.location, false, _value);
+          apply=true;
         }
         break;
       case WebGLRenderingContext.FLOAT:
         if (_uniform.value !== _value) {
           _uniform.value = _value;
-          if (gl && _uniform.location) gl.uniform1f(_uniform.location, _value);
+          apply=true;
         }
         break;
       case WebGLRenderingContext.SAMPLER_2D:
@@ -1086,28 +1088,19 @@ State = {};
         for (key in _value) _uniform.value[key] = _value[key];
       }
       // keep trying until image is ready
-      if (gl && !_uniform.value.glTexture) 
+      if (!_uniform.value.glTexture && _state.gl) 
             State.createTextureBuffer(_state,_uniform);
-
-      if (gl && _uniform.location)
-        if (_uniform.value.glTexture) {
-                gl.activeTexture(gl.TEXTURE0 + _uniform.value.textureUnit);
-                gl.bindTexture(gl.TEXTURE_2D, _uniform.value.glTexture); 
-                gl.uniform1i(_uniform.location, _uniform.value.textureUnit);
-        } else {
-                // texture is not ready, or there is no texture, let's use the default white texture
-                gl.activeTexture(gl.TEXTURE0 + _uniform.value.textureUnit);
-                gl.bindTexture(gl.TEXTURE_2D, State.whiteTexture); 
-                gl.uniform1i(_uniform.location, _uniform.value.textureUnit);
-        }
+      else 
+        apply = true;
+     
       break;
     default:
       RENDERER.logError('unknown type='+type+' in State.setUniform');
       return this;
       break;
     }
-
-    State.applyUniform(_state,_uniform,_value);
+    if (apply)
+      State.applyUniform(_state,_uniform,_value);
   };
 
 
@@ -1142,6 +1135,7 @@ State = {};
           
           break;
         case WebGLRenderingContext.SAMPLER_2D:
+
           if (_uniform.value.glTexture) {
             gl.activeTexture(gl.TEXTURE0 + _uniform.value.textureUnit);
             gl.bindTexture(gl.TEXTURE_2D, _uniform.value.glTexture); 
@@ -1216,10 +1210,11 @@ State = {};
     return function (_state, _mv)  {
         State.setUniform(_state, _state.program.uniforms.MODELVIEW, _mv);
 
-        mat3.fromMat4(tmpmat3, _mv)
-        mat3.transpose(tmpmat3,mat3.invert(tmpmat3,tmpmat3))
-        if (_state.program.uniforms.MODELVIEWINVERSETRANSPOSE) 
+        if (_state.program.uniforms.MODELVIEWINVERSETRANSPOSE) {
+          mat3.fromMat4(tmpmat3, _mv)
+          mat3.transpose(tmpmat3,mat3.invert(tmpmat3,tmpmat3))
           State.setUniform(_state,_state.program.uniforms.MODELVIEWINVERSETRANSPOSE, tmpmat3);
+        }
 
       return _state;
     }
@@ -1249,7 +1244,7 @@ State = {};
     for (var uniformID in _old.program.uniforms) {
       var uniform=_old.program.uniforms[uniformID];
 
-      State.setUniform(_old,uniform,uniform.value); // apply only if value changed ? ? ?
+      State.setUniform(_old,uniform,uniform.value); // applies only if value changed 
 
     }
 

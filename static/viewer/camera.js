@@ -22,9 +22,13 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.*/
 
- var verbose=true;
-  var ext=null;
+// extend math library with deg2rad if needed
 
+  if (!Math.deg2rad) {
+    Math.deg2rad = function (_deg) {
+      return .0174532925 * _deg;
+    }
+  }
 
   Camera = {};
 

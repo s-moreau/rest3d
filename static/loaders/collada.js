@@ -568,7 +568,7 @@ if (window.mat4 === undefined)
             }
 
             // now set the matrix
-            transform.mat4 = mat;
+            transform.local = mat;
 
             return transform;
         },
