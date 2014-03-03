@@ -79,20 +79,31 @@ setViewer6Upload=function(upload){
                         // ennumerate all resulting files
                         var $conve = upload.header(data.file.name);
                         $.each(data.result.files, function (index, file) {
-                            var $download = $("<button>Downl..</button>").on("click",function(){
+                            var $download = $("<button>Download</button>").on("click",function(){
                                 var gitHtml = $('<iframe id="myIframe" src="'+decodeURIComponent(file.url)+'" style="height:99% !important; width:99% !important; border:0px;"></iframe>');
                                 gitPanel = $('body').append(gitHtml);
                             });
 
                         var url = decodeURIComponent(file.url);
                         var ext = url.match(/\.[^.]+$/);
-                        console.debug(ext);
                         if(ext==".json"){
-                            var $dialog = $("<button>Launch</button>").on("click",function(){
+                            var $dialog = $("<button>Launch your model</button>").on("click",function(){
                                 glTF.load(url, viewer.parse_gltf);
                                 window.notif(url);
                             });
-                                upload.convert($conve,formatName(data,file),$dialog,$download);
+                            var $preview = $("<button>Peview</button>").on("click",function(){
+                                var gitHtml = '<div id="dialog"><iframe id="myIframe" src="" style="height:99% !important; width:99% !important; border:0px;"></iframe></div>';
+                                gitPanel = $('body').append(gitHtml);
+                                $("#dialog").dialog({
+                                    autoOpen: true,
+                                    width: 800,
+                                    height: 600,
+                                    open: function (ev, ui) {
+                                        $('#myIframe').attr('src', '/viewer/easy-viewer.html?file=/rest3d/upload/'+decodeURIComponent(file.name));
+                                    }
+                                });
+                            });
+                                upload.convert($conve,formatName(data,file),$dialog,$download,$preview);
                         }
                         else{
                             upload.upload($conve,formatName(data,file),$download);//

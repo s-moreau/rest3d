@@ -523,14 +523,40 @@ function initGUI() {
                 var $spanButton = htmlSpan($newLine,24);
                 $spanButton.append(button);
             }
-            this.convert = function(parent,link,button1,button2){
+            this.convert = function(parent,link,launch,download,preview){
                 var $newLine = htmlDiv(parent,false);
-                var $span = htmlSpan($newLine,50,link);
+                var $span = htmlSpan($newLine,70,link);
                 $span.css("text-align","left");
-                var $spanButton1 = htmlSpan($newLine,25);
-                $spanButton1.append(button1);
-                 var $spanButton2 = htmlSpan($newLine,25);
-                $spanButton2.append(button2);
+                var $spanButton1 = htmlSpan($newLine,10);
+                var tooltip = launch.html();
+                launch.html("").width("10px");
+                GUI.addIcon(launch, "ui-icon-play", "", "before");
+                launch.addClass("btn-upload");
+                $spanButton1.append(launch);
+                GUI.addTooltip({
+                        parent: launch,
+                        content: tooltip,
+                    });
+                var $spanButton2 = htmlSpan($newLine,10);
+                tooltip = download.html();
+                download.html("").width("10px");
+                GUI.addIcon(download, "ui-icon-disk", "", "before");
+                download.addClass("btn-upload");
+                $spanButton2.append(download);
+                GUI.addTooltip({
+                        parent: download,
+                        content: tooltip,
+                    });
+                var $spanButton3 = htmlSpan($newLine,10);
+                tooltip = preview.html();
+                preview.html("").width("10px");
+                GUI.addIcon(preview, "ui-icon-newwin", "", "before");
+                preview.addClass("btn-upload");
+                $spanButton3.append(preview);
+                GUI.addTooltip({
+                        parent: preview,
+                        content: tooltip,
+                    });
             }
             // this.createInfo = function(name,href,button){
             //     var tmp = this.header();
