@@ -21,19 +21,34 @@ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.*/
+(function(_global) {
 
-Channel= {};
+  var shim = {};
+  if (typeof(exports) === 'undefined') {
+    if(typeof define == 'function' && typeof define.amd == 'object' && define.amd) {
+      shim.exports = {};
+      define(function() {
+        return shim.exports;
+      });
+    } else {
+      shim.exports = typeof(window) !== 'undefined' ? window : _global;
+    }
+  }
+  else {
+    shim.exports = exports;
+  }
+
+  (function(exports) {
+
+  var Channel= {}
+
+  // active channel
+  Channel.gl=null;
 
   Channel.create = function(_canvas, _debug) {
-      this.canvas = _canvas;
 
-      var devicePixelRatio = window.devicePixelRatio || 1;
- 
-      // set the size of the drawingBuffer based on the size it's displayed.
-      this.canvas.width = _canvas.clientWidth * devicePixelRatio;
-      this.canvas.height = _canvas.clientHeight * devicePixelRatio;
-
-      var ctx = WebGLUtils.setupWebGL(this.canvas);
+     
+      var ctx = WebGLUtils.setupWebGL(_canvas);
       // find extensions
       ext = (
         ctx.getExtension('WEBGL_lose_context') ||
@@ -56,45 +71,55 @@ Channel= {};
             }
           }
         } 
- 
-
-      gl = WebGLDebugUtils.makeDebugContext( ctx, throwOnGLError, validateNoneOfTheArgsAreUndefined);
-
+        gl = WebGLDebugUtils.makeDebugContext( ctx, throwOnGLError, validateNoneOfTheArgsAreUndefined);
 
       } else {
         gl = ctx;
-         WebGLDebugUtils.init(gl);
+        WebGLDebugUtils.init(ctx);
       }
-     
-      //gl.clearColor(1.0, 0.0, 0.0, 1.0); // Set clear color to black, fully opaque
 
-      //gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT); // Clear the color as well as the depth buffer.
-      this.canvas.addEventListener('webglcontextlost', this.handleContextLost.bind(this), false);
-      this.canvas.addEventListener('webglcontextrestored', this.handleContextRestored.bind(this), false);
+      _canvas.addEventListener('webglcontextlost', Channel.handleContextLost.bind(gl), false);
+      _canvas.addEventListener('webglcontextrestored', Channel.handleContextRestored.bind(gl), false);
 
-      // create an immediate state
+      // create a channel object with an immediate state
+      var channel={};
+      channel.gl = gl;
+      channel.state =  State.create(gl);
 
-      this.state =  State.create(gl);
+      return channel;
 
+    };
 
-      // This is ugly - FIXME
-      //State.apply(this.state,State.createBasic())
-      var basicState = State.createBasic();
+    // private function
+    function resizeCanvas(_channel) {
 
-      State.applyProgram(this.state,basicState);
+      var canvas = _channel.gl.canvas;
+       
+      var devicePixelRatio = window.devicePixelRatio || 1;
+      var width = canvas.clientWidth * devicePixelRatio;
+      var height = canvas.clientHeight * devicePixelRatio;
 
-      this.clear();
+       // only change the size of the canvas if the size it's being displayed
+       // has changed.
+       if (canvas.width != width ||
+           canvas.height != height) {
+         // Change the size of the canvas to match the size it's being displayed
+         canvas.width = width;
+         canvas.height = height;
 
-      return this;
+         State.setViewport(_channel.state, 0, 0, width, height);
+       }
 
     };
 
   Channel.handleContextLost= function(e) {
+        // this is bind to then channel that lost its context
         RENDERER.logError("handle context lost");
         e.preventDefault();
     };
 
   Channel.handleContextRestored = function() {
+        // this is bind to the channel that got its context back
         RENDERER.logError("handle context restored");
         this.init(this.canvas);
         // recreate all primitive buffers
@@ -118,22 +143,18 @@ Channel= {};
       
     };
 
-    Channel.viewport= function(_x1,_y1,_x2,_y2) {
-      // todo - var aspect = gl.canvas.clientWidth / gl.canvas.clientHeight; 
-      // .perspective(fieldOfView, aspect, zNear, zFar); 
-      //this.x1 = _x1; this.x2=_x2; this.y1=_y1; this.y2=_y2;
-      State.setViewport(this.state, _x1,_y1, _x2, _y2);
-    };
 
-    Channel.clear=function(){
+    // todo -> set sky/earth ...
+    Channel.clear=function(channel){
 
-      var state = this.state;
+      var state = channel.state;
 
-      State.setClearColor(state, 0.5, 0.5, 0.5, 1);
+      resizeCanvas(channel);
+
+      //State.setClearColor(state, 0.5, 0.5, 0.5, 1);
       State.setScissorTestEnable(state, false);
       State.setDepthClear(state, 1.);
       State.setClear(state, State.COLOR_BUFFER_BIT | State.DEPTH_BUFFER_BIT);
-
 
       //State.setDepthTestEnable(state, true);
       State.setDepthFunc(state, State.LESS);
@@ -144,10 +165,13 @@ Channel= {};
       //State.setClearColor(state, 0, 1, 0, 1);
       //State.setClear(state, State.COLOR_BUFFER_BIT);
 
-  };
+    };
 
 
-  if(typeof(exports) !== 'undefined') {
-      exports.Channel = Channel;
-  }
 
+    if(typeof(exports) !== 'undefined') {
+        exports.Channel = Channel;
+    }
+
+  })(shim.exports);
+})(this);
