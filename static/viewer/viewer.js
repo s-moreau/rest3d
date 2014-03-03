@@ -370,19 +370,8 @@ viewer.draw = function() {
             $('#zoom').text('currentZoom is ' + currentZoom);
             $('#rot').text('currentRotation is ' + currentRotationX.toFixed(2) + ',' + currentRotationY.toFixed(2));
 
-            var devicePixelRatio = window.devicePixelRatio || 1;
-
-            // set the size of the drawingBuffer based on the size it's displayed.
-            canvas.width = canvas.clientWidth * devicePixelRatio;
-            canvas.height = canvas.clientHeight * devicePixelRatio;
-            var width = canvas.width;
-            var height = canvas.height;
-
-
-            channel.viewport(0, 0, width, height);
-            channel.clear();
-
-
+           
+            Channel.clear(channel);
 
             Camera.rotateAround(mainCamera, currentZoom, currentRotationX, currentRotationY);
 
