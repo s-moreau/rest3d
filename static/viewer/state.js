@@ -97,6 +97,19 @@ THE SOFTWARE.*/
 
         };
 
+        // convert from complex types to simple types
+        State.formatEnum = {};
+          State.formatEnum[_gl.FLOAT] =  {type: _gl.FLOAT, size:1};
+          State.formatEnum[_gl.FLOAT_VEC2] = {type: _gl.FLOAT, size:2},
+          State.formatEnum[_gl.FLOAT_VEC3] = {type: _gl.FLOAT, size:3},
+          State.formatEnum[_gl.FLOAT_VEC4] = {type: _gl.FLOAT, size:4}
+      
+        State.formatFn = {};
+          State.formatFn[_gl.FLOAT] = _gl.vertexAttrib1f;
+          State.formatFn[_gl.FLOAT_VEC2] = _gl.vertexAttrib2fv;
+          State.formatFn[_gl.FLOAT_VEC3] = _gl.vertexAttrib3fv;
+          State.formatFn[_gl.FLOAT_VEC4] =  _gl.vertexAttrib4fv;
+
         // utilities
 
         State.createSolidTexture = function (r, g, b, a) {
@@ -732,166 +745,165 @@ THE SOFTWARE.*/
       return state;
     };
     
-    State.clone = function(_state) {
-      // create default state
-      var state = State.create();
-      // copy program
-      if (_state.program) {
-        var program = {};
-        program.compileMe = _state.program.compileMe;
-        program.glProgram = _state.program.glProgram;
-        program.attributes = {};
-        // copy everything except values?
-        for (var semantic in _state.program.attributes) {
-            var attribute = _state.program.attributes[semantic];
-            var newattribute = {}
-            newattribute.location = attribute.location;
-            newattribute.semantic = attribute.semantic;
-            newattribute.symbol = attribute.symbol;
-            newattribute.type = attribute.type;
-            program.attributes[semantic] = newattribute;
-        }
-        var uniforms = _state.program.uniforms;
-      
-        program.vertexShader = _state.program.vertexShader;
-        program.fragmentShader = _state.program.fragmentShader;
-        state.program = program;
-        // alocate new values, copy old values in
-        State.allocateUniforms(state,uniforms);
-      }
-      // copy state
-      for (var key in _state) {
-        var statelet=_state[key];
-        if (key !== 'ID')
-          if ((typeof statelet === 'number') || (typeof statelet === 'bool') || (statelet === undefined) || (statelet === null))
-            state[key] = statelet;
-      }
-      return state;
-    };
-
-      State.createShader= function(_state,_shaderType, _shaderCode) {
-        var gl=_state.gl;
-        var shader = gl.createShader(_shaderType);
-        if (shader == null) return null;
-        gl.shaderSource(shader, _shaderCode);
-        gl.compileShader(shader);
-        if (!gl.getShaderParameter(shader, gl.COMPILE_STATUS)) {
-            var error = gl.getShaderInfoLog(shader);
-            RENDERER.logError("Error compiling shader:\n" + error);
-            print(gl.getShaderInfoLog(shader));
-            gl.deleteShader(shader);
-            return null;
-        }
-        return shader;
-    };
-    State.applyProgram = function(_old,_new) {
-      if (_old.program === _new.program) return;
-
-
-      _old.program = _new.program;
-
-      if (_old.program.compileMe) 
-        State.compileProgram(_old); // this create and returna new 'program'
-
-      var gl = _old.gl;
-      if (!gl) return;
-
-      // call useProgram and remap attrbutes if there is a change
-      if (_old.programinuse !== _old.program.glProgram) {
-       _old.programinuse = _old.program.glProgram
-       gl.useProgram(_old.program.glProgram);
-
-       // unifom values need to be re-applied as we switched program
-
-        for (var uniformID in _old.program.uniforms) {
-          var uniform=_old.program.uniforms[uniformID];
-          State.applyUniform(_old, uniform, uniform.value); // this calls WebGL
-        }
-        
-      } else {
-        // apply uniforms if new values are different than old valies
-      }
-      
-
-    },
-    // return a new {compiled program}
-    //   check if same program already exists
-    //   othewise create new {program}
-    State.compileProgram = function(_state) {
-
-
-      // search if that program already exists
-      for (var i=0,len=State.programs.length;i<len;i++){
-        var program = State.programs[i];
-        if (program.vertexShader === _state.program.vertexShader && program.fragmentShader === _state.program.fragmentShader) {
-          if (program.compileMe === true) {
-            RENDERER.logError('this is impossible ... program should be compiled already')
-          }
-          // copy only what we need, so we don't erase Material specifics values
-          _state.program.glProgram = program.glProgram;
-          for (var semantic in program.attributes) {
-            _state.program.attributes[semantic].location = program.attributes[semantic].location;
-            //if (program.value) _state.program.attributes[i].value = program.value;
-          }
-
-          for (var uniformID in program.uniforms) _state.program.uniforms[uniformID].location = program.uniforms[uniformID].location;
-          _state.program.compileMe=false;
-
-          return _state.program;
-        }
-      }
-      var gl = _state.gl; 
-
-      if (!gl) return _state.program;
-      // note: do not delete the previous program as this is not the owner 
-      // TODO - State:delete
-
-      var glVertexShader = State.createShader(_state,gl.VERTEX_SHADER,_state.program.vertexShader); 
-      var glFragmentShader = State.createShader(_state,gl.FRAGMENT_SHADER,_state.program.fragmentShader); 
-
-      var glProgram = gl.createProgram();
-      if (glProgram == null) 
-        RENDERER.logError("Creating program failed");
-
-      gl.attachShader(glProgram, glVertexShader);
-      gl.attachShader(glProgram, glFragmentShader);
-
-      gl.linkProgram(glProgram);
-
-
-      if (!gl.getProgramParameter(glProgram, gl.LINK_STATUS) && !gl.isContextLost()) {
-          RENDERER.logError(gl.getProgramInfoLog(glProgram));
-      }
-
-
+  State.clone = function(_state) {
+    // create default state
+    var state = State.create();
+    // copy program
+    if (_state.program) {
       var program = {};
-      program.ID = State.programs.length; 
-      program.glProgram = glProgram;
+      program.compileMe = _state.program.compileMe;
+      program.glProgram = _state.program.glProgram;
+      program.attributes = {};
+      // copy everything except values?
+      for (var semantic in _state.program.attributes) {
+          var attribute = _state.program.attributes[semantic];
+          var newattribute = {}
+          newattribute.location = attribute.location;
+          newattribute.semantic = attribute.semantic;
+          newattribute.symbol = attribute.symbol;
+          newattribute.type = attribute.type;
+          program.attributes[semantic] = newattribute;
+      }
+      var uniforms = _state.program.uniforms;
+    
       program.vertexShader = _state.program.vertexShader;
       program.fragmentShader = _state.program.fragmentShader;
-      program.compileMe = false;
-      program.uniforms = _state.program.uniforms;
-      program.attributes = _state.program.attributes;
+      state.program = program;
+      // alocate new values, copy old values in
+      State.allocateUniforms(state,uniforms);
+    }
+    // copy state
+    for (var key in _state) {
+      var statelet=_state[key];
+      if (key !== 'ID')
+        if ((typeof statelet === 'number') || (typeof statelet === 'bool') || (statelet === undefined) || (statelet === null))
+          state[key] = statelet;
+    }
+    return state;
+  };
 
-      for (var semantic in program.attributes)
-      {
-        var attribute = program.attributes[semantic];
-        attribute.location = gl.getAttribLocation(glProgram, attribute.symbol);
+  State.createShader= function(_state,_shaderType, _shaderCode) {
+    var gl=_state.gl;
+    var shader = gl.createShader(_shaderType);
+    if (shader == null) return null;
+    gl.shaderSource(shader, _shaderCode);
+    gl.compileShader(shader);
+    if (!gl.getShaderParameter(shader, gl.COMPILE_STATUS)) {
+        var error = gl.getShaderInfoLog(shader);
+        RENDERER.logError("Error compiling shader:\n" + error);
+        print(gl.getShaderInfoLog(shader));
+        gl.deleteShader(shader);
+        return null;
+    }
+    return shader;
+  };
+  State.applyProgram = function(_old,_new) {
+    if (_old.program === _new.program) return;
+
+
+    _old.program = _new.program;
+
+    if (_old.program.compileMe) 
+      State.compileProgram(_old); // this create and returna new 'program'
+
+    var gl = _old.gl;
+    if (!gl) return;
+
+    // call useProgram and remap attrbutes if there is a change
+    if (_old.programinuse !== _old.program.glProgram) {
+     _old.programinuse = _old.program.glProgram
+     gl.useProgram(_old.program.glProgram);
+
+     // unifom values need to be re-applied as we switched program
+
+      for (var uniformID in _old.program.uniforms) {
+        var uniform=_old.program.uniforms[uniformID];
+        State.applyUniform(_old, uniform, uniform.value); // this calls WebGL
       }
-        
-      // find uniforms location
-      for (var uniformID in program.uniforms)
-      {
-        var uniform = program.uniforms[uniformID];
-        program.uniforms[uniformID].location = gl.getUniformLocation(glProgram, uniform.symbol);
+      
+    } else {
+      // apply uniforms if new values are different than old valies
+    }
+    
+  };
+  // return a new {compiled program}
+  //   check if same program already exists
+  //   othewise create new {program}
+  State.compileProgram = function(_state) {
+
+
+    // search if that program already exists
+    for (var i=0,len=State.programs.length;i<len;i++){
+      var program = State.programs[i];
+      if (program.vertexShader === _state.program.vertexShader && program.fragmentShader === _state.program.fragmentShader) {
+        if (program.compileMe === true) {
+          RENDERER.logError('this is impossible ... program should be compiled already')
+        }
+        // copy only what we need, so we don't erase Material specifics values
+        _state.program.glProgram = program.glProgram;
+        for (var semantic in program.attributes) {
+          _state.program.attributes[semantic].location = program.attributes[semantic].location;
+          //if (program.value) _state.program.attributes[i].value = program.value;
+        }
+
+        for (var uniformID in program.uniforms) _state.program.uniforms[uniformID].location = program.uniforms[uniformID].location;
+        _state.program.compileMe=false;
+
+        return _state.program;
       }
+    }
+    var gl = _state.gl; 
 
-      State.programs.push(program);
+    if (!gl) return _state.program;
+    // note: do not delete the previous program as this is not the owner 
+    // TODO - State:delete
 
-      _state.program = program;
+    var glVertexShader = State.createShader(_state,gl.VERTEX_SHADER,_state.program.vertexShader); 
+    var glFragmentShader = State.createShader(_state,gl.FRAGMENT_SHADER,_state.program.fragmentShader); 
 
-      return _state.program;
-    };
+    var glProgram = gl.createProgram();
+    if (glProgram == null) 
+      RENDERER.logError("Creating program failed");
+
+    gl.attachShader(glProgram, glVertexShader);
+    gl.attachShader(glProgram, glFragmentShader);
+
+    gl.linkProgram(glProgram);
+
+
+    if (!gl.getProgramParameter(glProgram, gl.LINK_STATUS) && !gl.isContextLost()) {
+        RENDERER.logError(gl.getProgramInfoLog(glProgram));
+    }
+
+
+    var program = {};
+    program.ID = State.programs.length; 
+    program.glProgram = glProgram;
+    program.vertexShader = _state.program.vertexShader;
+    program.fragmentShader = _state.program.fragmentShader;
+    program.compileMe = false;
+    program.uniforms = _state.program.uniforms;
+    program.attributes = _state.program.attributes;
+
+    for (var semantic in program.attributes)
+    {
+      var attribute = program.attributes[semantic];
+      attribute.location = gl.getAttribLocation(glProgram, attribute.symbol);
+    }
+      
+    // find uniforms location
+    for (var uniformID in program.uniforms)
+    {
+      var uniform = program.uniforms[uniformID];
+      program.uniforms[uniformID].location = gl.getUniformLocation(glProgram, uniform.symbol);
+    }
+
+    State.programs.push(program);
+
+    _state.program = program;
+
+    return _state.program;
+  };
 
   // compare velue by address, and apply values if different
   // should be compare by value ?
@@ -1304,18 +1316,7 @@ THE SOFTWARE.*/
            "stencilTestEnable": State.setStencilTestEnable,
            "viewport": State.setViewport,
     } ;
-    // convert from complex types to simple types
-    State.formatEnum = {};
-      State.formatEnum[WebGLRenderingContext.FLOAT] =  {type: WebGLRenderingContext.FLOAT, size:1};
-      State.formatEnum[WebGLRenderingContext.FLOAT_VEC2] = {type: WebGLRenderingContext.FLOAT, size:2},
-      State.formatEnum[WebGLRenderingContext.FLOAT_VEC3] = {type: WebGLRenderingContext.FLOAT, size:3},
-      State.formatEnum[WebGLRenderingContext.FLOAT_VEC4] = {type: WebGLRenderingContext.FLOAT, size:4}
-  
-    State.formatFn = {};
-      State.formatFn[WebGLRenderingContext.FLOAT] = WebGLRenderingContext.vertexAttrib1f;
-      State.formatFn[WebGLRenderingContext.FLOAT_VEC2] = WebGLRenderingContext.vertexAttrib2fv;
-      State.formatFn[WebGLRenderingContext.FLOAT_VEC3] = WebGLRenderingContext.vertexAttrib3fv;
-      State.formatFn[WebGLRenderingContext.FLOAT_VEC4] =  WebGLRenderingContext.vertexAttrib4fv;
+    
 
     // initialize glEnum array to convert back and forth from Token to Value
     for (var propertyName in WebGLRenderingContext) {
