@@ -523,6 +523,21 @@ function initGUI() {
                 var $spanButton = htmlSpan($newLine,24);
                 $spanButton.append(button);
             }
+            this.download = function(parent,link,button){
+                var $newLine = htmlDiv(parent,false);
+                var $span = htmlSpan($newLine,90,link);
+                $span.css("text-align","left");
+                var $spanButton1 = htmlSpan($newLine,10);
+                var tooltip = button.html();
+                button.html("").width("10px");
+                GUI.addIcon(button, "ui-icon-disk", "", "before");
+                button.addClass("btn-upload");
+                $spanButton1.append(button);
+                GUI.addTooltip({
+                        parent: button,
+                        content: tooltip,
+                    });
+            }
             this.convert = function(parent,link,launch,download,preview){
                 var $newLine = htmlDiv(parent,false);
                 var $span = htmlSpan($newLine,70,link);

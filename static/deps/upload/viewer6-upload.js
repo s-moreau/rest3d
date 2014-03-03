@@ -82,8 +82,6 @@ setViewer6Upload=function(upload){
                             var href = $('<a style="display:none" href="'+decodeURIComponent(file.url)+'" target="_blank"></a>');
                             upload.filesArea.append(href);
                             var $download = $("<button>Download</button>").on("click",function(){
-                                // var gitHtml = $('<iframe id="myIframe" src="'+decodeURIComponent(file.url)+'" style="height:99% !important; width:99% !important; border:0px;"></iframe>');
-                                // gitPanel = $('body').append(gitHtml);
                                 href[0].click();
                             });
 
@@ -109,7 +107,7 @@ setViewer6Upload=function(upload){
                                 upload.convert($conve,formatName(data,file),$dialog,$download,$preview);
                         }
                         else{
-                            upload.upload($conve,formatName(data,file),$download);//
+                            upload.download($conve,formatName(data,file),$download);//
                         }
                         });
                     }
