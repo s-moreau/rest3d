@@ -141,7 +141,7 @@ setViewer6Upload=function(upload){
     }).on('fileuploadprocessalways', function (e, data) {
             var indexI = data.index,
             file = data.files[indexI],
-             node = $(data.context.children('div')[index+1]);
+             node = $(data.context.children('div')[index+1]);//s
         if (file.preview) {
             node
                 .prepend('<br>')
