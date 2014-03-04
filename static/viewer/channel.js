@@ -145,13 +145,14 @@ THE SOFTWARE.*/
 
 
     // todo -> set sky/earth ...
-    Channel.clear=function(channel){
+    Channel.clear=function(_channel, _r, _g, _b, _a){
 
-      var state = channel.state;
+      var state = _channel.state;
 
-      resizeCanvas(channel);
+      resizeCanvas(_channel);
 
-      //State.setClearColor(state, 0.5, 0.5, 0.5, 1);
+      if (_r && _g && _b && _a)
+        State.setClearColor(state, _r, _g, _b, _a);
       State.setScissorTestEnable(state, false);
       State.setDepthClear(state, 1.);
       State.setClear(state, State.COLOR_BUFFER_BIT | State.DEPTH_BUFFER_BIT);
