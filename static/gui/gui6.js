@@ -487,6 +487,7 @@ function initGUI() {
                     if(!html){html="";}
                     var $result = $('<span style="display:inline-block !important; width:'+percentage+'% !important;">'+html+'</span>');
                     parent.append($result);
+                    if(percentage<20)$result.addClass("btn-upload");
                     return $result;
                 }
 
@@ -505,10 +506,12 @@ function initGUI() {
                 var $frame = $('<div class="upload_header"></div>');
                 this.filesArea.append($frame);
                 var $head = htmlDiv($frame,true);
-                if(flag){var $span = htmlSpan($head,88,GUI.time(true)+" convert "+flag);}
-                else{var $span = htmlSpan($head,88,GUI.time(true)+" Upload");}
+                if(flag){
+                    var $span = htmlSpan($head,90,GUI.time(true)+" convert "+flag);
+                }
+                else{var $span = htmlSpan($head,90,GUI.time(true)+" Upload");}
                 $span.css("font-weight","bold");
-                var $spanButton = htmlSpan($head,12);
+                var $spanButton = htmlSpan($head,10);
                 var $j = $("<button>X</button>").on('click', function (){
                     $frame.hide();
                     stock.filesArea.children("br").last().remove();
@@ -516,12 +519,68 @@ function initGUI() {
                 $spanButton.append($j);
                 return $frame;
             };
-            this.upload = function(parent,link,button){
-                var $newLine = htmlDiv(parent,false);
-                var $span = htmlSpan($newLine,76,link);
-                $span.css("text-align","left");
-                var $spanButton = htmlSpan($newLine,24);
-                $spanButton.append(button);
+            this.upload = function(parent,link,button,button1,button2){
+                     var $newLine = htmlDiv(parent,false);
+                    var $span = htmlSpan($newLine,70,link);
+                    $span.css("text-align","left");
+                    var $spanButton = htmlSpan($newLine,10);
+                if(!button1&&!button2){
+                    $spanButton.append(button);
+                }
+                else{
+                    var tooltip = button1.html();
+                    button1.html("");
+                    GUI.addIcon(button1, "ui-icon-play", "", "before");
+                    $spanButton.append(button1);
+                    button1.addClass("btn-upload");
+                    GUI.addTooltip({
+                        parent: button1,
+                        content: tooltip,
+                    });
+                //        var $spanButton2 = htmlSpan($newLine,10);
+                // tooltip = download.html();
+                // width = download.parent().width();
+                // download.html("");
+                // GUI.addIcon(download, "ui-icon-disk", "", "before");
+                // $spanButton2.append(download).addClass("btn-upload");
+                // GUI.addTooltip({
+                //         parent: download,
+                //         content: tooltip,
+                //     });
+                // width = $spanButton2.width();
+
+                    var $spanButton2 = htmlSpan($newLine,10);
+                    var tooltip = button.html();
+                    button.html("");
+                    GUI.addIcon(button, "ui-icon-newwin", "", "before");
+                    $spanButton2.append(button);
+                     button.addClass("btn-upload");
+                    GUI.addTooltip({
+                        parent: button,
+                        content: tooltip,
+                    });
+
+                    var $spanButton1 = htmlSpan($newLine,10);
+                    var tooltip = button2.html();
+                    button2.html("");
+                    var arrowre = GUI.addIcon(button2, "ui-icon-arrowrefresh-1-n", "", "before");
+                    $spanButton1.append(button2);
+                    button2.addClass("btn-upload");
+                    GUI.addTooltip({
+                        parent: button2,
+                        content: tooltip,
+                    });
+                    var array = ["ui-icon-arrowrefresh-1-n","ui-icon-arrowrefresh-1-e","ui-icon-arrowrefresh-1-s","ui-icon-arrowrefresh-1-w"]
+                    button2.click(function(){
+                        var i = 1;
+                        setInterval(function(){
+                            if(i>3){i=0;}
+                            arrowre.remove();
+                            arrowre = GUI.addIcon(button2, array[i], "", "before");
+                            i++;
+                        },500)
+                    });
+                }
             }
             this.download = function(parent,link,button){
                 var $newLine = htmlDiv(parent,false);
@@ -529,7 +588,7 @@ function initGUI() {
                 $span.css("text-align","left");
                 var $spanButton1 = htmlSpan($newLine,10);
                 var tooltip = button.html();
-                button.html("").width("10px");
+                button.html("");
                 GUI.addIcon(button, "ui-icon-disk", "", "before");
                 button.addClass("btn-upload");
                 $spanButton1.append(button);
@@ -544,34 +603,43 @@ function initGUI() {
                 $span.css("text-align","left");
                 var $spanButton1 = htmlSpan($newLine,10);
                 var tooltip = launch.html();
-                launch.html("").width("10px");
+                
+           
+                launch.html("");
                 GUI.addIcon(launch, "ui-icon-play", "", "before");
-                launch.addClass("btn-upload");
-                $spanButton1.append(launch);
+                $spanButton1.append(launch).addClass("btn-upload");
                 GUI.addTooltip({
                         parent: launch,
                         content: tooltip,
                     });
+                var width = $spanButton1.width();
+                console.debug(width);
+                //launch.width(width);
+
                 var $spanButton2 = htmlSpan($newLine,10);
                 tooltip = download.html();
-                download.html("").width("10px");
+                width = download.parent().width();
+                download.html("");
                 GUI.addIcon(download, "ui-icon-disk", "", "before");
-                download.addClass("btn-upload");
-                $spanButton2.append(download);
+                $spanButton2.append(download).addClass("btn-upload");
                 GUI.addTooltip({
                         parent: download,
                         content: tooltip,
                     });
+                width = $spanButton2.width();
+                // download.width(width);
+
                 var $spanButton3 = htmlSpan($newLine,10);
                 tooltip = preview.html();
-                preview.html("").width("10px");
+                preview.html("");
                 GUI.addIcon(preview, "ui-icon-newwin", "", "before");
-                preview.addClass("btn-upload");
-                $spanButton3.append(preview);
+                $spanButton3.append(preview).addClass("btn-upload");
                 GUI.addTooltip({
                         parent: preview,
                         content: tooltip,
                     });
+                width = $spanButton3.width();
+                // preview.width(width);
             }
             // this.createInfo = function(name,href,button){
             //     var tmp = this.header();
@@ -2782,21 +2850,23 @@ function initGUI() {
         //obj.jqueryObject.options.west.maxSize = '90%';
 
         // obj.jqueryObject.sizePane("west", $(window).width() - 245);
-
         GUI.container = obj.jqueryObject;
-        $(window).on('resize orientationChanged', function () {
+       window.onresize = function(event) {
+        GUI.flagResize = true;
+
             if (GUI.flagResize) {
-                obj.jqueryObject.sizePane("west", $(window).width() - 300);
+                obj.jqueryObject.sizePane("west", $(window).width() - 450);
                 GUI.container.resizeAll();
                 GUI.container.initContent("center");
                 GUI.container.initContent("west");
             } else {}
-        });
+    }
 
         obj.jqueryObjectWest.append("<div id='support-layout' class='ui-layout-center' style='height:100%;width:100%'></div>");
         obj.jqueryObject.sizePane("north", 37);
         obj.jqueryObject.allowOverflow("north");
         obj.jqueryObject.sizePane("south", 25);
+        obj.jqueryObject.sizePane("west", $(window).width() - 450);
         return obj;
     }
     // does not work without this

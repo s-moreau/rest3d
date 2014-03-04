@@ -653,8 +653,21 @@ padding: 2px 2px 2px 2px;
     margin-left: 20px !important;
 }
 
-.btn-upload span{
-    margin-left: -5px !important;
+.btn-upload{
+    display: inline-block!important;
+    text-align: center !important;
+    vertical-align:middle !important;
+}
+.btn-upload button span{
+     display: inline-block!important;
+    text-align: center !important;
+}
+
+.btn-upload button{
+    display: inline-block!important;
+    width: 100% !important;
+    text-align: center !important;
+    padding: 0 0 0 0 !important;
 }
 
 .separator{

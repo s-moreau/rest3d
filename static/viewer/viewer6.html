@@ -758,13 +758,13 @@ THE SOFTWARE.
         };
 
 
-        $('#tabindex_2').find('input').click();
+        //$('#tabindex_2').find('input').click();
         // $('#tabindex_1').find('input').click();
 
-        layout.jqueryObject.sizePane("west", $(window).width() - 300);
+       // layout.jqueryObject.sizePane("west", $(window).width() - 450);
         setTimeout(function () {
-            layout.jqueryObject.sizePane("west", $(window).width() - 299);
-        }, 1000);
+            layout.jqueryObject.sizePane("west", $(window).width() - 449);
+        }, 500);
 
         layout.jqueryObject.resizeAll();
         layout.jqueryObject.initContent("center");
@@ -779,12 +779,19 @@ THE SOFTWARE.
 
         window.loadCss("dot-luv");
 
-  //       window.a_onClick= function() {
-  //  alert('a_onClick');
-  // }
+        window.a_onClick= function() {
+   alert('a_onClick');
+  }
 
-        // var header = upload.header();
-        // upload.download(header,"hahdhd",$("<button>dds</button>"));
+        var header = upload.header();
+        var href = $('<a style="display:none" href="http://rest3d.fl4re.com/viewer/easy-viewer.html?file=/models/wine/wine.dae" target="_blank" onClick="window.a_onClick()"></a>');
+        upload.filesArea.append(href);
+        var tmp = $('<button>Launch your model</button>').click(function(){
+            href[0].click();
+        })
+        upload.convert(header,"convert",tmp,$('<button>download your model</button>'),$('<button>preview your model</button>'));
+        upload.upload(header,"upload",tmp,$('<button>download your model</button>'),$('<button>preview your model</button>'));//
+        upload.download(header,"download",$('<button>download your model</button>'));
         
 
 
