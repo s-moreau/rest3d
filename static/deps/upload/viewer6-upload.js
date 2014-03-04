@@ -21,7 +21,7 @@ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.*/
-
+//
 setViewer6Upload=function(upload){
     var header;
     var index;
@@ -134,7 +134,6 @@ setViewer6Upload=function(upload){
                                 });
                             });
                 upload.upload(header,file.name,$dialog,$preview,uploadButton.clone(true).data(data));
-            }
             // else{this.upload(header,file.name);}
         });
     }).on('fileuploadprocessalways', function (e, data) {
@@ -164,7 +163,6 @@ setViewer6Upload=function(upload){
         $.each(data.result.files, function (index, file) {
             file.assetName = data.result.files[index].name;
             var $node = convertButton.clone(true).data({file: file, context: data.context})
-                .text('Convert')
                 .prop('disabled', !/dae$/i.test(file.url));
             buttonToReplace
                 .replaceWith($node);
