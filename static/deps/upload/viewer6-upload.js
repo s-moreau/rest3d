@@ -166,7 +166,7 @@ setViewer6Upload=function(upload){
                 .prop('disabled', !/dae$/i.test(file.url))
             buttonToReplace
                 .replaceWith($node)
-                .prop("id","nodeClose");
+                .prop("id","nodeClose");//
                 GUI.addIcon($node, "ui-icon-check", "", "before");
         });
     }).on('fileuploadfail', function (e, data) {
