@@ -34,13 +34,11 @@ setViewer6Upload=function(upload){
         uploadButton = $('<button/>')
             .addClass('btn')
             .prop('disabled', true)
-            .text('Upload')
             .on('click', function (){
                 var $this = $(this),
                     data = $this.data();
                 $this
                     .off('click')
-                    .text('Abort')
                     .on('click', function () {
                         $this.remove();
                         data.abort();
@@ -59,13 +57,11 @@ setViewer6Upload=function(upload){
         convertButton = $('<button/>')
             .addClass('btn')
             .prop('disabled', true)
-            .text('Convert')
             .on('click', function () {
                 var $this = $(this),
                     data = $this.data();
                 $this
                     .off('click')
-                    .text('Convert')
                     .prop('disabled',true)
                 // user rest to convert dae into glTF
                 var callback = function(data) {
