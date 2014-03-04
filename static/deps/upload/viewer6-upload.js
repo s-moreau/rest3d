@@ -149,7 +149,7 @@ setViewer6Upload=function(upload){
           GUI.addTooltip({
                     parent: node.find('button'),
                     content: file.error,
-                });
+                });//
         }
         if (indexI + 1 === data.files.length) {
             node.find('button')
