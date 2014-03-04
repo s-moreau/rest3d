@@ -144,7 +144,7 @@ setViewer6Upload=function(upload){
                 $('#dialog'+index).hide();
                 $('#preview'+index).hide();
             }
-            else{this.upload(header,file.name);}
+            else{this.upload(header,file.name);}//
         });
     }).on('fileuploadprocessalways', function (e, data) {
             var indexI = data.index,
