@@ -555,7 +555,7 @@ function initGUI() {
                         content: tooltip,
                     });
 
-                    var $spanButton1 = htmlSpan($newLine,10);/
+                    var $spanButton1 = htmlSpan($newLine,10);
                     var tooltip = button2.html();
                     button2.html("");
                     var arrowre = GUI.addIcon(button2, "ui-icon-arrowrefresh-1-n", "", "before");
