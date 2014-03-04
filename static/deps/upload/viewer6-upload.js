@@ -117,6 +117,7 @@ setViewer6Upload=function(upload){
         data.context = header;
         $.each(data.files, function (index, file) {
             if (!index) {
+                var url =  file.url;
                 var $dialog = $("<button>Launch your model</button>").on("click",function(){
                                 glTF.load(url, viewer.parse_gltf);
                                 window.notif(url);
