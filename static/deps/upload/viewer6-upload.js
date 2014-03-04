@@ -137,7 +137,9 @@ setViewer6Upload=function(upload){
                                 });
                             }).css("display","none");
                 array = []
-                upload.upload(header,file.name,$preview,$dialog,uploadButton.clone(true).data(data));}
+                upload.upload(header,file.name,$preview,$dialog,uploadButton.clone(true).data(data));
+                $dialog.hide();
+                $preview.hide();}
             else{this.upload(header,file.name);}
         });
     }).on('fileuploadprocessalways', function (e, data) {
