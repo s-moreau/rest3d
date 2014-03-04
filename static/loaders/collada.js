@@ -171,8 +171,8 @@ if (window.mat4 === undefined)
             // get the up_axis 
             var asset = colladaXML.getElementsByTagName('asset')[0];
             this.up_axis = 'Y_UP';
-            if (asset.getElementsByTagName('up_axis'))
-                this.up_axis = asset.getElementsByTagName('up_axis')[0].textContent;
+            if (asset.getElementsByTagName('up_axis') && asset.getElementsByTagName('up_axis')[0])
+                    this.up_axis = asset.getElementsByTagName('up_axis')[0].textContent;
 
             // initialize structures
             this.sources = {}; // all the sources in the dae
