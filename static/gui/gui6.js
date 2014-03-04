@@ -519,7 +519,7 @@ function initGUI() {
                 $spanButton.append($j);
                 return $frame;
             };
-            this.upload = function(parent,link,button,button1,button2){//
+            this.upload = function(parent,link,button,button1,button2){
                 var $newLine = htmlDiv(parent,false);
                 if(!button&&!button1&&!button2){
                     var $span = htmlSpan($newLine,100,link);
