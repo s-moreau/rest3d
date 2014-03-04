@@ -540,24 +540,13 @@ function initGUI() {
                     GUI.addTooltip({
                         parent: button1,
                         content: tooltip,
-                    });//
-                //        var $spanButton2 = htmlSpan($newLine,10);
-                // tooltip = download.html();
-                // width = download.parent().width();
-                // download.html("");
-                // GUI.addIcon(download, "ui-icon-disk", "", "before");
-                // $spanButton2.append(download).addClass("btn-upload");
-                // GUI.addTooltip({
-                //         parent: download,
-                //         content: tooltip,
-                //     });
-                // width = $spanButton2.width();
+                    });
 
                     var $spanButton2 = htmlSpan($newLine,10);
                     var tooltip = button.html();
                     button.html("");
                     GUI.addIcon(button, "ui-icon-newwin", "", "before");
-                    $spanButton2.append(button);
+                    $spanButton2.append(button);//
                      button.addClass("btn-upload");
                     GUI.addTooltip({
                         parent: button,
