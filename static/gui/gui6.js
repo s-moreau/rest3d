@@ -610,7 +610,6 @@ function initGUI() {
                         content: tooltip,
                     });
                 var width = $spanButton1.width();
-                console.debug(width);
                 //launch.width(width);
 
                 var $spanButton2 = htmlSpan($newLine,10);

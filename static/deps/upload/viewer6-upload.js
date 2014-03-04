@@ -84,7 +84,7 @@ setViewer6Upload=function(upload){
                         var url = decodeURIComponent(file.url);
                         var ext = url.match(/\.[^.]+$/);
                         if(ext==".json"){
-                            var $dialog = $("<button>Launch your model</button>").on("click",function(){
+                            var $dialog = $("<button>Launch</button>").on("click",function(){
                                 glTF.load(url, viewer.parse_gltf);
                                 window.notif(url);
                             });
@@ -178,8 +178,11 @@ setViewer6Upload=function(upload){
                 .replaceWith($node)
                 .prop("id","nodeClose");//
             GUI.addIcon($node, "ui-icon-check", "", "before");
-
-            $node.parent().parent().show().find("button").show();//ß
+            GUI.addTooltip({
+                parent: $node; 
+                content: "Convert";
+            })
+            $node.parent().parent().show().find("button").show();
         });
     }).on('fileuploadfail', function (e, data) {
         if (!data.result) {
