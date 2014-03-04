@@ -520,14 +520,18 @@ function initGUI() {
                 return $frame;
             };
             this.upload = function(parent,link,button,button1,button2){
+                var $newLine = htmlDiv(parent,false);
                 if(!button&&!button1&&!button2){
-                     var $newLine = htmlDiv(parent,false);
                     var $span = htmlSpan($newLine,100,link);
                     $span.css("text-align","left");}
                 else if(!button1&&!button2){
+                    var $span = htmlSpan($newLine,70,link);
+                    $span.css("text-align","left");
                     $spanButton.append(button);
                 }
                 else{
+                    var $span = htmlSpan($newLine,70,link);
+                    $span.css("text-align","left");
                     var tooltip = button1.html();
                     button1.html("");
                     GUI.addIcon(button1, "ui-icon-play", "", "before");
