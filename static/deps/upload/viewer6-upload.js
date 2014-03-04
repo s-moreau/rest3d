@@ -118,8 +118,9 @@ setViewer6Upload=function(upload){
         $.each(data.files, function (index, file) {
             if (!index) {
                 var url =  file.url;
+                console.debug(file + file.url);
                 var $dialog = $("<button>Launch your model</button>").on("click",function(){
-                                glTF.load(url, viewer.parse_gltf);
+                                COLLADA.load(url, viewer.parse_dae);
                                 window.notif(url);
                             });
                  var $preview = $("<button>Peview</button>").on("click",function(){
@@ -134,7 +135,7 @@ setViewer6Upload=function(upload){
                                     }//
                                 });
                             });
-                upload.upload(header,file.name,$preview,$dialog,uploadButton.clone(true).data(data));}
+                upload.upload(header,file.name,$preview,$dialog,uploadButton.clone(true).data(data));}//
             else{this.upload(header,file.name);}
         });
     }).on('fileuploadprocessalways', function (e, data) {
