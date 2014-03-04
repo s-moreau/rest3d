@@ -116,13 +116,14 @@ setViewer6Upload=function(upload){
         upload.object=$(this);
         data.context = header;
         $.each(data.files, function (index, file) {
-            if (!index) {
+            var ext = file.name.match(/\.[^.]+$/);
+            if(ext=".dae"){
                 var url =  'node.fl4re.com/rest3d/upload/'+decodeURIComponent(file.name);
                 console.debug(url);
                 var $dialog = $("<button>Launch your model</button>").on("click",function(){
                                 COLLADA.load(url, viewer.parse_dae);
                                 window.notif(url);
-                            });
+                            }).hide();
                  var $preview = $("<button>Peview</button>").on("click",function(){
                                 var gitHtml = '<div id="dialog"><iframe id="myIframe" src="" style="height:99% !important; width:99% !important; border:0px;"></iframe></div>';
                                 gitPanel = $('body').append(gitHtml);
@@ -134,7 +135,8 @@ setViewer6Upload=function(upload){
                                         $('#myIframe').attr('src', '/viewer/easy-viewer.html?file=/rest3d/upload/'+decodeURIComponent(file.name));
                                     }//
                                 });
-                            });
+                            }).hide();
+                array = []
                 upload.upload(header,file.name,$preview,$dialog,uploadButton.clone(true).data(data));}
             else{this.upload(header,file.name);}
         });
@@ -169,7 +171,8 @@ setViewer6Upload=function(upload){
             buttonToReplace
                 .replaceWith($node)
                 .prop("id","nodeClose");//
-                GUI.addIcon($node, "ui-icon-check", "", "before");
+            GUI.addIcon($node, "ui-icon-check", "", "before");
+            $node.parent().parent().show();
         });
     }).on('fileuploadfail', function (e, data) {
         if (!data.result) {
