@@ -118,7 +118,7 @@ setViewer6Upload=function(upload){
         $.each(data.files, function (index, file) {
             var ext = file.name.match(/\.[^.]+$/);
             if(ext=".dae"){
-                var url =  'node.fl4re.com/rest3d/upload/'+decodeURIComponent(file.name);
+                var url =  'node.fl4re.com/rest3d/upload/'+decodeURIComponent(file.name);//
                 console.debug(url);
                 var $dialog = $("<button>Launch your model</button>").on("click",function(){
                                 COLLADA.load(url, viewer.parse_dae);
