@@ -116,7 +116,6 @@ setViewer6Upload=function(upload){
                 rest3d.convert(data,callback);
             });
 
-//dsk
     upload.object.on('fileuploadadd', function (e, data) {
         upload.object=$(this);
         data.context = header;
