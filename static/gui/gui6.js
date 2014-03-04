@@ -543,6 +543,7 @@ function initGUI() {
                         parent: button1,
                         content: tooltip,
                     });
+                    button1.hide();
 
                     var $spanButton2 = htmlSpan($newLine,10);
                     var tooltip = button.html();
@@ -554,6 +555,7 @@ function initGUI() {
                         parent: button,
                         content: tooltip,
                     });
+                    button.hide();
 
                     var $spanButton1 = htmlSpan($newLine,10);
                     var tooltip = button2.html();
