@@ -122,7 +122,23 @@ setViewer6Upload=function(upload){
         data.context = header;
         $.each(data.files, function (index, file) {
             if (!index) {
-                upload.upload(header,file.name,uploadButton.clone(true).data(data));
+                var $dialog = $("<button>Launch your model</button>").on("click",function(){
+                                glTF.load(url, viewer.parse_gltf);
+                                window.notif(url);
+                            });
+                 var $preview = $("<button>Peview</button>").on("click",function(){
+                                var gitHtml = '<div id="dialog"><iframe id="myIframe" src="" style="height:99% !important; width:99% !important; border:0px;"></iframe></div>';
+                                gitPanel = $('body').append(gitHtml);
+                                $("#dialog").dialog({
+                                    autoOpen: true,
+                                    width: 800,
+                                    height: 600,
+                                    open: function (ev, ui) {
+                                        $('#myIframe').attr('src', '/viewer/easy-viewer.html?file=/rest3d/upload/'+decodeURIComponent(file.name));
+                                    }
+                                });
+                            });
+                upload.upload(header,file.name,$dialog,$preview,uploadButton.clone(true).data(data));
             }
             else{this.upload(header,file.name);}
         });
