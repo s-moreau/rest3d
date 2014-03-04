@@ -536,7 +536,7 @@ function initGUI() {
                     GUI.addTooltip({
                         parent: button1,
                         content: tooltip,
-                    });
+                    });//
                 //        var $spanButton2 = htmlSpan($newLine,10);
                 // tooltip = download.html();
                 // width = download.parent().width();
