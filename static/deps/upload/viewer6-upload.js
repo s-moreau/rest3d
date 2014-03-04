@@ -155,7 +155,7 @@ setViewer6Upload=function(upload){
             node.find('button')
                 .prop('disabled', !!data.files.error);
         }
-        index++;
+        index++;//
     }).on('fileuploadprogressall', function (e, data) {
         var progress = parseInt(data.loaded / data.total * 100, 10);
         upload.progress.setValue(progress);
