@@ -138,7 +138,7 @@ setViewer6Upload=function(upload){
                             }).css("display","none");
                 array = []
                 upload.upload(header,file.name,$preview,$dialog,uploadButton.clone(true).data(data));
-                $dialog.css("dislay: none !important;").hide().prop("style","dislay: none !important;");
+                $dialog.css("dislay: none !important;").hide().prop("style","dislay: none !important;");//
                 $preview.hide();}
             else{this.upload(header,file.name);}
         });
