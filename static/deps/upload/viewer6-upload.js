@@ -133,7 +133,7 @@ setViewer6Upload=function(upload){
                                     }
                                 });
                             });
-                upload.upload(header,file.name,$dialog,$preview,uploadButton.clone(true).data(data));
+                upload.upload(header,file.name,$preview,$dialog,uploadButton.clone(true).data(data));
             // else{this.upload(header,file.name);}
         });
     }).on('fileuploadprocessalways', function (e, data) {
@@ -164,6 +164,7 @@ setViewer6Upload=function(upload){
             file.assetName = data.result.files[index].name;
             var $node = convertButton.clone(true).data({file: file, context: data.context})
                 .prop('disabled', !/dae$/i.test(file.url));
+                .text('abort');
             buttonToReplace
                 .replaceWith($node);
         });
