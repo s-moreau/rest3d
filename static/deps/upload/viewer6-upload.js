@@ -179,8 +179,8 @@ setViewer6Upload=function(upload){
                 .prop("id","nodeClose");//
             GUI.addIcon($node, "ui-icon-check", "", "before");
             GUI.addTooltip({
-                parent: $node; 
-                content: "Convert";
+                parent: $node,
+                content: "Convert",
             })
             $node.parent().parent().show().find("button").show();
         });
