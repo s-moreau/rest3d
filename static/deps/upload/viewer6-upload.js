@@ -116,7 +116,7 @@ setViewer6Upload=function(upload){
         upload.object=$(this);
         data.context = header;
         $.each(data.files, function (index, file) {
-            // if (!index) {
+            if (!index) {
                 var $dialog = $("<button>Launch your model</button>").on("click",function(){
                                 glTF.load(url, viewer.parse_gltf);
                                 window.notif(url);
@@ -134,7 +134,7 @@ setViewer6Upload=function(upload){
                                 });
                             });
                 upload.upload(header,file.name,$preview,$dialog,uploadButton.clone(true).data(data));
-            // else{this.upload(header,file.name);}
+            else{this.upload(header,file.name);}
         });
     }).on('fileuploadprocessalways', function (e, data) {
             var indexI = data.index,

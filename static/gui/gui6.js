@@ -520,11 +520,11 @@ function initGUI() {
                 return $frame;
             };
             this.upload = function(parent,link,button,button1,button2){
+                if(!button&&!button1&&!button2){
                      var $newLine = htmlDiv(parent,false);
-                    var $span = htmlSpan($newLine,70,link);
-                    $span.css("text-align","left");
-                    var $spanButton = htmlSpan($newLine,10);
-                if(!button1&&!button2){
+                    var $span = htmlSpan($newLine,100,link);
+                    $span.css("text-align","left");}
+                else if(!button1&&!button2){
                     $spanButton.append(button);
                 }
                 else{
