@@ -654,7 +654,7 @@ padding: 2px 2px 2px 2px;
 }
 
 .btn-upload{
-    display: inline-block!important;
+    display: inline-block;
     text-align: center !important;
     vertical-align:middle !important;
 }
