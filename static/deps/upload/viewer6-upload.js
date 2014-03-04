@@ -155,7 +155,7 @@ setViewer6Upload=function(upload){
                 .prepend('<br>')
                 .prepend(file.preview);
         }
-        if (file.error) {//
+        if (file.error) {
           GUI.addTooltip({
                     parent: node.find('button'),
                     content: file.error,
