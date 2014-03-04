@@ -164,9 +164,10 @@ setViewer6Upload=function(upload){
             file.assetName = data.result.files[index].name;
             var $node = convertButton.clone(true).data({file: file, context: data.context})
                 .prop('disabled', !/dae$/i.test(file.url))
-                .text('abort');
             buttonToReplace
-                .replaceWith($node);
+                .replaceWith($node)
+                .prop("id","nodeClose");
+                GUI.addIcon($node, "ui-icon-check", "", "before");
         });
     }).on('fileuploadfail', function (e, data) {
         if (!data.result) {
