@@ -153,7 +153,7 @@ setViewer6Upload=function(upload){
         if (file.preview) {
             node
                 .prepend('<br>')
-                .prepend(file.preview);
+                .prepend(file.preview);//
         }
         if (file.error) {
           GUI.addTooltip({
