@@ -558,7 +558,7 @@ function initGUI() {
                     var $spanButton1 = htmlSpan($newLine,10);
                     var tooltip = button2.html();
                     button2.html("");
-                    var arrowre = GUI.addIcon(button2, "ui-icon-arrowrefresh-1-n", "", "before");//
+                    var arrowre = GUI.addIcon(button2, "ui-icon-arrowrefresh-1-n", "", "before");
                     $spanButton1.append(button2);
                     button2.addClass("btn-upload");
                     GUI.addTooltip({
