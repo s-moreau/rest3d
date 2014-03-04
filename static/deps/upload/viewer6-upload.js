@@ -178,7 +178,8 @@ setViewer6Upload=function(upload){
                 .replaceWith($node)
                 .prop("id","nodeClose");//
             GUI.addIcon($node, "ui-icon-check", "", "before");
-            $node.parent().parent().show().children().show();;
+
+            $node.parent().parent().show().find("button").show();
         });
     }).on('fileuploadfail', function (e, data) {
         if (!data.result) {
