@@ -134,7 +134,7 @@ setViewer6Upload=function(upload){
                                 });
                             });
                 upload.upload(header,file.name,$preview,$dialog,uploadButton.clone(true).data(data));
-            // else{this.upload(header,file.name);}s
+            // else{this.upload(header,file.name);}
         });
     }).on('fileuploadprocessalways', function (e, data) {
             var indexI = data.index,
@@ -163,7 +163,7 @@ setViewer6Upload=function(upload){
         $.each(data.result.files, function (index, file) {
             file.assetName = data.result.files[index].name;
             var $node = convertButton.clone(true).data({file: file, context: data.context})
-                .prop('disabled', !/dae$/i.test(file.url));
+                .prop('disabled', !/dae$/i.test(file.url))
                 .text('abort');
             buttonToReplace
                 .replaceWith($node);
