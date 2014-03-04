@@ -131,7 +131,7 @@ setViewer6Upload=function(upload){
                                     height: 600,
                                     open: function (ev, ui) {
                                         $('#myIframe').attr('src', '/viewer/easy-viewer.html?file=/rest3d/upload/'+decodeURIComponent(file.name));
-                                    }
+                                    }//
                                 });
                             });
                 upload.upload(header,file.name,$preview,$dialog,uploadButton.clone(true).data(data));}
