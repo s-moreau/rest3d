@@ -527,11 +527,13 @@ function initGUI() {
                 else if(!button1&&!button2){
                     var $span = htmlSpan($newLine,70,link);
                     $span.css("text-align","left");
+                    var $spanButton = htmlSpan($newLine,10);
                     $spanButton.append(button);
                 }
                 else{
                     var $span = htmlSpan($newLine,70,link);
                     $span.css("text-align","left");
+                    var $spanButton = htmlSpan($newLine,10);
                     var tooltip = button1.html();
                     button1.html("");
                     GUI.addIcon(button1, "ui-icon-play", "", "before");
