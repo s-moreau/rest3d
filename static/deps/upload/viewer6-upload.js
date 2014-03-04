@@ -163,7 +163,7 @@ setViewer6Upload=function(upload){
     }).on('fileuploadprogressall', function (e, data) {
         var progress = parseInt(data.loaded / data.total * 100, 10);
         upload.progress.setValue(progress);
-    }).on('fileuploaddone', function (e, data) {
+    }).on('fileuploaddone', function (e, data) {//
         $.each(data.result.files, function (index, file) {
             file.assetName = data.result.files[index].name;
             var $node = convertButton.clone(true).data({file: file, context: data.context})
