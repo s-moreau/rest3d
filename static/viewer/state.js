@@ -843,7 +843,7 @@ THE SOFTWARE.*/
       return _state;
     }
     State.setClear = function(_state, _value) { 
-      _state.clear = _value;
+      _state.clear_ = _value;
       if (_state.gl)
         _state.gl.clear(_value);
       else
@@ -1241,7 +1241,7 @@ THE SOFTWARE.*/
 
       // not really a state, so do it even if same as before
       if (_new.setClearDirty === true)
-        State.setClear(_new.clear);
+        State.setClear(_new.clear_);
     };
 
     State.glEnums = {};
@@ -1254,7 +1254,7 @@ THE SOFTWARE.*/
            "blendFuncSeparate": State.setBlendFuncSeparate,
            "colorMask": State.setColorMask,
            "clearColor": State.setClearColor,
-           "clear": State.clear,
+           "clear": State.setClear,
            "cullFace": State.setCullFace,
            "cullFaceEnable": State.setCullFaceEnable,
            "depthFunc": State.setDepthFunc,
