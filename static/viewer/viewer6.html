@@ -40,7 +40,9 @@ THE SOFTWARE.
     dep.push({link:"state.js"});
     dep.push({link:"camera.js"});
     dep.push({link:"channel.js"});
-    //dep.push({link:"/deps/upload/viewer6-upload.js"});
+    dep.push({link:"/deps/screenfull.js"});
+
+    // dep.push({link:"/deps/upload/viewer6-upload.js"});
     // dep.push({link:"/deps/tree/themes/default/style.min.css"});
     </script>
     <!--  <script type="text/javascript" src="../deps/jquery-2.0.3.min.js"></script> -->
@@ -124,7 +126,7 @@ THE SOFTWARE.
                 setTimeout(function(){mask.remove();},500);
             }
         };
-        window.loadCss("got-luv");
+
         var layout = GUI.Layout("mainLayout", 1);
 
 
@@ -133,13 +135,29 @@ THE SOFTWARE.
         CONSOLE.open(layout);
 
          ////////////
+//        GUI.button('rambler-min', accordion.collada, function () {
+
+        window.callbackFullscreen =function(){
+              if (screenfull.enabled) {
+                        screenfull.request();
+                    } else {
+                        console.error("browser doesn't allow the fullscreen mode")
+                    }
+        };
+        var $html = $('<a href="#" onClick="window.callbackFullscreen()"></a>')
+        $('body').append()
+        $html.hide();
 
         var menu = GUI.menu({
             id: "menu",
             parent: layout.jqueryObjectNorth,
             item: [{
-                text: "Load",
+                text: "COLLADA",
                 id: "load"
+            },
+            {
+                text: "glTF",
+                id: "loadgl"
             }, {
                 text: "Settings",
                 id: "settings"
@@ -153,7 +171,7 @@ THE SOFTWARE.
                 text: "b",
                 id: "fullscreen",
                 callback: function () {
-                    console.debug("fullscreen");
+                   $html.click();
                 },
             }]
         });
@@ -225,9 +243,13 @@ THE SOFTWARE.
 
          //------------------------------ all menu icons ---------------------------------------------------------------------------------------------
 
-         // //add icons to the menu
-        GUI.image(menu.load.text, "img-scenes", "../gui/images/menu-animations.gif", 15, 15, "before");
-        GUI.image(menu.settings.text, "img-settings", "../gui/images/icon-cog.png", 15, 15, "before");
+         // //add icons to the men
+         menu.load.text.text("");
+          GUI.image(menu.load.text, "img-settings", "../gui/images/collada.png", 70, 80, "before");
+          menu.loadgl.text.text("");
+          GUI.image(menu.loadgl.text, "img-settings1", "../gui/images/glTF.png", 40, 40, "before");
+
+        GUI.image(menu.settings.text, "img-settings", "../gui/images/icon-cog.png", 16, 16, "before");
         GUI.image(menu.support.text, "img-help", "../gui/images/menu-help.png", 15, 15, "before");
         GUI.image(menu.themes.text, "img-themes", "../gui/images/jquery.png", 15, 15, "before");
         GUI.addIcon(menu.fullscreen.text, "ui-icon-arrow-4-diag", "position: relative !important; right:10px !important;bottom: 10px !important;", "before");
@@ -283,7 +305,7 @@ THE SOFTWARE.
             },
     })
         GUI.image(renderMenu.render.title, "img-render", "../gui/images/menu-render.png", 12, 14, "before");
-        GUI.image(renderMenu.tree.title, "img-render", "../gui/images/menu-render.png", 12, 14, "before");
+        GUI.image(renderMenu.tree.title, "img-render", "../gui/images/menu-scenes.png", 12, 14, "before");
     
          //---------- SCRIPT tab --------------------------------------------------------------------------------------
 
@@ -419,6 +441,7 @@ THE SOFTWARE.
             content: "Ready to run"
         })
 
+
          window.interprate = function () {
             //$('body').unbind();
             // $(document).unbind();
@@ -541,6 +564,14 @@ THE SOFTWARE.
                 channel.forceContextRestore();
                 $(this).find('.ui-button-text').text("Simulate Context Loss");
             }
+        });
+
+        GUI.menu({
+            id: "settings-menu",
+            parent: menu.settings,
+            item: [
+            {id:"contextLoss",text:'Context Loss',callback:function(){button1.click();}},
+            ],
         });
 
         GUI.button('duck rest3d(need database)', accordion.collada, function () {
@@ -688,6 +719,37 @@ THE SOFTWARE.
                pleaseWait(false);
         }).width("90%");
 
+        var colladaMenu = [];
+        accordion.collada.find('button').each(function(i){
+            var stock = $(this);
+            colladaMenu[i]={};
+            colladaMenu[i].id="loadCollada_"+i;
+            colladaMenu[i].text=$(this).find('span').html();
+            colladaMenu[i].callback = function(){
+                stock.click();      };    
+        })
+
+        GUI.menu({
+            id: "load-menu",
+            parent: menu.load,
+            item: colladaMenu,
+        })
+
+        var gltfMenu = [];
+        accordion.gltf.find('button').each(function(i){
+            var stock = $(this);
+            gltfMenu[i]={};
+            gltfMenu[i].id="loadgltf_"+i;
+            gltfMenu[i].text=$(this).find('span').html();
+            gltfMenu[i].callback = function(){
+                stock.click();      };    
+        });
+        
+        GUI.menu({
+            id: "gltf-menu",
+            parent: menu.loadgl,
+            item: gltfMenu,
+        });
 
         canvas = GUI.canvas(layout.jqueryObjectWest);
          // layout.resetOverflow('west');
@@ -757,30 +819,49 @@ THE SOFTWARE.
             });
         };
 
+        button1.hide();
 
-        $('#tabindex_2').find('input').click();
+        //$('#tabindex_2').find('input').click();
         // $('#tabindex_1').find('input').click();
 
-        layout.jqueryObject.sizePane("west", $(window).width() - 300);
+       // layout.jqueryObject.sizePane("west", $(window).width() - 450);
         setTimeout(function () {
-            layout.jqueryObject.sizePane("west", $(window).width() - 299);
-        }, 1000);
+            layout.jqueryObject.sizePane("west", $(window).width() - 449);
+        },1000);
 
         layout.jqueryObject.resizeAll();
         layout.jqueryObject.initContent("center");
         layout.jqueryObject.initContent("west");
 
-         GUI.notification({
-                title: "Welcome to rest3d's viewer!",
-                text: "We are proposing a new version of our viewer elaborated with gui6. You are able to display some model samples in COLLADA/glTF format or explore 3D warehouse for displaying your favorite objects.",
-                type: "notice",
-                time:"30000",
-            })
+         // GUI.notification({
+         //        title: "Welcome to rest3d's viewer!",
+         //        text: "We are proposing a new version of our viewer elaborated with gui6. You are able to display some model samples in COLLADA/glTF format or explore 3D warehouse for displaying your favorite objects.",
+         //        type: "notice",
+         //        time:"1000",
+         //    })
 
-        window.loadCss("dot-luv");
+        window.loadCss("pepper-grinder");
+        accordion.collada.append('<p><div id="colorSelector"><div style="background-color: #0000ff"></div></div></p>');
+        $('#colorSelector').ColorPicker({
+            color: '#0000ff',
+            onShow: function (colpkr) {
+                $(colpkr).fadeIn(500);
+                return false;
+            },
+            onHide: function (colpkr) {
+                $(colpkr).fadeOut(500);
+                return false;
+            },
+            onChange: function (hsb, hex, rgb) {
+                $('#colorSelector div').css('backgroundColor', '#' + hex);
+            }
+        });
 
 
-       
+
+
+
+
 }
         loadGUI(INIT);
          </script>

@@ -21,7 +21,7 @@ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.*/
-
+//
 setViewer6Upload=function(upload){
     var header;
     var index;
@@ -34,13 +34,11 @@ setViewer6Upload=function(upload){
         uploadButton = $('<button/>')
             .addClass('btn')
             .prop('disabled', true)
-            .text('Upload')
             .on('click', function (){
                 var $this = $(this),
                     data = $this.data();
                 $this
                     .off('click')
-                    .text('Abort')
                     .on('click', function () {
                         $this.remove();
                         data.abort();
@@ -59,13 +57,11 @@ setViewer6Upload=function(upload){
         convertButton = $('<button/>')
             .addClass('btn')
             .prop('disabled', true)
-            .text('Convert')
             .on('click', function () {
                 var $this = $(this),
                     data = $this.data();
                 $this
                     .off('click')
-                    .text('Convert')
                     .prop('disabled',true)
                 // user rest to convert dae into glTF
                 var callback = function(data) {
@@ -79,23 +75,35 @@ setViewer6Upload=function(upload){
                         // ennumerate all resulting files
                         var $conve = upload.header(data.file.name);
                         $.each(data.result.files, function (index, file) {
-                            var $download = $("<button>Downl..</button>").on("click",function(){
-                                var gitHtml = $('<iframe id="myIframe" src="'+decodeURIComponent(file.url)+'" style="height:99% !important; width:99% !important; border:0px;"></iframe>');
-                                gitPanel = $('body').append(gitHtml);
+                            var href = $('<a style="display:none" href="'+decodeURIComponent(file.url)+'" target="_blank"></a>');
+                            upload.filesArea.append(href);
+                            var $download = $("<button>Download</button>").on("click",function(){
+                                href[0].click();
                             });
 
                         var url = decodeURIComponent(file.url);
                         var ext = url.match(/\.[^.]+$/);
-                        console.debug(ext);
                         if(ext==".json"){
                             var $dialog = $("<button>Launch</button>").on("click",function(){
                                 glTF.load(url, viewer.parse_gltf);
                                 window.notif(url);
                             });
-                                upload.convert($conve,formatName(data,file),$dialog,$download);
+                            var $preview = $("<button>Peview</button>").on("click",function(){
+                                var gitHtml = '<div id="dialog"><iframe id="myIframe" src="" style="height:99% !important; width:99% !important; border:0px;"></iframe></div>';
+                                gitPanel = $('body').append(gitHtml);
+                                $("#dialog").dialog({
+                                    autoOpen: true,
+                                    width: 800,
+                                    height: 600,
+                                    open: function (ev, ui) {
+                                        $('#myIframe').attr('src', '/viewer/easy-viewer.html?file=/rest3d/upload/'+decodeURIComponent(file.name));
+                                    }
+                                });
+                            });
+                                upload.convert($conve,formatName(data,file),$dialog,$download,$preview);
                         }
                         else{
-                            upload.upload($conve,formatName(data,file),$download);//
+                            upload.download($conve,formatName(data,file),$download);//
                         }
                         });
                     }
@@ -104,15 +112,37 @@ setViewer6Upload=function(upload){
                 rest3d.convert(data,callback);
             });
 
-
     upload.object.on('fileuploadadd', function (e, data) {
         upload.object=$(this);
         data.context = header;
         $.each(data.files, function (index, file) {
-            if (!index) {
-                upload.upload(header,file.name,uploadButton.clone(true).data(data));
+            var ext = file.name.match(/\.[^.]+$/);//
+            if(ext=".dae"){
+                var url =  '/rest3d/upload/'+decodeURIComponent(file.name);//
+                var $dialog = $("<button>Launch</button>").on("click",function(){
+                                COLLADA.load(url, viewer.parse_dae);
+                                window.notif(url);
+                            })
+                            .prop("id","dialog"+index);
+                 var $preview = $("<button>Peview</button>").on("click",function(){
+                                var gitHtml = '<div id="dialog"><iframe id="myIframe" src="" style="height:99% !important; width:99% !important; border:0px;"></iframe></div>';
+                                gitPanel = $('body').append(gitHtml);
+                                $("#dialog").dialog({
+                                    autoOpen: true,
+                                    width: 800,
+                                    height: 600,
+                                    open: function (ev, ui) {
+                                        $('#myIframe').attr('src', '/viewer/easy-viewer.html?file=/rest3d/upload/'+decodeURIComponent(file.name));
+                                    }//
+                                });
+                            })
+                 .prop("id","preview"+index);
+                array = []
+                upload.upload(header,file.name,$preview,$dialog,uploadButton.clone(true).data(data));
+                $('#dialog'+index).hide();
+                $('#preview'+index).hide();
             }
-            else{this.upload(header,file.name);}
+            else{this.upload(header,file.name);}//
         });
     }).on('fileuploadprocessalways', function (e, data) {
             var indexI = data.index,
@@ -121,20 +151,19 @@ setViewer6Upload=function(upload){
         if (file.preview) {
             node
                 .prepend('<br>')
-                .prepend(file.preview);
+                .prepend(file.preview);//
         }
         if (file.error) {
           GUI.addTooltip({
                     parent: node.find('button'),
                     content: file.error,
-                });
+                });//
         }
         if (indexI + 1 === data.files.length) {
             node.find('button')
-                .text('Upload')
                 .prop('disabled', !!data.files.error);
         }
-        index++;
+        index++;//
     }).on('fileuploadprogressall', function (e, data) {
         var progress = parseInt(data.loaded / data.total * 100, 10);
         upload.progress.setValue(progress);
@@ -142,10 +171,16 @@ setViewer6Upload=function(upload){
         $.each(data.result.files, function (index, file) {
             file.assetName = data.result.files[index].name;
             var $node = convertButton.clone(true).data({file: file, context: data.context})
-                .text('Convert')
-                .prop('disabled', !/dae$/i.test(file.url));
+                .prop('disabled', !/dae$/i.test(file.url))
             buttonToReplace
-                .replaceWith($node);
+                .replaceWith($node)
+                .prop("id","nodeClose");
+            GUI.addIcon($node, "ui-icon-check", "", "before");
+            GUI.addTooltip({
+                parent: $node,
+                content: "Convert",
+            })
+            $node.parent().parent().show().find("button").show();
         });
     }).on('fileuploadfail', function (e, data) {
         if (!data.result) {

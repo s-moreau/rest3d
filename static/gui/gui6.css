@@ -81,6 +81,12 @@ position: relative;
 top: 4px;
 }
 
+
+#img-settings1 {
+
+}
+
+
 #img-fullscreen {
 position: relative;
 bottom: 5px;
@@ -651,6 +657,21 @@ padding: 2px 2px 2px 2px;
 
 #saveScript, #helpScript{
     margin-left: 20px !important;
+}
+
+.btn-upload{
+    display: inline-block;
+    text-align: center !important;
+    vertical-align:middle !important;
+}
+.btn-upload button span{
+    text-align: center !important;
+}
+
+.btn-upload button{
+    width: 100% !important;
+    text-align: center !important;
+    padding: 0 0 0 0 !important;
 }
 
 .separator{
