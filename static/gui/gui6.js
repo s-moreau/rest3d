@@ -56,15 +56,6 @@ var dep = [{
 }, {
     link: "../deps/css/jquery.terminal.css"
 },
-//    {
-//     link:"../deps/upload/css/jquery.fileupload-ui.css"
-// },
-//    {
-//    link:"../deps/upload/css/bootstrap-responsive.min.css"
-// },
-//    {
-//    link:"../deps/upload/css/bootstrap.min.css"
-// },
     {
     link: "../gui/gui6.css"
 },
@@ -113,6 +104,12 @@ var dep = [{
 {link:"/deps/upload/jquery.fileupload.js"},
 {link:"/deps/upload/jquery.fileupload-process.js"},
 {link:"/deps/upload/jquery.fileupload-validate.js"},
+{link:"/deps/colorpicker/colorpicker.js"},
+{link:"/deps/colorpicker/eye.js"},
+{link:"/deps/colorpicker/utils.js"},
+{link:"/deps/colorpicker/layout.js"},
+{link:"/deps/colorpicker/css/colorpicker.css"},
+{link:"/deps/colorpicker/css/layout.css"},
 ];
 
 function loadGUI(callback) {
@@ -438,7 +435,7 @@ function initGUI() {
                 var stock=this;
                 this.button = GUI.button("Add files...",this[this.id],function(){
                     $('#fileupload_'+stock.id).click();
-                });
+                }).width("95%");
                 this[this.id].append("<hr>");
 
                 this.dropzone = GUI.image(this[this.id],"image_"+this.id,"../gui/images/upload_d.png","90%","100px");

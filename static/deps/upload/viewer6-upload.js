@@ -119,8 +119,7 @@ setViewer6Upload=function(upload){
             var ext = file.name.match(/\.[^.]+$/);//
             if(ext=".dae"){
                 var url =  '/rest3d/upload/'+decodeURIComponent(file.name);//
-                console.debug(url);
-                var $dialog = $("<button>Launch your model</button>").on("click",function(){
+                var $dialog = $("<button>Launch</button>").on("click",function(){
                                 COLLADA.load(url, viewer.parse_dae);
                                 window.notif(url);
                             })
@@ -140,7 +139,6 @@ setViewer6Upload=function(upload){
                  .prop("id","preview"+index);
                 array = []
                 upload.upload(header,file.name,$preview,$dialog,uploadButton.clone(true).data(data));
-                console.debug($dialog+" "+$preview);
                 $('#dialog'+index).hide();
                 $('#preview'+index).hide();
             }
