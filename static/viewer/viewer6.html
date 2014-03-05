@@ -831,7 +831,7 @@ THE SOFTWARE.
          //        type: "notice",
          //        time:"1000",
          //    })
-        window.loadCss("pepper-grinder");
+              window.loadCss("pepper-grinder");
         
         $("body").append('<p><div id="colorSelector"  style="z-index:9999!important;"><div style="background-color: #0000ff"></div></div></p>');
         var tmpPicker;
@@ -883,9 +883,64 @@ THE SOFTWARE.
             checked: true,
         }]});
 
+        function FPSCoounter() {
+    var counterID;
+    var intervalID;
 
+    // (function () {
+    //     this.check = true;
+    // })();
 
+    return {
+        'createElement': function (elem) {
+            counterID = elem.id;
+            this.fps = 0;
+            this.averageFPS = 0;
+            this.averageCount = 0;
+        },
+        'increment': function () {
+            ++this.fps;
+        },
+        'clear': function () {
+            this.fps = 0;
+        },
+        'UpdateFPS': function () {
+            var fpsDiv = document.getElementById(counterID);
+            fpsDiv.innerHTML = "Request animation frame: "+this.fps + " FPS";
+            this.averageFPS = (this.averageFPS * this.averageCount + this.fps) / (1+this.averageCount);
+            this.averageCount ++;
+            this.fps = 0;
+        },
+        'getAverageFPS': function() {
+            return this.averageFPS;
+        },
+        'run': function () {
+            var that = this;
+            intervalID = setInterval(function () { that.UpdateFPS.call(that); }, 1000);
+        },
+        'stop': function () {
+            clearInterval(intervalID);
+            this.fps = 0;
+            this.UpdateFPS();
+        }
+    }
+}
+    var htmlFps = '<p id="fps" >? FPS</p>';
+      GUI.notification({
+                title: "Script hotkeys",
+                text: htmlFps,
+                type: "notice"
+            })
+    var fpsCounter = new FPSCoounter();
+    fpsCounter.createElement( document.getElementById("fps"));
+    tick();
+    fpsCounter.run();
 
+    function tick() {
+        requestAnimFrame(tick);
+        viewer.draw();
+        fpsCounter.increment();
+    }
 }
         loadGUI(INIT);
          </script>
