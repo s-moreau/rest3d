@@ -59,6 +59,7 @@ THE SOFTWARE.
 
 	glTF.logError = function(msg) {
 		if (console && console.logError) console.logError(msg)
+		else if (console && console.error) console.error(msg)
 		else glTF.log('ERROR '+msg);
 	};
 
@@ -508,6 +509,9 @@ THE SOFTWARE.
                 if (!this.images[imageID]) {
 	                this.images[imageID] = new Image();
 	                if (this.onload) this.images[imageID].onload = this.onload;
+	                this.images[imageID].onerror = function () {
+                        glTF.logError('Could not load "'+imagePath+'"');
+                    }
 	                this.images[imageID].src = uri;
 	            }
 	            return { 

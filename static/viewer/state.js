@@ -94,18 +94,6 @@ THE SOFTWARE.*/
 
         };
 
-        // convert from complex types to simple types
-        State.formatEnum = {};
-          State.formatEnum[_gl.FLOAT] =  {type: _gl.FLOAT, size:1};
-          State.formatEnum[_gl.FLOAT_VEC2] = {type: _gl.FLOAT, size:2},
-          State.formatEnum[_gl.FLOAT_VEC3] = {type: _gl.FLOAT, size:3},
-          State.formatEnum[_gl.FLOAT_VEC4] = {type: _gl.FLOAT, size:4}
-      
-        State.formatFn = {};
-          State.formatFn[_gl.FLOAT] = _gl.vertexAttrib1f;
-          State.formatFn[_gl.FLOAT_VEC2] = _gl.vertexAttrib2fv;
-          State.formatFn[_gl.FLOAT_VEC3] = _gl.vertexAttrib3fv;
-          State.formatFn[_gl.FLOAT_VEC4] = _gl.vertexAttrib4fv;
 
         // utilities
 
@@ -618,8 +606,8 @@ THE SOFTWARE.*/
           for (var key in _value) _uniform.value[key] = _value[key];
         }
         // keep trying until image is ready
-        if (!_uniform.value.glTexture && _state.gl) 
-              State.createTextureBuffer(_state,_uniform);
+        if (_uniform.value.glTexture === undefined && _state.gl) 
+              apply = State.createTextureBuffer(_state,_uniform);
         else 
           apply = true;
        
@@ -688,46 +676,52 @@ THE SOFTWARE.*/
     State.createTextureBuffer = function(_state, _uniform) {
 
       var gl = _state.gl;
-        if (!_uniform.value.glTexture) {
+        if (_uniform.value.glTexture === undefined) {
          var textureID = _uniform.value.path + (_uniform.value.flipY ? 'F' : 'f');
           if (State.textures[textureID])
             _uniform.value.glTexture = State.textures[textureID].glTexture;
           else {
             if (_uniform.value.image && _uniform.value.image.complete) {
-              _uniform.value.glTexture = gl.createTexture();
-              gl.bindTexture(gl.TEXTURE_2D, _uniform.value.glTexture);
-              if (_uniform.value.flipY)
-               gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, true);
-              else
-               gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, false);
-               // load image
-              gl.texImage2D(gl.TEXTURE_2D, /* level */ 0, /* internal format */ gl.RGBA, /* image format */ gl.RGBA, gl.UNSIGNED_BYTE, _uniform.value.image);
-              //gl.generateMipmap(gl.TEXTURE_2D);
-              if (_uniform.value.magFilter)
-                gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, _uniform.value.magFilter);
-              if (_uniform.value.minFilter)
-                gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, _uniform.value.minFilter);
-              if (_uniform.value.wrapS)
-                gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, _uniform.value.wrapS);
-              if(_uniform.value.wrapT)
-                gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, _uniform.value.wrapT);
-              // if not POT
-              var width = _uniform.value.image.width;
-              var height = _uniform.value.image.height;
-              if (((width&(width-1)) === 0 ) && ((height&(height-1)) === 0)) {
-                gl.generateMipmap(gl.TEXTURE_2D);
-              } else {
-                gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
-                gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
-                gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
-                gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
-              }
-              gl.bindTexture(gl.TEXTURE_2D,  null);
-              State.textures[textureID] = { glTexture:_uniform.value.glTexture, 
-                                                   image: _uniform.value.image, 
-                                                   flipY: _uniform.value.flipY,
-                                                 };
 
+              if (_uniform.value.image.naturalWidth === undefined || _uniform.value.image.naturalWidth === 0) {
+                // there was a problem loading the image
+                _uniform.value.glTexture = null;
+              } else {
+                _uniform.value.glTexture = gl.createTexture();
+                gl.bindTexture(gl.TEXTURE_2D, _uniform.value.glTexture);
+                if (_uniform.value.flipY)
+                 gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, true);
+                else
+                 gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, false);
+                 // load image
+                gl.texImage2D(gl.TEXTURE_2D, /* level */ 0, /* internal format */ gl.RGBA, /* image format */ gl.RGBA, gl.UNSIGNED_BYTE, _uniform.value.image);
+                //gl.generateMipmap(gl.TEXTURE_2D);
+                if (_uniform.value.magFilter)
+                  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, _uniform.value.magFilter);
+                if (_uniform.value.minFilter)
+                  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, _uniform.value.minFilter);
+                if (_uniform.value.wrapS)
+                  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, _uniform.value.wrapS);
+                if(_uniform.value.wrapT)
+                  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, _uniform.value.wrapT);
+                // if not POT
+                var width = _uniform.value.image.width;
+                var height = _uniform.value.image.height;
+                if (((width&(width-1)) === 0 ) && ((height&(height-1)) === 0)) {
+                  gl.generateMipmap(gl.TEXTURE_2D);
+                } else {
+                  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
+                  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
+                  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
+                  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+                }
+                gl.bindTexture(gl.TEXTURE_2D,  null);
+                State.textures[textureID] = { glTexture:_uniform.value.glTexture, 
+                                                     image: _uniform.value.image, 
+                                                     flipY: _uniform.value.flipY,
+                                                   };
+                return true;
+              }
             }
          }
        }

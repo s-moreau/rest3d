@@ -45,7 +45,10 @@ var warehouse_tree = null;
 viewer.parse_dae = function(dae) {
 
             // set the image load callback to redraw
-            dae.onload = viewer.draw;
+            dae.onload = function(e) {
+                e.preventDefault();
+                viewer.draw();
+            }
 
             var starttime = window.performance.now();
             // get the scene
@@ -227,7 +230,10 @@ viewer.parse_dae = function(dae) {
             var starttime = window.performance.now();
 
             // set the image load callback to redraw
-            gltf.onload = viewer.draw;
+            gltf.onload = function(e) {
+                e.preventDefault();
+                viewer.draw();
+            }
             // traverse the scene, collect the geometry and make webGL objects out of those
             function buildMe() {
                 // this is the bounding box for all geometries instanced in this node

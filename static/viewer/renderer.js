@@ -104,11 +104,11 @@ RENDERER.primitive.prototype = {
     },
     clear: function () {
       this.prim = State.TRIANGLES;
-      this.defaultVertex = [0, 0, 0]; 
-      this.defaultNormal = [0, 0, 1]; 
-      this.defaultBinormal = [0, 0, 1]; 
-      this.defaultColor= [0.9, 0.9, 0.9, 0.9]; 
-      this.defaultTexcoord = [0, 0]; 
+      this.defaultVertex = new Float32Array([0, 0, 0]); 
+      this.defaultNormal = new Float32Array([0, 0, 1]); 
+      this.defaultBinormal = new Float32Array([0, 0, 1]); 
+      this.defaultColor= new Float32Array([0.9, 0.9, 0.9, 0.9]); 
+      this.defaultTexcoord = new Float32Array([0, 0]); 
       this.defaultID = 0; 
       this.hasColorBuffer = false; 
       this.numIndices = this.numVertices = 0; 
@@ -260,15 +260,38 @@ RENDERER.primitive.prototype = {
               if (this.glBuffer[semantic]) {            
                 gl.bindBuffer(gl.ARRAY_BUFFER, this.glBuffer[semantic]);
                 gl.enableVertexAttribArray(attribute.location);
-                gl.vertexAttribPointer(attribute.location, State.formatEnum[attribute.type].size, State.formatEnum[attribute.type].type, false, 0, 0);
-              
+                switch (attribute.type) {
+                  case gl.FLOAT:
+                    gl.vertexAttribPointer(attribute.location, 1, gl.FLOAT, false, 0, 0);
+                    break;
+                  case gl.FLOAT_VEC2:
+                    gl.vertexAttribPointer(attribute.location, 2, gl.FLOAT, false, 0, 0);
+                    break;
+                  case gl.FLOAT_VEC3:
+                    gl.vertexAttribPointer(attribute.location, 3, gl.FLOAT, false, 0, 0);
+                    break;
+                  case gl.FLOAT_VEC4:
+                    gl.vertexAttribPointer(attribute.location, 4, gl.FLOAT, false, 0, 0);
+                    break;
+                }
               // if the material overide the primitive settings
-              } else if (attribute.value) {
-                 State.formatFn[attribute.type](attribute.location, attribute.value);
-              // get value from the primitive
               } else {
-                State.formatFn[attribute.type](attribute.location,this.value[semantic]); 
-              }
+                var value = attribute.value || this.value[semantic];
+                switch (attribute.type) {
+                  case gl.FLOAT:
+                    gl.vertexAttrib1f(attribute.location, value);
+                    break;
+                  case gl.FLOAT_VEC2:
+                    gl.vertexAttrib2fv(attribute.location, value);
+                    break;
+                  case gl.FLOAT_VEC3:
+                    gl.vertexAttrib3fv(attribute.location, value);
+                    break;
+                  case gl.FLOAT_VEC4:
+                    gl.vertexAttrib4fv(attribute.location, value);
+                    break;
+                  }
+                }
             }        
           }
 
