@@ -566,14 +566,6 @@ THE SOFTWARE.
             }
         });
 
-        GUI.menu({
-            id: "settings-menu",
-            parent: menu.settings,
-            item: [
-            {id:"contextLoss",text:'Context Loss',callback:function(){button1.click();}},
-            ],
-        });
-
         GUI.button('duck rest3d(need database)', accordion.collada, function () {
             pleaseWait(true);
             var url = "/rest3d/assets/duck/duck.dae";
@@ -839,25 +831,57 @@ THE SOFTWARE.
          //        type: "notice",
          //        time:"1000",
          //    })
-
         window.loadCss("pepper-grinder");
-        accordion.collada.append('<p><div id="colorSelector"><div style="background-color: #0000ff"></div></div></p>');
+        
+        $("body").append('<p><div id="colorSelector"  style="z-index:9999!important;"><div style="background-color: #0000ff"></div></div></p>');
+        var tmpPicker;
         $('#colorSelector').ColorPicker({
-            color: '#0000ff',
+            color: '#ffffff',
             onShow: function (colpkr) {
                 $(colpkr).fadeIn(500);
+                tmpPicker = $(colpkr);
                 return false;
             },
             onHide: function (colpkr) {
                 $(colpkr).fadeOut(500);
+                tmpPicker = $(colpkr);
                 return false;
             },
-            onChange: function (hsb, hex, rgb) {
+            onSubmit: function (hsb, hex, rgb) {
                 $('#colorSelector div').css('backgroundColor', '#' + hex);
+                $('#mainLayout-west').css('backgroundColor', '#' + hex);
+                tmpPicker.fadeOut(500);
             }
-        });
+        }).hide();
+        $("#tmp, #colorSelector").mouseover(function(){
+            $('#colorSelector').show();
+        })
+          $("#tmp, #colorSelector").mouseleave(function(){
+            $('#colorSelector').hide();
+        })
 
 
+        var settingMenu =GUI.menu({
+            id: "settings-menu",
+            parent: menu.settings,
+            item: [
+            {id:"contextLoss",text:'Context Loss',callback:function(){button1.click();}},
+        {
+            id:"pickerEnable", type:"checkbox", text:"Enable colorpicker", isChecked:function(){
+            $("#tmp, #colorSelector").mouseover(function(){
+            $('#colorSelector').show();
+        })
+          $("#tmp, #colorSelector").mouseleave(function(){
+            $('#colorSelector').hide();
+        })
+            }
+            ,
+            noChecked:function(){
+                $("#tmp").off();
+
+            },
+            checked: true,
+        }]});
 
 
 

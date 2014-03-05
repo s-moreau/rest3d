@@ -107,7 +107,6 @@ var dep = [{
 {link:"/deps/colorpicker/colorpicker.js"},
 {link:"/deps/colorpicker/eye.js"},
 {link:"/deps/colorpicker/utils.js"},
-{link:"/deps/colorpicker/layout.js"},
 {link:"/deps/colorpicker/css/colorpicker.css"},
 {link:"/deps/colorpicker/css/layout.css"},
 ];
@@ -2264,6 +2263,7 @@ function initGUI() {
                     delete _json.parent;
                     checkbox = GUI.addCheckBox(_json);
                     element += checkbox.html;
+                    console.debug(checkbox.html)
                 } else if (_json.type == "radioList") {
                     if (!_json.hasOwnProperty("text")) {
                         delete _json.type;
