@@ -73,7 +73,7 @@ $('body').append($background);
 $canvas = $('<canvas id="tmp" class="ui-resize-me" style="position: absolute; top: 0px; bottom: 0px; right:0px; margins: 10px;height: 100%; width:100%; " ></canvas>');
 $background.append($canvas);
 // initialize webGL
-channel = Channel.create($canvas[0], true); // debug context please
+channel = Channel.create($canvas[0]); 
 
 initCanvasUI();
 
