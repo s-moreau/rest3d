@@ -57,6 +57,7 @@ if (window.mat4 === undefined)
 
     COLLADA.logError = function(msg) {
         if (console && console.logError) console.logError(msg)
+        else if (console && console.error) console.error(msg)
         else COLLADA.log('ERROR '+msg);
     }
 
@@ -378,6 +379,9 @@ if (window.mat4 === undefined)
                     this.images[init_from] = new Image();
 
                     if (this.onload) this.images[init_from].onload = this.onload;
+                    this.images[init_from].onerror = function () {
+                        COLLADA.logError('Could not load "'+imagePath+'"');
+                    }
                     this.images[init_from].src = uri;
                 }
 
