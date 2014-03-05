@@ -1,11 +1,13 @@
 #colorSelector {
-	position: relative;
+	position: absolute;
+	top: 90% !important;
 	width: 36px;
 	height: 36px;
 	background: url(../images/select.png);
 }
 #colorSelector div {
 	position: absolute;
+	background-color: white !important;
 	top: 3px;
 	left: 3px;
 	width: 30px;
