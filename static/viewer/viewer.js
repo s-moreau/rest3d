@@ -221,7 +221,8 @@ viewer.parse_dae = function(dae) {
             $('#loadtimer').text('load time=' + (scene.endtime - scene.starttime));
             viewer.draw();
         };
-viewer.parse_gltf = function(gltf) {
+
+        viewer.parse_gltf = function(gltf) {
 
             var starttime = window.performance.now();
 
@@ -331,7 +332,7 @@ viewer.drawnode = function() {
             for (var j = 0, len = this.geometries.length; j < len; j++) {
                 var primitives = this.geometries[j].glprimitives;
                 if (primitives) {
-                    State.setModelView(channel.state, mvMatrix);
+                    State.setModelView(mvMatrix);
                     for (var i = 0; i < primitives.length; i++)
                         primitives[i].render(channel);
                 }
@@ -371,7 +372,7 @@ viewer.draw = function() {
             $('#rot').text('currentRotation is ' + currentRotationX.toFixed(2) + ',' + currentRotationY.toFixed(2));
 
            
-            Channel.clear(channel);
+            Channel.clear(channel, 1., 0., 0., 1.); // red opaque
 
             Camera.rotateAround(mainCamera, currentZoom, currentRotationX, currentRotationY);
 
@@ -386,8 +387,8 @@ viewer.draw = function() {
                     mat4.rotate(mvMatrix, mvMatrix, -90 * deg2rad, vec3.fromValues(1, 0, 0));
                 };
 
-                //State.setModelView(state,mvMatrix);
-                State.setViewProj(state, pmMatrix);
+                //State.setModelView(mvMatrix);
+                State.setViewProj(pmMatrix);
 
                 // depth first scene drawing
                 viewer.render_scene.call(channel, scenes[i], viewer.drawnode);

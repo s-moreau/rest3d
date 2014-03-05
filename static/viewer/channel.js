@@ -43,7 +43,7 @@ THE SOFTWARE.*/
   var Channel= {}
 
   // active channel
-  Channel.gl=null;
+  Channel.active=null;
 
   Channel.create = function(_canvas, _debug) {
 
@@ -85,6 +85,7 @@ THE SOFTWARE.*/
       var channel={};
       channel.gl = gl;
       channel.state =  State.create(gl);
+      Channel.active = channel;
 
       return channel;
 
