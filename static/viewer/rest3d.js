@@ -74,6 +74,7 @@ setTimeout(function(){
     var data = {};
     data.files = [];
     data.files[0] = {};
-    data.files[0].name = "test";
+    data.files[0].name = "test.js";
+    data.files[0].content = "helloWorld!";
     rest3d.upload(data,getData);
 },3000);
