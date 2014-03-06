@@ -182,10 +182,11 @@ viewer.parse_dae = function(dae) {
                                 } else {
                                     search.value = [1, 1, 1, 0.5];
                                 }
+
                             } else if (search !== diffuse.texcoord) {
                                 console.log('semantic ' + search + ' does not match diffuse semantic of ' + diffuse.texcoord);
                             } else if (diffuse && diffuse.image) {
-                                state.program.uniforms['diffuse'].value = {
+                                state.values.diffuse = {
                                     "path": diffuse.path,
                                     "image": diffuse.image,
                                     "magFilter": diffuse.magFilter,

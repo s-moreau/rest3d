@@ -301,11 +301,12 @@ RENDERER.primitive.prototype = {
               gl.drawElements(this.prim, this.numIndices, gl.UNSIGNED_SHORT, 0);
           } else
               gl.drawArrays(this.prim, 0, this.numVertices);
-
+/*
           for (var semantic in _channel.state.program.attributes) {
             var attribute = _channel.state.program.attributes[semantic];
             gl.disableVertexAttribArray(attribute.location);
           }
+          */
         }
 
     }
