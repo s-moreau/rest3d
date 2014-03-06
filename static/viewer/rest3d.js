@@ -50,7 +50,7 @@ rest3d.getFileConverted = function(_file, _cb){
         params.error = JSON.parse(data.error().responseText);
     });
 };
-//rest3d.upload(url,)//url:'/rest3d/upload'
+//rest3d.upload(url,)//url:'/rest3d/upload
 
 rest3d.upload = function(_params,_cb){
         var params=_params || {};
