@@ -23,7 +23,7 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.*/
 
 (function(_global) {
-  "use strict";
+  //"use strict"; - safari has issues
 
   var shim = {};
   if (typeof(exports) === 'undefined') {
@@ -837,7 +837,7 @@ THE SOFTWARE.*/
       return _state;
     }
     State.setClear = function(_state, _value) { 
-      _state.clear_ = _value;
+      _state.clear = _value; 
       if (_state.gl)
         _state.gl.clear(_value);
       else
