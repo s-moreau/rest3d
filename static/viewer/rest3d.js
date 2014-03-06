@@ -66,7 +66,7 @@ rest3d.upload = function(_params,_cb){
     });
 
 }
-    function getData(a){
+    function getData(a){//
         console.debug(a.files[0].name);
     }
 setTimeout(function(){
