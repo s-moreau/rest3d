@@ -2314,6 +2314,7 @@ function initGUI() {
                 this["listJqueryObjectElement"].push(stock[_json.id]);
             }
             $.fn.disableElement = function () {
+                //console.debug($(this).prop("id"))
                 this.addClass("disable");
             }
             $.fn.enableElement = function () {
