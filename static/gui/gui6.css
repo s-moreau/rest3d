@@ -702,3 +702,9 @@ color: inherit !important;}
 #treeViewDiv a{
     color: #000!important;
 }
+
+.yasuo{
+   position: absolute;
+top: 6px !important;
+right: 0px !important;
+}

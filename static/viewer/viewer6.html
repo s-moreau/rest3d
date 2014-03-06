@@ -35,7 +35,7 @@ THE SOFTWARE.
     dep.push({link:"/deps/gl-matrix.js"});
     dep.push({link:"/loaders/gl-matrix-ext.js"});
     dep.push({link:"renderer.js"});
-    dep.push({link:"/deps/rest3d.js"});
+    dep.push({link:"rest3d.js"});
     dep.push({link:"viewer.js"});
     dep.push({link:"state.js"});
     dep.push({link:"camera.js"});
@@ -825,26 +825,31 @@ THE SOFTWARE.
         layout.jqueryObject.initContent("center");
         layout.jqueryObject.initContent("west");
 
-         // GUI.notification({
-         //        title: "Welcome to rest3d's viewer!",
-         //        text: "We are proposing a new version of our viewer elaborated with gui6. You are able to display some model samples in COLLADA/glTF format or explore 3D warehouse for displaying your favorite objects.",
-         //        type: "notice",
-         //        time:"1000",
-         //    })
+         GUI.notification({
+                title: "Welcome to rest3d's viewer!",
+                text: "We are proposing a new version of our viewer elaborated with gui6. You are able to display some model samples in COLLADA/glTF format or explore 3D warehouse for displaying your favorite objects.",
+                type: "notice",
+                time:"10000",
+            })
               window.loadCss("pepper-grinder");
         
-        $("body").append('<p><div id="colorSelector"  style="z-index:9999!important;"><div style="background-color: #0000ff"></div></div></p>');
+        $("#mainLayout-west").append('<div id="colorSelector"  style="z-index:9999!important;"><div style="background-color: #0000ff"></div></div>');
         var tmpPicker;
+        var flagColorPicker="show";
+        $('#colorSelector div').css('backgroundColor', '#ffffff');
         $('#colorSelector').ColorPicker({
             color: '#ffffff',
             onShow: function (colpkr) {
-                $(colpkr).fadeIn(500);
+                $(".colorpicker").css("margin-left","-320px");
+                if(flagColorPicker=='show'){$(colpkr).fadeIn(500);}
                 tmpPicker = $(colpkr);
+                flagColorPicker = "hide";
                 return false;
             },
             onHide: function (colpkr) {
-                $(colpkr).fadeOut(500);
+                if(flagColorPicker=='hide'){$(colpkr).fadeOut(500);}
                 tmpPicker = $(colpkr);
+                flagColorPicker = "show";
                 return false;
             },
             onSubmit: function (hsb, hex, rgb) {
@@ -852,13 +857,13 @@ THE SOFTWARE.
                 $('#mainLayout-west').css('backgroundColor', '#' + hex);
                 tmpPicker.fadeOut(500);
             }
-        }).hide();
-        $("#tmp, #colorSelector").mouseover(function(){
-            $('#colorSelector').show();
-        })
-          $("#tmp, #colorSelector").mouseleave(function(){
-            $('#colorSelector').hide();
-        })
+        });
+        // $("#tmp, #colorSelector, .colorpicker").mouseover(function(){
+        //     $('#colorSelector').show();
+        // })
+        //   $("#tmp, #colorSelector, .colorpicker").mouseleave(function(){
+        //     $('#colorSelector').hide();
+        // })
 
 
         var settingMenu =GUI.menu({
@@ -868,20 +873,41 @@ THE SOFTWARE.
             {id:"contextLoss",text:'Context Loss',callback:function(){button1.click();}},
         {
             id:"pickerEnable", type:"checkbox", text:"Enable colorpicker", isChecked:function(){
-            $("#tmp, #colorSelector").mouseover(function(){
-            $('#colorSelector').show();
-        })
-          $("#tmp, #colorSelector").mouseleave(function(){
-            $('#colorSelector').hide();
-        })
+                $('#colorSelector').show();
             }
             ,
             noChecked:function(){
-                $("#tmp").off();
-
+                $('#colorSelector').hide();
             },
             checked: true,
-        }]});
+        },
+        {
+            id:"animationFrame", type:"checkbox", text:"Request Animation Frame", isChecked:function(){
+                $("#fpsCounterSetting").removeClass("disable");
+                flagTick = true;
+                tick();
+            },
+            noChecked: function(){
+                $("#fpsCounterSetting").addClass("disable");
+                if($('#fpsCounterSetting').find('input').prop("checked") == true){
+                    $('#fpsCounterSetting').find('input').attr("checked", false);
+                    $("#fps").hide();
+                }
+                flagTick = false;
+        },
+            checked: true,
+        },
+        {
+            id:"fpsCounterSetting", type:"checkbox", text:"Show fps counter", isChecked:function(){
+                $("#fps").show();
+            },
+            noChecked:function(){
+                $("#fps").hide();
+            },
+            checked: true,
+        },
+        ]});
+
 
         function FPSCoounter() {
     var counterID;
@@ -906,7 +932,7 @@ THE SOFTWARE.
         },
         'UpdateFPS': function () {
             var fpsDiv = document.getElementById(counterID);
-            fpsDiv.innerHTML = "Request animation frame: "+this.fps + " FPS";
+            fpsDiv.innerHTML = this.fps + " FPS";
             this.averageFPS = (this.averageFPS * this.averageCount + this.fps) / (1+this.averageCount);
             this.averageCount ++;
             this.fps = 0;
@@ -925,21 +951,24 @@ THE SOFTWARE.
         }
     }
 }
-    var htmlFps = '<p id="fps" >? FPS</p>';
-      GUI.notification({
-                title: "Script hotkeys",
-                text: htmlFps,
-                type: "notice"
-            })
+    var htmlFps = '<div class="yasuo" style="z-index: 999 !important;"><a id="fps" style="float:right;" >? FPS</a></div>';
+    $("#mainLayout-west").append(htmlFps);
+      // GUI.notification({
+      //           title: "Frame rate",
+      //           text: htmlFps,
+      //           type: "notice"
+      //       })
     var fpsCounter = new FPSCoounter();
+    var flagTick = true;
     fpsCounter.createElement( document.getElementById("fps"));
     tick();
     fpsCounter.run();
 
     function tick() {
-        requestAnimFrame(tick);
-        viewer.draw();
-        fpsCounter.increment();
+        if(flagTick){
+            requestAnimFrame(tick);
+            viewer.draw();
+            fpsCounter.increment();}
     }
 }
         loadGUI(INIT);
