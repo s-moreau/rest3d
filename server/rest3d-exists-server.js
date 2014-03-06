@@ -1121,7 +1121,7 @@ UploadHandler.prototype.post = function () {
             if (!counter) {
                 files.forEach(function (fileInfo) {
 
-    			    console.log ('file '+fileInfo.name+' was uploaded succesfully');
+    			    console.log ('file '+fileInfo.name+' was uploaded succesfully');//
 
                     fileInfo.initUrls(handler.req);
 
