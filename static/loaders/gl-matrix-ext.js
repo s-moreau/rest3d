@@ -125,6 +125,43 @@ mat4.fromTRS = function (out, v, q, s) {
     
     return out;
 };
+/**
+ * Calculates the square distance between two n dimention elements
+ */
+mat4.squaredDistance = function(a, b) {
+    var c = b[0] - a[0],
+        d = b[1] - a[1],
+        e = b[2] - a[2],
+        f = b[3] - a[3],
+        g = b[4] - a[4],
+        h = b[5] - a[5],
+        i = b[6] - a[6],
+        j = b[7] - a[7],
+        k = b[8] - a[8],
+        l = b[9] - a[9],
+        m = b[10] - a[10],
+        n = b[11] - a[11],
+        o = b[12] - a[12],
+        p = b[13] - a[13],
+        q = b[14] - a[14],
+        r = b[15] - a[15];
+
+    return c*c+d*d+e*e+f*f+g*g+h*h+i*i+j*j+k*k+l*l+m*m+n*n+o*o+p*p+q*q+r*r;
+};
+
+mat3.squaredDistance = function(a, b) {
+    var c = b[0] - a[0],
+        d = b[1] - a[1],
+        e = b[2] - a[2],
+        f = b[3] - a[3],
+        g = b[4] - a[4],
+        h = b[5] - a[5],
+        i = b[6] - a[6],
+        j = b[7] - a[7],
+        k = b[8] - a[8];
+
+    return c*c+d*d+e*e+f*f+g*g+h*h+i*i+j*j+k*k;
+};
 
 
 // TODO - a aabb = null should be same as infinite small aabb
