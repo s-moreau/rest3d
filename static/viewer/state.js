@@ -527,67 +527,38 @@ THE SOFTWARE.*/
 
       switch (type){
         case WebGLRenderingContext.FLOAT_VEC2:
-          if (uniform.value[0] !== value[0] || 
-              uniform.value[1] !== value[1]) {
+          if (vec2.squaredDistance(uniform.value,value)>1e-12){
             vec2.copy(uniform.value, value);    
             apply=true; 
           }
           break;
         case WebGLRenderingContext.FLOAT_VEC3:
-          if (uniform.value[0] !== value[0] || 
-              uniform.value[1] !== value[1] ||
-              uniform.value[2] !== value[2]) {
+          if (vec3.squaredDistance(uniform.value,value)>1e-12){
             vec3.copy(uniform.value, value);
             apply=true;
           }
           break;
         case WebGLRenderingContext.FLOAT_VEC4:
-          if (uniform.value[0] !== value[0] || 
-              uniform.value[1] !== value[1] ||
-              uniform.value[2] !== value[2] ||
-              uniform.value[3] !== value[3]) {
+          if (vec4.squaredDistance(uniform.value,value)>1e-12){
             vec4.copy(uniform.value, value);
             apply=true;
           }
           break;
         case WebGLRenderingContext.FLOAT_MAT4:
-          if (uniform.value[0] !== value[0] || 
-              uniform.value[1] !== value[1] ||
-              uniform.value[2] !== value[2] ||
-              uniform.value[3] !== value[3] ||
-              uniform.value[4] !== value[4] ||
-              uniform.value[5] !== value[5] ||
-              uniform.value[6] !== value[6] ||
-              uniform.value[7] !== value[7] ||
-              uniform.value[8] !== value[8] ||
-              uniform.value[9] !== value[9] ||
-              uniform.value[10] !== value[10] ||
-              uniform.value[11] !== value[11] ||
-              uniform.value[12] !== value[12] ||
-              uniform.value[13] !== value[13] ||
-              uniform.value[14] !== value[14] ||
-              uniform.value[15] !== value[15]) {
+        if (mat4.squaredDistance(uniform.value,value)>1e-12){
             mat4.copy(uniform.value, value);
             apply=true;
           }
           break;
         case WebGLRenderingContext.FLOAT_MAT3:
-          if (uniform.value[0] !== value[0] || 
-              uniform.value[1] !== value[1] ||
-              uniform.value[2] !== value[2] ||
-              uniform.value[3] !== value[3] ||
-              uniform.value[4] !== value[4] ||
-              uniform.value[5] !== value[5] ||
-              uniform.value[6] !== value[6] ||
-              uniform.value[7] !== value[7] ||
-              uniform.value[8] !== value[8] ) {
+         if (mat3.squaredDistance(uniform.value,value)>1e-12){
             mat3.copy(uniform.value, value);
             apply=true;
           }
           break;
           // TODO -> should this be a pointer instead?
         case WebGLRenderingContext.FLOAT:
-          if (uniform.value !== value) {
+          if ((uniform.value - value) * (uniform.value-value)>1e-12) {
             uniform.value = value;
             apply=true;
           }

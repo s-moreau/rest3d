@@ -234,12 +234,16 @@ RENDERER.primitive.prototype = {
       }
       this.updateMe = false;
     },
+    // optimize VertexAttrib
+    VertexAttribBool: {},
     // this take a primitive (this), applies _state, and render to channel
-
     render: function(_channel) {
 
       var state = this.state;
       var gl = _channel.state.gl;
+      if (!_channel.VertexAttribBool){
+        _channel.VertexAttribBool = {};
+      }
         if (0 !== this.numVertices) {
 
           // this deals with gl states and uniforms
@@ -259,7 +263,9 @@ RENDERER.primitive.prototype = {
               // if this attribute is connected to an array
               if (this.glBuffer[semantic]) {            
                 gl.bindBuffer(gl.ARRAY_BUFFER, this.glBuffer[semantic]);
-                gl.enableVertexAttribArray(attribute.location);
+                if (_channel.VertexAttribBool[semantic] === undefined) 
+                  gl.enableVertexAttribArray(attribute.location); 
+                _channel.VertexAttribBool[semantic] = true;
                 switch (attribute.type) {
                   case gl.FLOAT:
                     gl.vertexAttribPointer(attribute.location, 1, gl.FLOAT, false, 0, 0);
@@ -276,6 +282,10 @@ RENDERER.primitive.prototype = {
                 }
               // if the material overide the primitive settings
               } else {
+                if (_channel.VertexAttribBool[semantic] === true)
+                  gl.disableVertexAttribArray(attribute.location); 
+                delete _channel.VertexAttribBool[semantic];
+
                 var value = attribute.value || this.value[semantic];
                 switch (attribute.type) {
                   case gl.FLOAT:
@@ -295,18 +305,24 @@ RENDERER.primitive.prototype = {
             }        
           }
 
+          for (var semantic in _channel.VertexAttribBool) {
+            if (_channel.VertexAttribBool[semantic] === false) {
+              delete _channel.VertexAttribBool[semantic] ;
+              gl.disableVertexAttribArray(_channel.state.program.attributes[semantic].location);
+            }
+          }
           
           if (this.glBuffer.INDEX) {
               gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, this.glBuffer.INDEX);
               gl.drawElements(this.prim, this.numIndices, gl.UNSIGNED_SHORT, 0);
           } else
               gl.drawArrays(this.prim, 0, this.numVertices);
-/*
+
           for (var semantic in _channel.state.program.attributes) {
-            var attribute = _channel.state.program.attributes[semantic];
-            gl.disableVertexAttribArray(attribute.location);
+            if (_channel.VertexAttribBool[semantic] === true)
+            _channel.VertexAttribBool[semantic] = false; // lazy disable
           }
-          */
+          
         }
 
     }
