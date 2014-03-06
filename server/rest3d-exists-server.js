@@ -1108,6 +1108,7 @@ var UploadHandler = function (req, res, callback) {
 
 
 UploadHandler.prototype.post = function () {
+	console.log ("upload requested");
     var handler = this,
         form = new formidable.IncomingForm(),
         tmpFiles = [],
