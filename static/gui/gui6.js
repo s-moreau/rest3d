@@ -141,7 +141,7 @@ function loadGUI(callback) {
             getScripts(dep);
             addLog(s.src + " loaded");
             removeScript();
-            // return true;
+            // return true;//
         } else {
             removeScript();
         }
