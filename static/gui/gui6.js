@@ -2880,7 +2880,7 @@ define("gui", (function (global) {
     GUI.offset = false;
 
     GUI.resize = function () {
-
+        console.debug("djsd");
     };
 
     GUI.copyToClipboard = function (text) {
