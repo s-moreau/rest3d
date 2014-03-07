@@ -175,7 +175,7 @@ var css = [
 "../deps/css/bootstrap.icons.css",
 "../deps/css/jquery.toolbars.css",
 "../deps/css/jquery.terminal.css",
-
+"../deps/jstree/themes/apple/style.css",
 "../deps/css/jquery.pnotify.default.css",
 "../deps/colorpicker/css/colorpicker.css",
 "../deps/colorpicker/css/layout.css",

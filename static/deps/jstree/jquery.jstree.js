@@ -92,7 +92,7 @@ define("jstree", (function (global) {
 					tmp.type	= 'text/css';
 					tmp.media	= "all";
 					tmp.href	= opts.url;
-					document.getElementsByTagName("head")[0].appendChild(tmp);
+					// document.getElementsByTagName("head")[0].appendChild(tmp);
 					return tmp.styleSheet;
 				}
 			}
