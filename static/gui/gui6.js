@@ -1503,7 +1503,6 @@ define("gui", (function (global) {
                                 if ($(this).text() == position) {
                                     $(this).find('input').click();
                                     buffer.showPanel();
-                                    GUI.container.sizePane("west", $(window).width() - 300);
                                     GUI.container.resizeAll();
                                     GUI.container.initContent("center");
                                     GUI.container.initContent("west");
@@ -2856,7 +2855,7 @@ define("gui", (function (global) {
         //obj.jqueryObject.options.west.minSize = '10%';
         //obj.jqueryObject.options.west.maxSize = '90%';
 
-        // obj.jqueryObject.sizePane("west", $(window).width() - 245);
+        // obj.jqueryObject.resize("west", $(window).width() - 245);
         GUI.container = obj.jqueryObject;
        window.onresize = function(event) {
         GUI.flagResize = true;
@@ -2873,14 +2872,13 @@ define("gui", (function (global) {
         obj.jqueryObject.sizePane("north", 37);
         obj.jqueryObject.allowOverflow("north");
         obj.jqueryObject.sizePane("south", 25);
-        obj.jqueryObject.sizePane("west", $(window).width() - 450);
         return obj;
     }
     // does not work without this
     GUI.offset = false;
 
     GUI.resize = function () {
-        console.debug("djsd");
+       
     };
 
     GUI.copyToClipboard = function (text) {
