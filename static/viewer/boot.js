@@ -189,7 +189,7 @@ function loadStyle(){
         s.href = css[i];
         document.getElementsByTagName('head').item(0).appendChild(s);
     }
-};
+};//
 loadStyle();
 require(['jquerymin','jqueryui','codemirror','javascript','showHint','javacriptHint','dialog','search','searchCursor','jquerylayout','upload','uploadProcess','uploadValidate','uploadTransport',
     'skinner','jstree','glmatrixExt','toolbar','terminal','pnotify','colorpicker','eye','utils','webglUtils','WebGLDebugUtils','collada','gltf','console','screenfull','gui',
