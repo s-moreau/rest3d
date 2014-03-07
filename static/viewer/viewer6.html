@@ -734,12 +734,12 @@ THE SOFTWARE.
          // layout.resetOverflow('west');
 
          // initialize webGL
-        var channel = Channel.create(canvas, false); // true for debug context
+        viewer.channel = Channel.create(canvas, false); // true for debug context
 
         initCanvasUI();
 
-        var currentZoom =0;
-        var currentRotationX, currentRotationY = 0;
+        // var currentZoom =0;
+        // var currentRotationX, currentRotationY = 0;
 
         function initCanvasUI() {
             var mouseDown = false;
@@ -756,15 +756,15 @@ THE SOFTWARE.
             function mouseMoveHandler(ev) {
                 if (!mouseDown) return false;
 
-                currentZoom = 1;
+                viewer.currentZoom = 1;
                 var mdelta = ev.screenX - lastX;
                 lastX = ev.screenX;
-                currentRotationX -= mdelta / 2.5;
+                viewer.currentRotationX -= mdelta / 2.5;
 
 
                 var mdelta = ev.screenY - lastY;
                 lastY = ev.screenY;
-                currentRotationY -= mdelta / 2.5;
+                viewer.currentRotationY -= mdelta / 2.5;
 
 
                 viewer.draw();
@@ -778,7 +778,7 @@ THE SOFTWARE.
             function mouseWheelHandler(ev) {
 
                 var mdelta = ev.wheelDelta;
-                currentZoom = Math.exp(mdelta / 2500);
+                viewer.currentZoom = Math.exp(mdelta / 2500);
 
                 viewer.draw();
                 return true;

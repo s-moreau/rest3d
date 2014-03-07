@@ -25,12 +25,12 @@ define("viewer", (function (global) {
 
 var viewer = this.viewer = {};
 var scenes = [];
-var currentZoom = 1;
+viewer.currentZoom = 1;
 var mvMatrixStack = [];
 var mvMatrix = mat4.create();
 var deg2rad = 0.0174532925; // constant
-var currentRotationX = 0;
-var currentRotationY = 0;
+viewer.currentRotationX = 0;
+viewer.currentRotationY = 0;
 
 var pmMatrix = mat4.create();
 
@@ -220,7 +220,7 @@ viewer.parse_dae = function(dae) {
     mainCamera = Camera.create();
     Camera.lookAtAabb(mainCamera, scene.bounds, scene.upAxis);
 
-    currentRotationX = currentRotationY = 0;
+    viewer.currentRotationX = viewer.currentRotationY = 0;
     viewer.clearStack();
     scene.starttime = starttime;
     scene.endtime = window.performance.now();
@@ -306,7 +306,7 @@ viewer.parse_gltf = function(gltf) {
     mainCamera = Camera.create();
     Camera.lookAtAabb(mainCamera, scene.bounds, scene.upAxis);
 
-    currentRotationX = currentRotationY = 0;
+    viewer.currentRotationX = viewer.currentRotationY = 0;
     viewer.clearStack();
 
     scene.starttime = starttime;
@@ -345,7 +345,7 @@ viewer.drawnode = function() {
         if (primitives) {
             State.setModelView(mvMatrix);
             for (var i = 0; i < primitives.length; i++)
-                primitives[i].render(channel);
+                primitives[i].render(viewer.channel);
         }
     }
 
@@ -372,24 +372,24 @@ viewer.render_scene = function(_nodes, _callback) {
 
     return cont;
 };
-
+viewer.channel;
 viewer.draw = function() {
 
     if (!scenes || scenes.length < 1) return;
 
 
 
-    $('#zoom').text('currentZoom is ' + currentZoom);
-    $('#rot').text('currentRotation is ' + currentRotationX.toFixed(2) + ',' + currentRotationY.toFixed(2));
+    $('#zoom').text('currentZoom is ' + viewer.currentZoom);
+    $('#rot').text('currentRotation is ' + viewer.currentRotationX.toFixed(2) + ',' + viewer.currentRotationY.toFixed(2));
 
    
-    Channel.clear(channel, 1., 0., 0., 1.); // red opaque
+    Channel.clear(viewer.channel, 1., 0., 0., 1.); // red opaque
 
-    Camera.rotateAround(mainCamera, currentZoom, currentRotationX, currentRotationY);
+    Camera.rotateAround(mainCamera, viewer.currentZoom, viewer.currentRotationX, viewer.currentRotationY);
 
     mat4.multiply(pmMatrix, mainCamera.projection, mainCamera.lookAt);
 
-    var state = channel.state;
+    var state = viewer.channel.state;
 
     for (var i = 0; i < scenes.length; i++) {
         viewer.pushMatrix();
@@ -402,7 +402,7 @@ viewer.draw = function() {
         State.setViewProj(pmMatrix);
 
         // depth first scene drawing
-        viewer.render_scene.call(channel, scenes[i], viewer.drawnode);
+        viewer.render_scene.call(viewer.channel, scenes[i], viewer.drawnode);
 
         viewer.popMatrix();
 
