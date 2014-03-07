@@ -135,7 +135,7 @@ require.config({
             exports: 'Camera',
         },
         'channel':{
-            deps: ['State'],
+            deps: ['state'],
             exports: 'Channel',
         },
         'screenfull':{
