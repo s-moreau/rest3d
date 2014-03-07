@@ -56,7 +56,7 @@
  * of your display but will stop rendering if your app is not
  * visible.
  */
-
+define("WebGLUtils", (function (global) {
 WebGLUtils = function() {
 
 /**
@@ -172,5 +172,9 @@ window.cancelAnimFrame = (function() {
          window.msCancelAnimationFrame ||
          window.clearTimeout;
 })();
+return function () {
+        return global.WebGLUtils;
+    };
+}(this)));
 
 

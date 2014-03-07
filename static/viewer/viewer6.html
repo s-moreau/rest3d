@@ -25,22 +25,9 @@ THE SOFTWARE.
 <head>
     <meta content="text/html;charset=utf-8" http-equiv="Content-Type">
     <meta content="utf-8" http-equiv="encoding">
-    <script type="text/javascript" src="../gui/gui6.js"></script>
+    <script type="text/javascript" src="../deps/require.js"></script>
+    <script type="text/javascript" src="boot.js"></script>
     <script type="text/javascript">
-    dep.push({link:"/loaders/collada.js"});
-    dep.push({link:"/loaders/gltf.js"});
-    dep.push({link:"../deps/console.js"});
-    dep.push({link:"/deps/webgl-utils.js"});
-    dep.push({link:"/deps/webgl-debug.js"});
-    dep.push({link:"/deps/gl-matrix.js"});
-    dep.push({link:"/loaders/gl-matrix-ext.js"});
-    dep.push({link:"renderer.js"});
-    dep.push({link:"rest3d.js"});
-    dep.push({link:"viewer.js"});
-    dep.push({link:"state.js"});
-    dep.push({link:"camera.js"});
-    dep.push({link:"channel.js"});
-    dep.push({link:"/deps/screenfull.js"});
 
     // dep.push({link:"/deps/upload/viewer6-upload.js"});
     // dep.push({link:"/deps/tree/themes/default/style.min.css"});
@@ -743,11 +730,11 @@ THE SOFTWARE.
             item: gltfMenu,
         });
 
-        canvas = GUI.canvas(layout.jqueryObjectWest);
+        var canvas = GUI.canvas(layout.jqueryObjectWest);
          // layout.resetOverflow('west');
 
          // initialize webGL
-        channel = Channel.create(canvas, false); // true for debug context
+        var channel = Channel.create(canvas, false); // true for debug context
 
         initCanvasUI();
 
@@ -973,6 +960,5 @@ THE SOFTWARE.
 
 
 }
-        loadGUI(INIT);
          </script>
 </body>

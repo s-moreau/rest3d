@@ -26,27 +26,27 @@ THE SOFTWARE.
  gltf.js needs gl-matrix.js gl-matrix-ext.js and glproperties.js
 */
 
-(function(_global) {
+define("gltf", (function (global) {
   "use strict";
 
-  var shim = {};
-  if (typeof(exports) === 'undefined') {
-    if(typeof define == 'function' && typeof define.amd == 'object' && define.amd) {
-      shim.exports = {};
-      define(function() {
-        return shim.exports;
-      });
-    } else {
-      // gl-matrix lives in a browser, define its namespaces in global
-      shim.exports = typeof(window) !== 'undefined' ? window : _global;
-    }
-  }
-  else {
-    // gl-matrix lives in commonjs, define its namespaces in exports
-    shim.exports = exports;
-  }
+  // var shim = {};
+  // if (typeof(exports) === 'undefined') {
+  //   if(typeof define == 'function' && typeof define.amd == 'object' && define.amd) {
+  //     shim.exports = {};
+  //     define(function() {
+  //       return shim.exports;
+  //     });
+  //   } else {
+  //     // gl-matrix lives in a browser, define its namespaces in global
+  //     shim.exports = typeof(window) !== 'undefined' ? window : _global;
+  //   }
+  // }
+  // else {
+  //   // gl-matrix lives in commonjs, define its namespaces in exports
+  //   shim.exports = exports;
+  // }
 
-  (function(exports) {
+  // (function(exports) {
   	var glTF={};
 
   	glTF.glProperties={};
@@ -639,15 +639,13 @@ THE SOFTWARE.
 		xhr.open("GET", _url, true);
 
 	    xhr.send(null);
+	    global.glTF = glTF;
 	    return document;
 	};
 	
-	if(typeof(exports) !== 'undefined') {
-	    exports.glTF = glTF;
-	};
-
-
-
-  })(shim.exports);
-})(this);
+	global.glTF = glTF;
+return function () {
+        return global.COLLADA;
+    };
+}(this)));
 

@@ -28,27 +28,26 @@ THE SOFTWARE.
  it also grew to include Axis Aligned Bounding Boxes, that probably should be 
  moved in its own file
 */
-(function(_global) {
   "use strict";
 
-  var shim = {};
-  if (typeof(exports) === 'undefined') {
-    if(typeof define == 'function' && typeof define.amd == 'object' && define.amd) {
-      shim.exports = {};
-      define(function() {
-        return shim.exports;
-      });
-    } else {
-      // gl-matrix lives in a browser, define its namespaces in global
-      shim.exports = typeof(window) !== 'undefined' ? window : _global;
-    }
-  }
-  else {
-    // gl-matrix lives in commonjs, define its namespaces in exports
-    shim.exports = exports;
-  }
+  // var shim = {};
+  // if (typeof(exports) === 'undefined') {
+  //   if(typeof define == 'function' && typeof define.amd == 'object' && define.amd) {
+  //     shim.exports = {};
+  //     define(function() {
+  //       return shim.exports;
+  //     });
+  //   } else {
+  //     // gl-matrix lives in a browser, define its namespaces in global
+  //     shim.exports = typeof(window) !== 'undefined' ? window : _global;
+  //   }
+  // }
+  // else {
+  //   // gl-matrix lives in commonjs, define its namespaces in exports
+  //   shim.exports = exports;
+  // }
 
-  (function(exports) {
+  // (function(exports) {
 /**
   calculate Translation, Rotation and Scale from a matrix
 */
@@ -400,17 +399,4 @@ if(typeof(exports) !== 'undefined') {
     TRS.localToWorldMatrix = function() {
         return localToWorldMatrix;
 }
-
-
-if(typeof(exports) !== 'undefined') {
-    exports.TRS = TRS;
-}
-;
-
-
-
-  })(shim.exports);
-})(this);
-
-
 

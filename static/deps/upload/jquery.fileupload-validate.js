@@ -12,21 +12,8 @@
 /*jslint nomen: true, unparam: true, regexp: true */
 /*global define, window */
 
-(function (factory) {
-    'use strict';
-    if (typeof define === 'function' && define.amd) {
-        // Register as an anonymous AMD module:
-        define([
-            'jquery',
-            './jquery.fileupload-process'
-        ], factory);
-    } else {
-        // Browser globals:
-        factory(
-            window.jQuery
-        );
-    }
-}(function ($) {
+
+define("uploadValidate", (function (global) {
     'use strict';
 
     // Append to the default processQueue:
@@ -113,4 +100,8 @@
 
     });
 
-}));
+return function () {
+        return $.blueimp.fileupload;
+    };
+}(this)));
+

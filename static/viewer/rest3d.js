@@ -21,8 +21,9 @@ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.*/
+define("rest3d", (function (global) {
 
-var rest3d={};
+var rest3d = this.rest3d = {};
 rest3d.convert = function(_params, _cb) {
     var params=_params || {};
     var cb=_cb;
@@ -69,12 +70,17 @@ rest3d.upload = function(_params,_cb){
     function getData(a){//
         console.debug(a.files[0].name);
     }
-setTimeout(function(){
-    console.debug("jaja");
-    var data = {};
-    data.files = [];
-    data.files[0] = {};
-    data.files[0].name = "test.js";
-    data.files[0].content = "helloWorld!";
-    rest3d.upload(data,getData);
-},3000);
+// setTimeout(function(){
+//     console.debug("jaja");
+//     var data = {};
+//     data.files = [];
+//     data.files[0] = {};
+//     data.files[0].name = "test.js";
+//     data.files[0].content = "helloWorld!";
+//     rest3d.upload(data,getData);
+// },3000);
+
+return function () {
+        return global.rest3d;
+    };
+}(this)));

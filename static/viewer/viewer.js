@@ -21,8 +21,9 @@ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.*/
+define("viewer", (function (global) {
 
-var viewer = {};
+var viewer = this.viewer = {};
 var scenes = [];
 var currentZoom = 1;
 var mvMatrixStack = [];
@@ -473,3 +474,8 @@ viewer.FPSCounter = function() {
     }
 return new counter();
 };
+
+return function () {
+        return global.viewer;
+    };
+}(this)));

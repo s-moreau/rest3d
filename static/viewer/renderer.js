@@ -47,21 +47,21 @@ if (window.TextureUtil === undefined)
     document.write('<script src="/deps/texture-util.min.js"><\/'+'script>');
 }
 */
-(function(){
+define("renderer", (function (global) {
   // Initial Setup
   // -------------
 
   // Save a reference to the global object (`window` in the browser, `exports`
   // on the server).
-  var root = this;
+  // var root = this;
   // The top-level namespace. All public COLLADA classes and modules will
   // be attached to this. Exported for both CommonJS and the browser.
-  var RENDERER;
-  if (typeof exports !== 'undefined') {
-    RENDERER = exports;
-  } else {
-    RENDERER = root.RENDERER = {};
-  } 
+  var RENDERER = this.RENDERER = {};
+  // if (typeof exports !== 'undefined') {
+  //   RENDERER = exports;
+  // } else {
+  //   RENDERER = root.RENDERER = {};
+  // } 
 
 
   
@@ -330,4 +330,7 @@ RENDERER.primitive.prototype = {
     }
 };
 
-}).call(this);
+return function () {
+        return global.RENDERER;
+    };
+}(this)));

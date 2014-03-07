@@ -22,26 +22,27 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.*/
 
-(function(_global) {
-  //"use strict"; - safari has issues
+// (function(_global) {
+//   //"use strict"; - safari has issues
 
-  var shim = {};
-  if (typeof(exports) === 'undefined') {
-    if(typeof define == 'function' && typeof define.amd == 'object' && define.amd) {
-      shim.exports = {};
-      define(function() {
-        return shim.exports;
-      });
-    } else {
-      shim.exports = typeof(window) !== 'undefined' ? window : _global;
-    }
-  }
-  else {
-    shim.exports = exports;
-  }
+//   var shim = {};
+//   if (typeof(exports) === 'undefined') {
+//     if(typeof define == 'function' && typeof define.amd == 'object' && define.amd) {
+//       shim.exports = {};
+//       define(function() {
+//         return shim.exports;
+//       });
+//     } else {
+//       shim.exports = typeof(window) !== 'undefined' ? window : _global;
+//     }
+//   }
+//   else {
+//     shim.exports = exports;
+//   }
 
-  (function(exports) {
-    var State = {};
+//   (function(exports) {
+  define("state", (function (global) {
+    var State = window.State ={};
 
     State.create = function(_gl) {
       
@@ -1317,12 +1318,7 @@ THE SOFTWARE.*/
                                      'diffuse': { symbol: 'uTexture0', type: WebGLRenderingContext.SAMPLER_2D },
                                      'alphaScale' :{ symbol: 'uAlphaScale', type: WebGLRenderingContext.FLOAT, value: 1}};
 
-
-    
-
-    if(typeof(exports) !== 'undefined') {
-        exports.State = State;
-    }
-
-  })(shim.exports);
-})(this);
+return function () {
+        return global.State;
+    };
+}(this)));

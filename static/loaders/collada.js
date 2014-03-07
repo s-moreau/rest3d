@@ -26,30 +26,30 @@ THE SOFTWARE.
  COLLADA.js needs gl-matrix.js
 */
 
-if (window.mat4 === undefined)
-{
-    document.write('<script src="/deps/gl-matrix.js"><\/'+'script>');
-    document.write('<script src="/loaders/gl-matrix-ext.js"><\/'+'script>');
-}
-
-(function(){
+// if (window.mat4 === undefined)
+// {
+//     document.write('<script src="/deps/gl-matrix.js"><\/'+'script>');
+//     document.write('<script src="/loaders/gl-matrix-ext.js"><\/'+'script>');
+// }
+define("collada", (function (global) {
     // Initial Setup
     // -------------
 
     // Save a reference to the global object (`window` in the browser, `exports`
     // on the server).
-    var root = this;
+    // var root = this;
     // The top-level namespace. All public COLLADA classes and modules will
     // be attached to this. Exported for both CommonJS and the browser.
-    var COLLADA;
-    if (typeof exports !== 'undefined') {
-        COLLADA = exports;
-    } else {
-        COLLADA = root.COLLADA = {};
-    };
+    var COLLADA = {};
+    global.COLLADA = COLLADA;
+    // if (typeof exports !== 'undefined') {
+    //     COLLADA = exports;
+    // } else {
+    //     COLLADA = root.COLLADA = {};
+    // };
     // TODO: Keep in sync with `package.json`.
-    COLLADA.VERSION = '0.0.3';
-    COLLADA._validate = true;
+    // COLLADA.VERSION = '0.0.3';
+    // COLLADA._validate = true;
 
     COLLADA.log = function(msg){
         if (console && console.log) console.log(msg);
@@ -1072,5 +1072,8 @@ if (window.mat4 === undefined)
         xhr.send(null);
         return document;
     }
-
-}).call(this);
+    global.COLLADA = COLLADA;
+return function () {
+        return global.COLLADA;
+    };
+}(this)));

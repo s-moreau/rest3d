@@ -21,26 +21,26 @@ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.*/
-(function(_global) {
+// (function(_global) {
 
-  var shim = {};
-  if (typeof(exports) === 'undefined') {
-    if(typeof define == 'function' && typeof define.amd == 'object' && define.amd) {
-      shim.exports = {};
-      define(function() {
-        return shim.exports;
-      });
-    } else {
-      shim.exports = typeof(window) !== 'undefined' ? window : _global;
-    }
-  }
-  else {
-    shim.exports = exports;
-  }
+//   var shim = {};
+//   if (typeof(exports) === 'undefined') {
+//     if(typeof define == 'function' && typeof define.amd == 'object' && define.amd) {
+//       shim.exports = {};
+//       define(function() {
+//         return shim.exports;
+//       });
+//     } else {
+//       shim.exports = typeof(window) !== 'undefined' ? window : _global;
+//     }
+//   }
+//   else {
+//     shim.exports = exports;
+//   }
 
-  (function(exports) {
-
-  var Channel= {}
+//   (function(exports) {
+define("channel", (function (global) {
+  var Channel= this.Channel = {}
 
   // active channel
   Channel.active=null;
@@ -171,12 +171,7 @@ THE SOFTWARE.*/
       //State.setClear(state, State.COLOR_BUFFER_BIT);
 
     };
-
-
-
-    if(typeof(exports) !== 'undefined') {
-        exports.Channel = Channel;
-    }
-
-  })(shim.exports);
-})(this);
+return function () {
+        return global.viewer;
+    };
+}(this)));

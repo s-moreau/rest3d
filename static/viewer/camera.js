@@ -23,6 +23,7 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.*/
 
 // extend math library with deg2rad if needed
+define("camera", (function (global) {
 
   if (!Math.deg2rad) {
     Math.deg2rad = function (_deg) {
@@ -30,7 +31,7 @@ THE SOFTWARE.*/
     }
   }
 
-  Camera = {};
+  Camera = this.Camera = {};
 
   Camera.create = function () {
     out = {
@@ -117,3 +118,7 @@ THE SOFTWARE.*/
 if(typeof(exports) !== 'undefined') {
       exports.Camera = Camera;
   }
+return function () {
+        return global.Camera;
+    };
+}(this)));
