@@ -87,6 +87,9 @@ THE SOFTWARE.*/
       channel.state =  State.create(gl);
       Channel.active = channel;
 
+      // keep track of vertexArrayAttrib enable/disable for lazy evaluation
+      channel.VertexAttribBool = {};
+
       return channel;
 
     };

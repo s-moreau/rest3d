@@ -237,12 +237,12 @@ THE SOFTWARE.
                     			"value":
                     			"type"
                          */
-                         if (_parameters.semantic) uniform.semantic = _parameters.semantic  // this correspond to the engine internal parameters
+                         uniform.semantic = _parameters.semantic ||  instance_program.uniforms[symbol];// this correspond to the engine internal parameters
                          uniform.symbol = symbol; // this is the symbol in the program
                          uniform.type = _parameters.type; // this is the type of the uniform
                          if (_parameters.source) uniform.source = _parameters.source; // this points to another object in the scene
                          if (_parameters.value) uniform.value = this.cloneValue(_parameters.value,_parameters.type); // this provides a default value
-                         pass.program.uniforms[instance_program.uniforms[symbol]]=(uniform);
+                         pass.program.uniforms[uniform.semantic]=(uniform);
   					}
 
   					var states = {};
@@ -475,12 +475,10 @@ THE SOFTWARE.
                 	// { semantic, value }
                 	// type has to match type in technique
                 	// value is either a float or array or typearray
-                	if (technique_json.parameters[parameterID]) {
-                		overrides[parameterID] = {};
-	                	overrides[parameterID].type = technique_json.parameters[parameterID].type;
-	                	overrides[parameterID].value = this.cloneValue(value,overrides[parameterID].type);	
-                	} else
-                	glTF.log("Error loading "+document.url+" expected technique parameter="+parameterID)
+                	if (technique_json.parameters[parameterID]) 
+                		overrides[parameterID] = this.cloneValue(value,technique_json.parameters[parameterID].type);	
+                	else
+                	  glTF.log("Error loading "+document.url+" expected technique parameter="+parameterID)
                 	
             }
             var material = { pass: this.techniques[techniqueID].defaultPass, overrides: overrides, id: _matID};

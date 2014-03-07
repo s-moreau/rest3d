@@ -170,6 +170,7 @@ viewer.parse_dae = function(dae) {
                 if (material.parameters && typeof material.parameters.diffuse === 'object') {
                     var diffuse = material.parameters.diffuse;
                     if (!diffuse.texcoord) {
+                        /*
                         search = null;
                         for (var attribute in state.program.attributes) {
                             if (state.program.attributes[attribute].semantic === 'COLOR') {
@@ -177,10 +178,12 @@ viewer.parse_dae = function(dae) {
                                 break;
                             }
                         }
+                        */
+                        
                         if (diffuse.color) {
-                            search.value = diffuse.color;
+                            state.values.COLOR = diffuse.color;
                         } else {
-                            search.value = [1, 1, 1, 0.5];
+                            state.values.COLOR = [1, 1, 1, 0.5];
                         }
 
                     } else if (search !== diffuse.texcoord) {

@@ -48,7 +48,7 @@ THE SOFTWARE.*/
       var state={}; 
       state.ID = State.states.length;
       State.states.push(state);
-      State.stamp = 0;
+      State.glTexture={};
 
       // if _gl then this is an immediate State
       if (_gl) {
@@ -180,60 +180,6 @@ THE SOFTWARE.*/
       return state;
     };
     
-    var basicState ={}; 
-    basicState.ID = "basicState";
-
-    basicState.program = {}; // allocate new program for basicState
-
-    basicState.program.vertexShader =  
-          "attribute vec3 aVertex;"+
-          "attribute vec3 aNormal;"+
-          "attribute vec2 aTexCoord0;"+
-          "attribute vec4 aColor;"+
-          "uniform mat4 uPMatrix;"+
-          "uniform mat4 uMVMatrix;"+
-          "uniform mat3 uNMatrix;"+
-          "uniform float uAlphaScale;"+
-          "varying vec2 vTexCoord0;"+
-          "varying vec4 vColor;"+
-          "varying vec3 vNormal;"+
-          "void main(void) {"+
-          "    gl_Position = uPMatrix * uMVMatrix * vec4(aVertex, 1.0);"+
-          "    vColor = vec4(aColor.xyz,aColor.w*uAlphaScale);"+
-          "    vNormal = normalize(uNMatrix * aNormal);"+
-          "    vTexCoord0 = aTexCoord0;"+
-          "}";
-
-    basicState.program.fragmentShader = 
-          "precision mediump float;"+
-          //"precision highp float;"+
-          "varying vec2 vTexCoord0;"+
-          "varying vec4 vColor;"+
-          "varying vec3 vNormal;"+
-          "uniform vec4 uColor;"+
-          "uniform sampler2D uTexture0;"+
-          "void main(void) {"+
-            "float lambert = max(dot(vNormal,vec3(0.,0.,1.)), 0.2);"+
-            "vec4 color = vColor * texture2D(uTexture0, vTexCoord0) * vec4(lambert,lambert,lambert,1.);"+
-            "gl_FragColor = vec4(color.rgb * color.a, color.a);"+
-          "}";
-
-
-
-    basicState.program.compileMe = true;
-    basicState.program.glProgram = null;
-
-    basicState.program.attributes = { 'POSITION' : { semantic: 'POSITION', symbol: 'aVertex', type: WebGLRenderingContext.FLOAT_VEC3 },
-                                 'NORMAL' : { semantic: 'NORMAL', symbol: 'aNormal', type: WebGLRenderingContext.FLOAT_VEC3} ,
-                                 'TEXCOORD_0' : { semantic: 'TEXCOORD_0', symbol: 'aTexCoord0', type: WebGLRenderingContext.FLOAT_VEC2},
-                                 'COLOR' : { semantic: 'COLOR', symbol: 'aColor', type: WebGLRenderingContext.FLOAT_VEC4}};
-
-    basicState.program.uniforms =  [ { semantic: 'MODELVIEW', symbol: 'uMVMatrix' , type: WebGLRenderingContext.FLOAT_MAT4 },
-                     { semantic: 'PROJECTION',  symbol: 'uPMatrix' , type: WebGLRenderingContext.FLOAT_MAT4 },
-                     { semantic: 'MODELVIEWINVERSETRANSPOSE', symbol: 'uNMatrix', type: WebGLRenderingContext.FLOAT_MAT3},
-                     { semantic: 'diffuse', symbol: 'uTexture0', type: WebGLRenderingContext.SAMPLER_2D },
-                     { semantic: 'alphaScale', symbol: 'uAlphaScale', type: WebGLRenderingContext.FLOAT, value: 1}];
-    
     // create a new State, with a basic shader
    State.createBasic = function(){
 
@@ -242,25 +188,9 @@ THE SOFTWARE.*/
     return State.clone(basicState);
   };
     
-
+  // TODO - pass Override into allocateUniforms
   State.fromPassAndOverrides = function(_pass,_overrides) {
-    var state = State.fromPass(_pass); // this state is not attached to a context
-
-    // need to create uniform values for those overrides
-    // possible to access those through API / semantic
-    for (var overrideID in _overrides) {
-      var override = _overrides[overrideID];
-      if (state.program.uniforms[overrideID]) {
-        state.values[overrideID] = override.value; // shared location
-      } else if (state.program.attributes[overrideID]) {
-        RENDERER.logError('ERROR - need to write override of attributes')
-      }
-    }
-    return state;
-  };
-
-  State.fromPass = function(_pass){
-
+   
     var state={}; 
     state.ID = State.states.length;
     State.states.push(state);
@@ -273,17 +203,9 @@ THE SOFTWARE.*/
     state.program.compileMe = true;
     state.program.glProgram = null;
 
-    state.program.attributes = _pass.program.attributes;
-    /*
-    for (var key in attributes) {
-      var attribute = attributes[key];
-      var semantic = attribute.semantic; // e.g. "NORMAL"       "TEXCOORD_0"     "POSITION"
-      var symbol = attribute.symbol; // e.g.     "a_normal"     "a_texcoord0"    "a_position"
-      var type = attribute.type; // e.g.         "FLOAT_VEC3"   "FLOAT_VEC2"     "FLOAT_VEC3"
-    }
-    */
 
-    allocateUniforms(state,_pass.program.uniforms);
+    // allocate values from default values in program
+    allocateUniformsAndAttributes(state,_pass.program.uniforms, _pass.program.attributes, _overrides);
 
     // now take care of the gl states
     for (var key in _pass.states) {
@@ -314,27 +236,27 @@ THE SOFTWARE.*/
     return state;
   };
 
-  var allocateUniforms = function(_state,_uniforms) {
+
+  // this creates the program uniforms and attributes, as well as state specific values
+  // _uniforms and _attributes can be sent as an array or an object
+  // this will take the value from the program, and create state values
+  var allocateUniformsAndAttributes = function(_state,_uniforms, _attributes, _overrides) {
     var textureUnit=0;
     _state.program.uniforms={};
     _state.values = {};
+    if (!_overrides) _overrides={};
 
-    for (var key in _uniforms){
-      var uniform = _uniforms[key];
-      var semantic = (uniform.semantic || key);  // so this loop works for arrays or object                    
-      var symbol = uniform.symbol; 
+    // UNIFORMS
+
+    for (var semantic in _uniforms){
+      var uniform = _uniforms[semantic];
       var type = uniform.type; 
-      var value = uniform.value; 
+      var value = State.Uniforms[semantic] || _overrides[semantic] || uniform.value; 
       var newvalue=null;
 
-      
       _state.program.uniforms[semantic] = {};
 
-      // this assumes that all run-time values are shared 
-      // TODO - does not work when we will want to make states order independant
-      if (State.Uniforms[semantic]) {
-        value = State.Uniforms[semantic];
-      } 
+
       // otherwise, allocate it for this state
       switch (type) {
         case WebGLRenderingContext.FLOAT:
@@ -356,8 +278,7 @@ THE SOFTWARE.*/
           if (!value) _state.values[semantic]=mat4.create(); else _state.values[semantic]=value;
           break;
         case WebGLRenderingContext.SAMPLER_2D:
-          // assign a texture unit, setUniform will create the glTexture
-          // TODO - is there a (value) passed in?
+
           if (value && value.textureUnit) {
             newvalue={};
             newvalue.textureUnit = value.textureUnit;
@@ -376,9 +297,38 @@ THE SOFTWARE.*/
 
       // allocate program uniforms
       _state.program.uniforms[semantic] = {
-        symbol:symbol,
+        symbol: uniform.symbol,
         type: type,
         value: newvalue 
+      }
+    }
+
+
+    // ATTRIBUTES
+    _state.program.attributes={};
+
+    /*
+    for (var key in attributes) {
+      var attribute = attributes[key];
+      var semantic = attribute.semantic; // e.g. "NORMAL"       "TEXCOORD_0"     "POSITION"
+      var symbol = attribute.symbol; // e.g.     "a_normal"     "a_texcoord0"    "a_position"
+      var type = attribute.type; // e.g.         "FLOAT_VEC3"   "FLOAT_VEC2"     "FLOAT_VEC3"
+    }
+    */
+
+    for (var semantic in _attributes) {
+      var attribute = _attributes[semantic];
+      var value = attribute.value; 
+      var type = attribute.type;
+
+      if (value)
+        _state.values[semantic] = value;
+  
+      // allocate program attributes
+      _state.program.attributes[semantic] = {
+        semantic: semantic,
+        symbol: attribute.symbol,
+        type: type
       }
     }
   };
@@ -388,29 +338,65 @@ THE SOFTWARE.*/
     state.ID = State.states.length;
     State.states.push(state);
 
-    // copy program
-    if (_state.program) {
-      var program = {};
-      program.compileMe = _state.program.compileMe;
-      program.glProgram = _state.program.glProgram;
-      program.attributes = {};
-      // copy everything except values?
-      for (var semantic in _state.program.attributes) {
-          var attribute = _state.program.attributes[semantic];
-          var newattribute = {}
-          newattribute.location = attribute.location;
-          newattribute.semantic = attribute.semantic;
-          newattribute.symbol = attribute.symbol;
-          newattribute.type = attribute.type;
-          program.attributes[semantic] = newattribute;
-      }
-      var uniforms = _state.program.uniforms;
+    state.program = {};
+     // consider those read-only for now
+    state.program.vertexShader = _state.program.vertexShader;
+    state.program.fragmentShader = _state.program.fragmentShader;
+    state.program.compileMe = true;
+    state.program.attributes={};
+    for (var semantic in _state.program.attributes){
+      var attribute = _state.program.attributes[semantic];
+      state.program.attributes[semantic] = {};
+      for (var key in attribute) 
+        state.program.attributes[semantic][key] = attribute[key];
+    }
+    state.program.uniforms={};
+    for (var semantic in _state.program.uniforms){
+      var uniform = _state.program.uniforms[semantic];
+      state.program.uniforms[semantic] = {};
+      for (var key in uniform) 
+        state.program.uniforms[semantic][key] = uniform[key];
+    }
     
-      program.vertexShader = _state.program.vertexShader;
-      program.fragmentShader = _state.program.fragmentShader;
-      state.program = program;
-      // alocate new values, copy old values in
-      allocateUniforms(state,uniforms);
+
+    // allocate values from default values in program
+    allocateUniformsAndAttributes(state, _state.program.uniforms, _state.program.attributes);
+
+    // copy state overrides
+    for (var key in _state.values) {
+      var attribute=_state.uniforms[key];
+      var value=_state.values[key];
+      var type = attribute.type;
+      if (value)
+        switch (type){
+          case WebGLRenderingContext.FLOAT_VEC2:
+             vec2.copy(state.values[key], value);
+            break;
+          case WebGLRenderingContext.FLOAT_VEC3:
+             vec3.copy(state.values[key],value);
+            break;
+          case WebGLRenderingContext.FLOAT_VEC4:
+             vec4.copy(state.values[key], value);
+            break;
+          case WebGLRenderingContext.FLOAT_MAT4:
+             mat4.copy(state.values[key],value);
+            break;
+          case WebGLRenderingContext.FLOAT_MAT3:
+             mat3.copy(state.values[key], value);
+            break;
+            // TODO -> should this be a pointer instead?
+          case WebGLRenderingContext.FLOAT:
+            state.values[key] = value;
+            break;
+          case WebGLRenderingContext.SAMPLER_2D:
+            for (var item in value) 
+              state.values[key][item] = value[item];
+          break;
+        default:
+          State.logError('unknown key type='+type+' in State.clone');
+          return this;
+          break;
+        }
     }
     // copy state
     for (var key in _state) {
@@ -487,6 +473,8 @@ THE SOFTWARE.*/
     //program.uniforms = _state.program.uniforms;
     //program.attributes = _state.program.attributes;
 
+    // make sure we are using slot '0', otherwise performance will suffer
+    _gl.bindAttribLocation(glProgram, "POSITION", 0);
     for (var semantic in _state.program.attributes)
     {
       var attribute = _state.program.attributes[semantic];
@@ -519,7 +507,7 @@ THE SOFTWARE.*/
   // compare velue by address, and apply values if different
   // should be compare by value ?
   // or why copy values?
-    State.setUniform=function(_gl, _state, _uniformID){
+    State.setUniform=function(_gl, _state, _uniformID) {
       var uniform = _state.program.uniforms[_uniformID];
       var type = uniform.type;
       var value = _state.values[_uniformID];
@@ -573,6 +561,10 @@ THE SOFTWARE.*/
             "glTexture" : texture created from image
             "textureUnit" : which texture unit to use
             "flipY": do we need to flip Y 
+
+            need to check if the active texture _uniform.value.textureUnit
+            is pointing to the same glTexture
+
         */        
 
 
@@ -585,6 +577,10 @@ THE SOFTWARE.*/
             uniform.value[key] = value[key];
             apply = true; // same shader, but different texture
           }
+
+        // also check if gl has same texture selected
+        if (State.glTexture[uniform.value.textureUnit] != uniform.value.glTexture)
+          apply=true;
 
         break;
       default:
@@ -629,11 +625,12 @@ THE SOFTWARE.*/
           
           break;
         case WebGLRenderingContext.SAMPLER_2D:
-
+            State.glTexture[_uniform.value.textureUnit] = _uniform.value.glTexture;
           if (_uniform.value.glTexture) {
             _gl.activeTexture(_gl.TEXTURE0 + _uniform.value.textureUnit);
             _gl.bindTexture(_gl.TEXTURE_2D, _uniform.value.glTexture); 
             _gl.uniform1i(_uniform.location, _uniform.value.textureUnit);
+
            } else {
             // texture is not ready, or there is no texture, let's use the default white texture
             _gl.activeTexture(_gl.TEXTURE0 + _uniform.value.textureUnit);
@@ -1263,6 +1260,65 @@ THE SOFTWARE.*/
     State.programs = []; // list of all programs that have been created
     State.primitives = []; // list of all primitives that have been created
     State.textures = []; // list of textures that have been created
+
+    // create a basic State
+
+    var basicState ={}; 
+    basicState.ID = "basicState";
+
+    basicState.program = {}; // allocate new program for basicState
+
+    basicState.program.vertexShader =  
+          "attribute vec3 aVertex;"+
+          "attribute vec3 aNormal;"+
+          "attribute vec2 aTexCoord0;"+
+          "attribute vec4 aColor;"+
+          "uniform mat4 uPMatrix;"+
+          "uniform mat4 uMVMatrix;"+
+          "uniform mat3 uNMatrix;"+
+          "uniform float uAlphaScale;"+
+          "varying vec2 vTexCoord0;"+
+          "varying vec4 vColor;"+
+          "varying vec3 vNormal;"+
+          "void main(void) {"+
+          "    gl_Position = uPMatrix * uMVMatrix * vec4(aVertex, 1.0);"+
+          "    vColor = vec4(aColor.xyz,aColor.w*uAlphaScale);"+
+          "    vNormal = normalize(uNMatrix * aNormal);"+
+          "    vTexCoord0 = aTexCoord0;"+
+          "}";
+
+    basicState.program.fragmentShader = 
+          "precision mediump float;"+
+          //"precision highp float;"+
+          "varying vec2 vTexCoord0;"+
+          "varying vec4 vColor;"+
+          "varying vec3 vNormal;"+
+          "uniform vec4 uColor;"+
+          "uniform sampler2D uTexture0;"+
+          "void main(void) {"+
+            "float lambert = max(dot(vNormal,vec3(0.,0.,1.)), 0.2);"+
+            "vec4 color = vColor * texture2D(uTexture0, vTexCoord0) * vec4(lambert,lambert,lambert,1.);"+
+            "gl_FragColor = vec4(color.rgb * color.a, color.a);"+
+          "}";
+
+
+
+    basicState.program.compileMe = true;
+    basicState.program.glProgram = null;
+
+    basicState.program.attributes = { 'POSITION' : { semantic: 'POSITION', symbol: 'aVertex', type: WebGLRenderingContext.FLOAT_VEC3 },
+                                      'NORMAL' : { semantic: 'NORMAL', symbol: 'aNormal', type: WebGLRenderingContext.FLOAT_VEC3} ,
+                                      'TEXCOORD_0' : { semantic: 'TEXCOORD_0', symbol: 'aTexCoord0', type: WebGLRenderingContext.FLOAT_VEC2},
+                                      'COLOR' : { semantic: 'COLOR', symbol: 'aColor', type: WebGLRenderingContext.FLOAT_VEC4}};
+
+    basicState.program.uniforms =  { 'MODELVIEW' : { symbol: 'uMVMatrix' , type: WebGLRenderingContext.FLOAT_MAT4 },
+                                     'PROJECTION' : { symbol: 'uPMatrix' , type: WebGLRenderingContext.FLOAT_MAT4 },
+                                     'MODELVIEWINVERSETRANSPOSE' : { symbol: 'uNMatrix', type: WebGLRenderingContext.FLOAT_MAT3},
+                                     'diffuse': { symbol: 'uTexture0', type: WebGLRenderingContext.SAMPLER_2D },
+                                     'alphaScale' :{ symbol: 'uAlphaScale', type: WebGLRenderingContext.FLOAT, value: 1}};
+
+
+    
 
     if(typeof(exports) !== 'undefined') {
         exports.State = State;
