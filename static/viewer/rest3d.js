@@ -32,8 +32,8 @@ rest3d.convert = function(_params, _cb) {
       if (data) params.result = JSON.parse(data); 
       if (cb) cb(params);
     }).fail(function(data) {
-        //console.log("Error Converting "+params.file.name);
-        //console.log(JSON.parse(data.error().responseText));
+        console.log("Error Converting "+params.file.name);
+        console.log(JSON.parse(data.error().responseText));
     });
 };
 
@@ -50,5 +50,31 @@ rest3d.getFileConverted = function(_file, _cb){
         params.error = JSON.parse(data.error().responseText);
     });
 };
-//rest3d.upload(url,)
+//rest3d.upload(url,)//url:'/rest3d/upload
 
+rest3d.upload = function(_params,_cb){
+        var params=_params || {};
+    var cb=_cb;
+    $.post('/rest3d/upload', params.file)
+    .done(function(data) {
+      if (data) params.result = data; 
+      if (cb) cb(params);
+    }).fail(function(data) {
+        console.log("fail upload!")
+        // console.log("Error Converting "+params.files.name);
+        // console.log(JSON.parse(data.error().responseText));
+    });
+
+}
+    function getData(a){//
+        console.debug(a.files[0].name);
+    }
+setTimeout(function(){
+    console.debug("jaja");
+    var data = {};
+    data.files = [];
+    data.files[0] = {};
+    data.files[0].name = "test.js";
+    data.files[0].content = "helloWorld!";
+    rest3d.upload(data,getData);
+},3000);
