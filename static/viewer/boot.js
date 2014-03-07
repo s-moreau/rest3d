@@ -181,7 +181,6 @@ var css = [
 "../deps/colorpicker/css/colorpicker.css",
 "../deps/colorpicker/css/layout.css",
 ]
-//
 
 function loadStyle(){
     for(var i=0;i<css.length;i++){
@@ -190,7 +189,8 @@ function loadStyle(){
         s.href = css[i];
         document.getElementsByTagName('head').item(0).appendChild(s);
     }
-};//
+};
+
 loadStyle();
 require(['jquerymin','jqueryui','codemirror','javascript','showHint','javacriptHint','dialog','search','searchCursor','jquerylayout','upload','uploadProcess','uploadValidate','uploadTransport',
     'skinner','jstree','glmatrixExt','toolbar','terminal','pnotify','colorpicker','eye','utils','webglUtils','WebGLDebugUtils','collada','gltf','console','screenfull','gui',
