@@ -180,7 +180,7 @@ var css = [
 "../deps/colorpicker/css/colorpicker.css",
 "../deps/colorpicker/css/layout.css",
 ]
-
+//
 
 function loadStyle(){
     for(var i=0;i<css.length;i++){
