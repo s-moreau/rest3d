@@ -160,6 +160,7 @@ require.config({
             deps: ['codemirror']
         },
         "gui":{
+            deps: ['jquerylayout'],
             exports: 'GUI',
         },
     },
