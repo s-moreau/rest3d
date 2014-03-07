@@ -150,7 +150,7 @@ define("channel", (function (global) {
 
     // todo -> set sky/earth ...
     Channel.clear=function(_channel, _r, _g, _b, _a){
-
+      console.debug(_channel)
       var state = _channel.state;
 
       resizeCanvas(_channel);

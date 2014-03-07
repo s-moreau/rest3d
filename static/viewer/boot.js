@@ -160,86 +160,13 @@ require.config({
             deps: ['codemirror']
         },
         "gui":{
-            exports: ['GUI']
+            exports: 'GUI',
         },
     },
 })
-// var dep = [{
-// }, {
-// }, {
-// }, {
-// }, {
-// }, {
-// }, {
-// },
-//     {
-// },
-//     {
-// }, {
-//     link: "../deps/jquery-2.0.3.min.js",
-//     obj: "$('')"
-// }, {
-//     link: "../deps/jquery-ui-1.9.2.min.js",
-//     obj: "$.ui"
-// }, {
-//     link: "../deps/codemirror/codemirror.min.js",
-//     obj: "window.CodeMirror"
-// }, {
-//     link: "../deps/jquery.layout-1.3.0.min.js",
-//     obj: "$.layout"
-// },{
-//     link: "../deps/jquery.toolbar.js",
-//     obj: "$.toolbar"
-// }, {
-//     link: "../deps/jquery.terminal-0.7.10.min.js",
-//     obj: "$.omap "
-// }, {
-//     link: "../deps/jquery.pnotify.min.js",
-//     obj: "$.pnotify"
-// }, {
-//     link: "../deps/codemirror/javascript.js",
-//     obj: "indentUnit"
-// }, {
-//     link: "../deps/codemirror/show-hint.js",
-//     obj: "CodeMirror.showHint"
-// }, {
-//     link: "../deps/codemirror/javascript-hint.js"
-// }, {
-//     link: "../deps/codemirror/dialog.js"
-// }, 
-//  {
-//     link: "../deps/codemirror/search.js"
-// }, {link: "../deps/codemirror/search-cursor.js"}, 
-// {link: "../deps/jquery-skinner.js",
-//     obj: "$.skinner"
-// },
-// {link:"/deps/jstree/jquery.jstree.js"},
-// {link:"/deps/upload/jquery.iframe-transport.js"},
-// {link:"/deps/upload/jquery.fileupload.js"},
-// {link:"/deps/upload/jquery.fileupload-process.js"},
-// {link:"/deps/upload/jquery.fileupload-validate.js"},
-// {link:"/deps/colorpicker/colorpicker.js"},
-// {link:"/deps/colorpicker/eye.js"},
-// {link:"/deps/colorpicker/utils.js"},
-// {link:"/deps/colorpicker/css/colorpicker.css"},
-// {link:"/deps/colorpicker/css/layout.css"},
-// ];
-//     dep.push({link:"/loaders/collada.js"});
-//     dep.push({link:"/loaders/gltf.js"});
-//     dep.push({link:"../deps/console.js"});
-//     dep.push({link:"/deps/webgl-utils.js"});
-//     dep.push({link:"/deps/webgl-debug.js"});
-//     dep.push({link:"/deps/gl-matrix.js"});
-//     dep.push({link:"/loaders/gl-matrix-ext.js"});
-//     dep.push({link:"renderer.js"});
-//     dep.push({link:"rest3d.js"});
-//     dep.push({link:"viewer.js"});
-//     dep.push({link:"state.js"});
-//     dep.push({link:"camera.js"});
-//     dep.push({link:"channel.js"});
-//     dep.push({link:"/deps/screenfull.js"});
 
 var css = [
+"../gui/gui6.css",
 "../deps/codemirror/css/eclipse.css",
 "../deps/css/jquery-skinner.css",
 "../deps/codemirror/css/codemirror.css",
@@ -248,7 +175,7 @@ var css = [
 "../deps/css/bootstrap.icons.css",
 "../deps/css/jquery.toolbars.css",
 "../deps/css/jquery.terminal.css",
-"../gui/gui6.css",
+
 "../deps/css/jquery.pnotify.default.css",
 "../deps/colorpicker/css/colorpicker.css",
 "../deps/colorpicker/css/layout.css",
