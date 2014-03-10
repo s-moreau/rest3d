@@ -142,7 +142,7 @@ setViewer6Upload=function(upload){
                 upload.upload(header,file.name,$preview,$dialog,uploadButton.clone(true).data(data));
                 $('#dialog'+index).hide();
                 $('#preview'+index).hide();
-                            rest3d.testUpload(file);
+                            // rest3d.testUpload(file);
             }
             else{this.upload(header,file.name);}//
         });

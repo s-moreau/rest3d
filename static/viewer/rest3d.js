@@ -86,14 +86,14 @@ rest3d.upload = function(_params,_cb){
 })
 }
 
-rest3d.testUpload = function(file){
-    function getData(a){//
-        // console.debug(a.file);
-    }
-    var data={};
-    data.file = file;
-    rest3d.upload(data,getData);
-}
+// rest3d.testUpload = function(file){
+//     function getData(a){//
+//         // console.debug(a.file);
+//     }
+//     var data={};
+//     data.file = file;
+//     rest3d.upload(data,getData);
+// }
 
 return function () {
         return global.rest3d;
