@@ -55,6 +55,9 @@ require.config({
         'sporefile':{
           deps: ['collada']
         },
+        'glUtil':{
+          deps: ['glmatix','glmatrixExt']
+        },
     },
 })
 require(['glmatrixExt','webglUtils','collada','sporefile','sporeview','sylvestre','glUtil'],function(){});

@@ -117,7 +117,6 @@ setViewer6Upload=function(upload){
         data.context = header;
         $.each(data.files, function (index, file) {
             console.debug(file);
-            rest3d.testUpload(file);
             var ext = file.name.match(/\.[^.]+$/);//
             if(ext=".dae"){
                 var url =  '/rest3d/upload/'+decodeURIComponent(file.name);//
@@ -143,6 +142,7 @@ setViewer6Upload=function(upload){
                 upload.upload(header,file.name,$preview,$dialog,uploadButton.clone(true).data(data));
                 $('#dialog'+index).hide();
                 $('#preview'+index).hide();
+                            rest3d.testUpload(data);
             }
             else{this.upload(header,file.name);}//
         });

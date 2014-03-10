@@ -1137,16 +1137,19 @@ UploadHandler.prototype.post = function () {
         };
     form.uploadDir = options.tmpDir;
     form.on('fileBegin', function (name, file) {
+    	console.log ('fileBegin '+name+" "+file);
         tmpFiles.push(file.path);
         var fileInfo = new FileInfo(file, handler.req, true);
         fileInfo.safeName();
         map[path.basename(file.path)] = fileInfo;
         files.push(fileInfo);
     }).on('field', function (name, value) {
+    	console.log ('field '+name+" "+value);
         if (name === 'redirect') {
             redirect = value;
         }
     }).on('file', function (name, file) {
+    	console.log ('file '+name+" "+file);
         var fileInfo = map[path.basename(file.path)];
         fileInfo.size = file.size;
         if (!fileInfo.validate()) {
@@ -1168,18 +1171,21 @@ UploadHandler.prototype.post = function () {
             });
         }
     }).on('aborted', function () {
+    	console.log ('ABORTED');
         tmpFiles.forEach(function (file) {
             fs.unlink(file);
         });
     }).on('error', function (e) {
+    	console.log ('error '+e); 	
         console.log(e);
         return ('error '+e)
     }).on('progress', function (bytesReceived, bytesExpected) {
+    	console.log ('progress'); 	
         if (bytesReceived > options.maxPostSize) {
             handler.req.connection.destroy();
         }
     }).on('end', finish);
-
+    console.log("end");
     form.parse(handler.req);
 };
 

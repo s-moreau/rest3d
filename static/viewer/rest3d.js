@@ -56,17 +56,34 @@ rest3d.getFileConverted = function(_file, _cb){
 rest3d.upload = function(_params,_cb){
         var params=_params || {};
     var cb=_cb;
-    console.debug(params.file)
-    $.post('/rest3d/upload', params.file)
-    .done(function(data) {
-        console.debug("DONE");
-      if (data) params.result = data; 
-      if (cb) cb(params);
-    }).fail(function(data) {
-        console.log("fail upload!")
-        // console.log("Error Converting "+params.files.name);
-        // console.log(JSON.parse(data.error().responseText));
+    // console.debug(params.file)
+     $.ajax({
+        url: 'http://node.fl4re.com/rest3d/upload',
+        data: params.file,
+        processData: false,
+        contentType: 'application/json',
+        type: 'POST',
+        success: function(data){
+              console.debug("DONE");
+    //   if (data) params.result = data; 
+    //   if (cb) cb(params);
+        },
+        error: function(err){
+               console.log("fail upload!")
+            // console.log("Error Converting "+params.files.name);
+            // console.log(JSON.parse(data.error().responseText));
+        }
     });
+    // $.post('http://node.fl4re.com/rest3d/upload', params.file)
+    // .done(function(data) {
+    //     console.debug("DONE");
+    //   if (data) params.result = data; 
+    //   if (cb) cb(params);
+    // }).fail(function(data) {
+    //     console.log("fail upload!")
+    //     // console.log("Error Converting "+params.files.name);
+    //     // console.log(JSON.parse(data.error().responseText));
+    // });
 
 }
 
