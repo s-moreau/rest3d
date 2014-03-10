@@ -1118,7 +1118,6 @@ UploadHandler.prototype.post = function () {
         counter = 1,
         redirect,
         finish = function () {
-        	 console.log("end");
             counter -= 1;
             if (!counter) {
                 files.forEach(function (fileInfo) {
@@ -1138,19 +1137,16 @@ UploadHandler.prototype.post = function () {
         };
     form.uploadDir = options.tmpDir;
     form.on('fileBegin', function (name, file) {
-    	console.log ('fileBegin '+name+" "+file);
         tmpFiles.push(file.path);
-        var fileInfo = new FileInfo(file, handler.req, true);//
+        var fileInfo = new FileInfo(file, handler.req, true);
         fileInfo.safeName();
         map[path.basename(file.path)] = fileInfo;
         files.push(fileInfo);
     }).on('field', function (name, value) {
-    	console.log ('field '+name+" "+value);
         if (name === 'redirect') {
             redirect = value;
         }
     }).on('file', function (name, file) {
-    	console.log ('file '+name+" "+file);
         var fileInfo = map[path.basename(file.path)];
         fileInfo.size = file.size;
         if (!fileInfo.validate()) {
@@ -1172,7 +1168,6 @@ UploadHandler.prototype.post = function () {
             });
         }
     }).on('aborted', function () {
-    	console.log ('ABORTED');
         tmpFiles.forEach(function (file) {
             fs.unlink(file);
         });
@@ -1181,12 +1176,10 @@ UploadHandler.prototype.post = function () {
         console.log(e);
         return ('error '+e)
     }).on('progress', function (bytesReceived, bytesExpected) {
-    	console.log ('progress'); 	
         if (bytesReceived > options.maxPostSize) {
             handler.req.connection.destroy();
         }
     }).on('end', finish);
-
     form.parse(handler.req);
 };
 
@@ -1390,53 +1383,6 @@ server.post(/^\/rest3d\/convert.*/,function(_req,_res,_next){
 		     return next();
 	     });
 	     });
-		// exec(cmd, function(code, output){
-
-		// 	if (code !== 0){
-		// 		handleError(req,res,{error: 'collada2gltf returned an error='+code+'\n'+output});
-		// 		return next();
-		// 	}
-		// 	codeC2J= code;
-		// 	outputC2J = output;
-		// 	console.log('Exit code:', code);
-	 //  		console.log('Program output:', output);
-					
-		// 	// hack, copy all images in the output_dir, so the viewer will work
-		//     fs.readdir('upload/', function (err, list) {
-  //               list.forEach(function (name) {
-  //               	if (name.endsWith('.png'))
-  //               	{
-  //               		copyFileSync('upload/'+name,'upload/'+output_dir+'/'+name);
-  //               		console.log('upload/'+name+'  TO  upload/'+output_dir+'/'+name);
-  //               	}
-		//         });
-		//     });
-		//     // end hack
-
-		// 	var files = [];
-		// 	fs.readdir('upload/'+output_dir, function (err, list) {
-  //               list.forEach(function (name) {
-		//             var stats = fs.statSync('upload/'+output_dir + '/' + name),
-		//                 fileInfo;
-		//             if (stats.isFile() && name[0] !== '.') {
-		//                 fileInfo = new FileInfo({
-		//                     name: output_dir+'/'+name,
-		//                     size: stats.size
-		//                 });
-		//                 fileInfo.initUrls(req);
-		//                 files.push(fileInfo);
-		//             }
-		//         });
-		//         var timeout = function() {
-  //                   	rmdirSync('upload/'+output_dir);
-  //                   	console.log('timeout !! upload/'+output_dir+'/ was deleted');
-  //                   }
-  //                   setTimeout(function() { timeout()},5 * 60 * 1000);
-		//         handleResult(req, res, {files: files, code:codeC2J, output:outputC2J});
-		//     });		
-		//      return next();
-	 //     });
-	// });
 
     form.parse(req);
 

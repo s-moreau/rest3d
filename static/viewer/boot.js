@@ -120,7 +120,7 @@ require.config({
             exports: 'RENDERER',
         },
         'rest3d':{
-            deps: ['jquerymin'],
+            deps: ['jquerymin','upload'],
             exports: 'rest3d',
         },
         'state':{

@@ -486,7 +486,7 @@ define("gui", (function (global) {
                     previewMaxWidth: 100,
                     previewMaxHeight: 100,
                     previewCrop: true,
-                    dropZone: stock.dropzone       
+                    dropZone: stock.dropzone,      
             });
             }
             this.createJqueryObject = function(){
