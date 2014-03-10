@@ -159,13 +159,13 @@ setViewer6Upload=function(upload){
           GUI.addTooltip({
                     parent: node.find('button'),
                     content: file.error,
-                });//
+                });
         }
         if (indexI + 1 === data.files.length) {
             node.find('button')
                 .prop('disabled', !!data.files.error);
         }
-        index++;//
+        index++;
     }).on('fileuploadprogressall', function (e, data) {
         var progress = parseInt(data.loaded / data.total * 100, 10);
         upload.progress.setValue(progress);
