@@ -1309,7 +1309,7 @@ server.post(/^\/rest3d\/convert.*/,function(_req,_res,_next){
      }).on('error', function (e) {
      	handleError(req,res,e);
         return next();
-     }).on('end', function(){
+     }).on('end', function(){//
      	console.log('now converting collada')
 
      	if (!params.name || !params.name.toLowerCase().endsWith('dae')) { 
