@@ -458,7 +458,7 @@ define("gui", (function (global) {
                         content: "Drag&drop area",
                     });
                 this[this.id].css("text-align","center");
-                this[this.id].append("<hr>");
+                this[this.id].append("<hr>");//
 
                 this.progress = GUI.progress({
                     id:"progress_"+this.id,
