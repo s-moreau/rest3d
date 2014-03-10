@@ -1140,7 +1140,7 @@ UploadHandler.prototype.post = function () {
     form.on('fileBegin', function (name, file) {
     	console.log ('fileBegin '+name+" "+file);
         tmpFiles.push(file.path);
-        var fileInfo = new FileInfo(file, handler.req, true);
+        var fileInfo = new FileInfo(file, handler.req, true);//
         fileInfo.safeName();
         map[path.basename(file.path)] = fileInfo;
         files.push(fileInfo);
