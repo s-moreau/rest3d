@@ -64,7 +64,7 @@ rest3d.upload = function(_params,_cb){
         contentType: 'application/json',
         type: 'POST',
         success: function(data){
-              console.debug("DONE");
+              console.debug("DONE "+data);
     //   if (data) params.result = data; 
     //   if (cb) cb(params);
         },

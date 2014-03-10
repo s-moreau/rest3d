@@ -1118,6 +1118,7 @@ UploadHandler.prototype.post = function () {
         counter = 1,
         redirect,
         finish = function () {
+        	 console.log("end");
             counter -= 1;
             if (!counter) {
                 files.forEach(function (fileInfo) {
@@ -1185,7 +1186,7 @@ UploadHandler.prototype.post = function () {
             handler.req.connection.destroy();
         }
     }).on('end', finish);
-    console.log("end");
+
     form.parse(handler.req);
 };
 
