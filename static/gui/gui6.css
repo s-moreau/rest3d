@@ -708,3 +708,7 @@ color: inherit !important;}
 top: 6px !important;
 right: 0px !important;
 }
+
+#settings-menu{
+    width: 150px !important;
+}

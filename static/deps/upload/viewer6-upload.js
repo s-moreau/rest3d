@@ -116,6 +116,8 @@ setViewer6Upload=function(upload){
         upload.object=$(this);
         data.context = header;
         $.each(data.files, function (index, file) {
+            console.debug(file);
+            rest3d.testUpload(file);
             var ext = file.name.match(/\.[^.]+$/);//
             if(ext=".dae"){
                 var url =  '/rest3d/upload/'+decodeURIComponent(file.name);//

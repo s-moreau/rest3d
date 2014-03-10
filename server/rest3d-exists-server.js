@@ -30,7 +30,8 @@ var send = require('send');
 var http = require('http');
 var basex  = require('basex');
 var utils = require('./utils');
-
+ var childProcess = require('child_process'),
+     ls;
 var os= require('os');
 require('shelljs/global');
 
@@ -1325,9 +1326,19 @@ server.post(/^\/rest3d\/convert.*/,function(_req,_res,_next){
 		var outputC2J;
      	var codeC2J;
      	// todo -> manage progress !!!
-		exec(cmd, function(code, output){
+		ls = childProcess.exec(cmd, function (error, stdout, stderr) {
+		   if (error) {
+		     console.log(error.stack);
+		     console.log('Error code: '+error.code);
+		     console.log('Signal received: '+error.signal);
+		   }
+		   console.log('Child Process STDOUT: '+stdout);
+		   console.log('Child Process STDERR: '+stderr);
+		 });
 
-			if (code !== 0){
+		 ls.on('exit', function (code, output) {
+		   console.log('Child process exited with exit code '+code);
+		   	if (code !== 0){
 				handleError(req,res,{error: 'collada2gltf returned an error='+code+'\n'+output});
 				return next();
 			}
@@ -1371,7 +1382,54 @@ server.post(/^\/rest3d\/convert.*/,function(_req,_res,_next){
 		    });		
 		     return next();
 	     });
-	});
+	     });
+		// exec(cmd, function(code, output){
+
+		// 	if (code !== 0){
+		// 		handleError(req,res,{error: 'collada2gltf returned an error='+code+'\n'+output});
+		// 		return next();
+		// 	}
+		// 	codeC2J= code;
+		// 	outputC2J = output;
+		// 	console.log('Exit code:', code);
+	 //  		console.log('Program output:', output);
+					
+		// 	// hack, copy all images in the output_dir, so the viewer will work
+		//     fs.readdir('upload/', function (err, list) {
+  //               list.forEach(function (name) {
+  //               	if (name.endsWith('.png'))
+  //               	{
+  //               		copyFileSync('upload/'+name,'upload/'+output_dir+'/'+name);
+  //               		console.log('upload/'+name+'  TO  upload/'+output_dir+'/'+name);
+  //               	}
+		//         });
+		//     });
+		//     // end hack
+
+		// 	var files = [];
+		// 	fs.readdir('upload/'+output_dir, function (err, list) {
+  //               list.forEach(function (name) {
+		//             var stats = fs.statSync('upload/'+output_dir + '/' + name),
+		//                 fileInfo;
+		//             if (stats.isFile() && name[0] !== '.') {
+		//                 fileInfo = new FileInfo({
+		//                     name: output_dir+'/'+name,
+		//                     size: stats.size
+		//                 });
+		//                 fileInfo.initUrls(req);
+		//                 files.push(fileInfo);
+		//             }
+		//         });
+		//         var timeout = function() {
+  //                   	rmdirSync('upload/'+output_dir);
+  //                   	console.log('timeout !! upload/'+output_dir+'/ was deleted');
+  //                   }
+  //                   setTimeout(function() { timeout()},5 * 60 * 1000);
+		//         handleResult(req, res, {files: files, code:codeC2J, output:outputC2J});
+		//     });		
+		//      return next();
+	 //     });
+	// });
 
     form.parse(req);
 

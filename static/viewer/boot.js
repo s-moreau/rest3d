@@ -42,7 +42,7 @@ require.config({
             exports: '$.ui'
         },
         'jquerylayout':{
-            deps: ['jquerymin'],
+            deps: ['jquerymin','jqueryui'],
             exports: '$.fn.layout;'
         },
         'skinner':{

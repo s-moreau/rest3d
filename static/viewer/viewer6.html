@@ -499,7 +499,7 @@ THE SOFTWARE.
         })
 
         var upload = GUI.upload({parent:accordionUp.upload, id:"upModel", url:'/rest3d/upload'});
-        upload.button.width("85%")
+        upload.button.width("100%")
         upload.progress.progress_upModel.width("100%");
         $.getScript("../deps/upload/viewer6-upload.js").done(function( script, textStatus ) {
             setViewer6Upload(upload);
@@ -559,7 +559,7 @@ THE SOFTWARE.
             COLLADA.load(url, viewer.parse_dae);
             window.notif(url);
             pleaseWait(false);
-        }).width("90%");
+        }).width("100%");
         accordion.collada.append("<hr></hr>");
 
         GUI.button('duck', accordion.collada, function () {
@@ -568,7 +568,7 @@ THE SOFTWARE.
             COLLADA.load(url, viewer.parse_dae);
             window.notif(url);
             pleaseWait(false);
-        }).width("90%");
+        }).width("100%");
         accordion.collada.append("<hr></hr>");
 
         GUI.button('creature', accordion.collada, function () {
@@ -577,7 +577,7 @@ THE SOFTWARE.
             COLLADA.load(url, viewer.parse_dae);
             window.notif(url);
             pleaseWait(false);
-        }).width("90%");
+        }).width("100%");
         accordion.collada.append("<hr></hr>");
 
         GUI.button('skinned creature (fix me!!)', accordion.gltf, function () {
@@ -586,7 +586,7 @@ THE SOFTWARE.
             glTF.load(url, viewer.parse_gltf);
             window.notif(url);
             pleaseWait(false);
-        }).width("90%");
+        }).width("100%");
         accordion.gltf.append("<hr></hr>");
 
         GUI.button('duck', accordion.gltf, function () {
@@ -595,7 +595,7 @@ THE SOFTWARE.
             glTF.load(url, viewer.parse_gltf);
             window.notif(url);
             pleaseWait(false);
-        }).width("90%");
+        }).width("100%");
         accordion.gltf.append("<hr></hr>");
 
         GUI.button('rambler', accordion.gltf, function () {
@@ -605,7 +605,7 @@ THE SOFTWARE.
             window.notif(url);
             pleaseWait(false);
 
-        }).width("90%");
+        }).width("100%");
         accordion.gltf.append("<hr></hr>");
 
         GUI.button('rambler-min', accordion.collada, function () {
@@ -615,7 +615,7 @@ THE SOFTWARE.
             window.notif(url);
             pleaseWait(false);
 
-        }).width("90%");
+        }).width("100%");
         accordion.collada.append("<hr></hr>");
 
         GUI.button('rambler', accordion.collada, function () {
@@ -624,7 +624,7 @@ THE SOFTWARE.
             COLLADA.load(url, viewer.parse_dae);
             window.notif(url);
             pleaseWait(false);
-        }).width("90%");
+        }).width("100%");
         accordion.collada.append("<hr></hr>");
 
         GUI.button('supermurdoch', accordion.collada, function () {
@@ -633,7 +633,7 @@ THE SOFTWARE.
             COLLADA.load(url, viewer.parse_dae);
             window.notif(url);
                pleaseWait(false);
-        }).width("90%");
+        }).width("100%");
         accordion.collada.append("<hr></hr>");
 
         GUI.button('supermurdoch', accordion.gltf, function () {
@@ -642,7 +642,7 @@ THE SOFTWARE.
             glTF.load(url, viewer.parse_gltf);
             window.notif(url);
                pleaseWait(false);
-        }).width("90%");
+        }).width("100%");
         accordion.gltf.append("<hr></hr>");
 
         GUI.button('wine', accordion.collada, function () {
@@ -651,7 +651,7 @@ THE SOFTWARE.
             COLLADA.load(url, viewer.parse_dae);
             window.notif(url);
                pleaseWait(false);
-        }).width("90%");
+        }).width("100%");
         accordion.collada.append("<hr></hr>");
 
         GUI.button('wine', accordion.gltf, function () {
@@ -660,7 +660,7 @@ THE SOFTWARE.
             glTF.load(url, viewer.parse_gltf);
             window.notif(url);
                pleaseWait(false);
-        }).width("90%");
+        }).width("100%");
         accordion.gltf.append("<hr></hr>");
 
 
@@ -670,7 +670,7 @@ THE SOFTWARE.
               COLLADA.load(url, viewer.parse_dae);
             window.notif(url);
                pleaseWait(false);
-        }).width("90%");
+        }).width("100%");
         accordion.collada.append("<hr></hr>");
 
         GUI.button('uh-1n', accordion.gltf, function () {
@@ -679,7 +679,7 @@ THE SOFTWARE.
             glTF.load(url, viewer.parse_gltf);
             window.notif(url);
                pleaseWait(false);
-        }).width("90%");
+        }).width("100%");
         accordion.gltf.append("<hr></hr>");
 
         GUI.button('cow', accordion.collada, function () {
@@ -688,7 +688,7 @@ THE SOFTWARE.
             COLLADA.load(url, viewer.parse_dae);
             window.notif(url);
                pleaseWait(false);
-        }).width("90%");
+        }).width("100%");
 
         GUI.button('cow', accordion.gltf, function () {
               pleaseWait(true);
@@ -696,7 +696,7 @@ THE SOFTWARE.
             glTF.load(url, viewer.parse_gltf);
             window.notif(url);
                pleaseWait(false);
-        }).width("90%");
+        }).width("100%");
 
         var colladaMenu = [];
         accordion.collada.find('button').each(function(i){
@@ -823,27 +823,26 @@ THE SOFTWARE.
         
         $("#mainLayout-west").append('<div id="colorSelector"  style="z-index:9999!important;"><div style="background-color: #0000ff"></div></div>');
         var tmpPicker;
-        var flagColorPicker="show";
+        var flagColorPicker='show';
         $('#colorSelector div').css('backgroundColor', '#ffffff');
+
         $('#colorSelector').ColorPicker({
             color: '#ffffff',
             onShow: function (colpkr) {
                 $(".colorpicker").css("margin-left","-320px");
-                if(flagColorPicker=='show'){$(colpkr).fadeIn(500);}
+                $(colpkr).fadeIn(200);
                 tmpPicker = $(colpkr);
-                flagColorPicker = "hide";
                 return false;
             },
             onHide: function (colpkr) {
-                if(flagColorPicker=='hide'){$(colpkr).fadeOut(500);}
+                $(colpkr).fadeOut(200);
                 tmpPicker = $(colpkr);
-                flagColorPicker = "show";
                 return false;
             },
             onSubmit: function (hsb, hex, rgb) {
                 $('#colorSelector div').css('backgroundColor', '#' + hex);
                 $('#mainLayout-west').css('backgroundColor', '#' + hex);
-                tmpPicker.fadeOut(500);
+                tmpPicker.fadeOut(200);
             }
         });
         // $("#tmp, #colorSelector, .colorpicker").mouseover(function(){
@@ -859,6 +858,7 @@ THE SOFTWARE.
             parent: menu.settings,
             item: [
             {id:"contextLoss",text:'Context Loss',callback:function(){button1.click();}},
+            {type:"separator"},
         {
             id:"pickerEnable", type:"checkbox", text:"Enable colorpicker", isChecked:function(){
                 $('#colorSelector').show();

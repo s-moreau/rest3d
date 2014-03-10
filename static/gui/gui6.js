@@ -311,7 +311,9 @@ THE SOFTWARE.
 
     // The top-level namespace. All public GUI classes and modules will
     // be attached to this. Exported for both CommonJS and the browser.
+
 define("gui", (function (global) {
+    
     var GUI;
 
     GUI = this.GUI = {};
@@ -447,10 +449,10 @@ define("gui", (function (global) {
                 var stock=this;
                 this.button = GUI.button("Add files...",this[this.id],function(){
                     $('#fileupload_'+stock.id).click();
-                }).width("95%");
+                }).width("100%");
                 this[this.id].append("<hr>");
 
-                this.dropzone = GUI.image(this[this.id],"image_"+this.id,"../gui/images/upload_d.png","90%","100px");
+                this.dropzone = GUI.image(this[this.id],"image_"+this.id,"../gui/images/upload_d.png","100%","100px");
                 GUI.addTooltip({
                         parent: this.dropzone,
                         content: "Drag&drop area",
@@ -2832,6 +2834,7 @@ define("gui", (function (global) {
         };
         obj.center = {
             onresize: GUI.resize,
+            resizable: true,
         };
         obj.north = {
             closable: false,
@@ -2841,7 +2844,7 @@ define("gui", (function (global) {
             spacing_closed: 0,
         };
         obj.south = {
-            resizable: true,
+            resizable: false,
             closable: false,
             slidable: false,
             spacing_open: 0,
@@ -2849,6 +2852,7 @@ define("gui", (function (global) {
         };
         obj.west = {
             resizerCursor: "move",
+             resizable: true,
             onresize: GUI.resize,
         };
         obj.create();
@@ -2878,7 +2882,6 @@ define("gui", (function (global) {
     GUI.offset = false;
 
     GUI.resize = function () {
-       
     };
 
     GUI.copyToClipboard = function (text) {
