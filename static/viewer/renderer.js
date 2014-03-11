@@ -242,6 +242,11 @@ RENDERER.primitive.prototype = {
       var state = this.state;
       var gl = _channel.state.gl;
 
+      if (_channel.picking) {
+        state = State.pickState; 
+        state.values.color = this.pickID;
+      }
+
       if (0 !== this.numVertices) {
 
         // this deals with gl states and uniforms
