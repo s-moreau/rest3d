@@ -1,4 +1,6 @@
 	/*global Element */
+
+define("screenfull", (function (global) {
 (function (window, document) {
 	'use strict';
 
@@ -135,3 +137,7 @@
 
 	window.screenfull = screenfull;
 })(window, document);
+return function () {
+        return global.screenfull;
+    };
+}(this)));

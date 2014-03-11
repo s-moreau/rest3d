@@ -21,15 +21,16 @@ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.*/
+define("viewer", (function (global) {
 
-var viewer = {};
+var viewer = this.viewer = {};
 var scenes = [];
-var currentZoom = 1;
+viewer.currentZoom = 1;
 var mvMatrixStack = [];
 var mvMatrix = mat4.create();
 var deg2rad = 0.0174532925; // constant
-var currentRotationX = 0;
-var currentRotationY = 0;
+viewer.currentRotationX = 0;
+viewer.currentRotationY = 0;
 
 var pmMatrix = mat4.create();
 
@@ -239,7 +240,7 @@ viewer.parse_dae = function(dae) {
     mainCamera = Camera.create();
     Camera.lookAtAabb(mainCamera, scene.bounds, scene.upAxis);
 
-    currentRotationX = currentRotationY = 0;
+    viewer.currentRotationX = viewer.currentRotationY = 0;
     viewer.clearStack();
     scene.starttime = starttime;
     scene.endtime = window.performance.now();
@@ -337,7 +338,7 @@ viewer.parse_gltf = function(gltf) {
     mainCamera = Camera.create();
     Camera.lookAtAabb(mainCamera, scene.bounds, scene.upAxis);
 
-    currentRotationX = currentRotationY = 0;
+    viewer.currentRotationX = viewer.currentRotationY = 0;
     viewer.clearStack();
 
     scene.starttime = starttime;
@@ -376,7 +377,7 @@ viewer.drawnode = function() {
         if (primitives) {
             State.setModelView(mvMatrix);
             for (var i = 0; i < primitives.length; i++)
-                primitives[i].render(channel);
+                primitives[i].render(viewer.channel);
         }
     }
 
@@ -415,25 +416,25 @@ viewer.draw = function(pick,x,y) {
 
 
     if (!pick) {
-    $('#zoom').text('currentZoom is ' + currentZoom);
-    $('#rot').text('currentRotation is ' + currentRotationX.toFixed(2) + ',' + currentRotationY.toFixed(2));
+    $('#zoom').text('currentZoom is ' + viewer.currentZoom);
+    $('#rot').text('currentRotation is ' + viewer.currentRotationX.toFixed(2) + ',' + viewer.currentRotationY.toFixed(2));
     } 
 
     if (pick) {
         viewer.dropTick=true;
-        Channel.pickMode(channel,true);      
+        Channel.pickMode(viewer.channel,true);      
     }
    
     if (pick)
-       Channel.clear(channel, [0,0,0,0]); 
+       Channel.clear(viewer.channel, [0,0,0,0]); 
     else
-       Channel.clear(channel, [0,0,0,0]); // transparent background - so we see through the canvas
+       Channel.clear(viewer.channel, [0,0,0,0]); // transparent background - so we see through the canvas
 
-    Camera.rotateAround(mainCamera, currentZoom, currentRotationX, currentRotationY);
+    Camera.rotateAround(mainCamera, viewer.currentZoom, viewer.currentRotationX, viewer.currentRotationY);
 
     mat4.multiply(pmMatrix, mainCamera.projection, mainCamera.lookAt);
 
-    var state = channel.state;
+    var state = viewer.channel.state;
 
     for (var i = 0; i < scenes.length; i++) {
         viewer.pushMatrix();
@@ -446,7 +447,7 @@ viewer.draw = function(pick,x,y) {
         State.setViewProj(pmMatrix);
 
         // depth first scene drawing
-        viewer.render_scene.call(channel, scenes[i], viewer.drawnode);
+        viewer.render_scene.call(viewer.channel, scenes[i], viewer.drawnode);
 
         viewer.popMatrix();
     } 
@@ -523,3 +524,8 @@ viewer.FPSCounter = function() {
     }
 return new counter();
 };
+
+return function () {
+        return global.viewer;
+    };
+}(this)));

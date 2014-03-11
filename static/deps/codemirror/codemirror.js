@@ -1,6 +1,7 @@
 // CodeMirror version 3.20
 //
 // CodeMirror is the only global var we claim
+define("jquery-terminal", (function (global) {
 window.CodeMirror = (function() {
   "use strict";
 
@@ -5942,3 +5943,7 @@ window.CodeMirror = (function() {
 
   return CodeMirror;
 })();
+return function () {
+        return global.CodeMirror;
+    };
+}(this)));

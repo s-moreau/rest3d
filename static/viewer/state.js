@@ -22,26 +22,8 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.*/
 
-(function(_global) {
-  //"use strict"; - safari has issues
-
-  var shim = {};
-  if (typeof(exports) === 'undefined') {
-    if(typeof define == 'function' && typeof define.amd == 'object' && define.amd) {
-      shim.exports = {};
-      define(function() {
-        return shim.exports;
-      });
-    } else {
-      shim.exports = typeof(window) !== 'undefined' ? window : _global;
-    }
-  }
-  else {
-    shim.exports = exports;
-  }
-
-  (function(exports) {
-    var State = {};
+  define("state", (function (global) {
+    var State = window.State ={};
 
     State.create = function(_gl) {
       
@@ -1322,8 +1304,9 @@ THE SOFTWARE.*/
 
     pickState.program = {}; // allocate new program for basicState
 
+
     pickState.program.vertexShader =  
-          "attribute vec3 aVertex;\n"+
+
           "uniform mat4 uPMatrix;\n"+
           "uniform mat4 uMVMatrix;\n"+
           "void main(void) {\n"+
@@ -1350,11 +1333,7 @@ THE SOFTWARE.*/
                                      'PROJECTION' : { symbol: 'uPMatrix' , type: WebGLRenderingContext.FLOAT_MAT4 },
                                      'color' :{ symbol: 'uColor', type: WebGLRenderingContext.FLOAT_VEC4 }};
     // TODO  - disable blend
-    
-
-    if(typeof(exports) !== 'undefined') {
-        exports.State = State;
-    }
-
-  })(shim.exports);
-})(this);
+return function () {
+        return global.State;
+    };
+}(this)));

@@ -25,27 +25,86 @@ THE SOFTWARE.
 <head>
   <meta content="text/html;charset=utf-8" http-equiv="Content-Type">
   <meta content="utf-8" http-equiv="encoding">
-  <script type="text/javascript" src="../deps/jquery-2.0.3.min.js"></script>
-  <script type="text/javascript" src="../deps/webgl-utils.js"></script>
-  <script type="text/javascript" src="../deps/webgl-debug.js"></script>
-  <script type="text/javascript" src="renderer.js"></script>
-  <script type="text/javascript" src="../loaders/gltf.js"></script>
-  <script type="text/javascript" src="../loaders/collada.js"></script>
-  <script type="text/javascript" src="viewer.js"></script>
-  <script type="text/javascript" src="camera.js"></script>
-  <script type="text/javascript" src="channel.js"></script>
-  <script type="text/javascript" src="state.js"></script>
-  <script type="text/javascript" src="../deps/colorpicker/colorpicker.js"></script>
-  <script type="text/javascript" src="../deps/colorpicker/eye.js"></script>
-  <script type="text/javascript" src="../deps/colorpicker/utils.js"></script>
+  <script type="text/javascript" src="../deps/require.js"></script>
   <link rel="stylesheet" href="../deps/colorpicker/css/colorpicker.css" />
   <link rel="stylesheet" href="../deps/colorpicker/css/layout.css" />
 </head>
 <body oncontextmenu="return false">
 <script type="text/javascript">
  "use strict";
+require.config({ 
+    paths: {
+        jquerymin: "../deps/jquery-2.0.3.min",
+        glmatrix: '../deps/gl-matrix',
+        glmatrixExt: '../loaders/gl-matrix-ext',
+        colorpicker: "../deps/colorpicker/colorpicker",
+        eye: "../deps/colorpicker/eye",
+        utils: "../deps/colorpicker/utils",
+        webglUtils: "../deps/webgl-utils",
+        WebGLDebugUtils:"../deps/webgl-debug",
+        collada:"../loaders/collada",
+        gltf:"../loaders/gltf",
+        gui:"../gui/gui6",
+    },
+    shim: {
+        'colorpicker':{
+            deps: ['jquerymin'],
+            exports: '$.fn.ColorPicker',
+        },
+        'eye':{
+            deps: ['jquerymin'],
+            exports: 'window.EYE',
+        },
+        'utils':{
+            deps: ['eye'],
+            exports: 'window.EYE',
+        },
+        'glmatrixExt':{
+            deps: ['glmatrix'],
+            exports: 'vec3',
+        },
+        'webglUtils':{
+            deps: ['glmatrixExt'],
+            exports: 'WebGLUtils',
+        },
+        'WebGLDebugUtils':{
+            exports: 'WebGLDebugUtils',
+        },
+        'collada':{
+            exports: 'COLLADA',
+        },
+        'gltf':{
+            deps:['glmatrixExt'],
+            exports: 'glTF',
+        },
+        'renderer':{
+            deps: ['jquerymin'],
+            exports: 'RENDERER',
+        },
+        'rest3d':{
+            deps: ['jquerymin'],
+            exports: 'rest3d',
+        },
+        'state':{
+            deps: ['jquerymin'],
+            exports: 'State',
+        },
+        'viewer':{
+             deps: ['glmatrixExt'],
+             exports: 'viewer',
+        },
+        'camera':{
+            exports: 'Camera',
+        },
+        'channel':{
+            deps: ['state'],
+            exports: 'Channel',
+        }
+    },
+})
+require(['jquerymin','glmatrix','glmatrixExt','colorpicker','eye','utils','webglUtils','WebGLDebugUtils','collada','gltf','channel','camera','viewer','state','renderer'],function(){
+
  var $canvas;
-$(document).ready(function(){
 
 if (!window.performance) {
     window.performance = {};
@@ -78,69 +137,69 @@ $('body').append($background);
 $canvas = $('<canvas id="tmp" class="ui-resize-me" style="position: absolute; top: 0px; bottom: 0px; right:0px; margins: 10px;height: 100%; width:100%; " ></canvas>');
 $background.append($canvas);
 // initialize webGL
-channel = Channel.create($canvas[0]); 
+viewer.channel = Channel.create($canvas[0]); 
 
 initCanvasUI();
 
 function initCanvasUI() {
-	canvas=$canvas[0];
-	//$("#tmp").removeEventListener("mousedown", mouseDownHandler, false);
-    var mouseDown = false;
-    var lastX, lastY = 0;
-    // attach mouse events to canvas
+            var mouseDown = false;
+            var lastX, lastY = 0;
+            // attach mouse events to canvas
 
-    function mouseDownHandler(ev) {
-        mouseDown = true;
-        lastX = ev.screenX;
-        lastY = ev.screenY;
-        return true;
-    }
+            function mouseDownHandler(ev) {
+                mouseDown = true;
+                lastX = ev.screenX;
+                lastY = ev.screenY;
+                return true;
+            }
 
-    function mouseMoveHandler(ev) {
-        if (!mouseDown) return false;
+            function mouseMoveHandler(ev) {
+                if (!mouseDown) return false;
 
-        currentZoom = 1;
-        var mdelta = ev.screenX - lastX;
-        lastX = ev.screenX;
-        currentRotationX -= mdelta / 2.5;
+                viewer.currentZoom = 1;
+                var mdelta = ev.screenX - lastX;
+                lastX = ev.screenX;
+                viewer.currentRotationX -= mdelta / 2.5;
 
 
-        var mdelta = ev.screenY - lastY;
-        lastY = ev.screenY;
-        currentRotationY -= mdelta / 2.5;
+                var mdelta = ev.screenY - lastY;
+                lastY = ev.screenY;
+                viewer.currentRotationY -= mdelta / 2.5;
 
 
-        viewer.draw();
-        return true;
-    }
+                viewer.draw();
+                return true;
+            }
 
-    function mouseUpHandler(ev) {
-        mouseDown = false;
-    }
+            function mouseUpHandler(ev) {
+                mouseDown = false;
+            }
 
-    function mouseWheelHandler(ev) {
+            function mouseWheelHandler(ev) {
 
-        var mdelta = ev.wheelDelta;
-        currentZoom = Math.exp(mdelta / 2500);
+                var mdelta = ev.wheelDelta;
+                viewer.currentZoom = Math.exp(mdelta / 2500);
 
-        viewer.draw();
-        return true;
-    }
+                viewer.draw();
+                return true;
+            }
 
-    canvas.removeEventListener("mousedown", mouseDownHandler, false);
-    canvas.removeEventListener("mousemove", mouseMoveHandler, false);
-    canvas.removeEventListener("mouseup", mouseUpHandler, false);
-    canvas.removeEventListener("mousewheel", mouseWheelHandler, false);
-    canvas.addEventListener("mousedown", mouseDownHandler, false);
-    canvas.addEventListener("mousemove", mouseMoveHandler, false);
-    canvas.addEventListener("mouseup", mouseUpHandler, false);
-    canvas.addEventListener("mousewheel", mouseWheelHandler, false);
-    // redraw on resize
+            $canvas[0].removeEventListener("mousedown", mouseDownHandler, false);
+            $canvas[0].removeEventListener("mousemove", mouseMoveHandler, false);
+            $canvas[0].removeEventListener("mouseup", mouseUpHandler, false);
+            $canvas[0].removeEventListener("mousewheel", mouseWheelHandler, false);
+            $canvas[0].addEventListener("mousedown", mouseDownHandler, false);
+            $canvas[0].addEventListener("mousemove", mouseMoveHandler, false);
+            $canvas[0].addEventListener("mouseup", mouseUpHandler, false);
+            $canvas[0].addEventListener("mousewheel", mouseWheelHandler, false);
+            // redraw on resize
 
-    $(canvas).resize(function (evt) {
-        viewer.draw();
-    });
-};
+            $($canvas).resize(function (evt) {
+                viewer.draw();
+            });
+        };
+
+
 var arg = args();
 if (arg.file) {
 	var ext = arg.file.match(/\.[^.]+$/);

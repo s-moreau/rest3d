@@ -11,20 +11,8 @@
 
 /*jslint nomen: true, unparam: true, regexp: true */
 /*global define, window, document, location, File, Blob, FormData */
+define("upload", (function (global) {
 
-(function (factory) {
-    'use strict';
-    if (typeof define === 'function' && define.amd) {
-        // Register as an anonymous AMD module:
-        define([
-            'jquery',
-            'jquery.ui.widget'
-        ], factory);
-    } else {
-        // Browser globals:
-        factory(window.jQuery);
-    }
-}(function ($) {
     'use strict';
 
     // Detect file input support, based on
@@ -1326,4 +1314,7 @@
 
     });
 
-}));
+return function () {
+        return $.fn.fileupload;
+    };
+}(this)));

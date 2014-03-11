@@ -116,6 +116,7 @@ setViewer6Upload=function(upload){
         upload.object=$(this);
         data.context = header;
         $.each(data.files, function (index, file) {
+            console.debug(file);
             var ext = file.name.match(/\.[^.]+$/);//
             if(ext=".dae"){
                 var url =  '/rest3d/upload/'+decodeURIComponent(file.name);//
@@ -141,6 +142,7 @@ setViewer6Upload=function(upload){
                 upload.upload(header,file.name,$preview,$dialog,uploadButton.clone(true).data(data));
                 $('#dialog'+index).hide();
                 $('#preview'+index).hide();
+                            // rest3d.testUpload(file);
             }
             else{this.upload(header,file.name);}//
         });
@@ -157,13 +159,13 @@ setViewer6Upload=function(upload){
           GUI.addTooltip({
                     parent: node.find('button'),
                     content: file.error,
-                });//
+                });
         }
         if (indexI + 1 === data.files.length) {
             node.find('button')
                 .prop('disabled', !!data.files.error);
         }
-        index++;//
+        index++;
     }).on('fileuploadprogressall', function (e, data) {
         var progress = parseInt(data.loaded / data.total * 100, 10);
         upload.progress.setValue(progress);

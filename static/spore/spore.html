@@ -26,13 +26,42 @@
 <html>
 <head>
 <title>Spore Creature Viewer</title>
-<script type="text/javascript" src="/loaders/collada.js"></script>
-<script type="text/javascript" src="/spore/sporefile.js"></script>
-<script type="text/javascript" src="/spore/sporeview.js"></script>
-<script type="text/javascript" src="/spore/sylvester.js"></script>
-<script type="text/javascript" src="/deps/webgl-utils.js"></script>
-<script type="text/javascript" src="/spore/glUtils.js"></script>
-
+<script type="text/javascript" src="../deps/require.js"></script>
+<script type="text/javascript">
+ "use strict";
+require.config({ 
+    paths: {
+        glmatrix: '../deps/gl-matrix',
+        glmatrixExt: '../loaders/gl-matrix-ext',
+        webglUtils: "../deps/webgl-utils",
+        collada:"../loaders/collada",
+        sporefile: "../spore/sporefile",
+        sporeview:"../spore/sporeview",
+        sylvestre: "../spore/sylvester",
+        glUtil : "../spore/glUtils"
+    },
+    shim: {
+        'glmatrixExt':{
+            deps: ['glmatrix'],
+            exports: 'vec3',
+        },
+        'webglUtils':{
+            deps: ['glmatrixExt'],
+            exports: 'WebGLUtils',
+        },
+        'collada':{
+            exports: 'COLLADA',
+        },
+        'sporefile':{
+          deps: ['collada']
+        },
+        'glUtil':{
+          deps: ['glmatrix','glmatrixExt']
+        },
+    },
+})
+require(['glmatrixExt','webglUtils','collada','sporefile','sporeview','sylvestre','glUtil'],function(){});
+</script>
 
 <style type="text/css">
 body {

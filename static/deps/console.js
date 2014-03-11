@@ -1,4 +1,4 @@
-(function () {
+define("console", (function (global) {
     CONSOLE = this.CONSOLE = {};
     CONSOLE.terminal = '';
     CONSOLE.window = 'all';
@@ -425,5 +425,8 @@
 
         return
     };
-}).call(this);
+return function () {
+        return global.CONSOLE;
+    };
+}(this)));
 

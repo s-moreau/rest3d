@@ -12,16 +12,7 @@
 /*jslint unparam: true, nomen: true */
 /*global define, window, document */
 
-(function (factory) {
-    'use strict';
-    if (typeof define === 'function' && define.amd) {
-        // Register as an anonymous AMD module:
-        define(['jquery'], factory);
-    } else {
-        // Browser globals:
-        factory(window.jQuery);
-    }
-}(function ($) {
+define("uploadTransport", (function (global) {
     'use strict';
 
     // Helper variable to create unique names for the transport iframes:
@@ -202,4 +193,8 @@
         }
     });
 
-}));
+return function () {
+        return $;
+    };
+}(this)));
+

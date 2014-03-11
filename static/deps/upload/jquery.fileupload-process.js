@@ -12,21 +12,7 @@
 /*jslint nomen: true, unparam: true */
 /*global define, window */
 
-(function (factory) {
-    'use strict';
-    if (typeof define === 'function' && define.amd) {
-        // Register as an anonymous AMD module:
-        define([
-            'jquery',
-            './jquery.fileupload'
-        ], factory);
-    } else {
-        // Browser globals:
-        factory(
-            window.jQuery
-        );
-    }
-}(function ($) {
+define("uploadProcess", (function (global) {
     'use strict';
 
     var originalAdd = $.blueimp.fileupload.prototype.options.add;
@@ -159,6 +145,8 @@
                 .promise();
         }
 
-    });
-
-}));
+});
+return function () {
+        return originalAdd;
+    };
+}(this)));

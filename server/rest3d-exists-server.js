@@ -30,7 +30,8 @@ var send = require('send');
 var http = require('http');
 var basex  = require('basex');
 var utils = require('./utils');
-
+ var childProcess = require('child_process'),
+     ls;
 var os= require('os');
 require('shelljs/global');
 
@@ -1171,6 +1172,7 @@ UploadHandler.prototype.post = function () {
             fs.unlink(file);
         });
     }).on('error', function (e) {
+    	console.log ('error '+e); 	
         console.log(e);
         return ('error '+e)
     }).on('progress', function (bytesReceived, bytesExpected) {
@@ -1178,7 +1180,6 @@ UploadHandler.prototype.post = function () {
             handler.req.connection.destroy();
         }
     }).on('end', finish);
-
     form.parse(handler.req);
 };
 
@@ -1308,7 +1309,7 @@ server.post(/^\/rest3d\/convert.*/,function(_req,_res,_next){
      }).on('error', function (e) {
      	handleError(req,res,e);
         return next();
-     }).on('end', function(){
+     }).on('end', function(){//
      	console.log('now converting collada')
 
      	if (!params.name || !params.name.toLowerCase().endsWith('dae')) { 
@@ -1325,9 +1326,19 @@ server.post(/^\/rest3d\/convert.*/,function(_req,_res,_next){
 		var outputC2J;
      	var codeC2J;
      	// todo -> manage progress !!!
-		exec(cmd, function(code, output){
+		ls = childProcess.exec(cmd, function (error, stdout, stderr) {
+		   if (error) {
+		     console.log(error.stack);
+		     console.log('Error code: '+error.code);
+		     console.log('Signal received: '+error.signal);
+		   }
+		   console.log('Child Process STDOUT: '+stdout);
+		   console.log('Child Process STDERR: '+stderr);
+		 });
 
-			if (code !== 0){
+		 ls.on('exit', function (code, output) {
+		   console.log('Child process exited with exit code '+code);
+		   	if (code !== 0){
 				handleError(req,res,{error: 'collada2gltf returned an error='+code+'\n'+output});
 				return next();
 			}
@@ -1371,7 +1382,7 @@ server.post(/^\/rest3d\/convert.*/,function(_req,_res,_next){
 		    });		
 		     return next();
 	     });
-	});
+	     });
 
     form.parse(req);
 

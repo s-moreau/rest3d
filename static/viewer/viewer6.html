@@ -25,22 +25,9 @@ THE SOFTWARE.
 <head>
     <meta content="text/html;charset=utf-8" http-equiv="Content-Type">
     <meta content="utf-8" http-equiv="encoding">
-    <script type="text/javascript" src="../gui/gui6.js"></script>
+    <script type="text/javascript" src="../deps/require.js"></script>
+    <script type="text/javascript" src="boot.js"></script>
     <script type="text/javascript">
-    dep.push({link:"/loaders/collada.js"});
-    dep.push({link:"/loaders/gltf.js"});
-    dep.push({link:"../deps/console.js"});
-    dep.push({link:"/deps/webgl-utils.js"});
-    dep.push({link:"/deps/webgl-debug.js"});
-    dep.push({link:"/deps/gl-matrix.js"});
-    dep.push({link:"/loaders/gl-matrix-ext.js"});
-    dep.push({link:"renderer.js"});
-    dep.push({link:"rest3d.js"});
-    dep.push({link:"viewer.js"});
-    dep.push({link:"state.js"});
-    dep.push({link:"camera.js"});
-    dep.push({link:"channel.js"});
-    dep.push({link:"/deps/screenfull.js"});
 
     // dep.push({link:"/deps/upload/viewer6-upload.js"});
     // dep.push({link:"/deps/tree/themes/default/style.min.css"});
@@ -202,7 +189,7 @@ THE SOFTWARE.
 
         var gitPanel = $([]);
         window.onGithub = function () {
-            var gitHtml = '<div id="dialog"><iframe id="myIframe" src="" style="height:99% !important; width:99% !important; border:0px;"></iframe></div>';
+            var gitHtml = '<div id="dialog"><iframe id="myIframe" src="" style="height:100% !important; width:100% !important; border:0px;"></iframe></div>';
             gitPanel = $('body').append(gitHtml);
             $("#dialog").dialog({
                 autoOpen: true,
@@ -212,6 +199,10 @@ THE SOFTWARE.
                     $('#myIframe').attr('src', url);
                 }
             });
+            $("#dialog").css({
+            "padding":"0",
+                })
+            
         }
 
          //////////////
@@ -244,10 +235,10 @@ THE SOFTWARE.
          //------------------------------ all menu icons ---------------------------------------------------------------------------------------------
 
          // //add icons to the men
-         menu.load.text.text("");
-          GUI.image(menu.load.text, "img-settings", "../gui/images/collada.png", 70, 80, "before");
-          menu.loadgl.text.text("");
-          GUI.image(menu.loadgl.text, "img-settings1", "../gui/images/glTF.png", 40, 40, "before");
+        menu.load.text.text("");
+        GUI.image(menu.load.text, "img-settings", "../gui/images/collada.png", 70, 80, "before");
+        menu.loadgl.text.text("");
+        GUI.image(menu.loadgl.text, "img-settings1", "../gui/images/glTF.png", 40, 40, "before");
 
         GUI.image(menu.settings.text, "img-settings", "../gui/images/icon-cog.png", 16, 16, "before");
         GUI.image(menu.support.text, "img-help", "../gui/images/menu-help.png", 15, 15, "before");
@@ -512,7 +503,7 @@ THE SOFTWARE.
         })
 
         var upload = GUI.upload({parent:accordionUp.upload, id:"upModel", url:'/rest3d/upload'});
-        upload.button.width("85%")
+        upload.button.width("100%")
         upload.progress.progress_upModel.width("100%");
         $.getScript("../deps/upload/viewer6-upload.js").done(function( script, textStatus ) {
             setViewer6Upload(upload);
@@ -535,7 +526,7 @@ THE SOFTWARE.
                 text: "glTF"
             }, ]
         })
-         accordion.autoScrollDown();
+        accordion.autoScrollDown();
 
         jumpLine();
 
@@ -556,23 +547,13 @@ THE SOFTWARE.
             GUI.label('rdm13','Use mouse wheel to zoom', win);
         }
 
-        var button1 = GUI.button('Simulate Context Loss', renderMenu.render, function () {
-            if ($(this).find('.ui-button-text').text() == "Simulate Context Loss") {
-                channel.forceContextLoss();
-                $(this).find('.ui-button-text').text("Simulate Restore Context");
-            } else {
-                channel.forceContextRestore();
-                $(this).find('.ui-button-text').text("Simulate Context Loss");
-            }
-        });
-
         GUI.button('duck rest3d(need database)', accordion.collada, function () {
             pleaseWait(true);
             var url = "/rest3d/assets/duck/duck.dae";
             COLLADA.load(url, viewer.parse_dae);
             window.notif(url);
             pleaseWait(false);
-        }).width("90%");
+        }).width("100%");
         accordion.collada.append("<hr></hr>");
 
         GUI.button('duck', accordion.collada, function () {
@@ -581,7 +562,7 @@ THE SOFTWARE.
             COLLADA.load(url, viewer.parse_dae);
             window.notif(url);
             pleaseWait(false);
-        }).width("90%");
+        }).width("100%");
         accordion.collada.append("<hr></hr>");
 
         GUI.button('creature', accordion.collada, function () {
@@ -590,7 +571,7 @@ THE SOFTWARE.
             COLLADA.load(url, viewer.parse_dae);
             window.notif(url);
             pleaseWait(false);
-        }).width("90%");
+        }).width("100%");
         accordion.collada.append("<hr></hr>");
 
         GUI.button('skinned creature (fix me!!)', accordion.gltf, function () {
@@ -599,7 +580,7 @@ THE SOFTWARE.
             glTF.load(url, viewer.parse_gltf);
             window.notif(url);
             pleaseWait(false);
-        }).width("90%");
+        }).width("100%");
         accordion.gltf.append("<hr></hr>");
 
         GUI.button('duck', accordion.gltf, function () {
@@ -608,7 +589,7 @@ THE SOFTWARE.
             glTF.load(url, viewer.parse_gltf);
             window.notif(url);
             pleaseWait(false);
-        }).width("90%");
+        }).width("100%");
         accordion.gltf.append("<hr></hr>");
 
         GUI.button('rambler', accordion.gltf, function () {
@@ -618,7 +599,7 @@ THE SOFTWARE.
             window.notif(url);
             pleaseWait(false);
 
-        }).width("90%");
+        }).width("100%");
         accordion.gltf.append("<hr></hr>");
 
         GUI.button('rambler-min', accordion.collada, function () {
@@ -628,7 +609,7 @@ THE SOFTWARE.
             window.notif(url);
             pleaseWait(false);
 
-        }).width("90%");
+        }).width("100%");
         accordion.collada.append("<hr></hr>");
 
         GUI.button('rambler', accordion.collada, function () {
@@ -637,7 +618,7 @@ THE SOFTWARE.
             COLLADA.load(url, viewer.parse_dae);
             window.notif(url);
             pleaseWait(false);
-        }).width("90%");
+        }).width("100%");
         accordion.collada.append("<hr></hr>");
 
         GUI.button('supermurdoch', accordion.collada, function () {
@@ -646,7 +627,7 @@ THE SOFTWARE.
             COLLADA.load(url, viewer.parse_dae);
             window.notif(url);
                pleaseWait(false);
-        }).width("90%");
+        }).width("100%");
         accordion.collada.append("<hr></hr>");
 
         GUI.button('supermurdoch', accordion.gltf, function () {
@@ -655,7 +636,7 @@ THE SOFTWARE.
             glTF.load(url, viewer.parse_gltf);
             window.notif(url);
                pleaseWait(false);
-        }).width("90%");
+        }).width("100%");
         accordion.gltf.append("<hr></hr>");
 
         GUI.button('wine', accordion.collada, function () {
@@ -664,7 +645,7 @@ THE SOFTWARE.
             COLLADA.load(url, viewer.parse_dae);
             window.notif(url);
                pleaseWait(false);
-        }).width("90%");
+        }).width("100%");
         accordion.collada.append("<hr></hr>");
 
         GUI.button('wine', accordion.gltf, function () {
@@ -673,7 +654,7 @@ THE SOFTWARE.
             glTF.load(url, viewer.parse_gltf);
             window.notif(url);
                pleaseWait(false);
-        }).width("90%");
+        }).width("100%");
         accordion.gltf.append("<hr></hr>");
 
 
@@ -683,7 +664,7 @@ THE SOFTWARE.
               COLLADA.load(url, viewer.parse_dae);
             window.notif(url);
                pleaseWait(false);
-        }).width("90%");
+        }).width("100%");
         accordion.collada.append("<hr></hr>");
 
         GUI.button('uh-1n', accordion.gltf, function () {
@@ -692,7 +673,7 @@ THE SOFTWARE.
             glTF.load(url, viewer.parse_gltf);
             window.notif(url);
                pleaseWait(false);
-        }).width("90%");
+        }).width("100%");
         accordion.gltf.append("<hr></hr>");
 
         GUI.button('cow', accordion.collada, function () {
@@ -701,7 +682,7 @@ THE SOFTWARE.
             COLLADA.load(url, viewer.parse_dae);
             window.notif(url);
                pleaseWait(false);
-        }).width("90%");
+        }).width("100%");
 
         GUI.button('cow', accordion.gltf, function () {
               pleaseWait(true);
@@ -709,7 +690,7 @@ THE SOFTWARE.
             glTF.load(url, viewer.parse_gltf);
             window.notif(url);
                pleaseWait(false);
-        }).width("90%");
+        }).width("100%");
 
         var colladaMenu = [];
         accordion.collada.find('button').each(function(i){
@@ -743,15 +724,25 @@ THE SOFTWARE.
             item: gltfMenu,
         });
 
-        canvas = GUI.canvas(layout.jqueryObjectWest);
+        var canvas = GUI.canvas(layout.jqueryObjectWest);
          // layout.resetOverflow('west');
 
          // initialize webGL
-        channel = Channel.create(canvas, false); // true for debug context
+        viewer.channel = Channel.create(canvas, false); // true for debug context
 
+        var button1 = GUI.button('Simulate Context Loss', renderMenu.render, function () {
+            if ($(this).find('.ui-button-text').text() == "Simulate Context Loss") {
+                Channel.forceContextLoss();
+                $(this).find('.ui-button-text').text("Simulate Restore Context");
+            } else {
+                Channel.forceContextRestore();
+                $(this).find('.ui-button-text').text("Simulate Context Loss");
+            }
+        });
         initCanvasUI();
 
-
+        // var currentZoom =0;
+        // var currentRotationX, currentRotationY = 0;
 
         function initCanvasUI() {
             var mouseDown = false;
@@ -774,15 +765,15 @@ THE SOFTWARE.
             function mouseMoveHandler(ev) {
                 if (!mouseDown) return false;
 
-                currentZoom = 1;
+                viewer.currentZoom = 1;
                 var mdelta = ev.screenX - lastX;
                 lastX = ev.screenX;
-                currentRotationX -= mdelta / 2.5;
+                viewer.currentRotationX -= mdelta / 2.5;
 
 
                 var mdelta = ev.screenY - lastY;
                 lastY = ev.screenY;
-                currentRotationY -= mdelta / 2.5;
+                viewer.currentRotationY -= mdelta / 2.5;
 
 
                 viewer.draw();
@@ -809,7 +800,7 @@ THE SOFTWARE.
             function mouseWheelHandler(ev) {
 
                 var mdelta = ev.wheelDelta;
-                currentZoom = Math.exp(mdelta / 2500);
+                viewer.currentZoom = Math.exp(mdelta / 2500);
 
                 viewer.draw();
                 return true;
@@ -852,29 +843,30 @@ THE SOFTWARE.
             })
               window.loadCss("pepper-grinder");
         
-        $("#mainLayout-west").append('<div id="colorSelector"  style="z-index:9999!important;"><div style="background-color: #0000ff"></div></div>');
+        // $("#mainLayout-west").append('<div id="colorSelector"  style="z-index:9999!important;"><div style="background-color: #0000ff"></div></div>');
+        GUI.button("undefined",$("#mainLayout-west")).prop("id","colorSelector");
         var tmpPicker;
-        var flagColorPicker="show";
+        var flagColorPicker='show';
         $('#colorSelector div').css('backgroundColor', '#ffffff');
+
         $('#colorSelector').ColorPicker({
             color: '#ffffff',
             onShow: function (colpkr) {
                 $(".colorpicker").css("margin-left","-320px");
-                if(flagColorPicker=='show'){$(colpkr).fadeIn(500);}
+                $(colpkr).fadeIn(200);
                 tmpPicker = $(colpkr);
-                flagColorPicker = "hide";
                 return false;
             },
             onHide: function (colpkr) {
-                if(flagColorPicker=='hide'){$(colpkr).fadeOut(500);}
+                $(colpkr).fadeOut(200);
                 tmpPicker = $(colpkr);
-                flagColorPicker = "show";
                 return false;
             },
             onSubmit: function (hsb, hex, rgb) {
                 $('#colorSelector div').css('backgroundColor', '#' + hex);
                 $('#mainLayout-west').css('backgroundColor', '#' + hex);
-                tmpPicker.fadeOut(500);
+                $("#mainLayout-west").css({"background-image":"none"});
+                tmpPicker.fadeOut(200);
             }
         });
         // $("#tmp, #colorSelector, .colorpicker").mouseover(function(){
@@ -890,6 +882,7 @@ THE SOFTWARE.
             parent: menu.settings,
             item: [
             {id:"contextLoss",text:'Context Loss',callback:function(){button1.click();}},
+            {type:"separator"},
         {
             id:"pickerEnable", type:"checkbox", text:"Enable colorpicker", isChecked:function(){
                 $('#colorSelector').show();
@@ -957,7 +950,7 @@ THE SOFTWARE.
             this.fps = 0;
         },
         'getAverageFPS': function() {
-            return this.averageFPS;
+            return this.averageFPS;//
         },
         'run': function () {
             var that = this;
@@ -970,13 +963,44 @@ THE SOFTWARE.
         }
     }
 }
-    var htmlFps = '<div class="yasuo" style="z-index: 999 !important;"><a id="fps" style="float:right;" >? FPS</a></div>';
+    var htmlFps = '<div class="yasuo" style="z-index: 999 !important;"><a id="fps" class="ui-widget-content" style="float:right;" >? FPS</a></div>';
     $("#mainLayout-west").append(htmlFps);
-      // GUI.notification({
-      //           title: "Frame rate",
-      //           text: htmlFps,
-      //           type: "notice"
-      //       })
+
+    var but1 = GUI.button('fullscreen',$("#mainLayout-west"),function(){
+        if (screenfull.enabled) {
+        screenfull.request($("#mainLayout-west")[0]);
+    }
+    }).prop("id","fullCanvas");
+    but1.html('');
+    GUI.addIcon(but1, "ui-icon-arrow-4-diag", "", "before");
+    GUI.addTooltip({
+        parent: but1,
+        content: "Fullscreen mode",
+    });
+    $('#colorSelector').html('');
+    GUI.addIcon($('#colorSelector'), "ui-icon-key", "", "before");
+    GUI.addTooltip({
+        parent: $('#colorSelector'),
+        content: "Set a color to the background",
+    });
+    $('#colorSelector').css({"background":"none !important;"})
+    var inputImage = GUI.input({
+        id: "loadImage",
+        parent: renderMenu.script,
+        hide: true,
+        extension: "image/*",
+        mode: "displayImage",
+    });
+    var button = GUI.button('',$("#mainLayout-west"),function(){
+        inputImage.click();
+    }).prop("id","imageCanvas");
+    button.html('');
+    GUI.addIcon(button, "ui-icon-image", "", "before");
+    GUI.addTooltip({
+        parent: button,
+        content: "Load an image as background",
+    });
+
     var fpsCounter = new FPSCoounter();
     var flagTick = true;
     fpsCounter.createElement( document.getElementById("fps"));
@@ -992,6 +1016,5 @@ THE SOFTWARE.
 
 
 }
-        loadGUI(INIT);
          </script>
 </body>

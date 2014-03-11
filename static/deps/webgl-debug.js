@@ -24,7 +24,7 @@
 */
 
 // Various functions for helping debug WebGL apps.
-
+define("WebGLDebugUtils", (function (global) {
 WebGLDebugUtils = function() {
 
 /**
@@ -875,4 +875,10 @@ return {
 };
 
 }();
+
+return function () {
+        return global.WebGLDebugUtils;
+    };
+}(this)));
+
 

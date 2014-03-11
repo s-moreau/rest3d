@@ -4,6 +4,7 @@
  * Author: Stefan Petre www.eyecon.ro
  * 
  */
+ define("utils", (function (global) {
 (function($) {
 EYE.extend({
 	getPosition : function(e, forceIt)
@@ -250,3 +251,8 @@ if (!$.easing.easeout) {
 }
 	
 })(jQuery);
+
+return function () {
+        return global.EYE;
+    };
+}(this)));

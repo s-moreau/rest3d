@@ -14,6 +14,7 @@
 
 /*jslint browser: true, onevar: true, undef: true, bitwise: true, strict: true */
 /*global window : false, clearInterval: false, clearTimeout: false, document: false, setInterval: false, setTimeout: false, jQuery: false, navigator: false, XSLTProcessor: false, DOMParser: false, XMLSerializer: false*/
+define("jstree", (function (global) {
 
 "use strict";
 
@@ -91,7 +92,7 @@
 					tmp.type	= 'text/css';
 					tmp.media	= "all";
 					tmp.href	= opts.url;
-					document.getElementsByTagName("head")[0].appendChild(tmp);
+					// document.getElementsByTagName("head")[0].appendChild(tmp);
 					return tmp.styleSheet;
 				}
 			}
@@ -4549,3 +4550,7 @@
 //*/
 
 })();
+return function () {
+        return global.$.fn.jstree;
+    };
+}(this)));

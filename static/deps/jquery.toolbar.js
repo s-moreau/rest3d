@@ -13,7 +13,7 @@
  * Released under the MIT license.
  * <https://raw.github.com/paulkinzett/toolbar/master/LICENSE.txt>
  */
-
+define("toolbar", (function (global) {
 if ( typeof Object.create !== 'function' ) {
     Object.create = function( obj ) {
         function F() {}
@@ -240,3 +240,7 @@ if ( typeof Object.create !== 'function' ) {
     };
 
 }) ( jQuery, window, document );
+return function () {
+        return global.$.fn.toolbar;
+    };
+}(this)));
