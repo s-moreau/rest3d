@@ -756,12 +756,18 @@ THE SOFTWARE.
         function initCanvasUI() {
             var mouseDown = false;
             var lastX, lastY = 0;
+            var downX, downY = 0;
             // attach mouse events to canvas
 
             function mouseDownHandler(ev) {
-                mouseDown = true;
+                if (!mouseDown) {
+                   mouseDown = true;
+                   downX = ev.screenX; 
+                   downY = ev.screenY;
+                }
                 lastX = ev.screenX;
                 lastY = ev.screenY;
+
                 return true;
             }
 
@@ -785,6 +791,19 @@ THE SOFTWARE.
 
             function mouseUpHandler(ev) {
                 mouseDown = false;
+                currentZoom = 1;
+
+                // pick
+                if ((downX === ev.screenX) && (downY === ev.screenY)) {
+
+                    var x = ev.layerX / ev.currentTarget.clientWidth;
+                    var y = 1.0 - (ev.layerY / ev.currentTarget.clientHeight);
+
+                    var id=viewer.draw(true,x,y);
+                    console.log("picked id="+viewer.pickName[id]);
+                    viewer.draw();
+
+                }
             }
 
             function mouseWheelHandler(ev) {

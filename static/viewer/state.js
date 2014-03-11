@@ -175,18 +175,15 @@ THE SOFTWARE.*/
 
         State.setStencilTestEnable(state,false);
 
+        // create default states
+
+        State.pickState = State.clone(pickState);
+        State.basicState = State.clone(basicState);
+
       };
 
       return state;
     };
-    
-    // create a new State, with a basic shader
-   State.createBasic = function(){
-
-    // this state will be created only once, and then cloned as needed
-
-    return State.clone(basicState);
-  };
     
   // TODO - pass Override into allocateUniforms
   State.fromPassAndOverrides = function(_pass,_overrides) {
@@ -256,7 +253,6 @@ THE SOFTWARE.*/
 
       _state.program.uniforms[semantic] = {};
 
-
       // otherwise, allocate it for this state
       switch (type) {
         case WebGLRenderingContext.FLOAT:
@@ -270,6 +266,9 @@ THE SOFTWARE.*/
           break;
         case WebGLRenderingContext.FLOAT_VEC4:
           if (!value) _state.values[semantic]=vec4.create(); else _state.values[semantic]=value;
+          break;
+        case WebGLRenderingContext.INT_VEC4:
+          if (!value) _state.values[semantic]=[0,0,0,0]; else _state.values[semantic]=value;
           break;
         case WebGLRenderingContext.FLOAT_MAT3:
           if (!value) _state.values[semantic]=mat3.create(); else _state.values[semantic]=value;
@@ -343,62 +342,50 @@ THE SOFTWARE.*/
     state.program.vertexShader = _state.program.vertexShader;
     state.program.fragmentShader = _state.program.fragmentShader;
     state.program.compileMe = true;
-    state.program.attributes={};
-    for (var semantic in _state.program.attributes){
-      var attribute = _state.program.attributes[semantic];
-      state.program.attributes[semantic] = {};
-      for (var key in attribute) 
-        state.program.attributes[semantic][key] = attribute[key];
-    }
-    state.program.uniforms={};
-    for (var semantic in _state.program.uniforms){
-      var uniform = _state.program.uniforms[semantic];
-      state.program.uniforms[semantic] = {};
-      for (var key in uniform) 
-        state.program.uniforms[semantic][key] = uniform[key];
-    }
-    
 
     // allocate values from default values in program
     allocateUniformsAndAttributes(state, _state.program.uniforms, _state.program.attributes);
 
     // copy state overrides
     for (var key in _state.values) {
-      var attribute=_state.uniforms[key];
-      var value=_state.values[key];
-      var type = attribute.type;
-      if (value)
-        switch (type){
-          case WebGLRenderingContext.FLOAT_VEC2:
-             vec2.copy(state.values[key], value);
+      var attribute=_state.program.uniforms[key] || _state.program.attributes[key];
+      if (attribute) {
+        var value=_state.values[key];
+        var type = attribute.type;
+        if (value)
+          switch (type){
+            case WebGLRenderingContext.FLOAT_VEC2:
+               vec2.copy(state.values[key], value);
+              break;
+            case WebGLRenderingContext.FLOAT_VEC3:
+               vec3.copy(state.values[key],value);
+              break;
+            case WebGLRenderingContext.FLOAT_VEC4:
+               vec4.copy(state.values[key], value);
+              break;
+            case WebGLRenderingContext.FLOAT_MAT4:
+               mat4.copy(state.values[key],value);
+              break;
+            case WebGLRenderingContext.FLOAT_MAT3:
+               mat3.copy(state.values[key], value);
+              break;
+              // TODO -> should this be a pointer instead?
+            case WebGLRenderingContext.FLOAT:
+              state.values[key] = value;
+              break;
+            case WebGLRenderingContext.SAMPLER_2D:
+              for (var item in value) 
+                state.values[key][item] = value[item];
             break;
-          case WebGLRenderingContext.FLOAT_VEC3:
-             vec3.copy(state.values[key],value);
+          default:
+            State.logError('unknown key type='+type+' in State.clone');
+            return this;
             break;
-          case WebGLRenderingContext.FLOAT_VEC4:
-             vec4.copy(state.values[key], value);
-            break;
-          case WebGLRenderingContext.FLOAT_MAT4:
-             mat4.copy(state.values[key],value);
-            break;
-          case WebGLRenderingContext.FLOAT_MAT3:
-             mat3.copy(state.values[key], value);
-            break;
-            // TODO -> should this be a pointer instead?
-          case WebGLRenderingContext.FLOAT:
-            state.values[key] = value;
-            break;
-          case WebGLRenderingContext.SAMPLER_2D:
-            for (var item in value) 
-              state.values[key][item] = value[item];
-          break;
-        default:
-          State.logError('unknown key type='+type+' in State.clone');
-          return this;
-          break;
-        }
+          }
+        } else
+        State.log('cannot find attribute/uniform '+key+" in State.clone");
     }
-    // copy state
+    // copy states
     for (var key in _state) {
       var statelet=_state[key];
       if (key !== 'ID')
@@ -532,6 +519,11 @@ THE SOFTWARE.*/
             apply=true;
           }
           break;
+        case WebGLRenderingContext.INT_VEC4:
+          if (uniform.value[0]!=value[0] || uniform.value[1]!=value[1] || uniform.value[2]!=value[2] || uniform.value[3]!=value[3]) {
+            uniform.value[0]=value[0]; uniform.value[1]=value[1]; uniform.value[2]=value[2]; uniform.value[3]=value[3];
+            apply=true;
+          }
         case WebGLRenderingContext.FLOAT_MAT4:
         if (mat4.squaredDistance(uniform.value,value)>1e-12){
             mat4.copy(uniform.value, value);
@@ -602,28 +594,33 @@ THE SOFTWARE.*/
       switch (type){
         case WebGLRenderingContext.FLOAT_VEC2:
           _gl.uniform2fv(_uniform.location, _value);
-          
           break;
+
         case WebGLRenderingContext.FLOAT_VEC3:
           _gl.uniform3fv(_uniform.location, _value);
-          
           break;
+
         case WebGLRenderingContext.FLOAT_VEC4:
           _gl.uniform4fv(_uniform.location, _value);
-          
           break;
-        case WebGLRenderingContext.FLOAT_MAT4:
-          _gl.uniformMatrix4fv(_uniform.location, false, _value);
 
+        case WebGLRenderingContext.INT_VEC4:
+          _gl.uniform4iv(_uniform.location, _value);
           break;
+
+        case WebGLRenderingContext.FLOAT_MAT4:
+          _gl.uniformMatrix4fv(_uniform.location, false, _value); // false = do no transpose
+          break;
+
         case WebGLRenderingContext.FLOAT_MAT3:
-          _gl.uniformMatrix3fv(_uniform.location, false, _value);
-          
+          _gl.uniformMatrix3fv(_uniform.location, false, _value); // false = do not transpose
           break;
+
         case WebGLRenderingContext.FLOAT:
           _gl.uniform1f(_uniform.location, _value);
-          
+
           break;
+
         case WebGLRenderingContext.SAMPLER_2D:
             State.glTexture[_uniform.value.textureUnit] = _uniform.value.glTexture;
           if (_uniform.value.glTexture) {
@@ -1261,7 +1258,7 @@ THE SOFTWARE.*/
     State.primitives = []; // list of all primitives that have been created
     State.textures = []; // list of textures that have been created
 
-    // create a basic State
+      // create a basic State
 
     var basicState ={}; 
     basicState.ID = "basicState";
@@ -1315,9 +1312,44 @@ THE SOFTWARE.*/
                                      'PROJECTION' : { symbol: 'uPMatrix' , type: WebGLRenderingContext.FLOAT_MAT4 },
                                      'MODELVIEWINVERSETRANSPOSE' : { symbol: 'uNMatrix', type: WebGLRenderingContext.FLOAT_MAT3},
                                      'diffuse': { symbol: 'uTexture0', type: WebGLRenderingContext.SAMPLER_2D },
-                                     'alphaScale' :{ symbol: 'uAlphaScale', type: WebGLRenderingContext.FLOAT, value: 1}};
+                                     'alphaScale' :{ symbol: 'uAlphaScale', type: WebGLRenderingContext.FLOAT, value: 1.}};
 
 
+  // picking state
+  // create a basic State (lambert)
+    var pickState ={}; 
+    pickState.ID = "pickState";
+
+    pickState.program = {}; // allocate new program for basicState
+
+    pickState.program.vertexShader =  
+          "attribute vec3 aVertex;\n"+
+          "uniform mat4 uPMatrix;\n"+
+          "uniform mat4 uMVMatrix;\n"+
+          "void main(void) {\n"+
+          "    gl_Position = uPMatrix * uMVMatrix * vec4(aVertex, 1.0);\n"+
+          "}";
+
+    pickState.program.fragmentShader = 
+          "precision mediump float;\n"+
+          //"precision highp float;"+
+          "uniform vec4 uColor;\n"+
+          "void main(void) {\n"+
+            "gl_FragColor = uColor;\n"+
+          "}";
+
+
+
+    pickState.program.compileMe = true;
+    pickState.program.glProgram = null;
+
+    pickState.program.attributes = { 'POSITION' : { semantic: 'POSITION', symbol: 'aVertex', type: WebGLRenderingContext.FLOAT_VEC3 }
+                                    };
+
+    pickState.program.uniforms =  {  'MODELVIEW' : { symbol: 'uMVMatrix' , type: WebGLRenderingContext.FLOAT_MAT4 },
+                                     'PROJECTION' : { symbol: 'uPMatrix' , type: WebGLRenderingContext.FLOAT_MAT4 },
+                                     'color' :{ symbol: 'uColor', type: WebGLRenderingContext.FLOAT_VEC4 }};
+    // TODO  - disable blend
     
 
     if(typeof(exports) !== 'undefined') {

@@ -87,6 +87,8 @@ THE SOFTWARE.*/
       channel.state =  State.create(gl);
       Channel.active = channel;
 
+      //Channel.initPickBuffer(channel);
+      
       // keep track of vertexArrayAttrib enable/disable for lazy evaluation
       channel.VertexAttribBool = {};
 
@@ -149,14 +151,14 @@ THE SOFTWARE.*/
 
 
     // todo -> set sky/earth ...
-    Channel.clear=function(_channel, _r, _g, _b, _a){
+    Channel.clear=function(_channel, _c){
 
       var state = _channel.state;
 
       resizeCanvas(_channel);
 
-      if (_r && _g && _b && _a)
-        State.setClearColor(state, _r, _g, _b, _a);
+      if (_c !== undefined)
+        State.setClearColor(state, _c[0], _c[1], _c[2], _c[3]);
       State.setScissorTestEnable(state, false);
       State.setDepthClear(state, 1.);
       State.setClear(state, State.COLOR_BUFFER_BIT | State.DEPTH_BUFFER_BIT);
@@ -172,11 +174,64 @@ THE SOFTWARE.*/
 
     };
 
+    Channel.initPickBuffer = function(_channel) 
+    {
+      var gl = _channel.gl;
 
+        _channel.rttFramebuffer = gl.createFramebuffer();
+        gl.bindFramebuffer(gl.FRAMEBUFFER, _channel.rttFramebuffer);
+        _channel.rttFramebuffer.width = 512;
+        _channel.rttFramebuffer.height = 512;
+
+        _channel.rttTexture = gl.createTexture();
+        gl.bindTexture(gl.TEXTURE_2D, _channel.rttTexture);
+        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
+        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
+        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST);
+
+        gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, _channel.rttFramebuffer.width, _channel.rttFramebuffer.height,
+            0, gl.RGBA, gl.UNSIGNED_BYTE, null);
+
+        var renderbuffer = gl.createRenderbuffer();
+        gl.bindRenderbuffer(gl.RENDERBUFFER, renderbuffer);
+        gl.renderbufferStorage(gl.RENDERBUFFER, gl.DEPTH_COMPONENT16, _channel.rttFramebuffer.width, _channel.rttFramebuffer.height);
+
+        gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0, gl.TEXTURE_2D, _channel.rttTexture, 0);
+        gl.framebufferRenderbuffer(gl.FRAMEBUFFER, gl.DEPTH_ATTACHMENT, gl.RENDERBUFFER, renderbuffer);
+
+        gl.bindTexture(gl.TEXTURE_2D, null);
+        gl.bindRenderbuffer(gl.RENDERBUFFER, null);
+        gl.bindFramebuffer(gl.FRAMEBUFFER, null);
+
+    }
+
+    Channel.pickMode = function(_channel,_bool,_x,_y)
+    {
+      var gl = _channel.gl;
+     
+
+      
+      _channel.picking = _bool;
+      if (_bool) {
+        //gl.bindFramebuffer(gl.FRAMEBUFFER, channel.rttFramebuffer);
+      } else {
+        // Read Pixel Color
+        var x=_x*_channel.gl.canvas.width;
+        var y=_y*_channel.gl.canvas.height; 
+        var PixelColor= new Uint8Array(4);
+        gl.readPixels(x,y,1,1,gl.RGBA,gl.UNSIGNED_BYTE,PixelColor);
+//console.log('pick x='+x+' y='+y+"color=",PixelColor);
+        //gl.bindFramebuffer(gl.FRAMEBUFFER, null);
+        return PixelColor[0]+(PixelColor[1]<<8)+(PixelColor[2]<<16);
+        
+      }
+    }
 
     if(typeof(exports) !== 'undefined') {
         exports.Channel = Channel;
     }
+
 
   })(shim.exports);
 })(this);

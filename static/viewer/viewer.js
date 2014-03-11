@@ -42,6 +42,12 @@ var tree = null;
 var scene_tree = null;
 var warehouse_tree = null;
 
+// associate primitive name with picking ID
+viewer.pickName = [null];
+viewer.nowParsing;
+
+viewer.dropTick=false;
+
 viewer.parse_dae = function(dae) {
 
     // set the image load callback to redraw
@@ -49,6 +55,9 @@ viewer.parse_dae = function(dae) {
         e.preventDefault();
         viewer.draw();
     }
+
+    // (viewer global) set current uri
+    viewer.nowParsing = dae.url;
 
     var starttime = window.performance.now();
     // get the scene
@@ -87,6 +96,7 @@ viewer.parse_dae = function(dae) {
 
             for (var p = 0; p < primitives.length; p++) {
 
+
                 var triangles = primitives[p];
                 // fill up my primitive structure
                 var primitive = {};
@@ -94,6 +104,7 @@ viewer.parse_dae = function(dae) {
                 var normal = null;
                 var texcoord = null;
                 var color = null;
+
 
                 // speed-up function call
 
@@ -133,7 +144,7 @@ viewer.parse_dae = function(dae) {
 
                 primitive.index = null;
 
-                var state = State.createBasic();
+                var state = State.clone(State.basicState);
                 var material = geometry.materials[p];
 
                 // check for a bind_vertex_input - this is for warning only
@@ -201,8 +212,17 @@ viewer.parse_dae = function(dae) {
                         };
                     }
                 }
-                geometry.glprimitives.push(new RENDERER.primitive(primitive.position, primitive.color,
-                    primitive.normal, null, primitive.texcoord, primitive.index, state));
+                
+                var glprim = new RENDERER.primitive( primitive.position, primitive.color,
+                                                     primitive.normal, null, primitive.texcoord, 
+                                                     primitive.index, state);
+
+                // initialize picking ID
+                var pickID = viewer.pickName.length;
+                viewer.pickName.push(viewer.nowParsing+"#"+this.id+"["+p+"]");
+                glprim.pickID = [(pickID & 0xff)/255,((pickID>>8)&0xff)/255,((pickID>>16)&0xff)/255,1];
+
+                geometry.glprimitives.push(glprim);
 
             }
             // a mesh has a bounding box
@@ -231,6 +251,8 @@ viewer.parse_dae = function(dae) {
 
 viewer.parse_gltf = function(gltf) {
 
+ // (viewer global) set current uri
+    viewer.nowParsing = gltf.url;
     var starttime = window.performance.now();
 
     // set the image load callback to redraw
@@ -254,6 +276,8 @@ viewer.parse_gltf = function(gltf) {
 
         for (var j = 0; j < geometries.length; j++) {
             var geometry = geometries[j];
+
+
 
             // each geometry has a mesh : an array of primitives
             // and a glprimitives - whcih contains the webGL primitives for each primitives in the mesh
@@ -281,8 +305,16 @@ viewer.parse_gltf = function(gltf) {
                 primitive.texcoord = triangles.TEXCOORD_0;
                 primitive.index = triangles.INDEX;
 
-                geometry.glprimitives.push(new RENDERER.primitive(primitive.position, null, primitive.normal,
-                    null, primitive.texcoord, primitive.index, state));
+                var glprim = new RENDERER.primitive(primitive.position, null, 
+                                                    primitive.normal, null, 
+                                                    primitive.texcoord, primitive.index, state);
+
+                  // initialize picking ID
+                var pickID = viewer.pickName.length;
+                viewer.pickName.push(viewer.nowParsing+"#"+this.id+"["+i+"]");
+                glprim.pickID = [(pickID & 0xff)/255,((pickID>>8)&0xff)/255,((pickID>>16)&0xff)/255,1];
+
+                geometry.glprimitives.push(glprim);
 
             }
             // a gltf mesh has a bounding box
@@ -372,17 +404,30 @@ viewer.render_scene = function(_nodes, _callback) {
     return cont;
 };
 
-viewer.draw = function() {
 
-    if (!scenes || scenes.length < 1) return;
+viewer.draw = function(pick,x,y) {
+
+    if (!scenes || scenes.length < 1 ) return null;
+    if (viewer.dropTick && !pick) {
+         console.log("dropTick activated"); 
+         return;
+     }
 
 
-
+    if (!pick) {
     $('#zoom').text('currentZoom is ' + currentZoom);
     $('#rot').text('currentRotation is ' + currentRotationX.toFixed(2) + ',' + currentRotationY.toFixed(2));
+    } 
 
+    if (pick) {
+        viewer.dropTick=true;
+        Channel.pickMode(channel,true);      
+    }
    
-    Channel.clear(channel, 1., 0., 0., 1.); // red opaque
+    if (pick)
+       Channel.clear(channel, [0,0,0,0]); 
+    else
+       Channel.clear(channel, [0,0,0,0]); // transparent background - so we see through the canvas
 
     Camera.rotateAround(mainCamera, currentZoom, currentRotationX, currentRotationY);
 
@@ -404,8 +449,13 @@ viewer.draw = function() {
         viewer.render_scene.call(channel, scenes[i], viewer.drawnode);
 
         viewer.popMatrix();
+    } 
 
-    }
+    if (pick)
+    {                     
+        viewer.dropTick = false;
+        return Channel.pickMode(channel,false,x,y);
+   }
 
 };
 
