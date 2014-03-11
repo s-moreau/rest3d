@@ -1306,7 +1306,7 @@ THE SOFTWARE.*/
 
 
     pickState.program.vertexShader =  
-
+          "attribute vec3 aVertex;"+
           "uniform mat4 uPMatrix;\n"+
           "uniform mat4 uMVMatrix;\n"+
           "void main(void) {\n"+

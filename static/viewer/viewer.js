@@ -455,7 +455,7 @@ viewer.draw = function(pick,x,y) {
     if (pick)
     {                     
         viewer.dropTick = false;
-        return Channel.pickMode(channel,false,x,y);
+        return Channel.pickMode(viewer.channel,false,x,y);
    }
 
 };
