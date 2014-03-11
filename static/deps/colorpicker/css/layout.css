@@ -1,10 +1,7 @@
 #colorSelector {
 	position: absolute;
 	bottom: 0px !important;
-	right:0px !important;
-	width: 36px;
-	height: 36px;
-	background: url(../images/select.png);
+	right:17px !important;
 }
 #colorSelector div {
 	position: absolute;

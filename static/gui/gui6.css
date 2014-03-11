@@ -705,10 +705,28 @@ color: inherit !important;}
 
 .yasuo{
    position: absolute;
-top: 6px !important;
+top: 4px !important;
 right: 0px !important;
+    background-color: white !important;
 }
 
 #settings-menu{
     width: 150px !important;
+}
+
+#fullCanvas{
+    position: absolute;
+bottom: 0px !important;
+right: 0px !important;
+    z-index: 9999 !important;
+
+/*    position: relative !important;
+    float: right !important;*/
+}
+
+#imageCanvas{
+       position: absolute;
+bottom: 0px !important;
+right: 34px !important;
+    z-index: 9999 !important; 
 }

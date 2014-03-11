@@ -2871,7 +2871,7 @@ define("gui", (function (global) {
                 GUI.container.initContent("west");
             } else {}
     }
-
+        obj.jqueryObject.sizePane("west", $(window).width() - 450);
         obj.jqueryObjectWest.append("<div id='support-layout' class='ui-layout-center' style='height:100%;width:100%'></div>");
         obj.jqueryObject.sizePane("north", 37);
         obj.jqueryObject.allowOverflow("north");
@@ -3071,6 +3071,9 @@ define("gui", (function (global) {
             if (this.json.hasOwnProperty('callback')) {
                 this.callback = this.json.callback;
             }
+            if (this.json.hasOwnProperty('onchange')) {
+                this.onchange = this.json.onchange;
+            }
             if (this.json.hasOwnProperty('hide')) {
                 this.hide = this.json.hide;
             }
@@ -3088,10 +3091,16 @@ define("gui", (function (global) {
                 if (this.extension) {
                     this.html += ' accept="' + this.extension + '"';
                 }
-                this.html += ' multiple ';
+                if(this.mode != "displayImage"){this.html += ' multiple ';}
                 if (this.mode == 'readText') {
                     this.html += ' onchange="window.readFile(this.files)"/>';
                 }
+                if (this.mode == 'displayImage'){
+                   this.html += 'onchange="window.displayImage(this.files)"/>'; 
+                }
+                // else{
+                //    this.html += '/>'; 
+                // }
             }
             this.create = function () {
                 this.parent.append(this.html);
@@ -3102,9 +3111,36 @@ define("gui", (function (global) {
                 }
                 stock = this;
                 this.header.on("change", function () {
+                    stock.onchange(stock);
                     this.value = null;
                 });
             }
+            window.displayImage = function(file){
+                    //var file = $('#loadImage').get(0).files;
+                    var file = file[0];
+                    console.debug(file);
+
+                            var reader = new FileReader();
+                            reader.onload = (function(theFile) {
+                                return function(e) {
+                                    console.debug("in");
+                                    var image = e.target.result;
+                                    $div = $("<div></div>")
+                                    $("#renderMenus_content").append($div);
+                                    $("#mainLayout-west").css({
+                                        "background-image":"url("+image+")",
+                                        "background-size": "cover",
+                                        "-webkit-background-size": "cover", /* For WebKit*/
+                                        "-moz-background-size": "cover",    /* Mozilla*/
+                                        "-o-background-size": "cover",      /* Opera*/
+                                        "background-size": "cover",         /* Generic*/
+                                    });
+                                };
+                            })(file);
+                            reader.readAsDataURL(file);
+                        
+                    }
+                // reader.readAsDataURL(files[0]);
             window.readFile = function (files) {
                 for (i = 0; i < files.length; i++) {
                     var file = files[i];

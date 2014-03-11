@@ -189,7 +189,7 @@ THE SOFTWARE.
 
         var gitPanel = $([]);
         window.onGithub = function () {
-            var gitHtml = '<div id="dialog"><iframe id="myIframe" src="" style="height:99% !important; width:99% !important; border:0px;"></iframe></div>';
+            var gitHtml = '<div id="dialog"><iframe id="myIframe" src="" style="height:100% !important; width:100% !important; border:0px;"></iframe></div>';
             gitPanel = $('body').append(gitHtml);
             $("#dialog").dialog({
                 autoOpen: true,
@@ -199,6 +199,10 @@ THE SOFTWARE.
                     $('#myIframe').attr('src', url);
                 }
             });
+            $("#dialog").css({
+            "padding":"0",
+                })
+            
         }
 
          //////////////
@@ -231,10 +235,10 @@ THE SOFTWARE.
          //------------------------------ all menu icons ---------------------------------------------------------------------------------------------
 
          // //add icons to the men
-         menu.load.text.text("");
-          GUI.image(menu.load.text, "img-settings", "../gui/images/collada.png", 70, 80, "before");
-          menu.loadgl.text.text("");
-          GUI.image(menu.loadgl.text, "img-settings1", "../gui/images/glTF.png", 40, 40, "before");
+        menu.load.text.text("");
+        GUI.image(menu.load.text, "img-settings", "../gui/images/collada.png", 70, 80, "before");
+        menu.loadgl.text.text("");
+        GUI.image(menu.loadgl.text, "img-settings1", "../gui/images/glTF.png", 40, 40, "before");
 
         GUI.image(menu.settings.text, "img-settings", "../gui/images/icon-cog.png", 16, 16, "before");
         GUI.image(menu.support.text, "img-help", "../gui/images/menu-help.png", 15, 15, "before");
@@ -522,7 +526,7 @@ THE SOFTWARE.
                 text: "glTF"
             }, ]
         })
-         accordion.autoScrollDown();
+        accordion.autoScrollDown();
 
         jumpLine();
 
@@ -542,16 +546,6 @@ THE SOFTWARE.
             GUI.label('rdm12','Use left mouse click to rotate', win);win.append('</br>');
             GUI.label('rdm13','Use mouse wheel to zoom', win);
         }
-
-        var button1 = GUI.button('Simulate Context Loss', renderMenu.render, function () {
-            if ($(this).find('.ui-button-text').text() == "Simulate Context Loss") {
-                channel.forceContextLoss();
-                $(this).find('.ui-button-text').text("Simulate Restore Context");
-            } else {
-                channel.forceContextRestore();
-                $(this).find('.ui-button-text').text("Simulate Context Loss");
-            }
-        });
 
         GUI.button('duck rest3d(need database)', accordion.collada, function () {
             pleaseWait(true);
@@ -736,6 +730,15 @@ THE SOFTWARE.
          // initialize webGL
         viewer.channel = Channel.create(canvas, false); // true for debug context
 
+        var button1 = GUI.button('Simulate Context Loss', renderMenu.render, function () {
+            if ($(this).find('.ui-button-text').text() == "Simulate Context Loss") {
+                Channel.forceContextLoss();
+                $(this).find('.ui-button-text').text("Simulate Restore Context");
+            } else {
+                Channel.forceContextRestore();
+                $(this).find('.ui-button-text').text("Simulate Context Loss");
+            }
+        });
         initCanvasUI();
 
         // var currentZoom =0;
@@ -821,7 +824,8 @@ THE SOFTWARE.
             })
               window.loadCss("pepper-grinder");
         
-        $("#mainLayout-west").append('<div id="colorSelector"  style="z-index:9999!important;"><div style="background-color: #0000ff"></div></div>');
+        // $("#mainLayout-west").append('<div id="colorSelector"  style="z-index:9999!important;"><div style="background-color: #0000ff"></div></div>');
+        GUI.button("undefined",$("#mainLayout-west")).prop("id","colorSelector");
         var tmpPicker;
         var flagColorPicker='show';
         $('#colorSelector div').css('backgroundColor', '#ffffff');
@@ -842,6 +846,7 @@ THE SOFTWARE.
             onSubmit: function (hsb, hex, rgb) {
                 $('#colorSelector div').css('backgroundColor', '#' + hex);
                 $('#mainLayout-west').css('backgroundColor', '#' + hex);
+                $("#mainLayout-west").css({"background-image":"none"});
                 tmpPicker.fadeOut(200);
             }
         });
@@ -939,13 +944,44 @@ THE SOFTWARE.
         }
     }
 }
-    var htmlFps = '<div class="yasuo" style="z-index: 999 !important;"><a id="fps" style="float:right;" >? FPS</a></div>';
+    var htmlFps = '<div class="yasuo" style="z-index: 999 !important;"><a id="fps" class="ui-widget-content" style="float:right;" >? FPS</a></div>';
     $("#mainLayout-west").append(htmlFps);
-      // GUI.notification({
-      //           title: "Frame rate",
-      //           text: htmlFps,
-      //           type: "notice"
-      //       })
+
+    var but1 = GUI.button('fullscreen',$("#mainLayout-west"),function(){
+        if (screenfull.enabled) {
+        screenfull.request($("#mainLayout-west")[0]);
+    }
+    }).prop("id","fullCanvas");
+    but1.html('');
+    GUI.addIcon(but1, "ui-icon-arrow-4-diag", "", "before");
+    GUI.addTooltip({
+        parent: but1,
+        content: "Fullscreen mode",
+    });
+    $('#colorSelector').html('');
+    GUI.addIcon($('#colorSelector'), "ui-icon-key", "", "before");
+    GUI.addTooltip({
+        parent: $('#colorSelector'),
+        content: "Set a color to the background",
+    });
+    $('#colorSelector').css({"background":"none !important;"})
+    var inputImage = GUI.input({
+        id: "loadImage",
+        parent: renderMenu.script,
+        hide: true,
+        extension: "image/*",
+        mode: "displayImage",
+    });
+    var button = GUI.button('',$("#mainLayout-west"),function(){
+        inputImage.click();
+    }).prop("id","imageCanvas");
+    button.html('');
+    GUI.addIcon(button, "ui-icon-image", "", "before");
+    GUI.addTooltip({
+        parent: button,
+        content: "Load an image as background",
+    });
+
     var fpsCounter = new FPSCoounter();
     var flagTick = true;
     fpsCounter.createElement( document.getElementById("fps"));
