@@ -173,7 +173,7 @@ module.exports = function (server) {
       {
         // this returns a json
         var start = 1;
-        var end = 1000;
+        var end = 100;
         var req = "https://3dwarehouse.sketchup.com/3dw/Search"+
                    "?startRow="+start+
                    "&endRow="+end+
