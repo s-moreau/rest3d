@@ -56,12 +56,6 @@ var database = require('./basexdriver');
 var FileInfo = require('./fileinfo');
 var sendFile = require('./sendfile');
 
-rmdirSync('tmp');
-rmdirSync('upload');
-
-fs.mkdirSync('tmp');
-fs.mkdirSync('upload');
-//fs.mkdirSync('upload/thumbnail');
 
 var platform = os.type().match(/^Win/) ? 'win' : 
 				(os.type().match(/^Dar/) ? 'mac' : 'unix');
@@ -87,17 +81,20 @@ if (process.env.GLTF_BIN_PATH)
 
 var server = module.exports.server = restify.createServer();
 
-// grab all the API from folder hierarchy
-/*
-registerRoutes = exports.registerRoutes = require('./src/router').registerRoutes;
-registerRoutes(server, {path: __dirname + '/src/routes'});
-*/
+
+rmdirSync('tmp');
+rmdirSync('upload');
+
+fs.mkdirSync('tmp');
+fs.mkdirSync('upload');
+//fs.mkdirSync('upload/thumbnail');
 
 server.use(restify.acceptParser(server.acceptable));
 //server.use(restify.authorizationParser());
 server.use(restify.dateParser());
 server.use(restify.queryParser());
 //server.use(restify.bodyParser()); -> use formidable instead
+server.use(restify.gzipResponse());
 restify.defaultResponseHeaders = false;
 
 // include routes

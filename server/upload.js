@@ -16,8 +16,11 @@ module.exports = function (server) {
         this.req = req;
         this.res = res;
         this.callback = callback;
-    },
-    options = {
+    };
+
+  // those are options for FileInfo
+
+  var options = {
       tmpDir: __dirname + '/tmp',
       uploadDir: __dirname + '/upload',
       uploadUrl: '/rest3d/upload/',
@@ -40,6 +43,7 @@ module.exports = function (server) {
         allowMethods: 'OPTIONS, HEAD, GET, POST, PUT, DELETE',
         allowHeaders: 'Content-Type, Content-Range, Content-Disposition'
       },
+
       /* Uncomment and edit this section to provide the service via HTTPS:
       ssl: {
         key: fs.readFileSync('/Applications/XAMPP/etc/ssl.key/server.key'),
@@ -49,45 +53,45 @@ module.exports = function (server) {
        nodeStatic: {
          cache: 3600 // seconds to cache served files
        }
-    },
-    utf8encode = function (str) {
-      return unescape(encodeURIComponent(str));
-    },
-
-   
-    handleResult = function (req, res, result, redirect) {
-
-      if (redirect) {
-        res.writeHead(302, {
-          'Location': redirect.replace(
-          /%s/,
-          encodeURIComponent(JSON.stringify(result))
-          )
-        });
-        res.end();
-      } else {
-        res.writeHead(200, {
-          'Content-Type': req.headers.accept
-          .indexOf('application/json') !== -1 ?
-            'application/json' : 'text/plain'
-        });
-        res.end(JSON.stringify(result));
-      }
-    },
-    handleError = function (req, res, error) {
-      console.log('returning error ='+JSON.stringify(error));
-    res.writeHead(500, {
-        'Content-Type': req.headers.accept
-        .indexOf('application/json') !== -1 ?
-          'application/json' : 'text/plain'
-      });
-      res.end(JSON.stringify(error));
-    },
-    setNoCacheHeaders = function (res) {
-      res.setHeader('Pragma', 'no-cache');
-      res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate');
-      res.setHeader('Content-Disposition', 'inline; filename="files.json"');
     };
+  var utf8encode = function (str) {
+   return unescape(encodeURIComponent(str));
+  };
+
+
+  var handleResult = function (req, res, result, redirect) {
+
+   if (redirect) {
+     res.writeHead(302, {
+       'Location': redirect.replace(
+       /%s/,
+       encodeURIComponent(JSON.stringify(result))
+       )
+     });
+     res.end();
+   } else {
+     res.writeHead(200, {
+       'Content-Type': req.headers.accept
+       .indexOf('application/json') !== -1 ?
+         'application/json' : 'text/plain'
+     });
+     res.end(JSON.stringify(result));
+   }
+  };
+  var handleError = function (req, res, error) {
+   console.log('returning error ='+JSON.stringify(error));
+      res.writeHead(500, {
+     'Content-Type': req.headers.accept
+     .indexOf('application/json') !== -1 ?
+       'application/json' : 'text/plain'
+   });
+   res.end(JSON.stringify(error));
+  };
+  var setNoCacheHeaders = function (res) {
+   res.setHeader('Pragma', 'no-cache');
+   res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate');
+   res.setHeader('Content-Disposition', 'inline; filename="files.json"');
+  };
 
 
 
@@ -100,19 +104,19 @@ module.exports = function (server) {
 
   UploadHandler.prototype.post = function () {
     console.log ("upload requested");
-    var handler = this,
-      form = new formidable.IncomingForm(),
-      tmpFiles = [],
-      files = [],
-      map = {},
-      counter = 1,
-      redirect,
-      finish = function () {
+    var handler = this;
+    var form = new formidable.IncomingForm();
+    var tmpFiles = [];
+    var files = [];
+    var map = {}
+    var counter = 1;
+    var redirect;
+    var finish = function () {
         counter -= 1;
         if (!counter) {
           files.forEach(function (fileInfo) {
 
-          console.log ('file '+fileInfo.name+' was uploaded succesfully');//
+          console.log ('file '+fileInfo.name+' was uploaded succesfully');
 
             fileInfo.initUrls(handler.req);
 
@@ -124,7 +128,8 @@ module.exports = function (server) {
           });
           handler.callback(handler.req, handler.res, {files: files}, redirect);
         }
-      };
+    };
+
     form.uploadDir = options.tmpDir;
     form.on('fileBegin', function (name, file) {
       tmpFiles.push(file.path);
@@ -215,9 +220,9 @@ module.exports = function (server) {
     handler.callback(this.req, this.res, {success: false});
   };
 
+  // rest3d post upload API
   server.post(/^\/rest3d\/upload.*/, function(req,res,next){
-
-
+    console.log('in POST upload/')
     res.setHeader(
       'Access-Control-Allow-Origin',
       options.accessControl.allowOrigin
@@ -238,36 +243,38 @@ module.exports = function (server) {
   });
 
 
-// this is where a file was uploaded
-server.get(/^\/rest3d\/upload.*/, function(req,res,next){
-    console.log('in upload/')
-    res.setHeader(
-        'Access-Control-Allow-Origin',
-        options.accessControl.allowOrigin
-    );
-    res.setHeader(
-        'Access-Control-Allow-Methods',
-        options.accessControl.allowMethods
-    );
-    res.setHeader(
-        'Access-Control-Allow-Headers',
-        options.accessControl.allowHeaders
-    );
-    var handler = new UploadHandler(req, res, handleResult);
+  // rest3d get upload API
+  server.get(/^\/rest3d\/upload.*/, function(req,res,next){
 
-    var asset = req.url.split("/upload/")[1];
-    console.log('asset='+asset)
-    if (asset === undefined || asset === '') {
-        setNoCacheHeaders(res);
-        if (req.method === 'GET') {
-            handler.get();
-        } else {
-           res.end();
-        }
-     } else {
-         var p=path.resolve(options.uploadDir+'/'+asset);
-         sendFile(req,res,p);
-     }
-     return next();
-});
+      res.setHeader(
+          'Access-Control-Allow-Origin',
+          options.accessControl.allowOrigin
+      );
+      res.setHeader(
+          'Access-Control-Allow-Methods',
+          options.accessControl.allowMethods
+      );
+      res.setHeader(
+          'Access-Control-Allow-Headers',
+          options.accessControl.allowHeaders
+      );
+      var handler = new UploadHandler(req, res, handleResult);
+
+      var asset = req.url.split("/upload/")[1];
+        
+      console.log('in GET upload/ for asset='+asset)
+
+      if (asset === undefined || asset === '') {
+          setNoCacheHeaders(res);
+          if (req.method === 'GET') {
+              handler.get();
+          } else {
+             res.end();
+          }
+       } else {
+           var p=path.resolve(options.uploadDir+'/'+asset);
+           sendFile(req,res,p);
+       }
+       return next();
+  });
 };

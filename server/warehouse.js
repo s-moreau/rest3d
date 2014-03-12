@@ -32,28 +32,7 @@ module.exports = function (server) {
   var toJSON = require('./tojson')
 
   server.get(/^\/rest3d\/warehouse.*/,function(req, res, next) {
-    // parse body to get result we need
-    function parseroot(body) {
-      var result={};
-      $ = cheerio.load(body);
-      var search = $('span[class="itemtitle"]'); //use your CSS selector here
-      result.name = $(search).text();
-      result.uri = '46f3f70fe38d801af6dcb9e43126f21d';
-      result.assets = []
-      search = $('div[class="resulttitle"] a');
-      result.loaded = true;
-      result.type = 'root'
-      $(search).each(function(i, link){
-        var item={};
-        item.name = $(link).attr('title')
-        item.uri = $(link).attr('href').split("mid=")[1];
-        item.type="collection"
-        item.assets=[]; // indicates there are assets, to be discovered...
-        item.loaded = false;
-        result.assets.push(item);
-      });
-      return result;
-    };  
+    
     function parsecollection(body,uid) {
       var result={};
       $ = cheerio.load(body);
@@ -107,6 +86,7 @@ module.exports = function (server) {
         var entry = json.entries[i];
         var kmz = null;
         var st = false;
+        if (!entry.binaryNames) continue;
         for (var j=0; j<entry.binaryExts.length;j++){
           if (entry.binaryExts[j] === 'kmz') {
             kmz=entry.binaryNames[j];
@@ -135,12 +115,82 @@ module.exports = function (server) {
       }
       return result;
     };    
+    // 
+    function parseroot(body) {
+      var result={};
+      var json = JSON.parse(body);
+
+      result.success = json.success;
+      if (result.success != true) return;
+
+      result.start = json.startRow;
+      result.end = json.endRow;
+      result.total = json.total;
+
+      result.assets = [];
+
+      for (var i=0;i<json.entries.length;i++){
+        var entry = json.entries[i];
+        var entityCount = entry.entityCount;
+        var collectionCount = entry.collectionCount;
+
+
+        // remove empty folders at root, there are tons of them
+        if (entityCount===0 && collectionCount===0) continue;
+
+        var st = false;
+        if (entry.binaryNames) 
+	        for (var j=0; j<entry.binaryExts.length;j++){
+	          if (entry.binaryNames[j] === 'st') 
+	            st = true;
+	        }
+
+        var item={};
+        item.name = entry.title;
+        item.description = entry.description;
+        item.id = entry.id;
+        item.type="collection";
+
+        item.assets=null;
+        item.uri="https://3dwarehouse.sketchup.com/collection.html?id="+entry.id;
+        item.creator = {name: entry.creator.displayName, id: entry.creator.id};
+        item.license = "N/A";
+        item.created = entry.createTime;
+        item.modified = entry.modifyTime;
+        item.parentID = entry.parentCatalogId;
+        item.collectionCount = collectionCount;
+        item.entityCount = entityCount;
+        item.iconUri = (st ? "https://3dwarehouse.sketchup.com/3dw/getbinary?subjectId="+entry.id+"&subjectClass=collection&name=st" : null);
+        result.assets.push(item);
+      }
+      return result;
+    };  
+
     var uid = req.url.split("/warehouse/")[1];
     console.log('[warehouse]' + uid);
-    if (uid === null || uid==='')
+
+    // just browsing
+    if (!uid || uid==='')
     {
-      request({ // 3d building collections
-          url: 'http://sketchup.google.com/3dwarehouse/cldetails?mid=46f3f70fe38d801af6dcb9e43126f21d'
+    	// this returns a json with all collections
+      var start = 1;
+      var end = 200;
+      request({ // All collections
+          url: "https://3dwarehouse.sketchup.com/3dw/Search"+
+                "?startRow="+start+
+                "&endRow="+end+
+                "&calculateTotal=true"+
+                "&q"+
+                "&type=USER_GENERATED"+
+                "&source"+
+                "&title"+
+                "&description"+
+                "&sortBy=title%20ASC"+
+                "&createUserDisplayName"+
+                "&createUserId"+
+                "&modifyUserDisplayName"+
+                "&class=collection"+
+                "&Lk=true"
           //,headers : {
           //  "Authorization" : "Basic " + new Buffer(basex_rest_user + ":" + basex_rest_pass).toString("base64")
           //}
@@ -150,13 +200,15 @@ module.exports = function (server) {
             console.log(err)
             return next(err);
           }
-          result=parseroot(body);
-            res.writeHead(200, {'Content-Type': 'application/json' });
+          var result=parseroot(body);
+          res.writeHead(200, {'Content-Type': 'application/json' });
           res.write(toJSON(result));
           res.end();
           return next();
           }
       );
+
+
 
     } else if (uid.startsWith('search/'))
     {
@@ -199,7 +251,7 @@ module.exports = function (server) {
           }
           var result = parsesearch(body,search);
 
-              result.RequestUri = uid;
+          result.RequestUri = uid;
 
           res.writeHead(200, {'Content-Type': 'application/json' });
           res.write(toJSON(result));
