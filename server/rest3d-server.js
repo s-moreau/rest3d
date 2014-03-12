@@ -1,5 +1,5 @@
 /*
-rest3d-exists-server.js
+rest3d-server.js
 
 The MIT License (MIT)
 
@@ -24,14 +24,13 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 */
 
+'use strict';
 var restify = require('restify');
 //var connect = require('connect');
 var send = require('send');
 var http = require('http');
-var basex  = require('basex');
 var utils = require('./utils');
- var childProcess = require('child_process'),
-     ls;
+var childProcess = require('child_process');
 var os= require('os');
 require('shelljs/global');
 
@@ -39,11 +38,9 @@ var fs = require('fs');
 var path = require('path');
 // create diskcache (no mem caching, no gzip)
 var cache = require('./diskcache').Cache;
-
 // fast html scrapping
 var request = require('request');
 var cheerio = require('cheerio');
-
 // get content from zip files
 var zip = require("zip");
 
@@ -52,26 +49,12 @@ var diskcache = new cache('cache',true,false,false);
 var formidable = require('formidable');
 var imageMagick = require('imagemagick');
 
+var rmdirSync = require('./rmdir');
+var copyFileSync = require('./cp');
 
-// create/delete tmp upload dirs
-var rmdirSync = function(dir) {
-	if (!fs.existsSync(dir)) return;
-	var list = fs.readdirSync(dir);
-	for(var i = 0; i < list.length; i++) {
-		var filename = path.join(dir, list[i]);
-		var stat = fs.statSync(filename);
-		
-        if(stat.isDirectory()) {
-			// rmdir recursively
-			rmdirSync(filename);
-		} else {
-			// rm fiilename
-			fs.unlinkSync(filename);
-		}
-	}
-	fs.rmdirSync(dir);
-};
+var toJSON = require('./tojson');
 
+var database = require('./basexdriver');
 
 rmdirSync('tmp');
 rmdirSync('upload');
@@ -84,42 +67,15 @@ var platform = os.type().match(/^Win/) ? 'win' :
 				(os.type().match(/^Dar/) ? 'mac' : 'unix');
 
 console.log('host platform=',platform);
-var static = path.join(__dirname , '../static');
+var staticPath = path.join(__dirname , '../static');
 
-console.log('static folder=',static);
-
-//
-function toJSON(o) {
-    var cache = [];
-	var result = JSON.stringify(o, function(key, value) {
-		if (typeof value === 'object' && value !== null) {
-        if (cache.indexOf(value) !== -1) {
-            // Circular reference found, discard key
-            return;
-        }
-        // Store value in our collection
-        cache.push(value);
-    }
-	    return value;
-	});
-	cache = null; // Enable garbage collection
-	return result;
-};
-
-//
-var basex_system = "";
+console.log('static folder=',staticPath);
 
 var listenToPort = process.env.OPENSHIFT_NODEJS_PORT || 
                    process.env.PORT || 
                    8000;
 var ip_address = process.env.OPENSHIFT_NODEJS_IP || null;
 
-var basex_port = process.env['DOTCLOUD_DATABASE_SERVERPORT_PORT'] || 1984;
-var basex_port_server = process.env['DOTCLOUD_DATABASE_SERVERPORT_HOST'];
-var basex_rest_server = process.env['DOTCLOUD_DATABASE_HTTP_HOST'];
-var basex_rest = 80;
-var basex_rest_user = 'admin';
-var basex_rest_pass = 'admin';
 
 // see where collada2gltf is located
 var openshift = process.env['OPENSHIFT_DATA_DIR'];
@@ -129,17 +85,13 @@ if (openshift)
 if (process.env.GLTF_BIN_PATH)
     collada2gltf = process.env.GLTF_BIN_PATH+'/collada2gltf';
 
-if (basex_port_server === undefined)
-{
-	basex_port_server = basex_rest_server = 'localhost';
-	basex_rest = 8984;
-}
+var server = module.exports.server = restify.createServer();
 
-console.log('baseX host='+basex_port_server+" TCP port="+basex_port+ " REST server="+basex_rest_server+" port="+basex_rest);
-var session = new basex.Session(basex_port_server,basex_port);
-
-
-var server = restify.createServer();
+// grab all the API from folder hierarchy
+/*
+registerRoutes = exports.registerRoutes = require('./src/router').registerRoutes;
+registerRoutes(server, {path: __dirname + '/src/routes'});
+*/
 
 server.use(restify.acceptParser(server.acceptable));
 //server.use(restify.authorizationParser());
@@ -147,6 +99,8 @@ server.use(restify.dateParser());
 server.use(restify.queryParser());
 //server.use(restify.bodyParser()); -> use formidable instead
 restify.defaultResponseHeaders = false;
+
+require('./warehouse')(server);
 
 function unknownMethodHandler(req, res) {
 	console.log('unkownMethodHandler method='+req.method.toLowerCase());
@@ -182,165 +136,6 @@ server.use(restify.throttle({
 */
 //server.use(restify.conditionalRequest());
 
-var basex_rest_url = 'http://'+basex_rest_server+':'+basex_rest;
-
-var basex_client = restify.createClient({
-	url: basex_rest_url
-});
-
-basex_client.basicAuth(basex_rest_user, basex_rest_pass);
-
-var check_basex = function () {
-	// start the rest session
-	basex_client.get('/rest', function(err, req) {
-		var didthiswork=true;
-		var test_count = 3;
-		if (err){
-			console.log('intial DB REST ERROR\n'+err);
-			console.log('running without database');
-			session=null;
-			return
-		}
-		req.on('result', function(err, res) {
-		  	if (err) {
-				console.log('REST RESULT ERROR')
-				console.log(err)
-				didthiswork=false;
-				return 
-			}
-		    res.body = '';
-		    res.setEncoding('binary');
-		    res.on('data', function(chunk) {
-		    	res.body += chunk;
-	    	});
-
-		    res.on('end', function() {
-		    	if (didthiswork) {
-	      			console.log('Database REST API and connection tested');
-	      			console.log("rest3d baseX server running at\n  => http://localhost:" + basex_rest + "/\nCTRL + C to shutdown");
-	      		}
-	      		else
-	      		{
-	      			console.log('ERROR: cannot get result from database');
-	      			test_count --;
-	      			if (test_count) {
-		      			console.log('trying again in 15 seconds')
-		      			setTimeout('check_basex',15000)
-		      		} else
-		      		{
-		      			console.log('running without database');
-		      			session=null;
-		      		}
-	      		}
-
-		    });
-		});
-	});
-};
-
-check_basex();
-
-
-function print(err, reply) {
-    if (err) {
-            console.log("Error: " + err);
-    } else {
-            console.log(reply);
-    }
-};
-
-basexGet= function(url, callback) {
-	var cb=callback;
-	basex_client.get(url, function(err, req2) {
-		console.log('calling BASEX REST GET = '+ url)
-		if (err){
-			console.log('BASEX REST GET ERROR')
-			console.log(err)
-			if (cb) cb(err,req2,null);
-			else return err;
-		}
-
-	  req2.on('result', function(err, res2) {
-	  	if (err){
-			console.log('BASEX REST GET RESULT ERROR')
-			console.log(err)
-			if (cb) cb(err,req2,null);
-			else return err;
-		}
-		res2.body=''
-	    res2.setEncoding('binary')
-	    res2.on('data', function(chunk) {
-	      res2.body += chunk;
-	    });
-
-	    res2.on('end', function() {
-	      if (cb) cb(null, req2, res2);
-	      else return res2;
-	    });
-	  });
-		
-	});
-};
-basexPost= function(url, body, callback) {
-	var cb=callback;
-	var opts = {};
-	opts['path'] = '/rest'+url;
-	opts['headers'] = {'content-type': 'application/xml'};
-	
-	basex_client.post(opts, function(err, req2) {
-		console.log('calling BASEX REST POST = '+req2.path);
-		if (err){
-			console.log('BASEX REST GET ERROR')
-			console.log(err)
-			if (cb) cb(err,req2,null);
-			else return err;
-		}
-	  req2.write(body);
-	  req2.end();
-
-	  req2.on('result', function(err, res2) {
-	  	if (err){
-			console.log('BASEX REST GET RESULT ERROR')
-			console.log(err)
-			if (cb) cb(err,req2,null);
-			else return err;
-		}
-		res2.body=''
-	    res2.setEncoding('binary')
-	    res2.on('data', function(chunk) {
-	      res2.body += chunk;
-	    });
-
-	    res2.on('end', function() {
-	      if (cb) cb(null, req2, res2);
-	      else return res2;
-	    });
-	  });
-		
-	});
-};
-
-// get basex system info 
-session.execute("xquery json:serialize-ml(db:system())", function (err,r){
-
-	if (err)
-	{
-		console.log("cannot connect to database");
-
-	} else
-	{
-		basex_system=eval(r.result);
-
-		// this will fail, but return only after a long timeout. 
-		// seems like this will enable other calls to repond fast. bug in node-basex most likely
-		var query_doc_type=session.query("db:content-type('assets','truc')");
-		query_doc_type.execute(function(err,r) {
-		
-			query_doc_type.execute(function(err,r) {
-			});
-		});
-	}
-});
 
 function sendFile(req,res,p) {
   function error(err) {
@@ -376,8 +171,8 @@ server.get(/^\/rest3d\/info/,function(_req, _res, _next) {
 	console.log('[rest3d]'+req.url);
 	    res.writeHead(200, {"Content-Type": "text/ascii"});  
 
-	    if (session) {
-	    	session.execute("info", function(err, r) {
+	    if (database.session) {
+	    	database.session.execute("info", function(err, r) {
 				if (err)
 				{
 					console.log('database INFO error'+err);
@@ -395,202 +190,6 @@ server.get(/^\/rest3d\/info/,function(_req, _res, _next) {
 	return next();
 });
 
-server.get(/^\/rest3d\/warehouse.*/,function(req, res, next) {
-	// parse body to get result we need
-	function parseroot(body) {
-		var result={};
-		$ = cheerio.load(body);
-		var search = $('span[class="itemtitle"]'); //use your CSS selector here
-		result.name = $(search).text();
-		result.uri = '46f3f70fe38d801af6dcb9e43126f21d';
-		result.assets = []
-		search = $('div[class="resulttitle"] a');
-		result.loaded = true;
-		result.type = 'root'
-		$(search).each(function(i, link){
-			var item={};
-			item.name = $(link).attr('title')
-			item.uri = $(link).attr('href').split("mid=")[1];
-			item.type="collection"
-			item.assets=[]; // indicates there are assets, to be discovered...
-			item.loaded = false;
-			result.assets.push(item);
-		});
-		return result;
-	};	
-	function parsecollection(body,uid) {
-		var result={};
-		$ = cheerio.load(body);
-		var search = $('span[class="itemtitle"]'); //use your CSS selector here
-		result.name = $(search).text();
-		result.uri = uid;
-		result.assets = []
-		search = $('div[class="resulttitle"] a');
-		//result.loaded = true;
-		result.type = 'collection'
-		$(search).each(function(i, link){
-			if ($(link).attr('href').startsWith('/3dwarehouse/details'))
-			{
-				var item={};
-				item.name = $(link).attr('title')
-				item.uri = $(link).attr('href').split("mid=")[1];
-				item.type="model"
-				item.assets=null; // this element has no assets
-				item.source = 'http://sketchup.google.com/3dwarehouse/download?mid='+item.uri+'&rtyp=zs';
-				//item.loaded = true;
-				result.assets.push(item);
-
-			} else if ($(link).attr('href').startsWith('/3dwarehouse/cldetails'))
-			{			
-				var item={};
-				item.name = $(link).attr('title')
-				item.uri = $(link).attr('href').split("mid=")[1];
-				item.type="collection"
-				item.assets=[]; // indicates there are assets, to be discovered...
-				//item.loaded = false;
-				result.assets.push(item);
-			}
-
-		});
-		return result;
-	};
-	function parsesearch(body,str) {
-		var result={};
-		$ = cheerio.load(body);
-		result.name = 'Search results for '+str;
-		result.uri = uid;
-		result.assets = []
-
-		var search = $('div[class="resulttitle"] a'); //use your CSS selector here
-		
-		$(search).each(function(i, link){
-			if ($(link).attr('href').startsWith('/3dwarehouse/details'))
-			{
-				var item={};
-				item.name = $(link).attr('title')
-				item.uri = $(link).attr('href').split("mid=")[1];
-				item.type="model"
-				item.assets=null; // this element has no assets
-				item.source = 'http://sketchup.google.com/3dwarehouse/download?mid='+item.uri+'&rtyp=zs';
-				//item.loaded = true;
-				result.assets.push(item);
-			}
-		});
-		return result;
-	};		
-	var uid = req.url.split("/warehouse/")[1];
-	console.log('[warehouse]' + uid);
-	if (uid == null || uid=='')
-	{
-		request({ // 3d building collections
-				url: 'http://sketchup.google.com/3dwarehouse/cldetails?mid=46f3f70fe38d801af6dcb9e43126f21d'
-				//,headers : {
-				//	"Authorization" : "Basic " + new Buffer(basex_rest_user + ":" + basex_rest_pass).toString("base64")
-				//}
-			},function(err, resp, body){
-				if (err){
-					console.log('CLIENT ERROR')
-					console.log(err)
-					return next(err);
-				}
-				result=parseroot(body);
-    			res.writeHead(200, {'Content-Type': 'application/json' });
-				res.write(toJSON(result));
-				res.end();
-				return next();
-  			}
-		);
-
-	} else if (uid.startsWith('search/'))
-	{
-		var search = uid.split('search/')[1];
-		console.log ('search warehouse for ['+search+']')
-		if (search === '')
-		{
-			console.log('search string cannot be empty')
-			res.writeHead(400);
-			res.write('search string cannot be empty');
-			res.end();
-			return next();
-		} else
-		{
-			var req = "http://sketchup.google.com/3dwarehouse/doadvsearch?title="+
-			          search+
-			          "&scoring=d&file=zip&dwld=true"
-			request({ 
-				url: req
-			}, function(err, resp, body){
-				if (err){
-					console.log('ERROR searching 3dwarehouse for '+search)
-					console.log(err)
-					return next(err);
-				}
-				var result = parsesearch(body,search);
-				res.writeHead(200, {'Content-Type': 'application/json' });
-				res.write(toJSON(result));
-				res.end();
-				return next();
-			});
-		}
-	} else
-	{
-		request({ // 3d building collections ?
-			url: 'http://sketchup.google.com/3dwarehouse/cldetails?mid='+uid
-			},function(err, resp, body){
-				if (err){
-					console.log('ERROR asking 3dwarehouse main page')
-					console.log(err)
-					return next(err);
-				}
-				result=parsecollection(body,uid);
-    			res.writeHead(200, {'Content-Type': 'application/json' });
-				res.write(toJSON(result));
-				res.end();
-				return next();
-  			}
-		);
-	}
-});
-
-var databaseStore = function(asset,filename) {
-	var opts = {};
-	opts['path'] = '/rest/assets/'+asset+'/'+filename;
-	opts['headers'] = {'content-type': 'application/octet-stream'}
-
-	console.log('databaseStore'+opts['path'])
-
-	if (filename.toLowerCase().endsWith('.xml') || filename.toLowerCase().endsWith('.dae') || filename.toLowerCase().endsWith('.kml'))
-		opts['headers'] = {'content-type': 'application/xml'}
-	else if (filename.toLowerCase().endsWith('.jpg') || filename.toLowerCase().endsWith('.jpeg'))
-		opts['headers'] = {'content-type': 'image/jpeg'}
-	else if (filename.toLowerCase().endsWith('.png'))
-		opts['headers'] = {'content-type': 'image/png'}
-
-	console.log('pusing to database = '+ opts['path'])
-	
-	basex_client.put(opts, function (err, req) { 
-		if (err){
-			console.log('Database Upload (Put) ERROR')
-			console.log(err)
-			return next(err);
-		}	
-		
-		var data = fs.readFileSync('tmp/'+asset+'/'+filename)
-		req.write(data);
-		req.end();
-		req.on('result', function (err,res2) {
-			res2.body=''
-			res2.setEncoding('UTF8');
-			res2.on('data', function(chunk) {
-				res2.body += chunk;
-			});
-
-			res2.on('end',function(){
-				console.log('GOT '+res2.body)
-			});
-		});
-	});
-}
 
 server.put(/^\/rest3d\/assets.*/,function(req, res, next) {
 	var asset = req.url.split('assets/')[1];
@@ -733,7 +332,7 @@ server.put(/^\/rest3d\/assets.*/,function(req, res, next) {
 			              'return '+
 			              'insert node $b as first into $a '
 
-			var query=session.query(xql);
+			var query=database.session.query(xql);
 
 			console.log('xql='+xql)
 			query.execute(function(err,r){
@@ -753,7 +352,7 @@ server.put(/^\/rest3d\/assets.*/,function(req, res, next) {
 				} else
 				{
 					files.forEach(function (filename) {
-						databaseStore(asset,'models/'+filename);
+						database.store(asset,'models/'+filename);
 						if (filename.toLowerCase().endsWith('glsl'))
 						{
 							var xml = '<asset  xmlns=""> '+
@@ -767,7 +366,7 @@ server.put(/^\/rest3d\/assets.*/,function(req, res, next) {
 					              'let $b := '+xml+
 					              'return '+
 					              'insert node $b into $a '
-							var query=session.query(xql);
+							var query=database.session.query(xql);
 							console.log('xql='+xql)
 							query.execute(function(err,r){
 								if (err)
@@ -789,7 +388,7 @@ server.put(/^\/rest3d\/assets.*/,function(req, res, next) {
 				} else
 				{
 					files.forEach(function (filename) {
-						databaseStore(asset,'images/'+filename);
+						database.store(asset,'images/'+filename);
 				
 						var xml = '<asset  xmlns=""> '+
 										'<type>image</type> '+
@@ -802,7 +401,7 @@ server.put(/^\/rest3d\/assets.*/,function(req, res, next) {
 				              'let $b := '+xml+
 				              'return '+
 				              'insert node $b into $a '
-						var query=session.query(xql);
+						var query=database.session.query(xql);
 						console.log('xql='+xql)
 						query.execute(function(err,r){
 							if (err)
@@ -841,13 +440,13 @@ server.get(/^\/rest3d\/assets.*/,function(_req, _res, _next) {
 	if (asset === undefined || asset=='') {
 		console.log('get assets');
 
-		if (session) {
+		if (database.session) {
 			var query='<query xmlns="http://basex.org/rest"><text><![CDATA['+
 		          'declare option output:method "json";'+
 		          'doc("assets/assets.xml")'+
 		          ']]></text></query>';
 
-			basexPost('/assets',query,function(err,req2,res2){
+			database.post('/assets',query,function(err,req2,res2){
 				if (err)
 				{
 					console.log('got ERROR from REST QUERY')
@@ -889,11 +488,11 @@ server.get(/^\/rest3d\/assets.*/,function(_req, _res, _next) {
 	    	}
 	    	// not in the cache - query database for asset
 
-	    	if (session) {
+	    	if (database.session) {
 
 		    	// Using Socket interface to baseX
-			    var query_doc=session.query("doc(\"assets/"+asset+"\")");
-			    var query_doc_type=session.query("db:content-type('assets','"+asset+"')");
+			    var query_doc=database.session.query("doc(\"assets/"+asset+"\")");
+			    var query_doc_type=database.session.query("db:content-type('assets','"+asset+"')");
 			    console.log('xquery='+"db:content-type('assets','"+asset+"')");
 			    //var query_binary=session.query("declare option output:method 'raw';  db:retrieve('assets', '"+asset+"')");
 
@@ -926,7 +525,7 @@ server.get(/^\/rest3d\/assets.*/,function(_req, _res, _next) {
 			    			// node_basex soket i/o does not work for binary files
 			    			// this may have been fixed now
 			    			// but for the time being - use the rest http API
-			    			basexGet(redirect,function(err,req2,res2){
+			    			database.get(redirect,function(err,req2,res2){
 			    				if (err)
 			    				{
 									res.end(err);
@@ -1275,23 +874,7 @@ server.get(/^\/rest3d\/upload.*/, function(req,res,next){
      return next();
 });
 
-// utility
-copyFileSync = function(srcFile, destFile) {
-  var BUF_LENGTH, buff, bytesRead, fdr, fdw, pos;
-  BUF_LENGTH = 64 * 1024;
-  buff = new Buffer(BUF_LENGTH);
-  fdr = fs.openSync(srcFile, "r");
-  fdw = fs.openSync(destFile, "w");
-  bytesRead = 1;
-  pos = 0;
-  while (bytesRead > 0) {
-    bytesRead = fs.readSync(fdr, buff, 0, BUF_LENGTH, pos);
-    fs.writeSync(fdw, buff, 0, bytesRead);
-    pos += bytesRead;
-  }
-  fs.closeSync(fdr);
-  return fs.closeSync(fdw);
-};
+
 // convert
 
 server.post(/^\/rest3d\/convert.*/,function(_req,_res,_next){
@@ -1326,7 +909,7 @@ server.post(/^\/rest3d\/convert.*/,function(_req,_res,_next){
 		var outputC2J;
      	var codeC2J;
      	// todo -> manage progress !!!
-		ls = childProcess.exec(cmd, function (error, stdout, stderr) {
+		var ls = childProcess.exec(cmd, function (error, stdout, stderr) {
 		   if (error) {
 		     console.log(error.stack);
 		     console.log('Error code: '+error.code);
@@ -1393,7 +976,7 @@ server.get(/^\/.*/, function (req, res, next) {
 	
 	// parse out parameters from url
 	var filename = req.url.split('\?')[0];
-	var p=path.resolve(static + filename);
+	var p=path.resolve(staticPath + filename);
 
 	console.log('http get path='+p);
 
