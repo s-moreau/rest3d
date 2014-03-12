@@ -618,16 +618,34 @@ server.post(/^\/rest3d\/convert.*/,function(_req,_res,_next){
          req = _req,
          next = _next,
          params = {},
-         
-    handleError = function (req, res, error) {
-      	console.log('returning error ='+JSON.stringify(error));
-	    res.writeHead(500, {
-	        'Content-Type': req.headers.accept
-	        .indexOf('application/json') !== -1 ?
-	          'application/json' : 'text/plain'
-	      });
-	      res.end(JSON.stringify(error));
-	    };
+         handleResult = function (req, res, result, redirect) {
+
+	      if (redirect) {
+	        res.writeHead(302, {
+	          'Location': redirect.replace(
+	          /%s/,
+	          encodeURIComponent(JSON.stringify(result))
+	          )
+	        });
+	        res.end();
+	      } else {
+	        res.writeHead(200, {
+	          'Content-Type': req.headers.accept
+	          .indexOf('application/json') !== -1 ?
+	            'application/json' : 'text/plain'
+	        });
+	        res.end(JSON.stringify(result));
+	      }
+	    },
+	    handleError = function (req, res, error) {
+	      	console.log('returning error ='+JSON.stringify(error));
+		    res.writeHead(500, {
+		        'Content-Type': req.headers.accept
+		        .indexOf('application/json') !== -1 ?
+		          'application/json' : 'text/plain'
+		      });
+		      res.end(JSON.stringify(error));
+		 ;
 
      form.on('field', function (name, data) {
      	params[name] = data;
