@@ -54,6 +54,7 @@ var copyFileSync = require('./cp');
 var toJSON = require('./tojson');
 
 var database = require('./basexdriver');
+var FileInfo = require('./fileinfo');
 
 rmdirSync('tmp');
 rmdirSync('upload');
