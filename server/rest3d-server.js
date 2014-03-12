@@ -27,7 +27,6 @@ THE SOFTWARE.
 'use strict';
 var restify = require('restify');
 //var connect = require('connect');
-var send = require('send');
 var http = require('http');
 var utils = require('./utils');
 var childProcess = require('child_process');
@@ -55,6 +54,7 @@ var toJSON = require('./tojson');
 
 var database = require('./basexdriver');
 var FileInfo = require('./fileinfo');
+var sendFile = require('./sendfile');
 
 rmdirSync('tmp');
 rmdirSync('upload');
@@ -138,66 +138,6 @@ server.use(restify.throttle({
 }));
 */
 //server.use(restify.conditionalRequest());
-
-
-function sendFile(req,res,p) {
-  function error(err) {
-    res.statusCode = err.status;
-    res.end(http.STATUS_CODES[err.status]);
-    console.log('send error');
-    
-    console.log(err);
-    console.log('******')
-  }
-
-  function redirect() {
-    res.statusCode = 301;
-    res.setHeader('Location', req.url + 'index.html');
-    res.end('Redirecting to ' + req.url + 'index.html');
-    console.log('redirected to '+req.url + 'index.html')
-  }
-
-console.log('sendFile dir='+ p);
-
-  send(req, p)
-  .on('error', error)
-  .on('directory', redirect)
-  .pipe(res);
-
-};
-
-// this is where a file was uploaded
-server.get(/^\/rest3d\/upload.*/, function(req,res,next){
-	console.log('in upload/')
-    res.setHeader(
-        'Access-Control-Allow-Origin',
-        options.accessControl.allowOrigin
-    );
-    res.setHeader(
-        'Access-Control-Allow-Methods',
-        options.accessControl.allowMethods
-    );
-    res.setHeader(
-        'Access-Control-Allow-Headers',
-        options.accessControl.allowHeaders
-    );
-    var handler = new UploadHandler(req, res, handleResult);
-
-    var asset = req.url.split("/upload/")[1];
-    console.log('asset='+asset)
-    if (asset === undefined || asset === '') {
-        setNoCacheHeaders(res);
-        if (req.method === 'GET') {
-            handler.get();
-        } else {
-           res.end();
-        }
-     } else {
-     	 var p=path.resolve(options.uploadDir+'/'+asset);
-         sendFile(req,res,p);
-     }
-     return next();
-});
 
 
 // rest3d API

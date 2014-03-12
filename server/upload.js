@@ -10,6 +10,7 @@ module.exports = function (server) {
   var imageMagick = require('imagemagick');
 
   var FileInfo = require('./fileinfo');
+  var sendFile = require('./sendfile');
 
   var UploadHandler = function (req, res, callback) {
         this.req = req;
@@ -231,4 +232,38 @@ module.exports = function (server) {
 
     return next();
   });
+
+
+// this is where a file was uploaded
+server.get(/^\/rest3d\/upload.*/, function(req,res,next){
+    console.log('in upload/')
+    res.setHeader(
+        'Access-Control-Allow-Origin',
+        options.accessControl.allowOrigin
+    );
+    res.setHeader(
+        'Access-Control-Allow-Methods',
+        options.accessControl.allowMethods
+    );
+    res.setHeader(
+        'Access-Control-Allow-Headers',
+        options.accessControl.allowHeaders
+    );
+    var handler = new UploadHandler(req, res, handleResult);
+
+    var asset = req.url.split("/upload/")[1];
+    console.log('asset='+asset)
+    if (asset === undefined || asset === '') {
+        setNoCacheHeaders(res);
+        if (req.method === 'GET') {
+            handler.get();
+        } else {
+           res.end();
+        }
+     } else {
+         var p=path.resolve(options.uploadDir+'/'+asset);
+         sendFile(req,res,p);
+     }
+     return next();
+});
 };
