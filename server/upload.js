@@ -144,6 +144,8 @@ module.exports = function (server) {
         return;
       }
       fs.renameSync(file.path, options.uploadDir + '/' + fileInfo.name);
+      /* Image resize 
+
       if (options.imageTypes.test(fileInfo.name)) {
         Object.keys(options.imageVersions).forEach(function (version) {
           counter += 1;
@@ -157,6 +159,8 @@ module.exports = function (server) {
           }, finish);
         });
       }
+      */
+      finish();
     }).on('aborted', function () {
       tmpFiles.forEach(function (file) {
         fs.unlink(file);
