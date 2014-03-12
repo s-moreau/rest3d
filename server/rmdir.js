@@ -1,5 +1,6 @@
 'use strict';
 var fs = require('fs');
+var path = require('path');
 // create/delete tmp upload dirs
 var rmdirSync = function(dir) {
 	if (!fs.existsSync(dir)) return;
