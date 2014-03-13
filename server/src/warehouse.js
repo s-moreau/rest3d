@@ -345,7 +345,7 @@ module.exports = function (server) {
 	      );
       } else {
 	      	// TODO call handleError
-	      	var error = { "code": "InternalError", "message": "invalid id="+id[1]+" in /rest3d/warehouse/ "};
+	      	var error = { "code": "InternalError", "message": "invalid id="+uid+" in /rest3d/warehouse/ "};
 		      console.log('returning error ='+toJSON(error));
 		      res.writeHead(500, {
 			     'Content-Type': req.headers.accept

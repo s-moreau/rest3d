@@ -84,9 +84,12 @@ THE SOFTWARE.
 
 	  <h3> rest3d api warhouse proxy samples </h3>
 	  <ul>
-	  	<li><a href="/rest3d/warehouse"> /rest3d/warehouse </a></li>
+	  	<li><a href="/rest3d/warehouse"> /rest3d/warehouse </a> List all collections from root</li>
 	  	<li> <a href="javascript:rest('/rest3d/warehouse/search/','q1');"> /rest3d/warehouse/search/</a>
-	  		<input type="text" size="40" value="duck" id="q1" onkeydown="if (event.keyCode == 13) rest('/rest3d/warehouse/search/','q1');"/> </li>
+	  		<input type="text" size="40" value="duck" id="q1" onkeydown="if (event.keyCode == 13) rest('/rest3d/warehouse/search/','q1');"/> Search for models with string in name </li>
+      <li> <a href="javascript:rest('/rest3d/warehouse/','qm');"> /rest3d/warehouse/</a>
+	  		<input type="text" size="51" value="c_f8fc62afb9653d03cbe9bc85eececab4" id="qm" onkeydown="if (event.keyCode == 13) rest('/rest3d/warehouse/','q1');"/> Get info abaout a specific collection, or return a model</li>
+	  	
 	  </ul>
 	</div>
 
