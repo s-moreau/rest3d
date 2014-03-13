@@ -18,42 +18,6 @@ module.exports = function (server) {
         this.callback = callback;
     };
 
-  // those are options for FileInfo
-
-  var options = {
-      tmpDir: __dirname + '/tmp',
-      uploadDir: __dirname + '/upload',
-      uploadUrl: '/rest3d/upload/',
-      maxPostSize: 11000000000, // 11 GB
-      minFileSize: 1,
-      maxFileSize: 10000000000, // 10 GB
-      acceptFileTypes: /.+/i,
-      // Files not matched by this regular expression force a download dialog,
-      // to prevent executing any scripts in the context of the service domain:
-      safeFileTypes: /\.(gif|jpe?g|png|tga|dae|zip)$/i,
-      imageTypes: /\.(gif|jpe?g|png|tga)$/i,
-      imageVersions: {
-        'thumbnail': {
-          width: 80,
-          height: 80
-           }
-       },
-       accessControl: {
-        allowOrigin: '*',
-        allowMethods: 'OPTIONS, HEAD, GET, POST, PUT, DELETE',
-        allowHeaders: 'Content-Type, Content-Range, Content-Disposition'
-      },
-
-      /* Uncomment and edit this section to provide the service via HTTPS:
-      ssl: {
-        key: fs.readFileSync('/Applications/XAMPP/etc/ssl.key/server.key'),
-        cert: fs.readFileSync('/Applications/XAMPP/etc/ssl.crt/server.crt')
-      },
-      */
-       nodeStatic: {
-         cache: 3600 // seconds to cache served files
-       }
-    };
   var utf8encode = function (str) {
    return unescape(encodeURIComponent(str));
   };
@@ -130,10 +94,10 @@ module.exports = function (server) {
         }
     };
 
-    form.uploadDir = options.tmpDir;
+    form.uploadDir = FileInfo.options.tmpDir;
     form.on('fileBegin', function (name, file) {
       tmpFiles.push(file.path);
-      var fileInfo = new FileInfo(file, options);
+      var fileInfo = new FileInfo(file);
       fileInfo.safeName();
       map[path.basename(file.path)] = fileInfo;
       files.push(fileInfo);
@@ -148,18 +112,18 @@ module.exports = function (server) {
         fs.unlink(file.path);
         return;
       }
-      fs.renameSync(file.path, options.uploadDir + '/' + fileInfo.name);
+      fs.renameSync(file.path, FileInfo.options.uploadDir + '/' + fileInfo.name);
       /* Image resize 
 
-      if (options.imageTypes.test(fileInfo.name)) {
-        Object.keys(options.imageVersions).forEach(function (version) {
+      if (FileInfo.options.imageTypes.test(fileInfo.name)) {
+        Object.keys(FileInfo.options.imageVersions).forEach(function (version) {
           counter += 1;
-          var opts = options.imageVersions[version];
+          var opts = FileInfo.ptions.imageVersions[version];
           imageMagick.resize({
             width: opts.width,
             height: opts.height,
-            srcPath: options.uploadDir + '/' + fileInfo.name,
-            dstPath: options.uploadDir + '/' + version + '/' +
+            srcPath: FileInfo.options.uploadDir + '/' + fileInfo.name,
+            dstPath: FileInfo.options.uploadDir + '/' + version + '/' +
               fileInfo.name
           }, finish);
         });
@@ -175,7 +139,7 @@ module.exports = function (server) {
       console.log(e);
       return ('error '+e)
     }).on('progress', function (bytesReceived, bytesExpected) {
-      if (bytesReceived > options.maxPostSize) {
+      if (bytesReceived > FileInfo.options.maxPostSize) {
         handler.req.connection.destroy();
       }
     }).on('end', finish);
@@ -185,9 +149,9 @@ module.exports = function (server) {
   UploadHandler.prototype.get = function () {
     var handler = this,
       files = [];
-    fs.readdir(options.uploadDir, function (err, list) {
+    fs.readdir(FileInfo.options.uploadDir, function (err, list) {
       list.forEach(function (name) {
-        var stats = fs.statSync(options.uploadDir + '/' + name),
+        var stats = fs.statSync(FileInfo.options.uploadDir + '/' + name),
           fileInfo;
         if (stats.isFile() && name[0] !== '.') {
           fileInfo = new FileInfo({
@@ -205,12 +169,12 @@ module.exports = function (server) {
   UploadHandler.prototype.destroy = function () {
     var handler = this,
       fileName;
-    if (handler.req.url.slice(0, options.uploadUrl.length) === options.uploadUrl) {
+    if (handler.req.url.slice(0, FileInfo.options.uploadUrl.length) === FileInfo.options.uploadUrl) {
       fileName = path.basename(decodeURIComponent(handler.req.url));
       if (fileName[0] !== '.') {
-        fs.unlink(options.uploadDir + '/' + fileName, function (ex) {
-          Object.keys(options.imageVersions).forEach(function (version) {
-            fs.unlink(options.uploadDir + '/' + version + '/' + fileName);
+        fs.unlink(FileInfo.options.uploadDir + '/' + fileName, function (ex) {
+          Object.keys(FileInfo.options.imageVersions).forEach(function (version) {
+            fs.unlink(FileInfo.options.uploadDir + '/' + version + '/' + fileName);
           });
           handler.callback(this.req, this.res, {success: !ex});
         });
@@ -225,15 +189,15 @@ module.exports = function (server) {
     console.log('in POST upload/')
     res.setHeader(
       'Access-Control-Allow-Origin',
-      options.accessControl.allowOrigin
+      FileInfo.options.accessControl.allowOrigin
     );
     res.setHeader(
       'Access-Control-Allow-Methods',
-      options.accessControl.allowMethods
+      FileInfo.options.accessControl.allowMethods
     );
     res.setHeader(
       'Access-Control-Allow-Headers',
-      options.accessControl.allowHeaders
+      FileInfo.options.accessControl.allowHeaders
     );
     var handler = new UploadHandler(req, res, handleResult);
     setNoCacheHeaders(res);
@@ -248,15 +212,15 @@ module.exports = function (server) {
 
       res.setHeader(
           'Access-Control-Allow-Origin',
-          options.accessControl.allowOrigin
+          FileInfo.options.accessControl.allowOrigin
       );
       res.setHeader(
           'Access-Control-Allow-Methods',
-          options.accessControl.allowMethods
+          FileInfo.options.accessControl.allowMethods
       );
       res.setHeader(
           'Access-Control-Allow-Headers',
-          options.accessControl.allowHeaders
+          FileInfo.options.accessControl.allowHeaders
       );
       var handler = new UploadHandler(req, res, handleResult);
 
@@ -272,7 +236,7 @@ module.exports = function (server) {
              res.end();
           }
        } else {
-           var p=path.resolve(options.uploadDir+'/'+asset);
+           var p=path.resolve(FileInfo.options.uploadDir+'/'+asset);
            sendFile(req,res,p);
        }
        return next();

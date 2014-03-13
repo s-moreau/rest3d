@@ -28,7 +28,7 @@ THE SOFTWARE.
 var restify = require('restify');
 //var connect = require('connect');
 var http = require('http');
-var utils = require('./utils');
+var utils = require('./src/utils');
 var childProcess = require('child_process');
 var os= require('os');
 require('shelljs/global');
@@ -36,10 +36,9 @@ require('shelljs/global');
 var fs = require('fs');
 var path = require('path');
 // create diskcache (no mem caching, no gzip)
-var cache = require('./diskcache').Cache;
+var cache = require('./src/diskcache').Cache;
 // fast html scrapping
 var request = require('request');
-var cheerio = require('cheerio');
 // get content from zip files
 var zip = require("zip");
 
@@ -47,14 +46,14 @@ var diskcache = new cache('cache',true,false,false);
 
 var formidable = require('formidable');
 
-var rmdirSync = require('./rmdir');
-var copyFileSync = require('./cp');
+var rmdirSync = require('./src/rmdir');
+var copyFileSync = require('./src/cp');
 
-var toJSON = require('./tojson');
+var toJSON = require('./src/tojson');
 
-var database = require('./basexdriver');
-var FileInfo = require('./fileinfo');
-var sendFile = require('./sendfile');
+var database = require('./src/basexdriver');
+var FileInfo = require('./src/fileinfo');
+var sendFile = require('./src/sendfile');
 
 
 var platform = os.type().match(/^Win/) ? 'win' : 
@@ -98,8 +97,8 @@ server.use(restify.gzipResponse());
 restify.defaultResponseHeaders = false;
 
 // include routes
-require('./warehouse')(server);
-require('./upload')(server);
+require('./src/warehouse')(server);
+require('./src/upload')(server);
 
 
 function unknownMethodHandler(req, res) {
@@ -181,7 +180,7 @@ server.put(/^\/rest3d\/assets.*/,function(req, res, next) {
 	rmdirSync('tmp');
 	fs.mkdirSync('tmp');
 
-	var zipfile = fs.createWriteStream('tmp/zip.zip')
+	var zipfile = fs.createWriteStream('tmp/zip.zip');
 
 	var daefilename = '';
 
