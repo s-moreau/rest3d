@@ -515,8 +515,8 @@ THE SOFTWARE.
                         trs.fromMat4(tmp, value);
                         var e = euler.create();
                         euler.fromQuat(e,tmp.localRotation);
-                        console.debug("translation :"+tmp.localTranslation+" rotation : "+e+" scale : "+tmp.localScale);
-
+                        console.debug(tmp.localTranslation,e,tmp.localScale);
+                        
                         // var q = quat.create();
                         // quat.fromEuler(q,e);
                         // console.debug(q);
