@@ -71,10 +71,7 @@ module.exports = function (server) {
             return next(err);
           }
           var result=parseroot(body);
-          res.writeHead(200, {'Content-Type': 'application/json' });
-              res.header('Access-Control-Allow-Origin', config.allowedDomains);
-    res.header('Access-Control-Allow-Methods', 'GET,PUT,POST,DELETE');
-    res.header('Access-Control-Allow-Headers', 'Content-Type');
+          res.writeHead(200, {'Content-Type': 'application/json', 'Access-Control-Allow-Origin' : '*'});
           res.write(toJSON(result));
           res.end();
           return next();
@@ -126,10 +123,7 @@ module.exports = function (server) {
 
           result.RequestUri = uid;
 
-          res.writeHead(200, {'Content-Type': 'application/json' });
-              res.header('Access-Control-Allow-Origin', config.allowedDomains);
-    res.header('Access-Control-Allow-Methods', 'GET,PUT,POST,DELETE');
-    res.header('Access-Control-Allow-Headers', 'Content-Type');
+          res.writeHead(200, {'Content-Type': 'application/json', 'Access-Control-Allow-Origin' : '*' });
           res.write(toJSON(result));
           res.end();
           return next();
@@ -206,10 +200,7 @@ module.exports = function (server) {
 			          // append collections to models
 			          result.assets = result.assets.concat(result2.assets);
 		            result.RequestUri = uid;
-			          res.writeHead(200, {'Content-Type': 'application/json' });
-                    res.header('Access-Control-Allow-Origin', config.allowedDomains);
-    res.header('Access-Control-Allow-Methods', 'GET,PUT,POST,DELETE');
-    res.header('Access-Control-Allow-Headers', 'Content-Type');
+			          res.writeHead(200, {'Content-Type': 'application/json', 'Access-Control-Allow-Origin' : '*' });
 			          res.write(toJSON(result));
 			          res.end();
 			          return next();
