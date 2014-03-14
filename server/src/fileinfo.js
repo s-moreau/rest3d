@@ -17,8 +17,8 @@
   };
 
   FileInfo.options = {
-      tmpDir: __dirname + '/tmp',
-      uploadDir: __dirname + '/upload',
+      tmpDir: __dirname + '/../tmp',
+      uploadDir: __dirname + '/../upload',
       uploadUrl: '/rest3d/upload/',
       maxPostSize: 11000000000, // 11 GB
       minFileSize: 1,
