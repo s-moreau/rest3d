@@ -1,4 +1,5 @@
 /*
+
 rest3d-server.js
 
 The MIT License (MIT)
@@ -54,6 +55,8 @@ var toJSON = require('./src/tojson');
 var database = require('./src/basexdriver');
 var FileInfo = require('./src/fileinfo');
 var sendFile = require('./src/sendfile');
+var handleResult = require('./src/handleresult');
+var handleError = require('./src/handleerror');
 
 
 var platform = os.type().match(/^Win/) ? 'win' : 
@@ -137,10 +140,8 @@ server.use(restify.throttle({
 
 
 // rest3d API
-server.get(/^\/rest3d\/info/,function(_req, _res, _next) {
-	var res=_res;
-	var req=_req;
-	var next=_next;
+server.get(/^\/rest3d\/info/,function(req, res, next) {
+	
 	console.log('[rest3d]'+req.url);
 	    res.writeHead(200, {"Content-Type": "text/ascii"});  
 
@@ -174,168 +175,221 @@ server.put(/^\/rest3d\/assets.*/,function(req, res, next) {
 			res.end();
 			return next();
 	}
-	console.log('put asset='+asset)
-	console.log('body=',req.body)
 
-	rmdirSync('tmp');
-	fs.mkdirSync('tmp');
+	// read body using formidable
+ 
+  var form = new formidable.IncomingForm();
+  form.on('error', function(error) { // I thought this would handle the upload error
+      handleError(req, res, error);
+      return next();
+  });
 
-	var zipfile = fs.createWriteStream('tmp/zip.zip');
-
-	var daefilename = '';
-
-	request.get(req.body).pipe(zipfile)
-
-	zipfile.on('close', function () {
-
-		zipfile = fs.createReadStream('tmp/zip.zip')
-		
-		var data = fs.readFileSync('tmp/zip.zip')
-		try {
-		//fs.open("tmp/zip.zip", "r", "0666", function(err, fd) {
-			//	var reader = zip.Reader(fd);
-
-			var reader = zip.Reader(data);
-		
-		    reader.forEach(function (entry) {
-		    	var filename = entry.getName();
-		    	console.log('****** entry *********')
-			    console.log('filename=',filename);
-
-			try {
-			    var tmpfilename = 'tmp/'+asset+'/'+filename;
-		    	if (tmpfilename.endsWith('/')) {
-		    	} else
-		    	{
-		    		// make sure folder exists
-		    		var folder = tmpfilename.substring(0,tmpfilename.lastIndexOf('/'));
-		    		console.log('folder='+folder)
-		    		mkdirsSync(folder); 
-		    		
-		    		fs.writeFileSync(tmpfilename, entry.getData(), function (err) {
-					  if (err) throw err;
-					  console.log('It\'s saved!');
-					});
-		    	
-		    		if (filename.toLowerCase().endsWith('.dae'))
-		    			daefilename = tmpfilename;
-			    	
-				}
-			} catch (e)
-			{
-				console.log("problem writing entry")
-				console.log(e)
-			}
-			
-	    	//});
-		});
-		} catch (e)
-		{
-			console.log('counld not unzip zip file')
-			console.log(e);
-			res.writeHead(500);
-			res.write('counld not unzip zip file');
-			res.end();
+ 
+  form.parse(req, function(err, fields, files) {
+		if (err) {
+			handleError(req,res,err);
 			return next();
 		}
-		if (daefilename == '')
-		{
-			console.log('counld not find .dae file in zip')
-			res.writeHead(400);
-			res.write('counld not find .dae file in zip');
-			res.end();
-			return next();
-		} else
-		{
-			console.log('now converting collada')
 
-			exec(collada2gltf+' '+daefilename+" "+daefilename.replace('.dae','.json'), function(code, output){
+		// will execute when form is parsed
+		console.log('put asset='+asset)
+		console.log('body=',req.body)
 
-			console.log('Exit code:', code);
-				console.log('Program output:', output);
+		rmdirSync('tmp');
+		fs.mkdirSync('tmp');
+
+		var zipfile = fs.createWriteStream('tmp/zip.zip');
+
+		var daefilename = '';
+
+		request.get(req.body).pipe(zipfile)
+
+		zipfile.on('close', function () {
+
+			zipfile = fs.createReadStream('tmp/zip.zip')
 			
+			var data = fs.readFileSync('tmp/zip.zip')
+			try {
+			//fs.open("tmp/zip.zip", "r", "0666", function(err, fd) {
+				//	var reader = zip.Reader(fd);
 
-			daefilename = daefilename.substring(daefilename.lastIndexOf('/')+1);
+				var reader = zip.Reader(data);
 			
-			console.log('filename = '+daefilename)
-			
-			console.log('pushing converted files to database')
+			    reader.forEach(function (entry) {
+			    	var filename = entry.getName();
+			    	console.log('****** entry *********')
+				    console.log('filename=',filename);
 
-			var xml = '<asset  xmlns=""> '+
-							 '<type>collection</type> '+
-						 '<name>'+asset+'</name> '+
-						 '<uri>assets/</uri> '+
-						   '<assets> '+
-						    '<asset> '+
-								 '<type>collection</type> '+
-								 '<name>models</name> '+
-								 '<uri>assets/'+asset+'/</uri> '+
-								 '<assets> '+
-									 '<asset> '+
-									 '<type>model</type> '+
-									 '<name>'+asset+'</name> '+
-									 '<uri>assets/'+asset+'/models/</uri> '+
-									 '<source>'+daefilename+'</source> '+
-									 '<builds> '+
-									 '<build> '+
-									 '<target>COLLADA2json</target> '+
-									 '<script>builtin</script> '+
-									 '<outputs> '+
-									    '<output>'+daefilename.replace('.dae','.json')+'</output> '+
-									    '<output>'+daefilename.replace('.dae','.bin')+'</output> '+
-									 '</outputs> '+
-									 '</build> '+
-									 '</builds> '+
-									 '</asset> '+
-								 '</assets> '+
-						    '</asset> '+
-						    '<asset> '+
-								 '<type>collection</type> '+
-								 '<name>images</name> '+
-								 '<uri>assets/'+asset+'/</uri> '+
-								 '<assets> '+
-								 '</assets> '+
-						    '</asset> '+
-						   '</assets> '+
-						 '</asset> '
-
-
-			var xql = 'let $a := doc("assets/assets.xml")/json/assets '+
-			              'let $b := '+xml+
-			              'return '+
-			              'insert node $b as first into $a '
-
-			var query=database.session.query(xql);
-
-			console.log('xql='+xql)
-			query.execute(function(err,r){
-				if (err)
+				try {
+				    var tmpfilename = 'tmp/'+asset+'/'+filename;
+			    	if (tmpfilename.endsWith('/')) {
+			    	} else
+			    	{
+			    		// make sure folder exists
+			    		var folder = tmpfilename.substring(0,tmpfilename.lastIndexOf('/'));
+			    		console.log('folder='+folder)
+			    		mkdirsSync(folder); 
+			    		
+			    		fs.writeFileSync(tmpfilename, entry.getData(), function (err) {
+						  if (err) throw err;
+						  console.log('It\'s saved!');
+						});
+			    	
+			    		if (filename.toLowerCase().endsWith('.dae'))
+			    			daefilename = tmpfilename;
+				    	
+					}
+				} catch (e)
 				{
-					console.log('query error'+err);
-				} else {
-					console.log('query OK');
-				}	
-			}); 
+					console.log("problem writing entry")
+					console.log(e)
+					return next();
+				}
+				
+		    	//});
+			});
+			} catch (e)
+			{
+				console.log('counld not unzip zip file')
+				console.log(e);
+				res.writeHead(500);
+				res.write('counld not unzip zip file');
+				res.end();
+				return next();
+			}
+			if (daefilename == '')
+			{
+				console.log('counld not find .dae file in zip')
+				res.writeHead(400);
+				res.write('counld not find .dae file in zip');
+				res.end();
+				return next();
+			} else
+			{
+				console.log('now converting collada')
+
+				exec(collada2gltf+' '+daefilename+" "+daefilename.replace('.dae','.json'), function(code, output){
+
+				console.log('Exit code:', code);
+					console.log('Program output:', output);
+				
+
+				daefilename = daefilename.substring(daefilename.lastIndexOf('/')+1);
+				
+				console.log('filename = '+daefilename)
+				
+				console.log('pushing converted files to database')
+
+				var xml = '<asset  xmlns=""> '+
+								 '<type>collection</type> '+
+							 '<name>'+asset+'</name> '+
+							 '<uri>assets/</uri> '+
+							   '<assets> '+
+							    '<asset> '+
+									 '<type>collection</type> '+
+									 '<name>models</name> '+
+									 '<uri>assets/'+asset+'/</uri> '+
+									 '<assets> '+
+										 '<asset> '+
+										 '<type>model</type> '+
+										 '<name>'+asset+'</name> '+
+										 '<uri>assets/'+asset+'/models/</uri> '+
+										 '<source>'+daefilename+'</source> '+
+										 '<builds> '+
+										 '<build> '+
+										 '<target>COLLADA2json</target> '+
+										 '<script>builtin</script> '+
+										 '<outputs> '+
+										    '<output>'+daefilename.replace('.dae','.json')+'</output> '+
+										    '<output>'+daefilename.replace('.dae','.bin')+'</output> '+
+										 '</outputs> '+
+										 '</build> '+
+										 '</builds> '+
+										 '</asset> '+
+									 '</assets> '+
+							    '</asset> '+
+							    '<asset> '+
+									 '<type>collection</type> '+
+									 '<name>images</name> '+
+									 '<uri>assets/'+asset+'/</uri> '+
+									 '<assets> '+
+									 '</assets> '+
+							    '</asset> '+
+							   '</assets> '+
+							 '</asset> '
+
+
+				var xql = 'let $a := doc("assets/assets.xml")/json/assets '+
+				              'let $b := '+xml+
+				              'return '+
+				              'insert node $b as first into $a '
+
+				var query=database.session.query(xql);
+
+				console.log('xql='+xql)
+				query.execute(function(err,r){
+					if (err)
+					{
+						console.log('query error'+err);
+					} else {
+						console.log('query OK');
+					}	
+				}); 
 
 
 
-			fs.readdir('tmp/'+asset+'/models', function(err, files) {
-				if (err) {
-					console.log('cannot readdir '+'tmp/'+asset+'/models')
-				} else
-				{
-					files.forEach(function (filename) {
-						database.store(asset,'models/'+filename);
-						if (filename.toLowerCase().endsWith('glsl'))
-						{
+				fs.readdir('tmp/'+asset+'/models', function(err, files) {
+					if (err) {
+						console.log('cannot readdir '+'tmp/'+asset+'/models')
+					} else
+					{
+						files.forEach(function (filename) {
+							database.store(asset,'models/'+filename);
+							if (filename.toLowerCase().endsWith('glsl'))
+							{
+								var xml = '<asset  xmlns=""> '+
+											'<type>shader</type> '+
+											'<name>'+filename.split('.')[0]+'</name> '+
+											'<uri>assets/'+asset+'/models/</uri> '+
+											'<source>'+filename+'</source> '+
+										'</asset> '
+
+								var xql = 'let $a := doc("assets/assets.xml")/json/assets/asset[name="'+asset+'"]/assets/asset[name="models"]/assets '+
+						              'let $b := '+xml+
+						              'return '+
+						              'insert node $b into $a '
+								var query=database.session.query(xql);
+								console.log('xql='+xql)
+								query.execute(function(err,r){
+									if (err)
+									{
+										console.log('query error'+err);
+									} else {
+										console.log('query OK');
+									}	
+								}); 
+							}
+						});
+					}
+				});
+
+
+				fs.readdir('tmp/'+asset+'/images', function(err, files) {
+					if (err) {
+						console.log('cannot readdir '+'tmp/'+asset+'/images')
+					} else
+					{
+						files.forEach(function (filename) {
+							database.store(asset,'images/'+filename);
+					
 							var xml = '<asset  xmlns=""> '+
-										'<type>shader</type> '+
-										'<name>'+filename.split('.')[0]+'</name> '+
-										'<uri>assets/'+asset+'/models/</uri> '+
-										'<source>'+filename+'</source> '+
-									'</asset> '
+											'<type>image</type> '+
+											'<name>'+filename.split('.')[0]+'</name> '+
+											'<uri>assets/'+asset+'/images/</uri> '+
+											'<source>'+filename+'</source> '+
+										'</asset> '
 
-							var xql = 'let $a := doc("assets/assets.xml")/json/assets/asset[name="'+asset+'"]/assets/asset[name="models"]/assets '+
+							var xql = 'let $a := doc("assets/assets.xml")/json/assets/asset[name="'+asset+'"]/assets/asset[name="images"]/assets '+
 					              'let $b := '+xml+
 					              'return '+
 					              'insert node $b into $a '
@@ -349,62 +403,24 @@ server.put(/^\/rest3d\/assets.*/,function(req, res, next) {
 									console.log('query OK');
 								}	
 							}); 
-						}
-					});
-				}
-			});
+						});
+					}
+				});
 
+				res.writeHead(200);
+				res.write(output);
+				res.end();
 
-			fs.readdir('tmp/'+asset+'/images', function(err, files) {
-				if (err) {
-					console.log('cannot readdir '+'tmp/'+asset+'/images')
-				} else
-				{
-					files.forEach(function (filename) {
-						database.store(asset,'images/'+filename);
 				
-						var xml = '<asset  xmlns=""> '+
-										'<type>image</type> '+
-										'<name>'+filename.split('.')[0]+'</name> '+
-										'<uri>assets/'+asset+'/images/</uri> '+
-										'<source>'+filename+'</source> '+
-									'</asset> '
-
-						var xql = 'let $a := doc("assets/assets.xml")/json/assets/asset[name="'+asset+'"]/assets/asset[name="images"]/assets '+
-				              'let $b := '+xml+
-				              'return '+
-				              'insert node $b into $a '
-						var query=database.session.query(xql);
-						console.log('xql='+xql)
-						query.execute(function(err,r){
-							if (err)
-							{
-								console.log('query error'+err);
-							} else {
-								console.log('query OK');
-							}	
-						}); 
-					});
-				}
-			});
-
-			res.writeHead(200)
-			res.write(output)
-			res.end()
-
-			
-			return next();
-	           });
-		}
-	})
-
-		
+				return next();
+		           });
+			}
+		});
+	});
 });
 
-server.get(/^\/rest3d\/assets.*/,function(_req, _res, _next) {
-	var req=_req;
-	var res=_res;
-	var next=_next;
+server.get(/^\/rest3d\/assets.*/,function(req, res, next) {
+	
 
 	var asset = req.url.split("/assets/")[1];
 	//if (asset !== undefined) asset = asset.toLowerCase()
@@ -545,45 +561,14 @@ server.get(/^\/rest3d\/assets.*/,function(_req, _res, _next) {
 
 // convert
 
-server.post(/^\/rest3d\/convert.*/,function(_req,_res,_next){
+server.post(/^\/rest3d\/convert.*/,function(req,res,next){
 	 console.log('post -> convert');
 
 	 var form = new formidable.IncomingForm(),
          url = '',
-         res = _res,
-         req = _req,
-         next = _next,
-         params = {},
+         params = {};
 
-         handleResult = function (req, res, result, redirect) {
-
-	      if (redirect) {
-	        res.writeHead(302, {
-	          'Location': redirect.replace(
-	          /%s/,
-	          encodeURIComponent(JSON.stringify(result))
-	          )
-	        });
-	        res.end();
-	      } else {
-	        res.writeHead(200, {
-	          'Content-Type': req.headers.accept
-	          .indexOf('application/json') !== -1 ?
-	            'application/json' : 'text/plain'
-	        });
-	        res.end(JSON.stringify(result));
-	      }
-	    },
-
-	    handleError = function (req, res, error) {
-	      	console.log('returning error ='+JSON.stringify(error));
-		    res.writeHead(500, {
-		        'Content-Type': req.headers.accept
-		        .indexOf('application/json') !== -1 ?
-		          'application/json' : 'text/plain'
-		      });
-		      res.end(JSON.stringify(error));
-		 };
+         
 
      form.on('field', function (name, data) {
      	params[name] = data;

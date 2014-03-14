@@ -39,6 +39,24 @@ THE SOFTWARE.
 	       		return false;	};
 	</script>
 
+
+	<script>
+		function put(url,q,r) {
+
+			var a = document.getElementById(q).value;
+			var m = document.getElementById(r).value;
+			if (!a) return false;
+			xmlhttp=new XMLHttpRequest(); 
+      xmlhttp.open('PUT',url+a,false) ; //synchronous
+
+			xmlhttp.setRequestHeader( 'Content-Type', 'application/json; charset=utf-8' );
+     
+      xmlhttp.send(JSON.stringify({from: m})); 
+
+	    return false;	};
+
+	</script>
+
 </head>
 
 <body>
@@ -82,13 +100,22 @@ THE SOFTWARE.
 	  	<li><a href="/upload/index.html"> upload demo </a></li>
 	  </ul>
 
-	  <h3> rest3d api warhouse proxy samples </h3>
+	  <h3> rest3d api warehouse proxy samples </h3>
 	  <ul>
 	  	<li><a href="/rest3d/warehouse"> /rest3d/warehouse </a> List all collections from root</li>
 	  	<li> <a href="javascript:rest('/rest3d/warehouse/search/','q1');"> /rest3d/warehouse/search/</a>
-	  		<input type="text" size="40" value="duck" id="q1" onkeydown="if (event.keyCode == 13) rest('/rest3d/warehouse/search/','q1');"/> Search for models with string in name </li>
+	  		<input type="text" size="51" value="duck" id="q1" onkeydown="if (event.keyCode == 13) rest('/rest3d/warehouse/search/','q1');"/> Search for models with string in name </li>
+
       <li> <a href="javascript:rest('/rest3d/warehouse/','qm');"> /rest3d/warehouse/</a>
-	  		<input type="text" size="51" value="c_f8fc62afb9653d03cbe9bc85eececab4" id="qm" onkeydown="if (event.keyCode == 13) rest('/rest3d/warehouse/','q1');"/> Get info abaout a specific collection, or return a model</li>
+	  		<input type="text" size="51" value="c_f8fc62afb9653d03cbe9bc85eececab4" id="qm" onkeydown="if (event.keyCode == 13) rest('/rest3d/warehouse/','qm');"/> Get info abaout a model or collection</li>
+
+      <li> <a href="javascript:rest('/rest3d/warehouse/data/','qr');"> /rest3d/warehouse/data/</a>
+	  		<input type="text" size="51" value="m_ac9c3413d59e8e4a7f7fbfb94ac070c5_k2" id="qr" onkeydown="if (event.keyCode == 13) rest('/rest3d/warehouse/data/','qr');"/> Get a model (kmz or zip)</li>
+      
+      <li> <a href="javascript:put('/rest3d/assets/','qz','mm');"> [PUT] /rest3d/assets/</a>
+	  		<input type="text" size="51" value="test" id="qz" onkeydown="if (event.keyCode == 13) rest('/rest3d/assets/','qz','mm');">
+	  		<input type="text" size="81" value="https://3dwarehouse.sketchup.com/3dw/getbinary?subjectId=ac9c3413d59e8e4a7f7fbfb94ac070c5&subjectClass=entity&name=k2" id="mm" onkeydown="if (event.keyCode == 13) rest('/rest3d/assets/','qz','mm');"> store a zip into database</li>
+
 	  	
 	  </ul>
 	</div>

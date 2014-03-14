@@ -33,6 +33,8 @@ module.exports = function (server) {
   var fs = require('fs');
   var sendFile = require('./sendfile');
 
+  var handleError = require('./handleerror');
+
   server.get(/^\/rest3d\/warehouse.*/,function(req, res, next) {
     
     
@@ -78,8 +80,30 @@ module.exports = function (server) {
           }
       );
 
+    } else if (uid.startsWith('data/'))
+    {
+        var ids = uid.split('data/')[1];
+        var id = ids.split('_');
+ 
+        if (id && id[0] === 'm' && id.length===3){
+          console.log ('get warehouse asset ID =['+id[1]+']')
+          var url = "https://3dwarehouse.sketchup.com/3dw/getbinary?subjectId="+id[1]+"&subjectClass=entity&name="+id[2];
 
+          // proxie
+          req.pipe(request(url)).pipe(res);
+          return next();
 
+        } else if (id && id[0] === 'c' && id.length===2){
+          // TODO call handleError
+          var error = { "code": "API call error", "message": "invalid id="+ids+" in /rest3d/warehouse/data/ "};
+          handleError(req,res,error);
+          return next();
+        } else {
+          error={code:"TODO",message:"transfering of entire collections not yet supported"};
+          handleError(req, res, error);
+          return next();
+        }
+        // return the asset 
     } else if (uid.startsWith('search/'))
     {
       var search = uid.split('search/')[1];
@@ -138,18 +162,17 @@ module.exports = function (server) {
           console.log ('get warehouse model ID =['+id[1]+']')
           var url = "https://3dwarehouse.sketchup.com/3dw/getbinary?subjectId="+id[1]+"&subjectClass=entity&name="+id[2];
 
-          // proxie
-          req.pipe(request(url)).pipe(res);
-          return next();
-          /*
-        	// this is a kmz or zip file
-        	var file = fs.createWriteStream('tmp/'+id[1]+'.zip');
-        	file.on('error', function(err) { console.log(err); });
-        	request.get(url).pipe(file);
-        	sendFile(req,res,'tmp/'+id[1]+".zip");
-        	*/
 
-			    return next();
+          // this is a kmz or zip file
+          var file = fs.createWriteStream('tmp/'+id[1]+'.zip');
+          file.on('error', function(err) { console.log(err); });
+          //req.pipe(request(url)).pipe(res);
+
+          req.pipe(request(url)).pipe(file);
+          sendFile(req,res,'tmp/'+id[1]+".zip");
+
+          return next();
+
 
       } else if (id && id[0] === 'c' && id.length===2){
           console.log ('get warehouse collection ID =['+id[1]+']')
@@ -162,11 +185,11 @@ module.exports = function (server) {
           "&startRow="+start+
           "&endRow="+end+
           "&Lk=true";
-                //https://3dwarehouse.sketchup.com/3dw/GetCollection?id=4ef38d3f07220753e9c10e42c8ca6ea7
-      // return: collectionCount, entityCount, parentCatalogId, description, title
-      //https://3dwarehouse.sketchup.com/3dw/Search?parentCollectionId=690ba0129bb10a958f7918fdf5f5eb1&class=entity&calculateTotal=true&startRow=1&endRow=4&Lk=true
-      // returns:  "entries": [{
-      //              
+          //https://3dwarehouse.sketchup.com/3dw/GetCollection?id=4ef38d3f07220753e9c10e42c8ca6ea7
+        // return: collectionCount, entityCount, parentCatalogId, description, title
+        //https://3dwarehouse.sketchup.com/3dw/Search?parentCollectionId=690ba0129bb10a958f7918fdf5f5eb1&class=entity&calculateTotal=true&startRow=1&endRow=4&Lk=true
+        // returns:  "entries": [{
+        //              
 	      request({ // 3d building collections ?
 	        url: url
 	        },function(err, resp, body){
@@ -211,13 +234,9 @@ module.exports = function (server) {
 	      );
       } else {
 	      	// TODO call handleError
-	      	var error = { "code": "InternalError", "message": "invalid id="+uid+" in /rest3d/warehouse/ "};
-		      console.log('returning error ='+toJSON(error));
-		      res.writeHead(500, {
-			     'Content-Type': req.headers.accept
-			     .indexOf('application/json') !== -1 ?
-			       'application/json' : 'text/plain'
-		      })
+	      	var error = { "code": "API call error", "message": "invalid id="+uid+" in /rest3d/warehouse/ "};
+          handleError(req,res,error);
+		      return next();
 	    }
 
     }

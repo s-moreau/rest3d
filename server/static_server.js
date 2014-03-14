@@ -1,4 +1,5 @@
 /*
+
 static_server.js
 
 The MIT License (MIT)
