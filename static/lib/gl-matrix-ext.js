@@ -53,7 +53,7 @@ THE SOFTWARE.
 */
 // define(['./utils','glmatrix'], function(){
 
-window.clamp = function(number,min, max) {
+var clamp = function(number,min, max) {
   return Math.min(Math.max(number, min), max);
 };
 
