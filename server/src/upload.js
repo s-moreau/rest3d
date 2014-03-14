@@ -12,6 +12,9 @@ module.exports = function (server) {
   var FileInfo = require('./fileinfo');
   var sendFile = require('./sendfile');
 
+  var handleResult = require('./handleresult');
+  var handleError = require('./handleerror');
+
   var UploadHandler = function (req, res, callback) {
         this.req = req;
         this.res = res;
@@ -23,34 +26,6 @@ module.exports = function (server) {
   };
 
 
-  var handleResult = function (req, res, result, redirect) {
-
-   if (redirect) {
-     res.writeHead(302, {
-       'Location': redirect.replace(
-       /%s/,
-       encodeURIComponent(JSON.stringify(result))
-       )
-     });
-     res.end();
-   } else {
-     res.writeHead(200, {
-       'Content-Type': req.headers.accept
-       .indexOf('application/json') !== -1 ?
-         'application/json' : 'text/plain'
-     });
-     res.end(JSON.stringify(result));
-   }
-  };
-  var handleError = function (req, res, error) {
-   console.log('returning error ='+JSON.stringify(error));
-      res.writeHead(500, {
-     'Content-Type': req.headers.accept
-     .indexOf('application/json') !== -1 ?
-       'application/json' : 'text/plain'
-   });
-   res.end(JSON.stringify(error));
-  };
   var setNoCacheHeaders = function (res) {
    res.setHeader('Pragma', 'no-cache');
    res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate');
@@ -78,29 +53,39 @@ module.exports = function (server) {
     var finish = function () {
         counter -= 1;
         if (!counter) {
-          files.forEach(function (fileInfo) {
+          try {
+            files.forEach(function (fileInfo) {
 
-          console.log ('file '+fileInfo.name+' was uploaded succesfully');
+            console.log ('file '+fileInfo.name+' was uploaded succesfully');
 
-            fileInfo.initUrls(handler.req);
+              fileInfo.initUrls(handler.req);
 
-            var timeout = function() {
-              fileInfo.delete();
-              console.log('timeout !! '+fileInfo.name+' was deleted');
-            }
-            setTimeout(function() { timeout()},5 * 60 * 1000);
-          });
-          handler.callback(handler.req, handler.res, {files: files}, redirect);
+              var timeout = function() {
+                fileInfo.delete();
+                console.log('timeout !! '+fileInfo.name+' was deleted');
+              }
+              setTimeout(function() { timeout()},5 * 60 * 1000);
+            });
+            handler.callback(handler.req, handler.res, {files: files}, redirect);
+          } catch (e) {
+            handleError(this.req, this.res, e);
+            return next();
+          }
         }
     };
 
     form.uploadDir = FileInfo.options.tmpDir;
     form.on('fileBegin', function (name, file) {
-      tmpFiles.push(file.path);
-      var fileInfo = new FileInfo(file);
-      fileInfo.safeName();
-      map[path.basename(file.path)] = fileInfo;
-      files.push(fileInfo);
+      try {
+        tmpFiles.push(file.path);
+        var fileInfo = new FileInfo(file);
+        fileInfo.safeName();
+        map[path.basename(file.path)] = fileInfo;
+        files.push(fileInfo);
+      } catch(e) {
+        handleError(req, res, e);
+        return next;
+      };
     }).on('field', function (name, value) {
       if (name === 'redirect') {
         redirect = value;
@@ -113,6 +98,7 @@ module.exports = function (server) {
         return;
       }
       fs.renameSync(file.path, FileInfo.options.uploadDir + '/' + fileInfo.name);
+      console.log("uploaded "+FileInfo.options.uploadDir + '/' + fileInfo.name);
       /* Image resize 
 
       if (FileInfo.options.imageTypes.test(fileInfo.name)) {
@@ -186,7 +172,7 @@ module.exports = function (server) {
 
   // rest3d post upload API
   server.post(/^\/rest3d\/upload.*/, function(req,res,next){
-    console.log('in POST upload/')
+
     res.setHeader(
       'Access-Control-Allow-Origin',
       FileInfo.options.accessControl.allowOrigin

@@ -54,6 +54,8 @@ var toJSON = require('./src/tojson');
 var database = require('./src/basexdriver');
 var FileInfo = require('./src/fileinfo');
 var sendFile = require('./src/sendfile');
+var handleResult = require('./src/handleresult');
+var handleError = require('./src/handleerror');
 
 
 var platform = os.type().match(/^Win/) ? 'win' : 
@@ -137,10 +139,8 @@ server.use(restify.throttle({
 
 
 // rest3d API
-server.get(/^\/rest3d\/info/,function(_req, _res, _next) {
-	var res=_res;
-	var req=_req;
-	var next=_next;
+server.get(/^\/rest3d\/info/,function(req, res, next) {
+	
 	console.log('[rest3d]'+req.url);
 	    res.writeHead(200, {"Content-Type": "text/ascii"});  
 
@@ -401,10 +401,8 @@ server.put(/^\/rest3d\/assets.*/,function(req, res, next) {
 		
 });
 
-server.get(/^\/rest3d\/assets.*/,function(_req, _res, _next) {
-	var req=_req;
-	var res=_res;
-	var next=_next;
+server.get(/^\/rest3d\/assets.*/,function(req, res, next) {
+	
 
 	var asset = req.url.split("/assets/")[1];
 	//if (asset !== undefined) asset = asset.toLowerCase()
@@ -553,37 +551,9 @@ server.post(/^\/rest3d\/convert.*/,function(_req,_res,_next){
          res = _res,
          req = _req,
          next = _next,
-         params = {},
+         params = {};
 
-         handleResult = function (req, res, result, redirect) {
-
-	      if (redirect) {
-	        res.writeHead(302, {
-	          'Location': redirect.replace(
-	          /%s/,
-	          encodeURIComponent(JSON.stringify(result))
-	          )
-	        });
-	        res.end();
-	      } else {
-	        res.writeHead(200, {
-	          'Content-Type': req.headers.accept
-	          .indexOf('application/json') !== -1 ?
-	            'application/json' : 'text/plain'
-	        });
-	        res.end(JSON.stringify(result));
-	      }
-	    },
-
-	    handleError = function (req, res, error) {
-	      	console.log('returning error ='+JSON.stringify(error));
-		    res.writeHead(500, {
-		        'Content-Type': req.headers.accept
-		        .indexOf('application/json') !== -1 ?
-		          'application/json' : 'text/plain'
-		      });
-		      res.end(JSON.stringify(error));
-		 };
+         
 
      form.on('field', function (name, data) {
      	params[name] = data;
