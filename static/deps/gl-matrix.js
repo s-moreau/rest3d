@@ -2726,7 +2726,7 @@ mat4.create = function() {
  * @param {mat4} a matrix to clone
  * @returns {mat4} a new 4x4 matrix
  */
-mat4.clone = function(a) {
+mat4.clone = function(a){
     var out = new GLMAT_ARRAY_TYPE(16);
     out[0] = a[0];
     out[1] = a[1];

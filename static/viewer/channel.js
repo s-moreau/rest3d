@@ -212,6 +212,6 @@ define("channel", (function (global) {
       }
     }
 return function () {
-        return global.viewer;
+        return global.Channel;
     };
 }(this)));

@@ -63,7 +63,7 @@ viewer.parse_dae = function(dae) {
     var starttime = window.performance.now();
     // get the scene
     var scene = dae.parse_visual_scene(dae.sceneID);
-
+    scene.url = dae.url;
     // pull out the Z-up flag
     scene.upAxis = dae.up_axis;
     if (!scene.upAxis) scene.upAxis = "Y_UP";
@@ -74,7 +74,6 @@ viewer.parse_dae = function(dae) {
 
         // this is the bounding box for all geometries instanced in this node
         var bounds = aabb.empty();
-
         if (!this.geometries || this.geometries.length === 0) return bounds;
 
         var geometries = this.geometries;
@@ -248,6 +247,7 @@ viewer.parse_dae = function(dae) {
     scenes.push(scene);
     $('#loadtimer').text('load time=' + (scene.endtime - scene.starttime));
     viewer.draw();
+    viewer.onload.call();
 };
 
 viewer.parse_gltf = function(gltf) {
@@ -328,6 +328,7 @@ viewer.parse_gltf = function(gltf) {
 
     // get the scene
     var scene = gltf.parse_visual_scene(gltf.sceneID);
+    scene.url = gltf.url;
     scene.upAxis = "Y_UP";
 
     // depth first traversal, create primitives, states and bounding boxes
@@ -346,6 +347,7 @@ viewer.parse_gltf = function(gltf) {
     $('#loadtimer').text('load time=' + (scene.endtime - scene.starttime));
     scenes.push(scene);
     viewer.draw();
+    viewer.onload.call();
 };
 
 viewer.pushMatrix = function(m) {
@@ -380,14 +382,16 @@ viewer.drawnode = function() {
                 primitives[i].render(viewer.channel);
         }
     }
-
     return true;
 }
 
 viewer.render_scene = function(_nodes, _callback) {
 
     for (var j = 0, lenj = _nodes.length; j < lenj; j++) {
+
         var node = _nodes[j];
+        // console.debug("node: ");
+        // console.debug(node.local)
 
         viewer.pushMatrix();
         mat4.multiply(mvMatrix, mvMatrix, node.local) ;
@@ -435,7 +439,7 @@ viewer.draw = function(pick,x,y) {
     mat4.multiply(pmMatrix, mainCamera.projection, mainCamera.lookAt);
 
     var state = viewer.channel.state;
-
+    viewer.scenes = scenes;
     for (var i = 0; i < scenes.length; i++) {
         viewer.pushMatrix();
 

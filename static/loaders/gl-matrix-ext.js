@@ -377,8 +377,8 @@ if(typeof(exports) !== 'undefined') {
     };
 
     TRS.fromMat4 = function(out,_mat) {
-        mat4.clone(out.localToWorldMatrix, _mat)
-        vec3.getTranslationFromMat4 (out.localTranslation,_mat);
+        mat4.clone(out.localToWorldMatrix, _mat);
+        vec3.getTranslationFromMat4(out.localTranslation,_mat);
         quat.getRotationfromMat4(out.localRotation,_mat);
         vec3.getScaleFromMat4(out.localScale,_mat);
         return out;
