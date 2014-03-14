@@ -115,9 +115,6 @@ define("camera", (function (global) {
     }
   })();
   
-if(typeof(exports) !== 'undefined') {
-      exports.Camera = Camera;
-  }
 return function () {
         return global.Camera;
     };
