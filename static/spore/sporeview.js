@@ -349,5 +349,5 @@ function handleLoad() {
   sf._loadHandler = renderStart;
   sf.load("/models/Amahani/Amahani.dae");
 }
-
-window.onload = handleLoad;
+//this call is done by require now
+//window.onload = handleLoad;

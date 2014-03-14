@@ -5,7 +5,6 @@
     "restify":"",
     "send":"",
     "mkdirp":"",
-    "basex":"",
     "shelljs":"",
     "underscore":"",
     "async":"",
@@ -17,5 +16,22 @@
     "formidable":"",
     "imagemagick":""
   },
-  "scripts": {"start": "node static_server.js"}
+  "devDependencies": {
+    "mocha": "1.7.4",
+    "should": "1.2.1"
+  },
+  "keywords": [
+    "rest",
+    "resources",
+    "routes",
+    "registration",
+    "ExpressJS",
+    "restify"
+  ],
+  "author": "Remi Arnaud <remi.arnaud@amd.com> (http://rest3d.com)",
+  "license": "MIT",
+  "scripts": {
+    "start": "node rest3d-server.js",
+    "test": "mocha tests/*.tests.js"
+  }
 }
