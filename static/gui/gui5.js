@@ -187,7 +187,7 @@ if (window.$ === undefined) {
                 },
                 scene : {
                     icon : {
-                        image : "/gui/img/scene-root22.png"
+                        image : "/gui/img/scene-root22.png"//
                     },
                     valid_children: ["model"],
                     //select_node : function () {return false;}
