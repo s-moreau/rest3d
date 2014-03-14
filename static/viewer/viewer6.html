@@ -487,7 +487,7 @@ THE SOFTWARE.
                     child.children = window.geometry(subsel,child.children);
                     child.children = window.camera(subsel,child.children);
                     child.children = displayConfig(subsel,child.children,"local");
-                    // child.children = window.children(subsel,child.children);
+                    child.children = window.children(subsel,child.children);
                     scene.children.push(child);                                                   //children
                 }
                 treeJson.data.push(scene);                                                            //}
@@ -510,10 +510,21 @@ THE SOFTWARE.
                 }
                 function local(id,value){
                     $("#"+id).click(function(){
-                        var tmp = new TRS();
-                        TRS.fromMat4(tmp, value);
-                        console.debug(tmp);
-                          });
+                        //
+                        var tmp = trs.create();
+                        trs.fromMat4(tmp, value);
+                        var e = euler.create();
+                        euler.fromQuat(e,tmp.localRotation);
+                        console.debug("translation :"+tmp.localTranslation+" rotation : "+e+" scale : "+tmp.localScale);
+
+                        // var q = quat.create();
+                        // quat.fromEuler(q,e);
+                        // console.debug(q);
+                        // var trs1 = trs.fromValues(tmp.localTranslation,q,tmp.localScale);
+                        // var mat1 = mat4.create();
+                        // mat4.fromTrs(mat1,trs1);
+                        // console.debug("output "+mat1);
+                        });
                     }
             for(var g=0;g<callbackArray.length;g++){
                 if(callbackArray[g].type=="display"){
@@ -556,15 +567,15 @@ THE SOFTWARE.
                         else
                         {
                               console.debug(node.attr('type'))
-                        var type = node.attr('type'); 
-                        if(type =="collection"){
-                            nodeId = node.attr('id');
-                            url = "http://node.fl4re.com/rest3d/warehouse/" + nodeId;
-                        }
-                        else{
-                            console.debug("model!");
-                            return;
-                        }
+                            var type = node.attr('type'); 
+                            if(type =="collection"){
+                                nodeId = node.attr('id');
+                                url = "http://node.fl4re.com/rest3d/warehouse/" + nodeId;
+                            }
+                            else{
+                                console.debug("model!");
+                                return;
+                            }
                         }
 
                         return url;
