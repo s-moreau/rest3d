@@ -53,8 +53,8 @@ THE SOFTWARE.
 */
 // define(['./utils','glmatrix'], function(){
 
-Number.prototype.clamp = function(min, max) {
-  return Math.min(Math.max(this, min), max);
+window.clamp = function(number,min, max) {
+  return Math.min(Math.max(number, min), max);
 };
 
 vec3.getColumnFromMat4 = function(out, mat,col)
@@ -503,7 +503,7 @@ if(typeof(exports) !== 'undefined') {
         var sqz = qz * qz;
         var sqw = qw * qw;
         vec3.set(_out,
-                 Math.asin(  ( 2. * ( qx * qw + qy * qz )).clamp(-1., 1.)),
+                 Math.asin(clamp( 2. * ( qx * qw + qy * qz ),-1., 1.)),
                  Math.atan2( 2. * ( qy * qw - qz * qx ), ( sqw - sqx - sqy + sqz )),
                  Math.atan2( 2. * ( qz * qw - qx * qy ), ( sqw - sqx + sqy - sqz )));
         return _out;
