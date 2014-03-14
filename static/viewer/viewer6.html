@@ -411,7 +411,7 @@ THE SOFTWARE.
                         var glprimitives =  self.primitives(subsel_geometries);
                         var mesh = self.mesh(subsel_geometries);
                         var title = "geometry_"+i;
-                        if(i=0){title = "geometry"}
+                        if(i==0){title = "geometry"}
                         var subchild = {
                             "data":title,
                             "children":[
@@ -529,21 +529,30 @@ THE SOFTWARE.
         treeScene=GUI.treeBis({
             id:'treeViewDiv',
             parent: renderMenu.tree,
-            json: {
-                        "data":[
-     {
-     "data" : "A node",
-     "children" : [ "Child 1", "Child 2" ]
-     },
-     {
-     "attr" : { "id" : "test1" },
-         "data" : {
-             "title" : "Long format demo",
-             "attr" : { "id" : "test2", "href" : "#" }
-         }
-     }
- ] 
+            json:  {
+                "ajax" : {
+                    "type": 'GET',
+                    "url": function (node) {
+                        var nodeId = "";
+                        var url = ""
+                        if (node == -1)
+                        {
+                            url = "http://node.fl4re.com/rest3d/warehouse/";
+                        }
+                        else
+                        {
+                            nodeId = node.attr('id');
+                            url = "http://localhost/introspection/introspection/children/" + nodeId;
+                        }
+
+                        return url;
                     },
+                    "success": function (new_data) {
+                        console.debug(new_data)
+                        return new_data;
+                    }
+                }
+            },
             themes:{
             "theme":"apple",
             },
