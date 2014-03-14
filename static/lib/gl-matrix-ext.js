@@ -55,7 +55,7 @@ THE SOFTWARE.
 
 var clamp = function(number,min, max) {
   return Math.min(Math.max(number, min), max);
-};
+};//
 
 vec3.getColumnFromMat4 = function(out, mat,col)
 {
