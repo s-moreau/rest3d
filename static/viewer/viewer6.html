@@ -301,7 +301,7 @@ THE SOFTWARE.
         // }
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-        var treeScene =$;
+        var treeScene =false;
         var treeJson = {};
         var callbackArray =[];
 
@@ -309,7 +309,7 @@ THE SOFTWARE.
             console.debug("call");
             // renderMenu.scenes.title.off()
             $flagScene.hide();
-            treeScene.remove();
+            if(treeScene){treeScene.remove();}
             callbackArray=[];
             treeJson.data = [];
             function displayConfig (parent,object,attr){
@@ -525,8 +525,20 @@ THE SOFTWARE.
         }
         viewer.onload = refreshScenesTree;
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+        function parseWarehouseJson(param_in,param_out){
+            var assets = param_in.assets;
+            for(var i =0;i<assets.length;i++){
+                var asset = assets[i];
+                var result = {};
+                result.data = asset.name.substr(0,60);
+                if(asset.type=="collection"){result.state = "closed";}
+                result.attr = {"id":asset.id,"type":asset.type}
+                param_out.push(result);
+            }
+            return param_out;
+        }
 
-        treeScene=GUI.treeBis({
+        GUI.treeBis({
             id:'treeViewDiv',
             parent: renderMenu.tree,
             json:  {
@@ -534,22 +546,35 @@ THE SOFTWARE.
                     "type": 'GET',
                     "url": function (node) {
                         var nodeId = "";
-                        var url = ""
+                        var url = "";
+                      
+                        // var type = node.attr('type'); 
                         if (node == -1)
                         {
                             url = "http://node.fl4re.com/rest3d/warehouse/";
                         }
                         else
                         {
+                              console.debug(node.attr('type'))
+                        var type = node.attr('type'); 
+                        if(type =="collection"){
                             nodeId = node.attr('id');
-                            url = "http://localhost/introspection/introspection/children/" + nodeId;
+                            url = "http://node.fl4re.com/rest3d/warehouse/" + nodeId;
+                        }
+                        else{
+                            console.debug("model!");
+                            return;
+                        }
                         }
 
                         return url;
                     },
                     "success": function (new_data) {
-                        console.debug(new_data)
-                        return new_data;
+                        console.debug(new_data);
+                        var result = [];
+                        result=parseWarehouseJson(new_data,result);
+                        console.debug(result);
+                        return result;
                     }
                 }
             },
@@ -557,6 +582,7 @@ THE SOFTWARE.
             "theme":"apple",
             },
     })
+
         GUI.image(renderMenu.render.title, "img-render", "../gui/images/menu-render.png", 12, 14, "before");
         GUI.image(renderMenu.tree.title, "img-render", "../gui/images/menu-scenes.png", 12, 14, "before");
         GUI.image(renderMenu.scenes.title, "img-render", "../gui/images/scene-root.png", 12, 14, "before");
