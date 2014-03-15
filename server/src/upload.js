@@ -68,7 +68,7 @@ module.exports = function (server) {
             });
             handler.callback(handler.req, handler.res, {files: files}, redirect);
           } catch (e) {
-            handleError(this.req, this.res, e);
+            handleError(handler.req, handler.res, e);
             return next();
           }
         }
@@ -83,8 +83,8 @@ module.exports = function (server) {
         map[path.basename(file.path)] = fileInfo;
         files.push(fileInfo);
       } catch(e) {
-        handleError(req, res, e);
-        return next;
+        handleError(handler.req, handler.res, e);
+        return next();
       };
     }).on('field', function (name, value) {
       if (name === 'redirect') {
@@ -121,9 +121,8 @@ module.exports = function (server) {
         fs.unlink(file);
       });
     }).on('error', function (e) {
-      console.log ('error '+e);   
-      console.log(e);
-      return ('error '+e)
+        handleError(handler.req, handler.res, e);
+        return next();
     }).on('progress', function (bytesReceived, bytesExpected) {
       if (bytesReceived > FileInfo.options.maxPostSize) {
         handler.req.connection.destroy();
