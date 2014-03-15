@@ -51,10 +51,20 @@ THE SOFTWARE.
 /**
   calculate Translation, Rotation and Scale from a matrix
 */
+// define(['./utils','glmatrix'], function(){
+
+Number.prototype.clamp = function(min, max) {
+  return Math.min(Math.max(this, min), max);
+};
 
 vec3.getColumnFromMat4 = function(out, mat,col)
 {
     return vec3.set(out, mat[col],mat[col+4],mat[col+8]);
+};
+
+vec3.getColumnFromMat3 = function(out, mat,col)
+{
+    return vec3.set(out, mat[col],mat[col+3],mat[col+6]);
 };
 
 vec3.getRowFromMat3 = function(out, mat,row)
@@ -62,30 +72,99 @@ vec3.getRowFromMat3 = function(out, mat,row)
     return vec3.set(out, mat[row*3],mat[row*3+1],mat[row*3+2]);
 };
 
-quat.getRotationfromMat4 = function(out, mat)
+
+vec3.getRowFromMat4 = function(out, mat,row)
 {
-    return quat.rotationTo(
-            out,
-            vec3.getColumnFromMat4(mat,2), 
-            vec3.getColumnFromMat4(mat,1)
-        );
+    return vec3.set(out, mat[row*4],mat[row*4+1],mat[row*4+2]);
 };
-vec3.getScaleFromMat4 = function(out, mat)
-{
-    return vec3.set( out,
-        vec3.length(vec3.getColumnFromMat4(mat,0)),
-        vec3.length(vec3.getColumnFromMat4(mat,1)),
-        vec3.length(vec3.getColumnFromMat4(mat,2))
-        );
-};
-vec3.getTranslationFromMat4 = function(out, mat)
-{
-    return vec3.getColumnFromMat4(out, mat,3);
+/*
+quat.getRotationfromMat4 = function() {
+    var tmp1=vec3.create();
+    var tmp2=vec3.create();
+    return function(out, mat)
+    {
+        return quat.rotationTo(
+                out,
+                vec3.getRowFromMat4(tmp1,mat,2), 
+                vec3.getRowFromMat4(tmp2,mat,1)
+            );
+    };
+}();
+*/
+/**
+ * Creates a quaternion from the given 3x3 rotation matrix.
+ *
+ * NOTE: The resultant quaternion is not normalized, so you should be sure
+ * to renormalize the quaternion yourself where necessary.
+ *
+ * @param {quat} out the receiving quaternion
+ * @param {mat3} m rotation matrix
+ * @returns {quat} out
+ * @function
+ */
+quat.fromMat4 = function(out, m) {
+    // Algorithm in Ken Shoemake's article in 1987 SIGGRAPH course notes
+    // article "Quaternion Calculus and Fast Animation".
+    var fTrace = m[0] + m[5] + m[10];
+    var fRoot;
+
+    if ( fTrace > 0.0 ) {
+        // |w| > 1/2, may as well choose w > 1/2
+        fRoot = Math.sqrt(fTrace + 1.0);  // 2w
+        out[3] = 0.5 * fRoot;
+        fRoot = 0.5/fRoot;  // 1/(4w)
+        out[0] = (m[9]-m[6])*fRoot;
+        out[1] = (m[2]-m[8])*fRoot;
+        out[2] = (m[4]-m[1])*fRoot;
+    } else {
+        // |w| <= 1/2
+        var i = 0;
+        if ( m[5] > m[0] )
+          i = 1;
+        if ( m[10] > m[i*4+i] )
+          i = 2;
+        var j = (i+1)%3;
+        var k = (i+2)%3;
+        
+        fRoot = Math.sqrt(m[i*4+i]-m[j*4+j]-m[k*4+k] + 1.0);
+        out[i] = 0.5 * fRoot;
+        fRoot = 0.5 / fRoot;
+        out[3] = (m[k*4+j] - m[j*4+k]) * fRoot;
+        out[j] = (m[j*4+i] + m[i*4+j]) * fRoot;
+        out[k] = (m[k*4+i] + m[i*4+k]) * fRoot;
+    }
+    
+    return out;
 };
 
-mat4.fromTRS = function (out, v, q, s) {
+vec3.getScaleFromMat4 = function() {
+
+    var tmp1=vec3.create();
+    var tmp2=vec3.create();
+    var tmp3=vec3.create();
+
+    return function(out, mat)
+    {
+        return vec3.set( out,
+            vec3.length(vec3.getColumnFromMat4(tmp1,mat,0)),
+            vec3.length(vec3.getColumnFromMat4(tmp2,mat,1)),
+            vec3.length(vec3.getColumnFromMat4(tmp3,mat,2))
+            );
+    };
+}();
+
+vec3.getTranslationFromMat4 = function(out, mat)
+{
+    return vec3.set(out,mat[12],mat[13],mat[14]);
+};
+
+mat4.fromTrs = function (out, trs) {
     
     // Quaternion math
+    var q = trs.localRotation;
+    var s = trs.localScale;
+    var v = trs.localTranslation;
+
     var x = q[0], y = q[1], z = q[2], w = q[3],
         x2 = x + x,
         y2 = y + y,
@@ -105,16 +184,16 @@ mat4.fromTRS = function (out, v, q, s) {
         wy = w * y2,
         wz = w * z2;
 
-    out[0] = sz*(1 - (yy + zz));
-    out[1] = sx*(xy + wz);
-    out[2] = sx*(xz - wy);
+    out[0] = sx*(1 - (yy + zz));
+    out[4] = sx*(xy + wz);
+    out[8] = sx*(xz - wy);
     out[3] = 0;
-    out[4] = sy*(xy - wz);
+    out[1] = sy*(xy - wz);
     out[5] = sy*(1 - (xx + zz));
-    out[6] = sy*(yz + wx);
+    out[9] = sy*(yz + wx);
     out[7] = 0;
-    out[8] = sz*(xz + wy);
-    out[9] = sz*(yz - wx);
+    out[2] = sz*(xz + wy);
+    out[6] = sz*(yz - wx);
     out[10] = sz*(1 - (xx + yy));
     out[11] = 0;
     out[12] = v[0];
@@ -369,34 +448,87 @@ if(typeof(exports) !== 'undefined') {
 };
 
 // todo -> use a floar[10] vertex array and views?
- var TRS = function () {
-        var localTranslation   = vec3.create(),
-            localRotation      = quat.create(),
-            localScale         = vec3.fromValues(1., 1., 1.),
-            localToWorldMatrix = mat4.create();
+ var trs = {};
+
+ trs.create = function () {
+        var out={};
+        out.localTranslation   = vec3.create();
+        out.localRotation      = quat.create();
+        out.localScale         = vec3.fromValues(1., 1., 1.);
+        return out;
     };
 
-    TRS.fromMat4 = function(out,_mat) {
-        mat4.clone(out.localToWorldMatrix, _mat);
+    trs.fromValues = function(t,r,s){
+        var out={};
+        out.localTranslation   = vec3.clone(t);
+        out.localRotation      = quat.clone(r);
+        out.localScale         = vec3.clone(s);
+        return out;
+
+    }
+
+    trs.fromMat4 = function(out,_mat) {
         vec3.getTranslationFromMat4(out.localTranslation,_mat);
-        quat.getRotationfromMat4(out.localRotation,_mat);
+        quat.fromMat4(out.localRotation,_mat);
         vec3.getScaleFromMat4(out.localScale,_mat);
         return out;
      };
 
-    TRS.fromPRS = function(_position,_rotation,_scale) {
-        vec3.copy(localTranslation,_position);
-        quat.copy(localRotation, _rotation);
-        vec3.copy(localScale, _scale);
-        this.updateMat();
-        return this;
+    trs.fromPrs = function(_out,_position,_rotation,_scale) {
+        vec3.copy(_out.localTranslation,_position);
+        quat.copy(_out.localRotation, _rotation);
+        vec3.copy(_out.localScale, _scale);
+
+        return _out;
     };
 
-    TRS.updateMat = function() {
-        fromTRS(localToWorldMatrix, localTranslation, localRotation, localScale);
-    }
 
-    TRS.localToWorldMatrix = function() {
-        return localToWorldMatrix;
-}
+    if(typeof(exports) !== 'undefined') {
+        exports.trs = trs;
+    };
+
+    var euler = {};
+    euler.create = function(){
+        out = vec3.create();
+        return out;
+    };
+    euler.fromQuat = function(_out,_quat){
+        // ZXY
+        var qx=_quat[0];
+        var qy=_quat[1];
+        var qz=_quat[2];
+        var qw=_quat[3];
+        var sqx = qx * qx;
+        var sqy = qy * qy;
+        var sqz = qz * qz;
+        var sqw = qw * qw;
+        vec3.set(_out,
+                 Math.asin(  ( 2. * ( qx * qw + qy * qz )).clamp(-1., 1.)),
+                 Math.atan2( 2. * ( qy * qw - qz * qx ), ( sqw - sqx - sqy + sqz )),
+                 Math.atan2( 2. * ( qz * qw - qx * qy ), ( sqw - sqx + sqy - sqz )));
+        return _out;
+    };
+    quat.fromEuler = function(_out,_euler){
+        // ZXY
+        var c1 = Math.cos(_euler[0] / 2. );
+        var c2 = Math.cos(_euler[1] / 2. );
+        var c3 = Math.cos(_euler[2] / 2. );
+        var s1 = Math.sin(_euler[0] / 2. );
+        var s2 = Math.sin(_euler[1] / 2. );
+        var s3 = Math.sin(_euler[2] / 2. );
+        quat.set(_out,
+                 s1 * c2 * c3 - c1 * s2 * s3,
+                 c1 * s2 * c3 + s1 * c2 * s3,
+                 c1 * c2 * s3 + s1 * s2 * c3,
+                 c1 * c2 * c3 - s1 * s2 * s3);
+
+        return _out;
+    };
+
+    if(typeof(exports) !== 'undefined') {
+    exports.euler = euler;
+    };
+
+
+// });
 

@@ -73,7 +73,7 @@ module.exports = function (server) {
             return next(err);
           }
           var result=parseroot(body);
-          res.writeHead(200, {'Content-Type': 'application/json' });
+          res.writeHead(200, {'Content-Type': 'application/json', 'Access-Control-Allow-Origin' : '*'});
           res.write(toJSON(result));
           res.end();
           return next();
@@ -147,7 +147,7 @@ module.exports = function (server) {
 
           result.RequestUri = uid;
 
-          res.writeHead(200, {'Content-Type': 'application/json' });
+          res.writeHead(200, {'Content-Type': 'application/json', 'Access-Control-Allow-Origin' : '*' });
           res.write(toJSON(result));
           res.end();
           return next();
@@ -223,7 +223,7 @@ module.exports = function (server) {
 			          // append collections to models
 			          result.assets = result.assets.concat(result2.assets);
 		            result.RequestUri = uid;
-			          res.writeHead(200, {'Content-Type': 'application/json' });
+			          res.writeHead(200, {'Content-Type': 'application/json', 'Access-Control-Allow-Origin' : '*' });
 			          res.write(toJSON(result));
 			          res.end();
 			          return next();

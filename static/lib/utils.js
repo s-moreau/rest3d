@@ -30,7 +30,6 @@ String.prototype.endsWith = function(suffix) {
 String.prototype.startsWith = function(prefix) {
   return this.lastIndexOf(prefix, 0) === 0;
 };
-Math.prototype.clamp = function(min, max) {
+Number.prototype.clamp = function(min, max) {
   return Math.min(Math.max(this, min), max);
 };
-console.debug("hre"+Math.clamp);

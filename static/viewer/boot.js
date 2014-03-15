@@ -18,7 +18,7 @@ require.config({
         skinner: '../deps/jquery-skinner',
         jstree: '../deps/jstree/jquery.jstree',
         glmatrix: '../deps/gl-matrix',
-        glmatrixExt: '../loaders/gl-matrix-ext',
+        glmatrixExt: '../lib/gl-matrix-ext',
         toolbar: "../deps/jquery.toolbar",
         terminal: "../deps/jquery.terminal-0.7.10.min",
         pnotify: "../deps/jquery.pnotify.min",
@@ -32,6 +32,7 @@ require.config({
         console:"../deps/console",
         screenfull:"../deps/screenfull",
         gui:"../gui/gui6",
+        utilMatrix: '../lib/utils',
     },
     shim: {
         'codemirror':{
@@ -94,7 +95,7 @@ require.config({
             exports: 'window.EYE',
         },
         'glmatrixExt':{
-            deps: ['glmatrix'],
+            deps: ['glmatrix','utilMatrix'],
             exports: 'vec3',
         },
         'webglUtils':{
@@ -194,7 +195,7 @@ function loadStyle(){
 loadStyle();
 require(['jquerymin','jqueryui','codemirror','javascript','showHint','javacriptHint','dialog','search','searchCursor','jquerylayout','upload','uploadProcess','uploadValidate','uploadTransport',
     'skinner','jstree','glmatrixExt','toolbar','terminal','pnotify','colorpicker','eye','utils','webglUtils','WebGLDebugUtils','collada','gltf','console','screenfull','gui',
-    'camera','channel','renderer','rest3d','state','viewer'],function(e){
+    'camera','channel','renderer','rest3d','state','viewer','utilMatrix'],function(e){
     INIT();
 })
 
