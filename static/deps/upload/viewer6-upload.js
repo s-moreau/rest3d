@@ -79,6 +79,7 @@ setViewer6Upload=function(upload){
                             upload.filesArea.append(href);
                             var $download = $("<button>Download</button>").on("click",function(){
                                 href[0].click();
+                                href[0].remove();
                             });
 
                         var url = decodeURIComponent(file.url);

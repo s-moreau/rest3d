@@ -418,24 +418,27 @@ define("gui", (function (global) {
                 if(this.mode=="html"){
                     $("#"+this.id).append(this.htmlInput);
                 }
-            }
+            }   
             this.generateJSON = function(){
                 this.jsonInput={};
                 if(this.json.hasOwnProperty("themes")){
                     this.jsonInput["themes"]=this.json.themes;}
+                if(this.json.hasOwnProperty("type")){
+                    this.jsonInput["types"]=this.json.type;
+                }
+                if(this.json.hasOwnProperty("contextmenu")){
+                    this.jsonInput["contextmenu"]=this.json.contextmenu;
+                }
                 if(this.json.hasOwnProperty("plugin")){
                     this.jsonInput["plugins"]=this.json.plugin;
                 }
                 else{
-                    this.jsonInput["plugins"]=["themes", "json_data", "ui", "types", "sort", "dnd"];
+                    this.jsonInput["plugins"]=["themes", "json_data", "ui", "types", "sort", "dnd","contextmenu"];
                 }
-
+                console.debug(this.jsonInput)
             }
             this.createJqueryObject = function(){
                 this[this.id] =$("#"+this.id);
-            }
-            this.refreshWithId = function(){
-                
             }
             this.createWidget = function(){
                 switch(this.mode){
@@ -465,136 +468,136 @@ define("gui", (function (global) {
         return tmp;
     }
 
-    GUI.tree = function (_tree, _parent, _callback, _id) {
-        var cb = _callback;
-        var tree = '<div';
-        if (_id) tree += ' id=' + _id;
-        tree += '> </div>';
-        var $tree = $(tree);
-        if (!_parent)
-            $('body').append($tree);
-        else
-            $(_parent).append($tree);
+    // GUI.tree = function (_tree, _parent, _callback, _id) {
+    //     var cb = _callback;
+    //     var tree = '<div';
+    //     if (_id) tree += ' id=' + _id;
+    //     tree += '> </div>';
+    //     var $tree = $(tree);
+    //     if (!_parent)
+    //         $('body').append($tree);
+    //     else
+    //         $(_parent).append($tree);
 
 
-        $tree.jstree({
-            plugins: ["dnd", "ui", "themeroller", "json_data", "crrm", "types"],
-            animation: 0,
-            /* ONLY FOR FOREIGN NODES
-          dnd : {
-            drag_target : ".jstree-draggable",
-            drop_target : ".jstree-drop",
-            drag_check : function (data) {
-               if(data.r.attr("id") == "phtml_1") {
-                  return false;
-               }
-               return {
-                after : false,
-                before : false,
-                inside : true
-               };
-            },
-            drop_check : function (data) {
-                return false;
-            },
-            drop_finish : function () {
-               alert("DROP");
-            },
-            drag_finish : function (data) {
-                alert("DRAG OK");
-            },
-          },
-            */
-            crrm: {
-                move: {
-                    default_position: "inside",
-                    always_copy: "multitree",
-                    check_move: function (m) {
-                        var ret = false;
-                        // we can put a model in a scene
-                        if (m.r.attr('rel') === 'scene' &&
-                            (m.o.attr('rel') === 'model'))
-                            ret = true;
-                        return ret;
+    //     $tree.jstree({
+    //         plugins: ["dnd", "ui", "themeroller", "json_data", "crrm", "types"],
+    //         animation: 0,
+    //         /* ONLY FOR FOREIGN NODES
+    //       dnd : {
+    //         drag_target : ".jstree-draggable",
+    //         drop_target : ".jstree-drop",
+    //         drag_check : function (data) {
+    //            if(data.r.attr("id") == "phtml_1") {
+    //               return false;
+    //            }
+    //            return {
+    //             after : false,
+    //             before : false,
+    //             inside : true
+    //            };
+    //         },
+    //         drop_check : function (data) {
+    //             return false;
+    //         },
+    //         drop_finish : function () {
+    //            alert("DROP");
+    //         },
+    //         drag_finish : function (data) {
+    //             alert("DRAG OK");
+    //         },
+    //       },
+    //         */
+    //         crrm: {
+    //             move: {
+    //                 default_position: "inside",
+    //                 always_copy: "multitree",
+    //                 check_move: function (m) {
+    //                     var ret = false;
+    //                     // we can put a model in a scene
+    //                     if (m.r.attr('rel') === 'scene' &&
+    //                         (m.o.attr('rel') === 'model'))
+    //                         ret = true;
+    //                     return ret;
 
-                    }
-                }
-            },
+    //                 }
+    //             }
+    //         },
 
-            types: {
-                max_depth: -2,
-                max_children: -2,
-                valid_children: ["root", "scene"],
-                types: {
-                    root: {
-                        icon: {
-                            image: "/gui/img/drive.png"
-                        },
-                        valid_children: ["collection"],
+    //         types: {
+    //             max_depth: -2,
+    //             max_children: -2,
+    //             valid_children: ["root", "scene"],
+    //             types: {
+    //                 root: {
+    //                     icon: {
+    //                         image: "/gui/img/drive.png"
+    //                     },
+    //                     valid_children: ["collection"],
 
-                        hover_node: false,
-                        //select_node : function () {return false;}
-                    },
-                    scene: {
-                        icon: {
-                            image: "/gui/img/scene-root22.png"
-                        },
-                        valid_children: ["model"],
-                        //select_node : function () {return false;}
-                    },
-                    collection: {
-                        icon: {
-                            image: "/gui/img/folder.png"
-                        },
-                        valid_children: ["image", "shader", "model"],
+    //                     hover_node: false,
+    //                     //select_node : function () {return false;}
+    //                 },
+    //                 scene: {
+    //                     icon: {
+    //                         image: "/gui/img/scene-root22.png"
+    //                     },
+    //                     valid_children: ["model"],
+    //                     //select_node : function () {return false;}
+    //                 },
+    //                 collection: {
+    //                     icon: {
+    //                         image: "/gui/img/folder.png"
+    //                     },
+    //                     valid_children: ["image", "shader", "model"],
 
-                        hover_node: true,
-                        //select_node : function () {return false;}
-                    },
-                    image: {
-                        icon: {
-                            image: "/gui/img/media-image.png"
-                        },
-                        valid_children: "none",
-                    },
-                    shader: {
-                        icon: {
-                            image: "/gui/img/GLSLStudioIcon22.png"
-                        },
-                        valid_children: "none",
-                    },
-                    model: {
-                        icon: {
-                            image: "/gui/img/bunny22.png"
-                        },
-                        valid_children: "none",
-                    },
-                    default: {
-                        valid_children: ["default"]
-                    }
-                }
-            },
-            json_data: {
-                data: [_tree]
-            }
-        }).bind("select_node.jstree", function (e, data) { // requires ui plugin
-            // `data.rslt.obj` is the jquery extended node that was clicked
-            if (cb) cb.call(data.inst, e, data.rslt);
-            data.inst.deselect_node(data.rslt.obj);
-        }).bind("move_node.jstree", function (e, data) { // requires crrm plugin
-            if (cb) cb.call(data.inst, e, data.rslt);
-        }).bind("dblclick.jstree", function (e, data) {
-            //var node = $(e.target).closest("li");
-            //var id = node[0].id; //id of the selected node
-            if (cb) cb.call(data.inst, e, data.rslt);
-        }).bind("create_node.jstree", function (e, data) {
-            if (cb) cb.call(data.inst, e, data.rslt);
-        }).bind("open_node.jstree", function (e, data) {
-            if (cb) cb.call(data.inst, e, data.rslt);
-        });
+    //                     hover_node: true,
+    //                     //select_node : function () {return false;}
+    //                 },
+    //                 image: {
+    //                     icon: {
+    //                         image: "/gui/img/media-gu.png"
+    //                     },
+    //                     valid_children: "none",
+    //                 },
+    //                 shader: {
+    //                     icon: {
+    //                         image: "/gui/img/GLSLStudioIcon22.png"
+    //                     },
+    //                     valid_children: "none",
+    //                 },
+    //                 model: {
+    //                     icon: {
+    //                         image: "/gui/img/bunny22.png"
+    //                     },
+    //                     valid_children: "none",
+    //                 },
+    //                 default: {
+    //                     valid_children: ["default"]
+    //                 }
+    //             }
+    //         },
+    //         json_data: {
+    //             data: [_tree]
+    //         }
+    //     }).bind("select_node.jstree", function (e, data) { // requires ui plugin
+    //         // `data.rslt.obj` is the jquery extended node that was clicked
+    //         if (cb) cb.call(data.inst, e, data.rslt);
+    //         data.inst.deselect_node(data.rslt.obj);
+    //     }).bind("move_node.jstree", function (e, data) { // requires crrm plugin
+    //         if (cb) cb.call(data.inst, e, data.rslt);
+    //     }).bind("dblclick.jstree", function (e, data) {
+    //         //var node = $(e.target).closest("li");
+    //         //var id = node[0].id; //id of the selected node
+    //         if (cb) cb.call(data.inst, e, data.rslt);
+    //     }).bind("create_node.jstree", function (e, data) {
+    //         if (cb) cb.call(data.inst, e, data.rslt);
+    //     }).bind("open_node.jstree", function (e, data) {
+    //         if (cb) cb.call(data.inst, e, data.rslt);
+    //     });
 
-        return $tree;
-    };
+    //     return $tree;
+    // };
 
     GUI.canvas = function (_parent) {
         $canvas = $(

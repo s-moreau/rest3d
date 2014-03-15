@@ -536,19 +536,51 @@ THE SOFTWARE.
         }
         viewer.onload = refreshScenesTree;
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+        var nodeBuffer;
         function parseWarehouseJson(param_in,param_out){
             var assets = param_in.assets;
-            for(var i =0;i<assets.length;i++){
-                var asset = assets[i];
-                var result = {};
-                result.data = asset.name.substr(0,60);
-                if(asset.type=="collection"){result.state = "closed";}
-                result.attr = {"id":asset.id,"type":asset.type}
-                param_out.push(result);
+            if(assets.length==0||assets==null){
+                nodeBuffer.attr("rel","empty");
             }
-            return param_out;
-        }
+            else{
+                for(var i =0;i<assets.length;i++){
+                    var asset = assets[i];
+                    var result = {};
+                    result.data = asset.name.substr(0,60);
+                    if(asset.type=="collection"){result.state = "closed";}
+                    result.attr = {"id":asset.id,"rel":asset.type,"iconuri":asset.iconUri,"name":result.data};
+                    //
+                    if(asset.hasOwnProperty('iconUri'));
+                    param_out.push(result);
+                }
+            }
+            return param_out;        
+        };
 
+        function download(node){
+            var href = $('<a style="display:none" href="http://node.fl4re.com/rest3d/warehouse/data/'+node.attr("id")+'" target="_blank"></a>');
+            $('body').append(href);
+            href[0].click();
+            href[0].remove();
+        }
+        function display(node){
+            console.error("REMIIIIII affiche moi le model: "+node.attr("id") +" :-)")
+        }
+        function icon(node){
+            $("#dialog").dialog("close");
+            var gitHtml = $('<div id="dialog"><img src="'+node.attr("iconuri") + '" /></div>');
+            gitPanel = $('body').append(gitHtml);
+            $("#dialog").dialog({
+                title: node.attr('name'),
+                autoOpen: true,
+                width: 'auto',
+                height: 'auto',
+                close: function(){
+                    gitHtml.remove();
+                }
+            });
+           $("#dialog").css({'min-height':'none !important;'});
+        }
         GUI.treeBis({
             id:'treeViewDiv',
             parent: renderMenu.tree,
@@ -556,9 +588,9 @@ THE SOFTWARE.
                 "ajax" : {
                     "type": 'GET',
                     "url": function (node) {
+                        nodeBuffer = node;
                         var nodeId = "";
                         var url = "";
-                      
                         // var type = node.attr('type'); 
                         if (node == -1)
                         {
@@ -567,7 +599,7 @@ THE SOFTWARE.
                         else
                         {
                               console.debug(node.attr('type'))
-                            var type = node.attr('type'); 
+                            var type = node.attr('rel'); 
                             if(type =="collection"){
                                 nodeId = node.attr('id');
                                 url = "http://node.fl4re.com/rest3d/warehouse/" + nodeId;
@@ -583,13 +615,43 @@ THE SOFTWARE.
                         console.debug(new_data);
                         var result = [];
                         result=parseWarehouseJson(new_data,result);
-                        console.debug(result);
                         return result;
                     }
                 }
             },
+            "contextmenu" : {
+                "items" : function (node) {
+                    var result = {};
+                    if(node.attr("iconuri")){
+                        result.icon = {'label':'Display icon','action':icon,};}
+                    if(node.attr("rel")=="model"){
+                        result.display = {'label':'Display model','action':display,};
+                        result.download = {'label':'Download','action':download,};
+                    }
+                    return result;
+                }
+            },
+            type:  { "types": {
+                "collection": {
+                    "icon" : {
+                        "image" : "../gui/images/folder.png",
+                    },
+                    },
+                    //select_node : function () {return false;}
+                "model": {
+                    "icon" : {
+                        "image" : "../gui/images/bunny.png",
+                    },
+                    },
+                "empty": {
+                    "icon" : {
+                        "image" : "../gui/images/cross.jpg",
+                    },
+                    },
+            }},
             themes:{
             "theme":"apple",
+            // "icons": false,
             },
     })
 
