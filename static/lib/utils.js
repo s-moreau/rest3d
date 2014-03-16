@@ -30,3 +30,17 @@ String.prototype.endsWith = function(suffix) {
 String.prototype.startsWith = function(prefix) {
   return this.lastIndexOf(prefix, 0) === 0;
 };
+
+if (!window.performance.now) {
+  var perf = window.performance || {};
+  perf.now (function() {
+      return performance.now    ||
+      performance.webkitNow     ||
+      performance.msNow         ||
+      performance.oNow          ||
+      performance.mozNow        ||
+      function() { return new Date().getTime(); };
+    })();
+  window.performance = perf;
+}
+  
