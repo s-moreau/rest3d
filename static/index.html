@@ -63,12 +63,17 @@ THE SOFTWARE.
 			if (!r) return false;
 
 			var m = document.getElementById(r).value;
-			xmlhttp=new XMLHttpRequest(); 
-      xmlhttp.open('POST',url,false) ; //synchronous
+			var p = document.getElementById('url-upload');
 
-			xmlhttp.setRequestHeader( 'Content-Type', 'application/json; charset=utf-8' );
+			p.url.value=m;
+			p.submit();
+
+			//xmlhttp=new XMLHttpRequest(); 
+      //xmlhttp.open('POST',url,false) ; //synchronous
+
+			//xmlhttp.setRequestHeader( 'Content-Type', 'application/json; charset=utf-8' );
      
-      xmlhttp.send(JSON.stringify({url: m})); 
+      //xmlhttp.send(JSON.stringify({url: m})); 
 
 	    return false;	};
 
@@ -166,7 +171,9 @@ THE SOFTWARE.
 
 	  	<h3> upload test </h3>
 	  	  <li><a href="javascript:posturl('/rest3d/upload/','u1');"> [POST URL] /rest3d/upload/</a>
-	  	  	<input type="text" size="51" value="/my/url/" id="u1" onkeydown="if (event.keyCode == 13) posturl('/rest3d/upload/','u1');"/> send url to upload </li>
+	  	  	<input type="text" size="51" value="http://download1948.mediafire.com/vnsy49yu96bg/7kjbc7pwrcspc94/Pokeball.zip" id="u1" onkeydown="if (event.keyCode == 13) posturl('/rest3d/upload/','u1');"/> send url to upload </li>
+
+
 
 	  	  <li><a href="javascript:postfile('/rest3d/upload/','u2');"> [POST FILE] /rest3d/upload/</a>
 	  	  	<input type="file" size="51" id="u2" onchange="postfile('/rest3d/upload/', this.value, 'u2');"/> send url to upload </li>
@@ -177,6 +184,14 @@ THE SOFTWARE.
 						</form>
 	  	
 	  </ul>
+	</div>
+
+	<div style="display: hidden" />
+
+		<form id='url-upload' style="display: hidden" action="/rest3d/upload/" method="POST" id="form">
+		  <input type="hidden" id="url" name="url" value=""/>
+		</form>
+
 	</div>
 
 </body>

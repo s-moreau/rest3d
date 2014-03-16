@@ -45,6 +45,11 @@ viewer.nowParsing;
 
 viewer.dropTick=false;
 
+if (!window.performance) {
+    window.performance = {};
+    window.performance.now = $.now
+};
+
 viewer.parse_dae = function(dae) {
 
     // set the image load callback to redraw
