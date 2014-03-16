@@ -106,8 +106,8 @@ require(['jquerymin','glmatrix','glmatrixExt','colorpicker','eye','utils','webgl
 
  var $canvas;
 
-if (!window.performance) {
-    window.performance = {};
+if (!window.performance || !window.performance.now) {
+    window.performance = window.performance || {};
     window.performance.now = $.now
 };
 function args() {

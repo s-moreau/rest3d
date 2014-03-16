@@ -45,8 +45,9 @@ viewer.nowParsing;
 
 viewer.dropTick=false;
 
-if (!window.performance) {
-    window.performance = {};
+
+if (!window.performance || !window.performance.now) {
+    window.performance = window.performance || {};
     window.performance.now = $.now
 };
 
