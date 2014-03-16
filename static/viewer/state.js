@@ -161,6 +161,7 @@ THE SOFTWARE.*/
 
         State.pickState = State.clone(pickState);
         State.basicState = State.clone(basicState);
+        State.greyState = State.clone(greyState);
 
       };
 
@@ -1298,7 +1299,6 @@ THE SOFTWARE.*/
 
 
   // picking state
-  // create a basic State (lambert)
     var pickState ={}; 
     pickState.ID = "pickState";
 
@@ -1326,10 +1326,46 @@ THE SOFTWARE.*/
     pickState.program.compileMe = true;
     pickState.program.glProgram = null;
 
-    pickState.program.attributes = { 'POSITION' : { semantic: 'POSITION', symbol: 'aVertex', type: WebGLRenderingContext.FLOAT_VEC3 }
-                                    };
+    pickState.program.attributes = { 'POSITION' : { semantic: 'POSITION', symbol: 'aVertex', type: WebGLRenderingContext.FLOAT_VEC3 },
+                                      };
 
     pickState.program.uniforms =  {  'MODELVIEW' : { symbol: 'uMVMatrix' , type: WebGLRenderingContext.FLOAT_MAT4 },
+                                     'PROJECTION' : { symbol: 'uPMatrix' , type: WebGLRenderingContext.FLOAT_MAT4 },
+                                     'color' :{ symbol: 'uColor', type: WebGLRenderingContext.FLOAT_VEC4 }};
+
+  // gray state (draw everything not selected as grey)
+   var greyState ={}; 
+    greyState.ID = "greyState";
+
+    greyState.program = {}; // allocate new program for basicState
+
+
+    greyState.program.vertexShader =  
+          "attribute vec3 aVertex;"+
+          "uniform mat4 uPMatrix;\n"+
+          "uniform mat4 uMVMatrix;\n"+
+          "uniform mat3 uNMatrix;"+
+          "varying vec3 vNormal;"+
+          "void main(void) {\n"+
+          "    gl_Position = uPMatrix * uMVMatrix * vec4(aVertex, 1.0);\n"+
+          "}";
+
+    greyState.program.fragmentShader = 
+          "precision mediump float;\n"+
+          "uniform vec4 uColor;\n"+
+          "void main(void) {\n"+
+            "gl_FragColor = vec4(0.5,0.5,0.5,1.);"+
+          "}";
+
+
+
+    greyState.program.compileMe = true;
+    greyState.program.glProgram = null;
+
+    greyState.program.attributes = { 'POSITION' : { semantic: 'POSITION', symbol: 'aVertex', type: WebGLRenderingContext.FLOAT_VEC3 },
+                                     };
+
+    greyState.program.uniforms =  {  'MODELVIEW' : { symbol: 'uMVMatrix' , type: WebGLRenderingContext.FLOAT_MAT4 },
                                      'PROJECTION' : { symbol: 'uPMatrix' , type: WebGLRenderingContext.FLOAT_MAT4 },
                                      'color' :{ symbol: 'uColor', type: WebGLRenderingContext.FLOAT_VEC4 }};
     // TODO  - disable blend
