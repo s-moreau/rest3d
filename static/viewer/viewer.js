@@ -39,15 +39,17 @@ var canvas = null;
 var mainCamera = null;
 var channel = null;
 
-var tree = null;
-var scene_tree = null;
-var warehouse_tree = null;
-
 // associate primitive name with picking ID
 viewer.pickName = [null];
 viewer.nowParsing;
 
 viewer.dropTick=false;
+
+
+if (!window.performance || !window.performance.now) {
+    window.performance = window.performance || {};
+    window.performance.now = $.now
+};
 
 viewer.parse_dae = function(dae) {
 
@@ -220,7 +222,8 @@ viewer.parse_dae = function(dae) {
                 // initialize picking ID
                 var pickID = viewer.pickName.length;
                 viewer.pickName.push(viewer.nowParsing+"#"+this.id+"["+p+"]");
-                glprim.pickID = [(pickID & 0xff)/255,((pickID>>8)&0xff)/255,((pickID>>16)&0xff)/255,1];
+                glprim.pickColor = [(pickID & 0xff)/255,((pickID>>8)&0xff)/255,((pickID>>16)&0xff)/255,1];
+                glprim.pickID = pickID;
 
                 geometry.glprimitives.push(glprim);
 
@@ -247,7 +250,8 @@ viewer.parse_dae = function(dae) {
     scenes.push(scene);
     $('#loadtimer').text('load time=' + (scene.endtime - scene.starttime));
     viewer.draw();
-    viewer.onload.call();
+    if (viewer.onload)
+        viewer.onload.call();
 };
 
 viewer.parse_gltf = function(gltf) {
@@ -313,7 +317,8 @@ viewer.parse_gltf = function(gltf) {
                   // initialize picking ID
                 var pickID = viewer.pickName.length;
                 viewer.pickName.push(viewer.nowParsing+"#"+this.id+"["+i+"]");
-                glprim.pickID = [(pickID & 0xff)/255,((pickID>>8)&0xff)/255,((pickID>>16)&0xff)/255,1];
+                glprim.pickColor = [(pickID & 0xff)/255,((pickID>>8)&0xff)/255,((pickID>>16)&0xff)/255,1];
+                glprim.pickID = pickID;
 
                 geometry.glprimitives.push(glprim);
 
@@ -347,7 +352,8 @@ viewer.parse_gltf = function(gltf) {
     $('#loadtimer').text('load time=' + (scene.endtime - scene.starttime));
     scenes.push(scene);
     viewer.draw();
-    viewer.onload.call();
+    if (viewer.onload)
+        viewer.onload.call();
 };
 
 viewer.pushMatrix = function(m) {
@@ -420,8 +426,8 @@ viewer.draw = function(pick,x,y) {
 
 
     if (!pick) {
-    $('#zoom').text('currentZoom is ' + viewer.currentZoom);
-    $('#rot').text('currentRotation is ' + viewer.currentRotationX.toFixed(2) + ',' + viewer.currentRotationY.toFixed(2));
+        $('#zoom').text('currentZoom is ' + viewer.currentZoom);
+        $('#rot').text('currentRotation is ' + viewer.currentRotationX.toFixed(2) + ',' + viewer.currentRotationY.toFixed(2));
     } 
 
     if (pick) {

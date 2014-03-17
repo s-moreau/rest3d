@@ -244,7 +244,10 @@ RENDERER.primitive.prototype = {
 
       if (_channel.picking) {
         state = State.pickState; 
-        state.values.color = this.pickID;
+        state.values.color = this.pickColor;
+      } else if (_channel.selected && _channel.selected[this.pickID] !== true)
+      {
+          state = State.greyState;
       }
 
       if (0 !== this.numVertices) {

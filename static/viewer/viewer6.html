@@ -37,10 +37,10 @@ THE SOFTWARE.
           var mask;
         var win =$('');
           
-        if (!window.performance) {
-            window.performance = {};
-            window.performance.now = $.now
-        };
+if (!window.performance || !window.performance.now) {
+    window.performance = window.performance || {};
+    window.performance.now = $.now
+};
         var listThemes = ["black-tie", "blitzer", "cupertino", "dark-hive", "dot-luv", "eggplant", "excite-bike", "flick", "hot-sneaks", "humanity", "le-frog", "mint-choc", "overcast", "pepper-grinder", "redmond", "smoothness", "south-street", "start", "sunny", "swanky-purse", "trontastic", "ui-darkness", "ui-lightness", "vader"];
         var renderMenu = $('');
         var flagStatus = false;
@@ -349,6 +349,7 @@ THE SOFTWARE.
             }
             return material;
             } 
+            /* we do not display glprimitives
 
             window.primitives = function(param_in){
                 var glprimitives = {};
@@ -383,6 +384,9 @@ THE SOFTWARE.
                 return glprimitives;
             }
 
+            */
+
+            /* we do not display inside a mesh
             window.mesh= function(param_in){
                 var mesh = {};
                 if(param_in.hasOwnProperty('mesh')){
@@ -403,27 +407,26 @@ THE SOFTWARE.
                 }
                 return mesh;
             }
+            */
+
             window.geometry = function(param_in,param_out){
                 if(param_in.hasOwnProperty("geometries")&&$.isArray(param_in.geometries)){
                     for(var i=0;i<param_in.geometries.length;i++){
                         var subsel_geometries = param_in.geometries[i];
                         var material =  self.material(subsel_geometries);
-                        var glprimitives =  self.primitives(subsel_geometries);
-                        var mesh = self.mesh(subsel_geometries);
+
+
                         var title = "geometry_"+i;
                         if(i==0){title = "geometry"}
                         var subchild = {
                             "data":title,
                             "children":[
-                            {"data":"materials",
-                            "children":[material],
-                            },
-                            {"data":"glprimitives",
-                            "children":[glprimitives],
-                            },
-                            {"data":"mesh",
-                            "children":[mesh],
-                            }
+                                {"data":"mesh",
+                                },
+                                {"data":"materials",
+                                "children":[material],
+                                },
+
                             ],
                     };
                     param_out.push(subchild);
@@ -1162,12 +1165,19 @@ THE SOFTWARE.
                     var y = 1.0 - (ev.layerY / ev.currentTarget.clientHeight);
 
                     var id=viewer.draw(true,x,y);
-                    // console.log("picked id="+viewer.pickName[id]);
+                    
                     if(viewer.pickName[id]!="undefined"&&viewer.pickName[id]!=null){
-                        window.fl4reStatus("",$("#mainLayout-south"),"selected "+viewer.pickName[id]);
-                    }
-                    else{
+                        if (!viewer.channel.selected) viewer.channel.selected = {};
+                        if (viewer.channel.selected[id]) {
+                            delete viewer.channel.selected[id];
+                            window.fl4reStatus("",$("#mainLayout-south"),"selected "+viewer.pickName[Object.keys(viewer.channel.selected)[0]]);
+                        } else {
+                            viewer.channel.selected [id] = true;
+                            window.fl4reStatus("",$("#mainLayout-south"),"selected "+viewer.pickName[id]);
+                        }  
+                    } else{ 
                         window.fl4reStatus("READY",$("#mainLayout-south"));
+                        delete viewer.channel.selected;
                     }
                     viewer.draw();
 

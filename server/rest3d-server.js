@@ -55,8 +55,8 @@ var toJSON = require('./src/tojson');
 var database = require('./src/basexdriver');
 var FileInfo = require('./src/fileinfo');
 var sendFile = require('./src/sendfile');
-var handleResult = require('./src/handleresult');
-var handleError = require('./src/handleerror');
+var handler= require('./src/handler');
+
 
 
 var platform = os.type().match(/^Win/) ? 'win' : 
@@ -167,6 +167,7 @@ server.get(/^\/rest3d\/info/,function(req, res, next) {
 
 server.put(/^\/rest3d\/assets.*/,function(req, res, next) {
 	var asset = req.url.split('assets/')[1];
+	var h = new handler(req, res, next)
 	// need asset uri !
 	if (asset === undefined || asset == null || asset === '')
 	{
@@ -180,15 +181,13 @@ server.put(/^\/rest3d\/assets.*/,function(req, res, next) {
  
   var form = new formidable.IncomingForm();
   form.on('error', function(error) { // I thought this would handle the upload error
-      handleError(req, res, error);
-      return next();
+      h.handleError(error);
   });
 
  
   form.parse(req, function(err, fields, files) {
 		if (err) {
-			handleError(req,res,err);
-			return next();
+			h.handleError(error);
 		}
 
 		// will execute when form is parsed
@@ -202,7 +201,6 @@ server.put(/^\/rest3d\/assets.*/,function(req, res, next) {
 
 		var daefilename = '';
 
-		request.get(req.body).pipe(zipfile)
 
 		zipfile.on('close', function () {
 
@@ -416,6 +414,7 @@ server.put(/^\/rest3d\/assets.*/,function(req, res, next) {
 		           });
 			}
 		});
+		request.get(req.body).pipe(zipfile); 
 	});
 });
 
@@ -568,19 +567,19 @@ server.post(/^\/rest3d\/convert.*/,function(req,res,next){
          url = '',
          params = {};
 
+   var h = new handler(req,res, next);
          
 
      form.on('field', function (name, data) {
      	params[name] = data;
      }).on('error', function (e) {
-     	handleError(req,res,e);
-        return next();
+     	h.handleError(req,res,e);
      }).on('end', function(){//
      	console.log('now converting collada')
 
      	if (!params.name || !params.name.toLowerCase().endsWith('dae')) { 
-     		handleError(req,res,{error: 'invalid file '+params.name+' in convert'});
-     		return next();
+     		h.handleError(req,res,{error: 'invalid file '+params.name+' in convert'});
+     		return;
      	}
      	var output_dir = params.name.split('\.')[0]+'_gltf';
      	var output_file = params.name.replace('.dae','.json');
@@ -598,7 +597,7 @@ server.post(/^\/rest3d\/convert.*/,function(req,res,next){
 		     //console.log('Error code: '+error.code);
 		     //console.log('Signal received: '+error.signal);
 
-			 handleError(req,res,{"code":error.code, "message": stderr});
+			 h.handleError(req,res,{"code":error.code, "message": stderr});
 
 		   }
 		   console.log('Child Process STDOUT: '+stdout);
@@ -606,9 +605,10 @@ server.post(/^\/rest3d\/convert.*/,function(req,res,next){
 		 });
 
 		 ls.on('exit', function (code, output) {
-		   console.log('Child process exited with exit code '+code);
-		   	if (code !== 0){
-				return next();
+		  console.log('Child process exited with exit code '+code);
+		  if (code !== 0) {
+				h.handleError({errorCode:code, message:'Child process exited with exit code '});
+				return;
 			}
 			codeC2J= code;
 			outputC2J = output;
@@ -646,9 +646,8 @@ server.post(/^\/rest3d\/convert.*/,function(req,res,next){
                     	console.log('timeout !! upload/'+output_dir+'/ was deleted');
                     }
                     setTimeout(function() { timeout()},5 * 60 * 1000);
-		        handleResult(req, res, {files: files, code:codeC2J, output:outputC2J});
+		        h.handleResult({files: files, code:codeC2J, output:outputC2J});
 		    });		
-		     return next();
 	     });
 	     });
 

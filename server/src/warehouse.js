@@ -30,14 +30,19 @@ module.exports = function (server) {
   var request = require('request');
   var cheerio = require('cheerio');
   var toJSON = require('./tojson');
+  var mkdirp = require('mkdirp');
   var fs = require('fs');
   var sendFile = require('./sendfile');
 
-  var handleError = require('./handleerror');
+  var handler = require('./handler');
+
+  var zip = require('zip'); // peeking inside zip file
+
 
   server.get(/^\/rest3d\/warehouse.*/,function(req, res, next) {
     
-    
+    var warehouseHandler = new handler(req,res);
+
     var uid = req.url.split("/warehouse/")[1];
     console.log('[warehouse]' + uid);
 
@@ -96,11 +101,11 @@ module.exports = function (server) {
         } else if (id && id[0] === 'c' && id.length===2){
           // TODO call handleError
           var error = { "code": "API call error", "message": "invalid id="+ids+" in /rest3d/warehouse/data/ "};
-          handleError(req,res,error);
+          warehouseHandler.handleError(error);
           return next();
         } else {
-          error={code:"TODO",message:"transfering of entire collections not yet supported"};
-          handleError(req, res, error);
+          error={code:"API call error",message:"transfering a collection is not supported"};
+          warehouseHandler.handleError(error);
           return next();
         }
         // return the asset 
@@ -159,21 +164,89 @@ module.exports = function (server) {
 
       var id = uid.split('_');
       if (id && id[0] === 'm' && id.length===3){
-          console.log ('get warehouse model ID =['+id[1]+']')
-          var url = "https://3dwarehouse.sketchup.com/3dw/getbinary?subjectId="+id[1]+"&subjectClass=entity&name="+id[2];
+        console.log ('get warehouse model ID =['+id[1]+']')
+        var url = "https://3dwarehouse.sketchup.com/3dw/getbinary?subjectId="+id[1]+"&subjectClass=entity&name="+id[2];
 
+        // TODO - do we really need to use file for this?
+        // can't we do this in memory instead?
 
-          // this is a kmz or zip file
-          var file = fs.createWriteStream('tmp/'+id[1]+'.zip');
-          file.on('error', function(err) { console.log(err); });
-          //req.pipe(request(url)).pipe(res);
+        var asset = {type:'folder', id:uid, path:'/'}; // output ... find name of asset somewhere?
+        var zipfile = fs.createWriteStream('tmp/'+uid+'.zip');
+        var daefilename = ""; // this will look for a .dae in the zip file
+        zipfile.on('error', function(error) {
+          warehouseHandler.handleError(error);
+        });
+        zipfile.on('close', function () {
+          try {
+            // there must be better than doing a SYNC read!
+            var data = fs.readFileSync('tmp/'+uid+'.zip')
+            var reader = zip.Reader(data);
 
-          req.pipe(request(url)).pipe(file);
-          sendFile(req,res,'tmp/'+id[1]+".zip");
+            reader.forEach(function (entry) {
 
+              var filename = entry.getName();
+              console.log('****** entry *********')
+              console.log('filename=',filename);
+
+/* this code creates files and folders
+
+                var tmpfilename = 'tmp/'+uid+'/'+filename;
+
+                if (tmpfilename.endsWith('/')) {
+                } else
+                {
+                  var folder = tmpfilename.substring(0,tmpfilename.lastIndexOf('/'));
+                  console.log('folder='+folder)
+                  mkdirp.sync(folder); 
+                  
+                  fs.writeFileSync(tmpfilename, entry.getData(), function (err) {
+                    if (err) throw err;
+                    console.log('It\'s saved!');
+                  });
+                
+                  if (filename.toLowerCase().endsWith('.dae'))
+                    daefilename = tmpfilename;
+                    
+                }
+*/
+                // returns list of files
+                // find where this should be inserted
+                var path = filename;
+                var index = path.indexOf('/');
+                var file = path;
+                var folder = asset;
+                var found = asset;
+                while (index>0) {
+                  file = path.substring(0,index);
+                  if (!folder.children) folder.children=[];
+                  var test=null;
+                  for( var i=0; i< folder.children.length; i++ ) { if (folder.children[i].name === file) {test=folder.children[i]; break;}};
+                  if (!test) {
+                    test = {name:file, type:'folder'};
+                    folder.children.push(test);
+                  } 
+                  folder = test;
+                  path = path.substring(index+1);
+                  index = path.indexOf('/');
+                }
+                if (path.length !== 0) {
+                  entry = {name:path, type:'file'};
+                  if (!folder.children) folder.children=[];
+                  folder.children.push(entry);
+                  if (file.toLowerCase().endsWith('.dae'))
+                    asset.daefilename = filename;
+                }
+            });
+          } catch (e)
+          {
+            warehouseHandler.handleError(e);
+            return next();
+          }
+
+          warehouseHandler.handleResult(asset);
           return next();
-
-
+        });
+        request.get(url).pipe(zipfile); 
       } else if (id && id[0] === 'c' && id.length===2){
           console.log ('get warehouse collection ID =['+id[1]+']')
           var start = 1;
@@ -235,12 +308,15 @@ module.exports = function (server) {
       } else {
 	      	// TODO call handleError
 	      	var error = { "code": "API call error", "message": "invalid id="+uid+" in /rest3d/warehouse/ "};
-          handleError(req,res,error);
+          warehouseHandler.handleError(error);
 		      return next();
 	    }
 
     }
   });
+
+// not used, this is the old code that had to parse the web page
+// warehouse web site has changed, and json objects are now available
   var parsecollection = function(body) {
       var result={};
       var $ = cheerio.load(body);
@@ -273,7 +349,6 @@ module.exports = function (server) {
           //item.loaded = false;
           result.assets.push(item);
         }
-
       });
       return result;
     };

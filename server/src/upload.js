@@ -12,32 +12,15 @@ module.exports = function (server) {
   var FileInfo = require('./fileinfo');
   var sendFile = require('./sendfile');
 
-  var handleResult = require('./handleresult');
-  var handleError = require('./handleerror');
-
-  var UploadHandler = function (req, res, callback) {
-        this.req = req;
-        this.res = res;
-        this.callback = callback;
-    };
-
+  var UploadHandler = require('./handler');
   var utf8encode = function (str) {
    return unescape(encodeURIComponent(str));
   };
-
 
   var setNoCacheHeaders = function (res) {
    res.setHeader('Pragma', 'no-cache');
    res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate');
    res.setHeader('Content-Disposition', 'inline; filename="files.json"');
-  };
-
-
-
-  var UploadHandler = function (req, res, callback) {
-    this.req = req;
-    this.res = res;
-    this.callback = callback;
   };
 
 
@@ -66,9 +49,9 @@ module.exports = function (server) {
               }
               setTimeout(function() { timeout()},5 * 60 * 1000);
             });
-            handler.callback(handler.req, handler.res, {files: files}, redirect);
+            handler.handleResult({files: files}, redirect);
           } catch (e) {
-            handleError(handler.req, handler.res, e);
+            handler.handleError( e);
             return next();
           }
         }
@@ -83,7 +66,7 @@ module.exports = function (server) {
         map[path.basename(file.path)] = fileInfo;
         files.push(fileInfo);
       } catch(e) {
-        handleError(handler.req, handler.res, e);
+        handler.handleError( e);
         return next();
       };
     }).on('field', function (name, value) {
@@ -121,7 +104,7 @@ module.exports = function (server) {
         fs.unlink(file);
       });
     }).on('error', function (e) {
-        handleError(handler.req, handler.res, e);
+        handler.handleError( e);
         return next();
     }).on('progress', function (bytesReceived, bytesExpected) {
       if (bytesReceived > FileInfo.options.maxPostSize) {
@@ -147,7 +130,7 @@ module.exports = function (server) {
           files.push(fileInfo);
         }
       });
-      handler.callback(handler.req, handler.res, {files: files});
+      handler.handleResult({files: files});
     });
   };
 
@@ -161,12 +144,12 @@ module.exports = function (server) {
           Object.keys(FileInfo.options.imageVersions).forEach(function (version) {
             fs.unlink(FileInfo.options.uploadDir + '/' + version + '/' + fileName);
           });
-          handler.callback(this.req, this.res, {success: !ex});
+          handler.handleResult({success: !ex});
         });
         return;
       }
     }
-    handler.callback(this.req, this.res, {success: false});
+    handler.handleResult({success: false});
   };
 
   // rest3d post upload API
@@ -184,7 +167,7 @@ module.exports = function (server) {
       'Access-Control-Allow-Headers',
       FileInfo.options.accessControl.allowHeaders
     );
-    var handler = new UploadHandler(req, res, handleResult);
+    var handler = new UploadHandler(req, res);
     setNoCacheHeaders(res);
     var result = handler.post();
 
@@ -207,7 +190,7 @@ module.exports = function (server) {
           'Access-Control-Allow-Headers',
           FileInfo.options.accessControl.allowHeaders
       );
-      var handler = new UploadHandler(req, res, handleResult);
+      var handler = new UploadHandler(req, res);
 
       var asset = req.url.split("/upload/")[1];
         
