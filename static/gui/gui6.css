@@ -730,3 +730,11 @@ bottom: 0px !important;
 right: 34px !important;
     z-index: 9999 !important; 
 }
+
+#submitSearch {
+    position: static;
+    top: 0;
+    right:0;
+
+
+}
