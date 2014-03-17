@@ -581,9 +581,20 @@ THE SOFTWARE.
             });
            $("#dialog").css({'min-height':'none !important;'});
         }
+        var accor = GUI.accordion({
+            id:"warehouse_accor",
+            parent:renderMenu.tree,
+              item: [{
+                id: "sample",
+                text: "Sample of collections"
+            }, {
+                id: "search",
+                text: "Search in the warehouse"
+            }, ]
+        })
         GUI.treeBis({
-            id:'treeViewDiv',
-            parent: renderMenu.tree,
+            id:'warehouse',
+            parent: accor.sample,
             json:  {
                 "ajax" : {
                     "type": 'GET',
@@ -914,7 +925,7 @@ THE SOFTWARE.
             COLLADA.load(url, viewer.parse_dae);
             window.notif(url);
             pleaseWait(false);
-        }).width("100%");
+        }).width("90%");
         accordion.collada.append("<hr></hr>");
 
         GUI.button('duck', accordion.collada, function () {
@@ -923,7 +934,7 @@ THE SOFTWARE.
             COLLADA.load(url, viewer.parse_dae);
             window.notif(url);
             pleaseWait(false);
-        }).width("100%");
+        }).width("90%");
         accordion.collada.append("<hr></hr>");
 
         GUI.button('creature', accordion.collada, function () {
@@ -932,7 +943,7 @@ THE SOFTWARE.
             COLLADA.load(url, viewer.parse_dae);
             window.notif(url);
             pleaseWait(false);
-        }).width("100%");
+        }).width("90%");
         accordion.collada.append("<hr></hr>");
 
         GUI.button('skinned creature (fix me!!)', accordion.gltf, function () {
@@ -941,7 +952,7 @@ THE SOFTWARE.
             glTF.load(url, viewer.parse_gltf);
             window.notif(url);
             pleaseWait(false);
-        }).width("100%");
+        }).width("90%");
         accordion.gltf.append("<hr></hr>");
 
         GUI.button('duck', accordion.gltf, function () {
@@ -950,7 +961,7 @@ THE SOFTWARE.
             glTF.load(url, viewer.parse_gltf);
             window.notif(url);
             pleaseWait(false);
-        }).width("100%");
+        }).width("90%");
         accordion.gltf.append("<hr></hr>");
 
         GUI.button('rambler', accordion.gltf, function () {
@@ -960,7 +971,7 @@ THE SOFTWARE.
             window.notif(url);
             pleaseWait(false);
 
-        }).width("100%");
+        }).width("90%");
         accordion.gltf.append("<hr></hr>");
 
         GUI.button('rambler-min', accordion.collada, function () {
@@ -970,7 +981,7 @@ THE SOFTWARE.
             window.notif(url);
             pleaseWait(false);
 
-        }).width("100%");
+        }).width("90%");
         accordion.collada.append("<hr></hr>");
 
         GUI.button('rambler', accordion.collada, function () {
@@ -979,7 +990,7 @@ THE SOFTWARE.
             COLLADA.load(url, viewer.parse_dae);
             window.notif(url);
             pleaseWait(false);
-        }).width("100%");
+        }).width("90%");
         accordion.collada.append("<hr></hr>");
 
         GUI.button('supermurdoch', accordion.collada, function () {
@@ -988,7 +999,7 @@ THE SOFTWARE.
             COLLADA.load(url, viewer.parse_dae);
             window.notif(url);
                pleaseWait(false);
-        }).width("100%");
+        }).width("90%");
         accordion.collada.append("<hr></hr>");
 
         GUI.button('supermurdoch', accordion.gltf, function () {
@@ -997,7 +1008,7 @@ THE SOFTWARE.
             glTF.load(url, viewer.parse_gltf);
             window.notif(url);
                pleaseWait(false);
-        }).width("100%");
+        }).width("90%");
         accordion.gltf.append("<hr></hr>");
 
         GUI.button('wine', accordion.collada, function () {
@@ -1006,7 +1017,7 @@ THE SOFTWARE.
             COLLADA.load(url, viewer.parse_dae);
             window.notif(url);
                pleaseWait(false);
-        }).width("100%");
+        }).width("90%");
         accordion.collada.append("<hr></hr>");
 
         GUI.button('wine', accordion.gltf, function () {
@@ -1015,7 +1026,7 @@ THE SOFTWARE.
             glTF.load(url, viewer.parse_gltf);
             window.notif(url);
                pleaseWait(false);
-        }).width("100%");
+        }).width("90%");
         accordion.gltf.append("<hr></hr>");
 
 
@@ -1025,7 +1036,7 @@ THE SOFTWARE.
               COLLADA.load(url, viewer.parse_dae);
             window.notif(url);
                pleaseWait(false);
-        }).width("100%");
+        }).width("90%");
         accordion.collada.append("<hr></hr>");
 
         GUI.button('uh-1n', accordion.gltf, function () {
@@ -1034,7 +1045,7 @@ THE SOFTWARE.
             glTF.load(url, viewer.parse_gltf);
             window.notif(url);
                pleaseWait(false);
-        }).width("100%");
+        }).width("90%");
         accordion.gltf.append("<hr></hr>");
 
         GUI.button('cow', accordion.collada, function () {
@@ -1043,7 +1054,7 @@ THE SOFTWARE.
             COLLADA.load(url, viewer.parse_dae);
             window.notif(url);
                pleaseWait(false);
-        }).width("100%");
+        }).width("90%");
 
         GUI.button('cow', accordion.gltf, function () {
               pleaseWait(true);
@@ -1051,7 +1062,7 @@ THE SOFTWARE.
             glTF.load(url, viewer.parse_gltf);
             window.notif(url);
                pleaseWait(false);
-        }).width("100%");
+        }).width("90%");
 
         var colladaMenu = [];
         accordion.collada.find('button').each(function(i){
@@ -1376,6 +1387,9 @@ THE SOFTWARE.
             fpsCounter.increment();}
     }
      window.fl4reStatus("READY",$("#mainLayout-south"));
+      GUI.container.resizeAll();
+                GUI.container.initContent("center");
+                GUI.container.initContent("west");
 }
          </script>
 </body>
