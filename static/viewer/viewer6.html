@@ -572,8 +572,10 @@ if (!window.performance || !window.performance.now) {
                         param_out.push(result);
                     }
                 }
-            var assets = param_in.assets;
-            if(!assets.length||assets==null){
+            if(param_in.hasOwnProperty("assets")){
+                var assets = param_in.assets;
+            }
+            if(assets&&(assets.length==0||assets==null){
                 nodeBuffer.attr("rel","empty");
             }
             else if(param_in.type == "folder"){
