@@ -581,12 +581,12 @@ if (!window.performance || !window.performance.now) {
             else if(param_in.type == "folder"){
                 var result = {};
                 var path = param_in.children;
-                try{result.data = tmp.name.substr(0,60)}
+                try{result.data = param_in.name.substr(0,60)}
                 catch(err){
                     result.data = "folder";}
                 result.attr = {"id":result.data,"rel":"folder","name":result.data};
                 result.children = [];
-                children(param_in,result.children);
+                children(param_in.children,result.children);
             }
             else{
                 for(var i =0;i<assets.length;i++){
