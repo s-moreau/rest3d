@@ -559,7 +559,7 @@ if (!window.performance || !window.performance.now) {
                         result.attr = {"id":result.data,"rel":ext,"name":result.data};
                         param_out.push(result);
                         }
-                        else if(ext=='.jpg'||'.png'||'.jpeg'){
+                        else if(ext=='.jpg'||ext=='.png'||ext=='.jpeg'){
                             ext = "image";
                              result.data = tmp.name.substr(0,60);
                         result.attr = {"id":result.data,"rel":ext,"name":result.data};
