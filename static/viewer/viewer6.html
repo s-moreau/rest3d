@@ -573,7 +573,7 @@ if (!window.performance || !window.performance.now) {
                     }
                 }
             var assets = param_in.assets;
-            if(assets.length==0||assets==null){
+            if(!assets.length||assets==null){
                 nodeBuffer.attr("rel","empty");
             }
             else if(param_in.type == "folder"){
