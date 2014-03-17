@@ -586,7 +586,7 @@ if (!window.performance || !window.performance.now) {
                     result.data = "folder";}
                 result.attr = {"id":result.data,"rel":"folder","name":result.data};
                 result.children = [];
-                children(param_in.children,result);
+                children(param_in,result.children);
             }
             else{
                 for(var i =0;i<assets.length;i++){
