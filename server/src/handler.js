@@ -13,10 +13,12 @@ Handler.prototype.handleError = function (error) {
       if (typeof error === 'string') 
         error = {success:false, errorCode:'N/A', message:error};
 
-       var type=typeof error;
-       console.log('type of error ='+type);
+       if (error instanceof Error) {
+        var message = error.stack || error.message || "internal error";
+        error = {success:false, message:message, errorCode:error.name};
+       }
 
-        console.log('returning error (500) ='+toJSON(error));
+       // console.log('returning error (500) ='+toJSON(error));
         this.res.writeHead(500, {
             'Content-Type': this.req.headers.accept
             .indexOf('application/json') !== -1 ?
@@ -30,11 +32,13 @@ Handler.prototype.handleResult = function(result, redirect) {
 
       if (typeof result === 'string') 
         result = {success:true, message:result};
+      if (error instanceof Error) 
+        return this.handleError(error);
       
         if (redirect) {
 
         
-        console.log('returning redirect (302) ='+encodeURIComponent(toJSON(result)));
+        // console.log('returning redirect (302) ='+encodeURIComponent(toJSON(result)));
 
           this.res.writeHead(302, {
             'Location': redirect.replace(
@@ -46,7 +50,7 @@ Handler.prototype.handleResult = function(result, redirect) {
         } else {
 
         
-        console.log('returning result (200) ='+toJSON(result));
+        // console.log('returning result (200) ='+toJSON(result));
 
           this.res.writeHead(200, {
             'Content-Type': this.req.headers.accept

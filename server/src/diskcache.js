@@ -123,17 +123,21 @@ subclass(Cache, events.EventEmitter, {
 				return cb(new Error("Cached in memory!"));
 			} else if (this.useDisk) {
 				var keys = this._keysForURL(URL);
-				console.log('calling readFile '+keys.path+'.meta.json');
 
 				//return
 				fs.readFile(keys.path+'.meta.json', _.bind(function(err, jsonData) {
-					console.log('in readFile ['+jsonData+']')
+					//console.log('in readFile ['+jsonData+']')
 					if (err || !jsonData || !jsonData.length) return cb ? cb(err) : 0;
 					var entry = JSON.parse(jsonData);
-					console.log('FOUND cache with content-type='+entry.headers['content-type'])
-					
+					if (!entry.headers ) {
+						// something bad occured
+						return cb ? cb(err) : 0;
+					}
+					//console.log('FOUND cache with content-type='+entry.headers['content-type'])
+					// TODO - check for date stamp and so forth!
+
 					entry.filename = keys.path+'.bin';
-					console.log('filename='+entry.filename)
+					//console.log('filename='+entry.filename)
 					return cb(0,entry);
 				}));
 			

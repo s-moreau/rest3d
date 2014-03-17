@@ -57,56 +57,6 @@ THE SOFTWARE.
 
 	</script>
 
-	<script>
-		function posturl(url,r) {
-
-			if (!r) return false;
-
-			var m = document.getElementById(r).value;
-			var p = document.getElementById('url-upload');
-
-			p.url.value=m;
-			p.submit();
-
-			//xmlhttp=new XMLHttpRequest(); 
-      //xmlhttp.open('POST',url,false) ; //synchronous
-
-			//xmlhttp.setRequestHeader( 'Content-Type', 'application/json; charset=utf-8' );
-     
-      //xmlhttp.send(JSON.stringify({url: m})); 
-
-	    return false;	};
-
-	</script>
-
-	<script>
-		function postfile(url,r) {
-
-			if (!r) return false;
-
-			var m = document.getElementById(r).value;
-			xmlhttp=new XMLHttpRequest(); 
-      xmlhttp.open('POST',url,false) ; //synchronous
-
-			xmlhttp.setRequestHeader( 'Content-Type', 'multipart/form-data' );
-     
-      xmlhttp.send(JSON.stringify({files: m})); 
-
-	    return false;	};
-
-	</script>
-		<script>
-		function postform(url,r) {
-
-			if (!r) return false;
-
-			var m = document.getElementById(r);
-			m.submit();
-
-	    return false;	};
-
-	</script>
-
 </head>
 
 <body>
@@ -164,33 +114,36 @@ THE SOFTWARE.
 
       <li> <a href="javascript:rest('/rest3d/warehouse/data/','qr');"> /rest3d/warehouse/data/</a>
 	  		<input type="text" size="51" value="m_ac9c3413d59e8e4a7f7fbfb94ac070c5_k2" id="qr" onkeydown="if (event.keyCode == 13) rest('/rest3d/warehouse/data/','qr');"/> Get a model (kmz or zip)</li>
+	  	<h3> upload test </h3>
+	  	 
+		    <form id='url-upload' action="/rest3d/upload/" enctype="application/x-www-form-urlencoded" method="POST" >
+		    	[POST URL] /rest3d/upload/
+				  <input id="url" name="url" value="http://download1948.mediafire.com/vnsy49yu96bg/7kjbc7pwrcspc94/Pokeball.zip"/>
+				  <input type="submit" value="Upload"/>
+				  send url to upload
+				</form>
+			</li>
+			<li>
+				<form id='file-upload'  action="/rest3d/upload/" enctype="multipart/form-data" method="POST">
+					[POST files] /rest3d/upload/
+			    <input type="file" name="upload" multiple="multiple"/>
+			    <input type="submit" value="Upload"/>
+			    send files to upload
+		    </form>
+		  </li>
       
       <li> <a href="javascript:put('/rest3d/assets/','qz','mm');"> [PUT] /rest3d/assets/</a>
 	  		<input type="text" size="51" value="test" id="qz" onkeydown="if (event.keyCode == 13) put('/rest3d/assets/','qz','mm');">
 	  		<input type="text" size="81" value="https://3dwarehouse.sketchup.com/3dw/getbinary?subjectId=ac9c3413d59e8e4a7f7fbfb94ac070c5&subjectClass=entity&name=k2" id="mm" onkeydown="if (event.keyCode == 13) rest('/rest3d/assets/','qz','mm');"> store a zip into database</li>
 
-	  	<h3> upload test </h3>
-	  	  <li><a href="javascript:posturl('/rest3d/upload/','u1');"> [POST URL] /rest3d/upload/</a>
-	  	  	<input type="text" size="51" value="http://download1948.mediafire.com/vnsy49yu96bg/7kjbc7pwrcspc94/Pokeball.zip" id="u1" onkeydown="if (event.keyCode == 13) posturl('/rest3d/upload/','u1');"/> send url to upload </li>
-
-
-
-	  	  <li><a href="javascript:postfile('/rest3d/upload/','u2');"> [POST FILE] /rest3d/upload/</a>
-	  	  	<input type="file" size="51" id="u2" onchange="postfile('/rest3d/upload/', this.value, 'u2');"/> send url to upload </li>
-
-						<form id='form' enctype="multipart/form-data" action="/rest3d/upload" method="post">
-						    <input id="image-file" type="file"/>
-						    <input type="submit" value="Submit"/>
-						</form>
 	  	
 	  </ul>
 	</div>
 
 	<div style="display: hidden" />
 
-		<form id='url-upload' style="display: hidden" action="/rest3d/upload/" method="POST" id="form">
-		  <input type="hidden" id="url" name="url" value=""/>
-		</form>
+		
+
 
 	</div>
 
