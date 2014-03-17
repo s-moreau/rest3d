@@ -564,13 +564,14 @@ if (!window.performance || !window.performance.now) {
                             result.data = tmp.name.substr(0,60)||"folder";
                             result.attr = {"id":result.data,"rel":ext,"name":result.data};
                             result.children = [];
-                            children(tmp,result.children)
+                            result.children = children(tmp,result.children);
                         }
                         }
                         result.data = tmp.name.substr(0,60);
                         result.attr = {"id":result.data,"rel":ext,"name":result.data};
                         param_out.push(result);
                     }
+                    return param_out;
                 }
             if(param_in.hasOwnProperty("assets")){
                 var assets = param_in.assets;
@@ -586,7 +587,7 @@ if (!window.performance || !window.performance.now) {
                     result.data = "folder";}
                 result.attr = {"id":result.data,"rel":"folder","name":result.data};
                 result.children = [];
-                children(param_in.children,result.children);
+                result.children = children(param_in.children,result.children);
             }
             else{
                 for(var i =0;i<assets.length;i++){
