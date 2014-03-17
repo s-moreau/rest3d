@@ -615,7 +615,7 @@ if (!window.performance || !window.performance.now) {
         };
 
         function download(node){
-            var href = $('<a style="display:none" href="http://node.fl4re.com/rest3d/warehouse/data/'+node.attr("id")+'" target="_blank"></a>');
+            var href = $('<a style="display:none" href="/rest3d/warehouse/data/'+node.attr("id")+'" target="_blank"></a>');
             $('body').append(href);
             href[0].click();
             href[0].remove();
@@ -646,7 +646,7 @@ if (!window.performance || !window.performance.now) {
                 text: "Sample of collections"
             }, {
                 id: "search",
-                text: "Search in the warehouse"
+                text: "Search among the warehouse"
             }, ]
         })
         GUI.treeBis({
@@ -661,12 +661,12 @@ if (!window.performance || !window.performance.now) {
                         var url = "";
                         if (node == -1)
                         {
-                            url = "http://node.fl4re.com/rest3d/warehouse/";
+                            url = "/rest3d/warehouse/";
                         }
                         else if(node.attr('rel')=="collection"||"model")
                         {
                             nodeId = node.attr('id');
-                            url = "http://node.fl4re.com/rest3d/warehouse/" + nodeId;
+                            url = "/rest3d/warehouse/" + nodeId;
                         }
                         return url;
                     },
@@ -756,12 +756,12 @@ if (!window.performance || !window.performance.now) {
                         // var type = node.attr('type'); 
                         if (node == -1)
                         {
-                            url = "http://node.fl4re.com/rest3d/warehouse/search/"+searchInput.val();
+                            url = "/rest3d/warehouse/search/"+searchInput.val();
                         }
                         else if(node.attr('rel')=="collection"||"model")
                         {
                             nodeId = node.attr('id');
-                            url = "http://node.fl4re.com/rest3d/warehouse/" + nodeId;
+                            url = "/rest3d/warehouse/" + nodeId;
                         }
                         return url;
                     },
