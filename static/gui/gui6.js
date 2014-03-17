@@ -433,7 +433,7 @@ define("gui", (function (global) {
                     this.jsonInput["plugins"]=this.json.plugin;
                 }
                 else{
-                    this.jsonInput["plugins"]=["themes", "json_data", "ui", "types", "sort", "dnd","contextmenu"];
+                    this.jsonInput["plugins"]=["themes", "json_data", "ui", "types", "sort","contextmenu","search"];
                 }
                 console.debug(this.jsonInput)
             }

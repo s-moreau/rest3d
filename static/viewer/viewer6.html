@@ -541,19 +541,73 @@ if (!window.performance || !window.performance.now) {
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
         var nodeBuffer;
         function parseWarehouseJson(param_in,param_out){
-            var assets = param_in.assets;
-            if(assets.length==0||assets==null){
+            function children(param_in,param_out){
+                for (var j=0; j<param_in.length;j++){
+                    var result = {};
+                    var tmp =param_in[j];
+
+                        var ext = tmp.name.match(/\.[^.]+$/);
+                        if(ext=='.dae'){
+                            ext = "collada";
+                             result.data = tmp.name.substr(0,60);
+                        result.attr = {"id":result.data,"rel":ext,"name":result.data};
+                        param_out.push(result);
+                        }
+                        else if(ext=='.kml'){
+                            ext = "kml";
+                             result.data = tmp.name.substr(0,60);
+                        result.attr = {"id":result.data,"rel":ext,"name":result.data};
+                        param_out.push(result);
+                        }
+                        else if(ext=='.jpg'||ext=='.png'||ext=='.jpeg'){
+                            ext = "image";
+                             result.data = tmp.name.substr(0,60);
+                        result.attr = {"id":result.data,"rel":ext,"name":result.data};
+                        param_out.push(result);
+                        }
+                        else if(ext=='.txt'){
+                            ext = "text";
+                             result.data = tmp.name.substr(0,60);
+                        result.attr = {"id":result.data,"rel":ext,"name":result.data};
+                        param_out.push(result);
+                        }
+                        else{
+                            ext = "folder";
+                            result.data = tmp.name.substr(0,60)||"folder";
+                            result.attr = {"id":result.data,"rel":ext,"name":result.data};
+                            result.children = [];
+                            result.children = children(tmp.children,result.children);
+                            param_out.push(result);
+                        }
+                        
+                       
+                    }
+                    return param_out;
+                }
+            if(param_in.hasOwnProperty("assets")){
+                var assets = param_in.assets;
+            }
+            if(assets&&(assets.length==0||assets==null)){
                 nodeBuffer.attr("rel","empty");
+            }
+            else if(param_in.type == "folder"){
+                var result = {};
+                var path = param_in.children;
+                try{result.data = param_in.name.substr(0,60)}
+                catch(err){
+                    result.data = "folder";}
+                result.attr = {"id":result.data,"rel":"folder","name":result.data};
+                result.children = [];
+                result.children = children(param_in.children,result.children);
+                param_out.push(result);
             }
             else{
                 for(var i =0;i<assets.length;i++){
-                    var asset = assets[i];
                     var result = {};
+                    var asset = assets[i];
                     result.data = asset.name.substr(0,60);
-                    if(asset.type=="collection"){result.state = "closed";}
+                    result.state = "closed";
                     result.attr = {"id":asset.id,"rel":asset.type,"iconuri":asset.iconUri,"name":result.data};
-                    //
-                    if(asset.hasOwnProperty('iconUri'));
                     param_out.push(result);
                 }
             }
@@ -584,9 +638,20 @@ if (!window.performance || !window.performance.now) {
             });
            $("#dialog").css({'min-height':'none !important;'});
         }
+        var accor = GUI.accordion({
+            id:"warehouse_accor",
+            parent:renderMenu.tree,
+              item: [{
+                id: "sample",
+                text: "Sample of collections"
+            }, {
+                id: "search",
+                text: "Search in the warehouse"
+            }, ]
+        })
         GUI.treeBis({
-            id:'treeViewDiv',
-            parent: renderMenu.tree,
+            id:'warehouse',
+            parent: accor.sample,
             json:  {
                 "ajax" : {
                     "type": 'GET',
@@ -599,25 +664,18 @@ if (!window.performance || !window.performance.now) {
                         {
                             url = "http://node.fl4re.com/rest3d/warehouse/";
                         }
-                        else
+                        else if(node.attr('rel')=="collection"||"model")
                         {
-                              console.debug(node.attr('type'))
-                            var type = node.attr('rel'); 
-                            if(type =="collection"){
-                                nodeId = node.attr('id');
-                                url = "http://node.fl4re.com/rest3d/warehouse/" + nodeId;
-                            }
-                            else{
-                                return;
-                            }
+                            nodeId = node.attr('id');
+                            url = "http://node.fl4re.com/rest3d/warehouse/" + nodeId;
                         }
-
                         return url;
                     },
                     "success": function (new_data) {
                         console.debug(new_data);
                         var result = [];
                         result=parseWarehouseJson(new_data,result);
+                         console.debug(result);
                         return result;
                     }
                 }
@@ -635,9 +693,34 @@ if (!window.performance || !window.performance.now) {
                 }
             },
             type:  { "types": {
-                "collection": {
+                "folder": {
                     "icon" : {
                         "image" : "../gui/images/folder.png",
+                    },
+                    },
+                "collection": {
+                    "icon" : {
+                        "image" : "../gui/images/menu-scenes.png",
+                    },
+                    },
+                "collada": {
+                    "icon" : {
+                        "image" : "../favicon.ico",
+                    },
+                    },
+                "text": {
+                    "icon" : {
+                        "image" : "../gui/images/file.png",
+                    },
+                    },
+                "kml": {
+                    "icon" : {
+                        "image" : "../gui/images/kml.png",
+                    },
+                    },
+                 "image": {
+                    "icon" : {
+                        "image" : "../gui/images/media-image.png",
                     },
                     },
                     //select_node : function () {return false;}
@@ -917,7 +1000,7 @@ if (!window.performance || !window.performance.now) {
             COLLADA.load(url, viewer.parse_dae);
             window.notif(url);
             pleaseWait(false);
-        }).width("100%");
+        }).width("90%");
         accordion.collada.append("<hr></hr>");
 
         GUI.button('duck', accordion.collada, function () {
@@ -926,7 +1009,7 @@ if (!window.performance || !window.performance.now) {
             COLLADA.load(url, viewer.parse_dae);
             window.notif(url);
             pleaseWait(false);
-        }).width("100%");
+        }).width("90%");
         accordion.collada.append("<hr></hr>");
 
         GUI.button('creature', accordion.collada, function () {
@@ -935,7 +1018,7 @@ if (!window.performance || !window.performance.now) {
             COLLADA.load(url, viewer.parse_dae);
             window.notif(url);
             pleaseWait(false);
-        }).width("100%");
+        }).width("90%");
         accordion.collada.append("<hr></hr>");
 
         GUI.button('skinned creature (fix me!!)', accordion.gltf, function () {
@@ -944,7 +1027,7 @@ if (!window.performance || !window.performance.now) {
             glTF.load(url, viewer.parse_gltf);
             window.notif(url);
             pleaseWait(false);
-        }).width("100%");
+        }).width("90%");
         accordion.gltf.append("<hr></hr>");
 
         GUI.button('duck', accordion.gltf, function () {
@@ -953,7 +1036,7 @@ if (!window.performance || !window.performance.now) {
             glTF.load(url, viewer.parse_gltf);
             window.notif(url);
             pleaseWait(false);
-        }).width("100%");
+        }).width("90%");
         accordion.gltf.append("<hr></hr>");
 
         GUI.button('rambler', accordion.gltf, function () {
@@ -963,7 +1046,7 @@ if (!window.performance || !window.performance.now) {
             window.notif(url);
             pleaseWait(false);
 
-        }).width("100%");
+        }).width("90%");
         accordion.gltf.append("<hr></hr>");
 
         GUI.button('rambler-min', accordion.collada, function () {
@@ -973,7 +1056,7 @@ if (!window.performance || !window.performance.now) {
             window.notif(url);
             pleaseWait(false);
 
-        }).width("100%");
+        }).width("90%");
         accordion.collada.append("<hr></hr>");
 
         GUI.button('rambler', accordion.collada, function () {
@@ -982,7 +1065,7 @@ if (!window.performance || !window.performance.now) {
             COLLADA.load(url, viewer.parse_dae);
             window.notif(url);
             pleaseWait(false);
-        }).width("100%");
+        }).width("90%");
         accordion.collada.append("<hr></hr>");
 
         GUI.button('supermurdoch', accordion.collada, function () {
@@ -991,7 +1074,7 @@ if (!window.performance || !window.performance.now) {
             COLLADA.load(url, viewer.parse_dae);
             window.notif(url);
                pleaseWait(false);
-        }).width("100%");
+        }).width("90%");
         accordion.collada.append("<hr></hr>");
 
         GUI.button('supermurdoch', accordion.gltf, function () {
@@ -1000,7 +1083,7 @@ if (!window.performance || !window.performance.now) {
             glTF.load(url, viewer.parse_gltf);
             window.notif(url);
                pleaseWait(false);
-        }).width("100%");
+        }).width("90%");
         accordion.gltf.append("<hr></hr>");
 
         GUI.button('wine', accordion.collada, function () {
@@ -1009,7 +1092,7 @@ if (!window.performance || !window.performance.now) {
             COLLADA.load(url, viewer.parse_dae);
             window.notif(url);
                pleaseWait(false);
-        }).width("100%");
+        }).width("90%");
         accordion.collada.append("<hr></hr>");
 
         GUI.button('wine', accordion.gltf, function () {
@@ -1018,7 +1101,7 @@ if (!window.performance || !window.performance.now) {
             glTF.load(url, viewer.parse_gltf);
             window.notif(url);
                pleaseWait(false);
-        }).width("100%");
+        }).width("90%");
         accordion.gltf.append("<hr></hr>");
 
 
@@ -1028,7 +1111,7 @@ if (!window.performance || !window.performance.now) {
               COLLADA.load(url, viewer.parse_dae);
             window.notif(url);
                pleaseWait(false);
-        }).width("100%");
+        }).width("90%");
         accordion.collada.append("<hr></hr>");
 
         GUI.button('uh-1n', accordion.gltf, function () {
@@ -1037,7 +1120,7 @@ if (!window.performance || !window.performance.now) {
             glTF.load(url, viewer.parse_gltf);
             window.notif(url);
                pleaseWait(false);
-        }).width("100%");
+        }).width("90%");
         accordion.gltf.append("<hr></hr>");
 
         GUI.button('cow', accordion.collada, function () {
@@ -1046,7 +1129,7 @@ if (!window.performance || !window.performance.now) {
             COLLADA.load(url, viewer.parse_dae);
             window.notif(url);
                pleaseWait(false);
-        }).width("100%");
+        }).width("90%");
 
         GUI.button('cow', accordion.gltf, function () {
               pleaseWait(true);
@@ -1054,7 +1137,7 @@ if (!window.performance || !window.performance.now) {
             glTF.load(url, viewer.parse_gltf);
             window.notif(url);
                pleaseWait(false);
-        }).width("100%");
+        }).width("90%");
 
         var colladaMenu = [];
         accordion.collada.find('button').each(function(i){
@@ -1386,6 +1469,9 @@ if (!window.performance || !window.performance.now) {
             fpsCounter.increment();}
     }
      window.fl4reStatus("READY",$("#mainLayout-south"));
+      GUI.container.resizeAll();
+                GUI.container.initContent("center");
+                GUI.container.initContent("west");
 }
          </script>
 </body>
