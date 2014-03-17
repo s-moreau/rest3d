@@ -56,7 +56,7 @@ rest3d.getFileConverted = function(_file, _cb){
 // _params = {file: 'File Object'}
 // this is the only way to get a file from the client side, by selecting a file physically via an input HTML5 element.
 // In this function, I hack a fake input element to use the fileupload plugin and send the file indicated from the "_params" paramater to the cloud.
-rest3d.upload = function(_params,_cb){
+rest3d.fileUpload = function(_params,_cb){
     var params=_params || {};
     var cb=_cb;
     $input = $('<input id="fileupload" style="display:none;" type="file" name="files[]" multiple>');
@@ -73,6 +73,7 @@ rest3d.upload = function(_params,_cb){
         previewMaxHeight: 100,
         previewCrop: true,
     });
+
     var jqXHR = $input.fileupload('send', {files: _params.file})
     jqXHR.success(function (result, textStatus, jqXHR) {
         console.debug("upload successfull: "+result);
@@ -86,6 +87,22 @@ rest3d.upload = function(_params,_cb){
 })
 }
 
+// rest3d.urlUpload = function(_params,_cb){
+//     _params = warehouse.zip;
+
+
+
+
+// }
+
+// rest3d.assetUpload = function(_params,_cb){
+//     _params.database = "warehouse";
+//     _params.id = ""
+    
+
+
+
+// }
 // rest3d.testUpload = function(file){
 //     function getData(a){//
 //         // console.debug(a.file);

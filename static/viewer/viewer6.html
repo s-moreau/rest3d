@@ -692,6 +692,24 @@ if (!window.performance || !window.performance.now) {
                     return result;
                 }
             },
+            // "search": function(data)
+            /*{
+                "case_insensitive" : true,
+                "ajax" : {
+                    "type": 'GET',
+                    "url": function (node) {
+                        
+                        return url;
+                    },
+                    "success": function (new_data) {
+                        console.debug(new_data);
+                        var result = [];
+                        result=parseWarehouseJson(new_data,result);
+                         console.debug(result);
+                        return result;
+                    }
+                }
+            },*/
             type:  { "types": {
                 "folder": {
                     "icon" : {
@@ -740,7 +758,165 @@ if (!window.performance || !window.performance.now) {
             // "icons": false,
             },
     })
+        // var treeSearch = GUI.treeBis({
+        //     id:'warehouseSearch',
+        //     parent: accor.search,
+        //     search: {
+        //           'ajax' : {
+        //             "type": 'GET',
+        //             'url':function(node){
+        //                 console.debug(node);
+        //                 nodeId = node.attr('id');
+        //                 url = "http://node.fl4re.com/rest3d/warehouse/search/" + nodeId;
+        //                 return url;},
+        //             'data': function(node){
+        //                 console.debug(node);
+        //                 return {data:"haha"}},
+        //         },},
+                // json: {data:"hihi"},
+ //            'search' : {
+ //  'fuzzy' : false,
+ //  'ajax' : {
+ //   'url' : "/unspsc/cctreesearch",
+ //   'data' : function(str) {
+ //    return { "search_str" : str };
+ //   },
+ //  },
+ // },
+ // 'core' : {
+ //     'data' : {
+ //      'url' : function (node) {
+ //       var ccid = node.id.substr(1,8);
+ //       return node.id === '#' ? '/unspsc/cctree/ALL' : '/unspsc/cctree/' + ccid;
+ //      },
+ //      'data' : function (node) {
+ //       return { 'id' : node.id };
+ //      }
+ //     }
+            /*{
+                "case_insensitive" : true,
+                "ajax" : {
+                    "type": 'GET',
+                    "url": function (node) {
+                        
+                        return url;
+                    },
+                    "success": function (new_data) {
+                        console.debug(new_data);
+                        var result = [];
+                        result=parseWarehouseJson(new_data,result);
+                         console.debug(result);
+                        return result;
+                    }
+                }
+            },*/
 
+//             themes:{
+//             "theme":"apple",
+//             // "icons": false,
+//             },
+//             })
+//          var to = false;
+//         searchInput.keypress(
+//           function(e){
+//           if (e.keyCode==13){
+//           if(to) { clearTimeout(to); }
+//             to = setTimeout(function () {
+//               var v = searchInput.val();
+//               $('#warehouseSearch').jstree("search",v);
+//               console.debug("dsa")
+//             }, 250);
+//           };
+//           //tape your code here 
+// });
+
+        var searchInput = GUI.addInput("searchInputWarehouse", "example", accor.search);
+        var searchTree = GUI.treeBis({
+            id:'warehouseSearch',
+            parent: accor.search,
+            json:  {
+                "ajax" : {
+                    "type": 'GET',
+                    "url": function (node) {
+                        nodeBuffer = node;
+                        var nodeId = "";
+                        var url = "";
+                        // var type = node.attr('type'); 
+                        if (node == -1)
+                        {
+                            url = "http://node.fl4re.com/rest3d/warehouse/"+searchInput.val();
+                        }
+                        return url;
+                    },
+                    "success": function (new_data) {
+                        console.debug(new_data);
+                        var result = [];
+                        result=parseWarehouseJson(new_data,result);
+                         console.debug(result);
+                        return result;
+                    }
+                }
+            },
+            "contextmenu" : {
+                "items" : function (node) {
+                    var result = {};
+                    if(node.attr("iconuri")){
+                        result.icon = {'label':'Display icon','action':icon,};}
+                    if(node.attr("rel")=="model"){
+                        result.display = {'label':'Display model','action':display,};
+                        result.download = {'label':'Download','action':download,};
+                    }
+                    return result;
+                }
+            },
+            type:  { "types": {
+                "folder": {
+                    "icon" : {
+                        "image" : "../gui/images/folder.png",
+                    },
+                    },
+                "collection": {
+                    "icon" : {
+                        "image" : "../gui/images/menu-scenes.png",
+                    },
+                    },
+                "collada": {
+                    "icon" : {
+                        "image" : "../favicon.ico",
+                    },
+                    },
+                "text": {
+                    "icon" : {
+                        "image" : "../gui/images/file.png",
+                    },
+                    },
+                "kml": {
+                    "icon" : {
+                        "image" : "../gui/images/kml.png",
+                    },
+                    },
+                 "image": {
+                    "icon" : {
+                        "image" : "../gui/images/media-image.png",
+                    },
+                    },
+                    //select_node : function () {return false;}
+                "model": {
+                    "icon" : {
+                        "image" : "../gui/images/bunny.png",
+                    },
+                    },
+                "empty": {
+                    "icon" : {
+                        "image" : "../gui/images/cross.jpg",
+                    },
+                    },
+            }},
+            themes:{
+            "theme":"apple",
+            // "icons": false,
+            },
+    })
         GUI.image(renderMenu.render.title, "img-render", "../gui/images/menu-render.png", 12, 14, "before");
         GUI.image(renderMenu.tree.title, "img-render", "../gui/images/menu-scenes.png", 12, 14, "before");
         GUI.image(renderMenu.scenes.title, "img-render", "../gui/images/scene-root.png", 12, 14, "before");

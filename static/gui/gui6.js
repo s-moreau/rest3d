@@ -429,6 +429,9 @@ define("gui", (function (global) {
                 if(this.json.hasOwnProperty("contextmenu")){
                     this.jsonInput["contextmenu"]=this.json.contextmenu;
                 }
+                if(this.json.hasOwnProperty("search")){
+                    this.jsonInput["search"]=this.json.search;
+                }
                 if(this.json.hasOwnProperty("plugin")){
                     this.jsonInput["plugins"]=this.json.plugin;
                 }
