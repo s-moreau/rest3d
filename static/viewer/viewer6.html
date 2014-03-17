@@ -541,19 +541,56 @@ if (!window.performance || !window.performance.now) {
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
         var nodeBuffer;
         function parseWarehouseJson(param_in,param_out){
+            function children(param_in,param_out){
+                for (var j=0; j<param_in.length;j++){
+                    var result = {};
+                    var tmp =param_in[j];
+                    if(tmp.type == "file"){
+                        var ext = tmp.name.match(/\.[^.]+$/);
+                        if(ext=='.dae'){
+                            ext = "collada";
+                        }
+                        else if(ext=='.kml'){
+                            ext = "collada";
+                        }
+                        else if(ext=='.jpg'||'.png'||'.jpeg'){
+                            ext = "image";
+                        }
+                        else if(ext=='.txt'){
+                            ext = "text";
+                        }
+                        else{
+                            ext = "folder";
+                            result.data = tmp.name.substr(0,60)||"folder";
+                            result.attr = {"id":result.data,"rel":ext,"name":result.data};
+                            result.children = [];
+                            children(tmp,result.children)
+                        }
+                        }
+                        result.data = tmp.name.substr(0,60);
+                        result.attr = {"id":result.data,"rel":ext,"name":result.data};
+                        param_out.push(result);
+                    }
+                }
             var assets = param_in.assets;
             if(assets.length==0||assets==null){
                 nodeBuffer.attr("rel","empty");
             }
+            else if(param_in.type == "folder"){
+                var result = {};
+                var path = param_in.children;
+                result.data = tmp.name.substr(0,60)||"folder";
+                result.attr = {"id":result.data,"rel":"folder","name":result.data};
+                result.children = [];
+                children(param_in.children,result);
+            }
             else{
                 for(var i =0;i<assets.length;i++){
-                    var asset = assets[i];
                     var result = {};
+                    var asset = assets[i];
                     result.data = asset.name.substr(0,60);
-                    if(asset.type=="collection"){result.state = "closed";}
+                    result.state = "closed";
                     result.attr = {"id":asset.id,"rel":asset.type,"iconuri":asset.iconUri,"name":result.data};
-                    //
-                    if(asset.hasOwnProperty('iconUri'));
                     param_out.push(result);
                 }
             }
@@ -610,25 +647,18 @@ if (!window.performance || !window.performance.now) {
                         {
                             url = "http://node.fl4re.com/rest3d/warehouse/";
                         }
-                        else
+                        else if(node.attr('rel')=="collection"||"model")
                         {
-                              console.debug(node.attr('type'))
-                            var type = node.attr('rel'); 
-                            if(type =="collection"){
-                                nodeId = node.attr('id');
-                                url = "http://node.fl4re.com/rest3d/warehouse/" + nodeId;
-                            }
-                            else{
-                                return;
-                            }
+                            nodeId = node.attr('id');
+                            url = "http://node.fl4re.com/rest3d/warehouse/" + nodeId;
                         }
-
                         return url;
                     },
                     "success": function (new_data) {
                         console.debug(new_data);
                         var result = [];
                         result=parseWarehouseJson(new_data,result);
+                         console.debug(result);
                         return result;
                     }
                 }
