@@ -554,7 +554,7 @@ if (!window.performance || !window.performance.now) {
                         param_out.push(result);
                         }
                         else if(ext=='.kml'){
-                            ext = "collada";
+                            ext = "kml";
                              result.data = tmp.name.substr(0,60);
                         result.attr = {"id":result.data,"rel":ext,"name":result.data};
                         param_out.push(result);
@@ -693,9 +693,34 @@ if (!window.performance || !window.performance.now) {
                 }
             },
             type:  { "types": {
-                "collection": {
+                "folder": {
                     "icon" : {
                         "image" : "../gui/images/folder.png",
+                    },
+                    },
+                // "collection": {
+                //     "icon" : {
+                //         "image" : "../gui/images/collection.ico",
+                //     },
+                //     },
+                "collada": {
+                    "icon" : {
+                        "image" : "../favicon.ico",
+                    },
+                    },
+                "text": {
+                    "icon" : {
+                        "image" : "../gui/images/file.png",
+                    },
+                    },
+                "kml": {
+                    "icon" : {
+                        "image" : "../gui/images/kml.png",
+                    },
+                    },
+                 "image": {
+                    "icon" : {
+                        "image" : "../gui/images/media-image.png",
                     },
                     },
                     //select_node : function () {return false;}
