@@ -50,9 +50,10 @@ module.exports = function (server) {
               setTimeout(function() { timeout()},5 * 60 * 1000);
             });
             handler.handleResult({files: files}, redirect);
+            return;
           } catch (e) {
             handler.handleError( e);
-            return next();
+            return 
           }
         }
     };
@@ -67,7 +68,7 @@ module.exports = function (server) {
         files.push(fileInfo);
       } catch(e) {
         handler.handleError( e);
-        return next();
+        return 
       };
     }).on('field', function (name, value) {
       if (name === 'redirect') {
@@ -105,7 +106,7 @@ module.exports = function (server) {
       });
     }).on('error', function (e) {
         handler.handleError( e);
-        return next();
+        return 
     }).on('progress', function (bytesReceived, bytesExpected) {
       if (bytesReceived > FileInfo.options.maxPostSize) {
         handler.req.connection.destroy();
@@ -130,7 +131,8 @@ module.exports = function (server) {
           files.push(fileInfo);
         }
       });
-      handler.handleResult({files: files});
+      handler.handleResult({success: true, files: files});
+      return;
     });
   };
 
@@ -145,6 +147,7 @@ module.exports = function (server) {
             fs.unlink(FileInfo.options.uploadDir + '/' + version + '/' + fileName);
           });
           handler.handleResult({success: !ex});
+          return;
         });
         return;
       }
@@ -155,6 +158,9 @@ module.exports = function (server) {
   // rest3d post upload API
   server.post(/^\/rest3d\/upload.*/, function(req,res,next){
 
+    //if (req.headers.content-type === "multipart/form-data")
+
+    console.log(req.headers['content-type']);
     res.setHeader(
       'Access-Control-Allow-Origin',
       FileInfo.options.accessControl.allowOrigin
@@ -167,7 +173,7 @@ module.exports = function (server) {
       'Access-Control-Allow-Headers',
       FileInfo.options.accessControl.allowHeaders
     );
-    var handler = new UploadHandler(req, res);
+    var handler = new UploadHandler(req, res, next);
     setNoCacheHeaders(res);
     var result = handler.post();
 
@@ -190,7 +196,7 @@ module.exports = function (server) {
           'Access-Control-Allow-Headers',
           FileInfo.options.accessControl.allowHeaders
       );
-      var handler = new UploadHandler(req, res);
+      var handler = new UploadHandler(req, res, next);
 
       var asset = req.url.split("/upload/")[1];
         

@@ -36,14 +36,11 @@ require('shelljs/global');
 
 var fs = require('fs');
 var path = require('path');
-// create diskcache (no mem caching, no gzip)
 var cache = require('./src/diskcache').Cache;
 // fast html scrapping
 var request = require('request');
 // get content from zip files
 var zip = require("zip");
-
-var diskcache = new cache('cache',true,false,false); 
 
 var formidable = require('formidable');
 
@@ -85,10 +82,17 @@ var server = module.exports.server = restify.createServer();
 
 
 rmdirSync('tmp');
+rmdirSync('cache');
 rmdirSync('upload');
 
 fs.mkdirSync('tmp');
 fs.mkdirSync('upload');
+fs.mkdirSync('cache');
+
+fs.chmodSync('tmp', '777');
+fs.chmodSync('upload', '777');
+fs.chmodSync('cache', '777');
+
 //fs.mkdirSync('upload/thumbnail');
 
 server.use(restify.acceptParser(server.acceptable));
@@ -103,6 +107,8 @@ restify.defaultResponseHeaders = false;
 require('./src/warehouse')(server);
 require('./src/upload')(server);
 
+// create diskcache (no mem caching, no gzip)
+var diskcache = server.diskcache = new cache('cache',true,false,false); 
 
 function unknownMethodHandler(req, res) {
 	console.log('unkownMethodHandler method='+req.method.toLowerCase());
@@ -520,20 +526,19 @@ server.get(/^\/rest3d\/assets.*/,function(req, res, next) {
 									console.log('err'+err)
 									return next(404);
 			    				} else
-	 							diskcache.store(redirect,res2,function(err,entry){
-								      	if (err){
-					    					console.log('DISK CACHE ERROR')
-					    					console.log(err)
-					    					return next(err);
-					    				}
-					    				console.log('SERVE CONTENT NOW!!='+entry.filename)
-					    				res.setHeader('Content-Type', entry.headers['content-type']);
-							    		console.log('set content-type to ['+entry.headers['content-type']+']')
+		 							diskcache.store(redirect,res2,function(err,entry){
+									  if (err){
+				    					console.log('DISK CACHE ERROR')
+				    					console.log(err)
+				    					return next(err);
+				    				}
+				    				console.log('SERVE CONTENT NOW!!='+entry.filename)
+				    				res.setHeader('Content-Type', entry.headers['content-type']);
+						    		console.log('set content-type to ['+entry.headers['content-type']+']')
 										sendFile(req,res,entry.filename);
 										return next();
 									});
-			    			});
-			    			
+				    		});
 			     		}
 
 			 		} else 

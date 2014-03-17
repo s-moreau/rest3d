@@ -14,7 +14,8 @@
     "zip":"",
     "blueimp-file-upload":"",
     "formidable":"",
-    "imagemagick":""
+    "imagemagick":"",
+    "memorystream":""
   },
   "devDependencies": {
     "mocha": "1.7.4",
