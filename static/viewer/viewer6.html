@@ -564,7 +564,7 @@ if (!window.performance || !window.performance.now) {
                             result.data = tmp.name.substr(0,60)||"folder";
                             result.attr = {"id":result.data,"rel":ext,"name":result.data};
                             result.children = [];
-                            result.children = children(tmp,result.children);
+                            result.children = children(tmp.children,result.children);
                         }
                         }
                         result.data = tmp.name.substr(0,60);
