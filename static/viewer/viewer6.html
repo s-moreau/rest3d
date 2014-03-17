@@ -545,19 +545,31 @@ if (!window.performance || !window.performance.now) {
                 for (var j=0; j<param_in.length;j++){
                     var result = {};
                     var tmp =param_in[j];
-                    if(tmp.type == "file"){
+
                         var ext = tmp.name.match(/\.[^.]+$/);
                         if(ext=='.dae'){
                             ext = "collada";
+                             result.data = tmp.name.substr(0,60);
+                        result.attr = {"id":result.data,"rel":ext,"name":result.data};
+                        param_out.push(result);
                         }
                         else if(ext=='.kml'){
                             ext = "collada";
+                             result.data = tmp.name.substr(0,60);
+                        result.attr = {"id":result.data,"rel":ext,"name":result.data};
+                        param_out.push(result);
                         }
                         else if(ext=='.jpg'||'.png'||'.jpeg'){
                             ext = "image";
+                             result.data = tmp.name.substr(0,60);
+                        result.attr = {"id":result.data,"rel":ext,"name":result.data};
+                        param_out.push(result);
                         }
                         else if(ext=='.txt'){
                             ext = "text";
+                             result.data = tmp.name.substr(0,60);
+                        result.attr = {"id":result.data,"rel":ext,"name":result.data};
+                        param_out.push(result);
                         }
                         else{
                             ext = "folder";
@@ -566,10 +578,8 @@ if (!window.performance || !window.performance.now) {
                             result.children = [];
                             result.children = children(tmp.children,result.children);
                         }
-                        }
-                        result.data = tmp.name.substr(0,60);
-                        result.attr = {"id":result.data,"rel":ext,"name":result.data};
-                        param_out.push(result);
+                        
+                       
                     }
                     return param_out;
                 }
