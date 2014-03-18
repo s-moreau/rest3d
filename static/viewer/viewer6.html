@@ -386,7 +386,7 @@ if (!window.performance || !window.performance.now) {
                         var id = child.data+"_"+Math.floor(Math.random() * 1000000) + 1;
                         window[id] = sel;         
                         child.attr = {"id":sel.id,"rel":"child"};
-                        sub.attr["type"] = sel.id;
+                        child.attr["type"] = sel.id;
                         param_out.push(child);
                     }
                 }
