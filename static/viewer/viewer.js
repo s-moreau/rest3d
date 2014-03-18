@@ -41,6 +41,7 @@ var channel = null;
 
 // associate primitive name with picking ID
 viewer.pickName = [null];
+viewer.pickId = {}; 
 viewer.nowParsing;
 
 viewer.dropTick=false;
@@ -220,7 +221,9 @@ viewer.parse_dae = function(dae) {
                                                      primitive.index, state);
 
                 // initialize picking ID
+
                 var pickID = viewer.pickName.length;
+                viewer.pickId[this.id]=this.id;
                 viewer.pickName.push(viewer.nowParsing+"#"+this.id+"["+p+"]");
                 glprim.pickColor = [(pickID & 0xff)/255,((pickID>>8)&0xff)/255,((pickID>>16)&0xff)/255,1];
                 glprim.pickID = pickID;
@@ -316,6 +319,7 @@ viewer.parse_gltf = function(gltf) {
 
                   // initialize picking ID
                 var pickID = viewer.pickName.length;
+                viewer.pickId[this.id]=this.id;
                 viewer.pickName.push(viewer.nowParsing+"#"+this.id+"["+i+"]");
                 glprim.pickColor = [(pickID & 0xff)/255,((pickID>>8)&0xff)/255,((pickID>>16)&0xff)/255,1];
                 glprim.pickID = pickID;

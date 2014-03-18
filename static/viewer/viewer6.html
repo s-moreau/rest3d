@@ -546,7 +546,7 @@ if (!window.performance || !window.performance.now) {
             var tmp = data.inst.get_json()[0];
             if(tmp.attr.hasOwnProperty("id")){
                 var id = tmp.attr.id.replace("sub_","");
-                if(viewer.pickName[id]!="undefined"&&viewer.pickName[id]!=null){
+                if(viewer.pickId.hasOwnProperty(id)){
                     if (!viewer.channel.selected) viewer.channel.selected = {};
                     if (viewer.channel.selected[id]) {
                         delete viewer.channel.selected[id];
@@ -1403,7 +1403,7 @@ if (!window.performance || !window.performance.now) {
                     var y = 1.0 - (ev.layerY / ev.currentTarget.clientHeight);
 
                     var id=viewer.draw(true,x,y);
-                    console.debug(id);    
+                    
                     if(viewer.pickName[id]!="undefined"&&viewer.pickName[id]!=null){
                         if (!viewer.channel.selected) viewer.channel.selected = {};
                         if (viewer.channel.selected[id]) {
