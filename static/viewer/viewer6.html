@@ -485,9 +485,9 @@ if (!window.performance || !window.performance.now) {
                     if(position.hasOwnProperty("children")){
                          sub.attr = {"id":id,"rel":"children"};
                     }
-                    if(position.hasOwnProperty("local")){
-                         sub.attr = {"id":id,"rel":"local"};
-                    }
+                    // if(position.hasOwnProperty("local")){
+                    //      sub.attr = {"id":id,"rel":"local"};
+                    // }
                     else{
                         sub.attr = {"id":id,"rel":"sub"};}
                     sub.children = [];
