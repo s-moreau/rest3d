@@ -801,10 +801,10 @@ if (!window.performance || !window.performance.now) {
                     // {"data":attr,"attr":{"id":id}}
                     var data = {};
                     data.data = attr;
-                    if(attr == "znear"||"zfar"||"yfov"||"projection"||"aspect_ratio"){
+                    if(attr == "znear"||attr =="zfar"||attr =="yfov"||attr =="projection"||attr =="aspect_ratio"){
                         data.attr = {"id":id,'rel':'camera_child'}
                     }   
-                    if(attr == "local"){
+                    else if(attr == "local"){
                         data.attr = {"id":id,'rel':'local'}
                     }
                     else{
@@ -828,6 +828,7 @@ if (!window.performance || !window.performance.now) {
                 for(var z=0; z<stock.materials.length;z++){
                     var subsel_material = stock.materials[z];
                     material.data  = subsel_material.name||subsel_material.id||subsel_material.symbol||subsel_material.target;
+                    material.attr =  {"rel":"children","id":material.data+"_"+Math.floor(Math.random() * 1000000) + 1};
                     material.children = [];
                     var material_parameter = subsel_material.overrides||subsel_material.parameters;
                     displayConfig(material_parameter,material.children,"ambient");
@@ -912,8 +913,10 @@ if (!window.performance || !window.performance.now) {
                         if(i==0){title = "geometry"}
                         var subchild = {
                             "data":title,
+                            "attr":{"rel":"geometry","id":title+"_"+Math.floor(Math.random() * 1000000) + 1},
                             "children":[
                                 {"data":"materials",
+                                "attr":{"rel":"children","id":"material"+"_"+Math.floor(Math.random() * 1000000) + 1},
                                 "children":[material],
                                 },
                             ],
@@ -989,7 +992,12 @@ if (!window.performance || !window.performance.now) {
                     if(position.hasOwnProperty("children")){
                          sub.attr = {"id":id,"rel":"children"};
                     }
-                    sub.attr = {"id":id,"rel":"sub"};
+                    // if(position.hasOwnProperty("local")){
+                    //      sub.attr = {"id":id,"rel":"local"};
+                    // }
+                    else{
+                        sub.attr = {"id":id,"rel":"sub"};}
+
                     sub.children = [];
                     window.geometry(position,sub.children);
                     window.camera(position,sub.children);
@@ -1023,9 +1031,11 @@ if (!window.performance || !window.performance.now) {
                                 case "main":
                                     viewerObject = window[nodeBuffer.attr('id')];
                                     window.sub(viewerObject,result);
+                                    break;
                                 case "child":
                                     viewerObject = window[nodeBuffer.attr('id')];
                                     window.sub(viewerObject,result);
+                                    break;
                             }
                         }
                         window.callbacks();
@@ -1039,34 +1049,34 @@ if (!window.performance || !window.performance.now) {
                         "image" : "../favicon.ico",
                     },
                     },
-                "collection": {
+                "camera": {
                     "icon" : {
-                        "image" : "../gui/images/menu-scenes.png",
+                        "image" : "../gui/images/camera-anim.gif",
                     },
                     },
-                "collada": {
+                "children": {
                     "icon" : {
-                        "image" : "../favicon.ico",
+                        "image" : "../gui/images/folder.png",
                     },
                     },
-                "text": {
+                "local": {
                     "icon" : {
-                        "image" : "../gui/images/file.png",
+                        "image" : "../gui/images/Photoshop3DAxis.png",
                     },
                     },
-                "kml": {
+                "geometry": {
                     "icon" : {
-                        "image" : "../gui/images/kml.png",
+                        "image" : "../gui/images/geometry.png",
                     },
                     },
-                 "image": {
+                 "sub": {
                     "icon" : {
-                        "image" : "../gui/images/media-image.png",
+                        "image" : "../gui/images/folder.png",
                     },
                     },
-                "model": {
+                "child": {
                     "icon" : {
-                        "image" : "../gui/images/bunny.png",
+                        "image" : "../gui/images/folder.png",
                     },
                     },
                 "empty": {
@@ -1074,7 +1084,18 @@ if (!window.performance || !window.performance.now) {
                         "image" : "../gui/images/cross.jpg",
                     },
                     },
+                "material": {
+                    "icon" : {
+                        "image" : "../gui/images/material.png",
+                    },
+                    },
+                "camera_child": {
+                    "icon" : {
+                        "image" : "../gui/images/camera.png",
+                    },
+                    },
             }},
+
                 themes:{
                     "theme":"apple",
                 },
