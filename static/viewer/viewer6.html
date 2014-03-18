@@ -387,7 +387,7 @@ if (!window.performance || !window.performance.now) {
                         window[id] = sel;         
                         child.attr = {"id":sel.id,"rel":"child"};
                         if(sel.hasOwnProperty("id")){
-                            child.attr.realid = sel.id;
+                            child.attr.type = sel.id;
                         }
                         param_out.push(child);
                     }
@@ -423,7 +423,7 @@ if (!window.performance || !window.performance.now) {
                     var id = sub.data+"_"+Math.floor(Math.random() * 1000000) + 1;
                     sub.data = position.id||position.name;
                     sub.state = 'open'; 
-                    var realid = position.id;
+                    var type = position.id;
                     if(position.hasOwnProperty("camera")){
                         sub.attr = {"id":id,"rel":"camera"};
                     } 
@@ -440,7 +440,7 @@ if (!window.performance || !window.performance.now) {
                         sub.attr = {"id":id,"rel":"sub"};
                     }
                    if(position.hasOwnProperty("id")){
-                        sub.attr.realid = position.id;
+                        sub.attr.type = position.id;
                     }
                     sub.children = [];
                     window.geometry(position,sub.children);
@@ -547,8 +547,8 @@ if (!window.performance || !window.performance.now) {
         treeScene.Tree.bind(
         "select_node.jstree", function(evt, data){
             var tmp = data.inst.get_json()[0];
-            if(tmp.attr.hasOwnProperty("realid")){
-                var id = tmp.attr.realid;
+            if(tmp.attr.hasOwnProperty("type")){
+                var id = tmp.attr.type;
                 if(viewer.pickName[id]!="undefined"&&viewer.pickName[id]!=null){
                     if (!viewer.channel.selected) viewer.channel.selected = {};
                     if (viewer.channel.selected[id]) {
