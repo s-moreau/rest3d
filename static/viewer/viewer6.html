@@ -549,14 +549,17 @@ if (!window.performance || !window.performance.now) {
                 if(viewer.pickId.hasOwnProperty(id)){
                     if (!viewer.channel.selected) viewer.channel.selected = {};
                     if (viewer.channel.selected[id]) {
+                        console.debug(id+" "+selected)
                         delete viewer.channel.selected[id];
                         window.fl4reStatus("",$("#mainLayout-south"),"selected "+viewer.pickId[Object.keys(viewer.channel.selected)[0]]);
                     } else {
                         viewer.channel.selected [id] = true;
                         window.fl4reStatus("",$("#mainLayout-south"),"selected "+viewer.pickId[id]);
+                         console.debug(id+" "+selected)
                     }  
                 } else{ 
                     window.fl4reStatus("READY",$("#mainLayout-south"));
+                     console.debug("no selected")
                     delete viewer.channel.selected;
                 }
             }
