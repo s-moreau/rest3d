@@ -386,9 +386,7 @@ if (!window.performance || !window.performance.now) {
                         var id = child.data+"_"+Math.floor(Math.random() * 1000000) + 1;
                         window[id] = sel;         
                         child.attr = {"id":sel.id,"rel":"child"};
-                        if(sel.hasOwnProperty("id")){
-                            child.attr.type = sel.id;
-                        }
+                        sub.attr["type"] = sel.id;
                         param_out.push(child);
                     }
                 }
@@ -439,7 +437,7 @@ if (!window.performance || !window.performance.now) {
                     else{
                         sub.attr = {"id":id,"rel":"sub"};
                     }
-                    sub.class = position.id;
+                    sub.attr["type"] = position.id;
                     sub.children = [];
                     window.geometry(position,sub.children);
                     window.camera(position,sub.children);
