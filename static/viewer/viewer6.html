@@ -553,7 +553,7 @@ if (!window.performance || !window.performance.now) {
                         delete viewer.channel.selected[id];
                         window.fl4reStatus("",$("#mainLayout-south"),"selected "+viewer.pickId[Object.keys(viewer.channel.selected)[0]]);
                     } else {
-                        viewer.channel.selected [id] = true;
+                        viewer.channel.selected[id] = true;
                         window.fl4reStatus("",$("#mainLayout-south"),"selected "+viewer.pickId[id]);
                          console.debug(id+" "+"selected")
                     }  
@@ -1405,7 +1405,7 @@ if (!window.performance || !window.performance.now) {
                     var x = ev.layerX / ev.currentTarget.clientWidth;
                     var y = 1.0 - (ev.layerY / ev.currentTarget.clientHeight);
 
-                    var id=viewer.draw(true,x,y);
+                    // var id=viewer.draw(true,x,y);
                     
                     if(viewer.pickName[id]!="undefined"&&viewer.pickName[id]!=null){
                         if (!viewer.channel.selected) viewer.channel.selected = {};
