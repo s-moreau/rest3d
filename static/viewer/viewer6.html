@@ -439,9 +439,7 @@ if (!window.performance || !window.performance.now) {
                     else{
                         sub.attr = {"id":id,"rel":"sub"};
                     }
-                   if(position.hasOwnProperty("id")){
-                        sub.attr.type = position.id;
-                    }
+                    sub.attr.type = position.id;
                     sub.children = [];
                     window.geometry(position,sub.children);
                     window.camera(position,sub.children);
