@@ -524,9 +524,11 @@ if (!window.performance || !window.performance.now) {
                                 case "main":
                                     viewerObject = window[nodeBuffer.attr('id')];
                                     window.sub(viewerObject,result);
+                                    break;
                                 case "child":
                                     viewerObject = window[nodeBuffer.attr('id')];
                                     window.sub(viewerObject,result);
+                                    break;
                             }
                         }
                         window.callbacks();
