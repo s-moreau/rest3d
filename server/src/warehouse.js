@@ -321,6 +321,7 @@ module.exports = function (server) {
         item.rating = entry.popularity;
         item.iconUri = (st ? "https://3dwarehouse.sketchup.com/3dw/getbinary?subjectId="+entry.id+"&subjectClass=entity&name=st" : null);
         item.assetUri = "https://3dwarehouse.sketchup.com/3dw/getbinary?subjectId="+entry.id+"&subjectClass=entity&name="+kmz;
+        item.previewUri = "https://3dwarehouse.sketchup.com/embed.html?entityId="+entry.id;
         result.assets.push(item);
       }
       return result;
