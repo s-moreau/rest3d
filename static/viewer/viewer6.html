@@ -425,21 +425,21 @@ if (!window.performance || !window.performance.now) {
                     sub.state = 'open'; 
                     var type = position.id;
                     if(position.hasOwnProperty("camera")){
-                        sub.attr = {"id":id,"rel":"camera","type":position.id};
+                        sub.attr = {"id":id,"rel":"camera"};
                     } 
                     if(position.hasOwnProperty("geometries")){
-                        sub.attr = {"id":id,"rel":"geometry","type":position.id};
+                        sub.attr = {"id":id,"rel":"geometry"};
                     }
                     if(position.hasOwnProperty("children")){
-                        sub.attr = {"id":id,"rel":"children","type":position.id};
+                        sub.attr = {"id":id,"rel":"children"};
                     }
                     // if(position.hasOwnProperty("local")){
                     //      sub.attr = {"id":id,"rel":"local"};
                     // }
                     else{
-                        sub.attr = {"id":id,"rel":"sub","type":position.id};
+                        sub.attr = {"id":id,"rel":"sub"};
                     }
-                    // sub.attr.type = position.id;
+                    sub.class = position.id;
                     sub.children = [];
                     window.geometry(position,sub.children);
                     window.camera(position,sub.children);
@@ -545,8 +545,8 @@ if (!window.performance || !window.performance.now) {
         treeScene.Tree.bind(
         "select_node.jstree", function(evt, data){
             var tmp = data.inst.get_json()[0];
-            if(tmp.attr.hasOwnProperty("type")){
-                var id = tmp.attr.type;
+            if(tmp.hasOwnProperty("class")){
+                var id = tmp.class;
                 if(viewer.pickName[id]!="undefined"&&viewer.pickName[id]!=null){
                     if (!viewer.channel.selected) viewer.channel.selected = {};
                     if (viewer.channel.selected[id]) {
