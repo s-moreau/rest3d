@@ -297,7 +297,7 @@ if (!window.performance || !window.performance.now) {
                     // {"data":attr,"attr":{"id":id}}
                     var data = {};
                     data.data = attr;
-                    if(attr == "znear"||"zfar"||"yfov"||"projection"||"aspect_ratio"){
+                    if(attr == "znear"||attr =="zfar"||attr =="yfov"||attr =="projection"||attr =="aspect_ratio"){
                         data.attr = {"id":id,'rel':'camera_child'}
                     }   
                     else if(attr == "local"){
