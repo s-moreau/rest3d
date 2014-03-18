@@ -52,7 +52,7 @@ module.exports = function (server) {
                 fileInfo.delete();
                 console.log('timeout !! '+fileInfo.name+' was deleted');
               }
-              setTimeout(function() { timeout()},5 * 60 * 1000);
+              setTimeout(function() { timeout()},60 * 60 * 1000);
             });
             handler.handleResult({files: files}, redirect);
             return;

@@ -95,7 +95,8 @@
     fs.unlink(FileInfo.options.uploadDir + '/' + fileName, function (ex) {
       if (FileInfo.options.imageVersions)
         Object.keys(FileInfo.options.imageVersions).forEach(function (version) {
-          fs.unlink(FileInfo.options.uploadDir + '/' + version + '/' + fileName);
+          fs.unlinkSync(FileInfo.options.uploadDir + '/' + version + '/' + fileName);
+          console.log('deleted '+FileInfo.options.uploadDir + '/' + version + '/' + fileName);
         });
     });
   };
