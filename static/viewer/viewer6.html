@@ -381,9 +381,10 @@ if (!window.performance || !window.performance.now) {
                     for(var i=0; i<param_in.children.length;i++){
                         var sel = param_in.children[i];
                         var child = {};
-                        child.data = sel.name+" #"+sel.id||sel.id||sel.name;
+                        var title = sel.id||sel.name||"undefined_"+Math.floor(Math.random() * 1000000) + 1;
+                        child.data = sel.id||sel.name||title;
                         child.state = 'closed'; 
-                        var id = child.data+"_"+Math.floor(Math.random() * 1000000) + 1;
+                        var id = child.data;
                         window[id] = sel;         
                         child.attr = {"id":sel.id,"rel":"child"};
                         child.attr["type"] = sel.id;
