@@ -418,10 +418,11 @@ if (!window.performance || !window.performance.now) {
                 for(var j=0;j<length;j++){
                     var position =target[j];
                     var sub = {};
-                    var id = sub.data.substr(0,2)+"_"+Math.floor(Math.random() * 1000000) + 1;
+               
                     sub.data = position.id||position.name;
+                    var id = "sub_"+position.id;
                     sub.state = 'open'; 
-                    var type = position.id;
+
                     if(position.hasOwnProperty("camera")){
                         sub.attr = {"id":id,"rel":"camera"};
                     } 
@@ -431,9 +432,9 @@ if (!window.performance || !window.performance.now) {
                     if(position.hasOwnProperty("children")){
                         sub.attr = {"id":id,"rel":"children"};
                     }
-                    // if(position.hasOwnProperty("local")){
-                    //      sub.attr = {"id":id,"rel":"local"};
-                    // }
+                    if(position.hasOwnProperty("local")){
+                         sub.attr = {"id":id,"rel":"local"};
+                    }
                     else{
                         sub.attr = {"id":id,"rel":"sub"};
                     }
@@ -544,7 +545,7 @@ if (!window.performance || !window.performance.now) {
         "select_node.jstree", function(evt, data){
             var tmp = data.inst.get_json()[0];
             if(tmp.attr.hasOwnProperty("id")){
-                var id = tmp.attr.id.substr(0,11);
+                var id = tmp.attr.id.substr(0,4);
                 if(viewer.pickName[id]!="undefined"&&viewer.pickName[id]!=null){
                     if (!viewer.channel.selected) viewer.channel.selected = {};
                     if (viewer.channel.selected[id]) {
