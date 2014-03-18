@@ -13,12 +13,15 @@
       this.name = file.name;
       this.size = file.size;
       this.type = file.type;
-      this.delete_type = 'DELETE';
+      this.path = file.path;
+      //this.delete_type = 'DELETE';
   };
 
   FileInfo.options = {
-      tmpDir: __dirname + '/../tmp',
-      uploadDir: __dirname + '/../upload',
+      //tmpDir: __dirname + '/../tmp',
+      //uploadDir: __dirname + '/../upload',
+      tmpDir: 'tmp',
+      uploadDir: 'upload',
       uploadUrl: '/rest3d/upload/',
       maxPostSize: 11000000000, // 11 GB
       minFileSize: 1,
@@ -73,8 +76,9 @@
     if (!this.error) {
       var that = this,
         baseUrl = (FileInfo.options.ssl ? 'https:' : 'http:') +
-          '//' + req.headers.host + FileInfo.options.uploadUrl;
-      this.url = this.delete_url = baseUrl + encodeURIComponent(this.name);
+          '//' + req.headers.host ;
+      this.url = baseUrl + encodeURIComponent(this.path);
+      //this.delete_url = this.url;
       if (FileInfo.options.imageVersions)
         Object.keys(FileInfo.options.imageVersions).forEach(function (version) {
           if (fs.existsSync(

@@ -115,14 +115,26 @@ THE SOFTWARE.
       <li> <a href="javascript:rest('/rest3d/warehouse/data/','qr');"> /rest3d/warehouse/data/</a>
 	  		<input type="text" size="51" value="m_ac9c3413d59e8e4a7f7fbfb94ac070c5_k2" id="qr" onkeydown="if (event.keyCode == 13) rest('/rest3d/warehouse/data/','qr');"/> Get a model (kmz or zip)</li>
 	  	<h3> upload test </h3>
-	  	 
+	  	 <li>
 		    <form id='url-upload' action="/rest3d/upload/" enctype="application/x-www-form-urlencoded" method="POST" >
 		    	[POST URL] /rest3d/upload/
-				  <input id="url" name="url" value="http://download1948.mediafire.com/vnsy49yu96bg/7kjbc7pwrcspc94/Pokeball.zip"/>
+				  <input id="url" size="150" name="url" value="https://3dwarehouse.sketchup.com/3dw/getbinary?subjectId=ac9c3413d59e8e4a7f7fbfb94ac070c5&subjectClass=entity&name=k2"/>
 				  <input type="submit" value="Upload"/>
-				  send url to upload
+				  send url to upload (zip file example)
 				</form>
 			</li>
+
+			<li>
+		    <form id='url-upload' action="/rest3d/upload/" enctype="application/x-www-form-urlencoded" method="POST" >
+		    	[POST URL] /rest3d/upload/
+				  <input id="url" size="150" name="url" value="http://timenewsfeed.files.wordpress.com/2013/05/duckband.jpg?w=753"/>
+				  <input type="submit" value="Upload"/>
+				  send url to upload (single file example)
+				</form>
+			</li>
+
+			
+
 			<li>
 				<form id='file-upload'  action="/rest3d/upload/" enctype="multipart/form-data" method="POST">
 					[POST files] /rest3d/upload/

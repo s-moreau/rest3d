@@ -8,9 +8,10 @@ module.exports = function (server) {
   var mkdirp = require('mkdirp');
   var request = require('request');
   var memoryStream = require('memorystream');
-
-  // create diskcache (no mem caching, no gzip)
-  //var cache = require('./src/diskcache').Cache;
+  require('./utils');
+  var FileInfo = require('./fileinfo');
+  var Mime = require('mime');
+  var toJSON = require('./tojson')
 
   var zipFile = {};
 
@@ -18,79 +19,62 @@ module.exports = function (server) {
   var _getAssetInfo = function(entry, params){
 
     var daefilename = ""; // this will look for a .dae in the zip file
+      
+    var name=null;
+    var headers=null;
+    if (entry.headers && entry.headers['content-disposition']) 
+      headers = entry.headers['content-disposition'];
+    if (params.req && params.req.response && params.req.response.headers)
+      headers = params.req.response.headers['content-disposition'];
+    if (headers) {
+      var index = headers.indexOf('filename=');
+      name = headers.substring(index+9);
+    } else 
+      return params.cb(new Error('cannot find header in _getAssetInfo'));
+
+    var asset = {type:'asset', name:name, id:params.uid, url:params.url}; 
 
     try {
-      // there must be better than doing a SYNC read!
-      var name=null;
-      var headers=null;
-      if (entry.headers && entry.headers['content-disposition']) 
-        headers = entry.headers['content-disposition'];
-      if (params.req && params.req.response && params.req.response.headers)
-        headers = params.req.response.headers['content-disposition'];
-      if (headers) {
-        var index = headers.indexOf('filename=');
-        name = headers.substring(index+9);
-      } else
-        throw new Error('cannot find header in _getAssetInfo');
 
-      var asset = {type:'asset', name:name, id:params.uid, path:'/'}; // output ... find name of asset somewhere?
-      var data = fs.readFileSync(entry.filename)
+      var data = fs.readFileSync(entry.filename);
       var reader = zip.Reader(data);
+      var currentpath = '';
 
       reader.forEach(function (entry) {
 
         var filename = entry.getName();
-        //console.log('****** entry *********')
-        //console.log('filename=',filename);
+     
+        // returns list of files
+        // find where this should be inserted
+        var path = filename;
+        var index = path.indexOf('/');
+        var file = path;
+        var folder = asset;
 
-  /* this code creates files and folders
+        while (index>0) {
+          file = path.substring(0,index);
 
-          var tmpfilename = 'tmp/'+uid+'/'+filename;
+          if (currentpath != '') currentpath += '/';
+          currentpath += file;
 
-          if (tmpfilename.endsWith('/')) {
-          } else
-          {
-            var folder = tmpfilename.substring(0,tmpfilename.lastIndexOf('/'));
-            console.log('folder='+folder)
-            mkdirp.sync(folder); 
-            
-            fs.writeFileSync(tmpfilename, entry.getData(), function (err) {
-              if (err) throw err;
-              console.log('It\'s saved!');
-            });
-          
-            if (filename.toLowerCase().endsWith('.dae'))
-              daefilename = tmpfilename;
-              
-          }
-  */
-          // returns list of files
-          // find where this should be inserted
-          var path = filename;
-          var index = path.indexOf('/');
-          var file = path;
-          var folder = asset;
-          var found = asset;
-          while (index>0) {
-            file = path.substring(0,index);
-            if (!folder.children) folder.children=[];
-            var test=null;
-            for( var i=0; i< folder.children.length; i++ ) { if (folder.children[i].name === file) {test=folder.children[i]; break;}};
-            if (!test) {
-              test = {name:file, type:'folder'};
-              folder.children.push(test);
-            } 
-            folder = test;
-            path = path.substring(index+1);
-            index = path.indexOf('/');
-          }
-          if (path.length !== 0) {
-            entry = {name:path, type:'file'};
-            if (!folder.children) folder.children=[];
-            folder.children.push(entry);
-            if (path.toLowerCase().endsWith('.dae'))
-              asset.dae = filename;
-          }
+          if (!folder.children) folder.children=[];
+          var test=null;
+          for( var i=0; i< folder.children.length; i++ ) { if (folder.children[i].name === file) {test=folder.children[i]; break;}};
+          if (!test) {
+            test = {name:file, type:'folder', path:currentpath, size:entry._header.uncompressed_size};
+            folder.children.push(test);
+          } 
+          folder = test;
+          path = path.substring(index+1);
+          index = path.indexOf('/');
+        }
+        if (path.length !== 0) {
+          var item = {name:path, type:'file', path:filename};
+          if (!folder.children) folder.children=[];
+          folder.children.push(item);
+          if (path.toLowerCase().endsWith('.dae'))
+            asset.dae = filename;
+        }
 
       });
 
@@ -99,7 +83,6 @@ module.exports = function (server) {
       params.cb(null,asset);
     } catch (e)
     {
-      console.log('error'+e);
       params.cb(e);
     }
 
@@ -125,7 +108,7 @@ module.exports = function (server) {
         buffer.on('end', function () {
           params.req.response.body = this.toBuffer();
           server.diskcache.store(params.url,params.req.response,function(err,entry){
-          _getAssetInfo(entry,params);
+            _getAssetInfo(entry,params);
           });
         });
        
@@ -138,6 +121,128 @@ module.exports = function (server) {
       }
     });
   };
+
+  // This will atempt to unzip a file, return file as asset otherwise
+  zipFile.unzip = function (_entry,_params){
+
+    var params=_params;
+    var entry = _entry;
+
+    var daefilename = ""; // this will look for a .dae in the zip file
+
+      
+    var name=null;
+    var headers=null;
+    
+    if (entry.headers && entry.headers['content-disposition']) 
+      headers = entry.headers['content-disposition'];
+    if (params.req && params.req.response && params.req.response.headers)
+      headers = params.req.response.headers['content-disposition'];
+    if (headers) {
+      var index = headers.indexOf('filename=');
+      name = headers.substring(index+9);
+    } 
+    if (!name) {
+      var contentType=null;
+      if (entry.headers && entry.headers['content-type']) 
+        contentType = entry.headers['content-type'];
+      if (!contentType && params.req && params.req.response && params.req.response.headers)
+        contentType = params.req.response.headers['content-type'];
+      if (contentType) {
+        var extension = Mime.extension(contentType);
+        name = params.uid+'.'+extension;
+        console.log('made up name for file is'+name);
+      }
+    }
+
+    if (!name)
+      return params.cb(new Error('cannot find header in _getAssetInfo'));
+
+    var asset = {type:'asset', name:name, id:params.uid, url:params.url}; 
+
+
+    try {
+      var data = fs.readFileSync(entry.filename);
+      var reader = zip.Reader(data);
+
+      reader.forEach(function (entry) {
+
+        var filename = entry.getName();
+        var currentpath = params.where+'/'+params.uid; // folder where file will be written
+        var tmpfilename = currentpath+'/'+filename;
+
+        mkdirp.sync(currentpath);
+
+        var path = filename; 
+        var index = path.indexOf('/'); // where to cut
+        var file = path; // currenly considered item in the path
+        var folder = asset; // were we are at in the {asset}
+
+        while (index>0) {
+          file = path.substring(0,index);
+          
+          currentpath += '/'+file;
+          
+          mkdirp.sync(currentpath);
+
+          if (!folder.children) folder.children=[];
+          var test=null;
+          for( var i=0; i< folder.children.length; i++ ) { if (folder.children[i].name === file) {test=folder.children[i]; break;}};
+          if (!test) {
+            test = {name:file, type:'folder', path:currentpath};
+            //console.log('folder ='+toJSON(test));
+            folder.children.push(test);
+          } 
+          folder = test;
+          path = path.substring(index+1);
+          index = path.indexOf('/');
+        }
+        if (path.length !== 0) {
+          var item = {name:path, path:currentpath+'/'+path, size:entry._header.uncompressed_size, type:'file'};
+          //console.log('item='+toJSON(item));
+          if (!folder.children) folder.children=[];
+          folder.children.push(item);
+          if (path.toLowerCase().endsWith('.dae'))
+            asset.dae = filename;
+          fs.writeFileSync(tmpfilename, entry.getData());
+          
+        }
+      });
+
+      //console.log('asset='+asset);
+      //console.log('cb='+params.cb);
+      params.cb(null,asset);
+    } catch (e)
+    {
+      if (e.message && e.message.startsWith("cannot find header in zip") || 
+          e.message.startsWith("ZIP end of central directory record signature invalid")) {
+
+        console.log("this is not a zip file");
+        var newname = FileInfo.options.uploadDir + '/' + params.uid + '/' + name;
+        var oldname = entry.filename;
+
+        var folder = newname.substring(0,newname.lastIndexOf('/'));
+        console.log("creating folder="+folder);
+        mkdirp.sync(folder);
+
+        console.log("copy "+entry.filename+" to "+newname);
+        // do not move, this is from the cache ?
+        fs.writeFileSync(newname, fs.readFileSync(entry.filename));
+
+        var filename = newname.substring(newname.lastIndexOf('/')+1);
+        var item = {name:filename, type:'file', path:newname};
+        console.log("new entry="+toJSON(item));
+        asset.children=[item];
+        return params.cb(null,asset);
+      }
+
+      params.cb(e);
+    }
+
+
+  }
+
+
   return zipFile;
 };
 
