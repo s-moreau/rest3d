@@ -148,7 +148,7 @@ module.exports = function (server) {
       var fileInfo = map[file.path];
       fileInfo.size = file.size;
       if (!fileInfo.validate()) {
-        fs.unlink(file.path);
+        fs.unlinkSync(file.path);
         return;
       }
       fs.renameSync(file.path, FileInfo.options.uploadDir + '/' + fileInfo.name);
@@ -173,7 +173,7 @@ module.exports = function (server) {
       finish();
     }).on('aborted', function () {
       tmpFiles.forEach(function (file) {
-        fs.unlink(file);
+        fs.unlinkSync(file);
       });
     }).on('error', function (e) {
         handler.handleError( e);

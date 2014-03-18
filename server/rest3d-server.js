@@ -578,12 +578,12 @@ server.post(/^\/rest3d\/convert.*/,function(req,res,next){
      form.on('field', function (name, data) {
      	params[name] = data;
      }).on('error', function (e) {
-     	h.handleError(req,res,e);
+     	h.handleError(e);
      }).on('end', function(){//
-     	console.log('now converting collada')
+     	console.log('now converting collada');
 
      	if (!params.name || !params.name.toLowerCase().endsWith('dae')) { 
-     		h.handleError(req,res,{error: 'invalid file '+params.name+' in convert'});
+     		h.handleError({error: 'invalid file '+params.name+' in convert'});
      		return;
      	}
      	var output_dir = params.name.split('\.')[0]+'_gltf';
@@ -602,7 +602,7 @@ server.post(/^\/rest3d\/convert.*/,function(req,res,next){
 		     //console.log('Error code: '+error.code);
 		     //console.log('Signal received: '+error.signal);
 
-			 h.handleError(req,res,{"code":error.code, "message": stderr});
+			 h.handleError({"code":error.code, "message": stderr});
 
 		   }
 		   console.log('Child Process STDOUT: '+stdout);
