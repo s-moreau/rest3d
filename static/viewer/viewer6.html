@@ -386,6 +386,9 @@ if (!window.performance || !window.performance.now) {
                         var id = child.data+"_"+Math.floor(Math.random() * 1000000) + 1;
                         window[id] = sel;         
                         child.attr = {"id":sel.id,"rel":"child"};
+                        if(sel.hasOwnProperty("id")){
+                            child.attr.realid = sel.id;
+                        }
                         param_out.push(child);
                     }
                 }
@@ -423,30 +426,22 @@ if (!window.performance || !window.performance.now) {
                     var realid = position.id;
                     if(position.hasOwnProperty("camera")){
                         sub.attr = {"id":id,"rel":"camera"};
-                        if(realid!="undefined"){
-                            sub.attr.realid = realid;
-                        }
                     } 
                     if(position.hasOwnProperty("geometries")){
                         sub.attr = {"id":id,"rel":"geometry"};
-                        if(realid!="undefined"){
-                            sub.attr.realid = realid;
-                        }
                     }
                     if(position.hasOwnProperty("children")){
                         sub.attr = {"id":id,"rel":"children"};
-                        if(realid!="undefined"){
-                            sub.attr.realid = realid;
-                        }
                     }
                     // if(position.hasOwnProperty("local")){
                     //      sub.attr = {"id":id,"rel":"local"};
                     // }
                     else{
                         sub.attr = {"id":id,"rel":"sub"};
-                        if(realid!="undefined"){
-                            sub.attr.realid = realid;
-                        }}
+                    }
+                   if(position.hasOwnProperty("id")){
+                        sub.attr.realid = position.id;
+                    }
                     sub.children = [];
                     window.geometry(position,sub.children);
                     window.camera(position,sub.children);
