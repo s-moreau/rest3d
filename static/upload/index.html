@@ -9,6 +9,7 @@
  *
  * Licensed under the MIT license:
  * http://www.opensource.org/licenses/MIT
+ *
  */
 -->
 <html lang="en">
@@ -178,7 +179,7 @@ function INIT (){
 
                             var span = '<p><span><a href="'+decodeURIComponent(file.name)+'" target="_blank"><p><span>'+formatName(data,file)+'</a>';
                             // endsWith
-                            if (file.name.indexOf('.json', file.url.length - '.json'.length) !== -1) {
+                            if (file.name.indexOf('.json', file.name.length - '.json'.length) !== -1) {
                                 var url='/viewer/easy-viewer.html?file=/upload/'+decodeURIComponent(file.name);
                                 span += ' -> <a href="'+url+'" target="_blank"> View '+formatName(data,file)+'</a>';
                             }
