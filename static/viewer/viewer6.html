@@ -485,7 +485,8 @@ if (!window.performance || !window.performance.now) {
                     if(position.hasOwnProperty("children")){
                          sub.attr = {"id":id,"rel":"children"};
                     }
-                    sub.attr = {"id":id,"rel":"sub"};
+                    else{
+                        sub.attr = {"id":id,"rel":"sub"};}
                     sub.children = [];
                     window.geometry(position,sub.children);
                     window.camera(position,sub.children);
