@@ -13,9 +13,11 @@ git reset --hard origin/master
 cd server
 npm install
 
-pm2 --silent delete all
+pm2 --silent -f stop logs
+pm2 --silent -f delete all
 
-pm2 flush
+#pm2 flush
+rm -f /home/git/.pm2/logs/*
 pm2 start pm2.json
 
 echo 'start log server'
