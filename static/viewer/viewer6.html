@@ -545,7 +545,7 @@ if (!window.performance || !window.performance.now) {
         "select_node.jstree", function(evt, data){
             var tmp = data.inst.get_json()[0];
             if(tmp.attr.hasOwnProperty("id")){
-                var id = tmp.attr.id.substr(4,0);
+                var id = tmp.attr.id.replace("sub_","");
                 if(viewer.pickName[id]!="undefined"&&viewer.pickName[id]!=null){
                     if (!viewer.channel.selected) viewer.channel.selected = {};
                     if (viewer.channel.selected[id]) {
