@@ -385,7 +385,7 @@ if (!window.performance || !window.performance.now) {
                         child.state = 'closed'; 
                         var id = child.data+"_"+Math.floor(Math.random() * 1000000) + 1;
                         window[id] = sel;         
-                        child.attr = {"id":id,"rel":"child"};
+                        child.attr = {"id":sel.id,"rel":"child"};
                         param_out.push(child);
                     }
                 }
@@ -420,20 +420,33 @@ if (!window.performance || !window.performance.now) {
                     var id = sub.data+"_"+Math.floor(Math.random() * 1000000) + 1;
                     sub.data = position.id||position.name;
                     sub.state = 'open'; 
+                    var realid = position.id;
                     if(position.hasOwnProperty("camera")){
                         sub.attr = {"id":id,"rel":"camera"};
+                        if(realid!="undefined"){
+                            sub.attr.realid = realid;
+                        }
                     } 
                     if(position.hasOwnProperty("geometries")){
                         sub.attr = {"id":id,"rel":"geometry"};
+                        if(realid!="undefined"){
+                            sub.attr.realid = realid;
+                        }
                     }
                     if(position.hasOwnProperty("children")){
-                         sub.attr = {"id":id,"rel":"children"};
+                        sub.attr = {"id":id,"rel":"children"};
+                        if(realid!="undefined"){
+                            sub.attr.realid = realid;
+                        }
                     }
                     // if(position.hasOwnProperty("local")){
                     //      sub.attr = {"id":id,"rel":"local"};
                     // }
                     else{
-                        sub.attr = {"id":id,"rel":"sub"};}
+                        sub.attr = {"id":id,"rel":"sub"};
+                        if(realid!="undefined"){
+                            sub.attr.realid = realid;
+                        }}
                     sub.children = [];
                     window.geometry(position,sub.children);
                     window.camera(position,sub.children);
@@ -539,6 +552,22 @@ if (!window.performance || !window.performance.now) {
         treeScene.Tree.bind(
         "select_node.jstree", function(evt, data){
             var tmp = data.inst.get_json()[0];
+            if(tmp.attr.realid){
+                var id = tmp.attr.realid;
+                if(viewer.pickName[id]!="undefined"&&viewer.pickName[id]!=null){
+                    if (!viewer.channel.selected) viewer.channel.selected = {};
+                    if (viewer.channel.selected[id]) {
+                        delete viewer.channel.selected[id];
+                        window.fl4reStatus("",$("#mainLayout-south"),"selected "+viewer.pickName[Object.keys(viewer.channel.selected)[0]]);
+                    } else {
+                        viewer.channel.selected [id] = true;
+                        window.fl4reStatus("",$("#mainLayout-south"),"selected "+viewer.pickName[id]);
+                    }  
+                } else{ 
+                    window.fl4reStatus("READY",$("#mainLayout-south"));
+                    delete viewer.channel.selected;
+                }
+            }
             console.debug(tmp.attr.id+" "+tmp.attr.rel);
             //selected node object: data.inst.get_json()[0];
             //selected node text: data.inst.get_json()[0].data
