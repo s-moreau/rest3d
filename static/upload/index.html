@@ -180,7 +180,7 @@ function INIT (){
                             var span = '<p><span><a href="'+decodeURIComponent(file.name)+'" target="_blank"><p><span>'+formatName(data,file)+'</a>';
                             // endsWith
                             if (file.name.indexOf('.json', file.name.length - '.json'.length) !== -1) {
-                                var url='/viewer/easy-viewer.html?file=/upload/'+decodeURIComponent(file.name);
+                                var url='/viewer/easy-viewer.html?file=/rest3d/upload/'+decodeURIComponent(file.name);
                                 span += ' -> <a href="'+url+'" target="_blank"> View '+formatName(data,file)+'</a>';
                             }
                             span += '</span></p>';
