@@ -432,6 +432,9 @@ define("gui", (function (global) {
                 if(this.json.hasOwnProperty("search")){
                     this.jsonInput["search"]=this.json.search;
                 }
+                if(this.json.hasOwnProperty("core")){
+                    this.jsonInput["core"]=this.json.core;
+                }
                 if(this.json.hasOwnProperty("plugin")){
                     this.jsonInput["plugins"]=this.json.plugin;
                 }

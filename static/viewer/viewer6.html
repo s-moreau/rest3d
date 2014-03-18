@@ -280,25 +280,6 @@ if (!window.performance || !window.performance.now) {
         var $flagScene = $("<h3 style='text-align:center !important;'>No scenes loaded yet</h3>");
         renderMenu.scenes.append($flagScene);
 
-        //     "data":[
-        //         {
-        //             "data" : "Search engines",
-        //             "children" :[
-        //                          {"data":"Yahoo", "metadata":{"href":"http://www.yahoo.com"}},
-        //                          {"data":"Bing", "metadata":{"href":"http://www.bing.com"}},
-        //                          {"data":"Google", "children":[{"data":"Youtube", "metadata":{"href":"http://youtube.com"}},{"data":"Gmail", "metadata":{"href":"http://www.gmail.com"}},{"data":"Orkut","metadata":{"href":"http://www.orkut.com"}}], "metadata" : {"href":"http://youtube.com"}}
-        //                         ],
-        //             "state" : "open"
-        //         },
-        //         {
-        //             "data" : "Networking sites",
-        //             "children" :[
-        //                 {"data":"Facebook", "metadata":{"href":"http://www.fb.com"}},
-        //                 {"data":"Twitter", "metadata":{"href":"http://twitter.com"}}
-        //             ]
-        //         }
-        //     ]
-        // }
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
         var treeScene =false;
@@ -306,8 +287,6 @@ if (!window.performance || !window.performance.now) {
         var callbackArray =[];
 
         window.refreshScenesTree = function(){
-            console.debug("call");
-            // renderMenu.scenes.title.off()
             $flagScene.hide();
             if(treeScene){treeScene.remove();}
             callbackArray=[];
@@ -315,11 +294,22 @@ if (!window.performance || !window.performance.now) {
             function displayConfig (parent,object,attr){
                 if(parent.hasOwnProperty(attr)){
                     var id = attr+"_"+Math.floor(Math.random() * 1000000) + 1;
-                    object.push({"data":attr,"attr":{"id":id}});//TODO change to an ID more elaborated
+                    {"data":attr,"attr":{"id":id}}
+                    var data = {};
+                    data.data = attr;
+                    if(attr == "znear"||"zfar"||"yfov"||"projection"||"aspect_ratio"){
+                        data.attr = {"id":id,'rel':'camera'}
+                    }   
+                    if(attr == "local"){
+                        data.attr = {"id":id,'rel':'local'}
+                    }
+                    else{
+                        data.attr = {"id":id,'rel':'material'}
+                    }
+                    object.push(data);//TODO change to an ID more elaborated
                     var tmp ={}
                     tmp.id = id;
-                    tmp.type = "display";
-                    if(attr=="local"){tmp.type = "local";}
+                    tmp.type = attr;
                     tmp.value = parent[attr];
                     callbackArray.push(tmp);
                 };
@@ -333,7 +323,7 @@ if (!window.performance || !window.performance.now) {
               if(stock.hasOwnProperty('materials')){
                 for(var z=0; z<stock.materials.length;z++){
                     var subsel_material = stock.materials[z];
-                    material.data  = subsel_material.name||subsel_material.id;
+                    material.data  = subsel_material.name||subsel_material.id||subsel_material.symbol||subsel_material.target;
                     material.children = [];
                     var material_parameter = subsel_material.overrides||subsel_material.parameters;
                     displayConfig(material_parameter,material.children,"ambient");
@@ -386,47 +376,42 @@ if (!window.performance || !window.performance.now) {
 
             */
 
-            /* we do not display inside a mesh
-            window.mesh= function(param_in){
-                var mesh = {};
-                if(param_in.hasOwnProperty('mesh')){
-                    for(var y=0; y<param_in.mesh.length;y++){
-                        var subsel_mesh = param_in.mesh[y];
-                        mesh.data  = mesh.name||mesh.id||"mesh_"+Math.floor(Math.random() * 1000000) + 1;
-                        mesh.children = [];
-                        displayConfig(subsel_mesh,mesh.children,"NORMAL");
-                        displayConfig(subsel_mesh,mesh.children,"POSITION");
-                        displayConfig(subsel_mesh,mesh.children,"TEXCOORD_0");
-                        displayConfig(subsel_mesh,mesh.children,"VERTEX");
-                        displayConfig(subsel_mesh,mesh.children,"count");
-                        displayConfig(subsel_mesh,mesh.children,"material");
-                        displayConfig(subsel_mesh,mesh.children,"max_offset");
-                        displayConfig(subsel_mesh,mesh.children,"p");
-                        displayConfig(subsel_mesh,mesh.children,"primitives");
-                    }
-                }
-                return mesh;
-            }
-            */
+             // we do not display inside a mesh
+            // window.mesh= function(param_in){
+            //     var mesh = {};
+            //     if(param_in.hasOwnProperty('mesh')){
+            //         for(var y=0; y<param_in.mesh.length;y++){
+            //             var subsel_mesh = param_in.mesh[y];
+            //             mesh.data  = mesh.name||mesh.id||"mesh_"+Math.floor(Math.random() * 1000000) + 1;
+            //             mesh.children = [];
+            //             displayConfig(subsel_mesh,mesh.children,"NORMAL");
+            //             displayConfig(subsel_mesh,mesh.children,"POSITION");
+            //             displayConfig(subsel_mesh,mesh.children,"TEXCOORD_0");
+            //             displayConfig(subsel_mesh,mesh.children,"VERTEX");
+            //             displayConfig(subsel_mesh,mesh.children,"count");
+            //             displayConfig(subsel_mesh,mesh.children,"material");
+            //             displayConfig(subsel_mesh,mesh.children,"max_offset");
+            //             displayConfig(subsel_mesh,mesh.children,"p");
+            //             displayConfig(subsel_mesh,mesh.children,"primitives");
+            //         }
+            //     }
+            //     return mesh;
+            // }
+            
 
             window.geometry = function(param_in,param_out){
                 if(param_in.hasOwnProperty("geometries")&&$.isArray(param_in.geometries)){
                     for(var i=0;i<param_in.geometries.length;i++){
                         var subsel_geometries = param_in.geometries[i];
                         var material =  self.material(subsel_geometries);
-
-
                         var title = "geometry_"+i;
                         if(i==0){title = "geometry"}
                         var subchild = {
                             "data":title,
                             "children":[
-                                {"data":"mesh",
-                                },
                                 {"data":"materials",
                                 "children":[material],
                                 },
-
                             ],
                     };
                     param_out.push(subchild);
@@ -446,64 +431,100 @@ if (!window.performance || !window.performance.now) {
                 }
                 return param_out;
             }
-            window.local = function (param_in,param_out){
-                if(param_in.hasOwnProperty("local")){
-                    var subsel_local = param_in.local;
-                    displayConfig(param_in,param_out,"local");
-                }
-                return param_out;
-            }
+
             window.children = function(param_in,param_out){
                 if(param_in.hasOwnProperty("children")){
                     for(var i=0; i<param_in.children.length;i++){
                         var sel = param_in.children[i];
                         var child = {};
                         child.data = sel.name+" #"+sel.id||sel.id||sel.name;
-                        child.children = [];
-                        child.children = geometry(sel,child.children);
-                        child.children = camera(sel,child.children);
-                        child.children = local(sel,child.children);
-                        
-                        // if(sel.hasOwnProperty("children")){
-                        //     var children = window.children(sel,child.children)
-                        //     var subchild={"data":"Assets","children":[children]};
-                        //     child.children.push(subchild);
-                        // }
+                        child.state = 'closed'; 
+                        var id = child.data+"_"+Math.floor(Math.random() * 1000000) + 1;
+                        window[id] = sel;         
+                        child.attr = {"id":id,"rel":"child"};
                         param_out.push(child);
                     }
                 }
                 return param_out;
             }
-
-            for(var i =0;i<viewer.scenes.length;i++){                          //{
-                var sel =  viewer.scenes[i]
-                var scene = {};
-                console.debug(sel)
-                scene.data = sel.url.replace(/^.*[\\\/]/, '');                  //data:
-                scene.state = 'open';           
-                scene.children = [];                                                        
-                for(var j=0;j<sel.length;j++){
-                    var subsel = sel[j];
-                    var child = {};
-                    child.data = subsel.id||subsel.name;
-                    child.children = [];
-                    child.children = window.geometry(subsel,child.children);
-                    child.children = window.camera(subsel,child.children);
-                    child.children = displayConfig(subsel,child.children,"local");
-                    child.children = window.children(subsel,child.children);
-                    scene.children.push(child);                                                   //children
+            window.main = function(param_in,param_out){
+                for(var i =0;i<param_in.length;i++){                          //{
+                    var sel =  param_in[i]
+                    var scene = {};
+                    console.debug(sel)
+                    scene.data = sel.url.replace(/^.*[\\\/]/, '');                  //data:
+                    scene.state = 'closed'; 
+                    var id = scene.data+"_"+Math.floor(Math.random() * 1000000) + 1;
+                    window[id] = sel;         
+                    scene.attr = {"id":id,"rel":"main"}
+                    param_out.push(scene);                                                            
                 }
-                treeJson.data.push(scene);                                                            //}
+                return param_out;
+            }
+            window.sub = function(param_in,param_out){
+                console.debug(param_in);
+                var length = param_in.length;
+                var target = param_in;
+                if(param_in.hasOwnProperty("id")){
+                    length=1;
+                    target = [];
+                    target[0]= param_in;
+                }
+                for(var j=0;j<length;j++){
+                    var position =target[j];
+                    var sub = {};
+                    var id = sub.data+"_"+Math.floor(Math.random() * 1000000) + 1;
+                    sub.data = position.id||position.name;
+                    sub.state = 'open'; 
+                    sub.attr = {"id":id,"rel":"sub"};
+                    sub.children = [];
+                    window.geometry(position,sub.children);
+                    window.camera(position,sub.children);
+                    window.children(position,sub.children);
+                    displayConfig(position,sub.children,"local");
+                    param_out.push(sub);
+                }
+                return param_out;
             }
 
             treeScene = GUI.treeBis({
                 id:'Tree',
                 parent: renderMenu.scenes,
-                json: treeJson,
+                json:  {
+                "ajax" : {
+                    "type": 'GET',
+                    "url": function (node) {
+                        nodeBuffer = node;
+                        var nodeId = "";
+                        var url = "/rest3d/warehouse/";
+                        return url;
+                    },
+                    "success": function (new_data) {
+                        var result = [];
+                        if(nodeBuffer==-1){
+                            window.main(viewer.scenes,result)
+                        }
+                        else{
+                            var viewerObject;
+                            switch(nodeBuffer.attr('rel')){
+                                case "main":
+                                    viewerObject = window[nodeBuffer.attr('id')];
+                                    window.sub(viewerObject,result);
+                                case "child":
+                                    viewerObject = window[nodeBuffer.attr('id')];
+                                    window.sub(viewerObject,result);
+                            }
+                        }
+                        window.callbacks();
+                        return result;
+                    },
+                },
+            },
                 themes:{
                     "theme":"apple",
                 },
             });
+        window.callbacks = function(){
             setTimeout(function(){
                 function display(id,value){
                     $("#"+id).click(function(){
@@ -513,7 +534,6 @@ if (!window.performance || !window.performance.now) {
                 }
                 function local(id,value){
                     $("#"+id).click(function(){
-                        //
                         var tmp = trs.create();
                         trs.fromMat4(tmp, value);
                         var e = euler.create();
@@ -530,13 +550,15 @@ if (!window.performance || !window.performance.now) {
                         });
                     }
             for(var g=0;g<callbackArray.length;g++){
-                if(callbackArray[g].type=="display"){
-                    display(callbackArray[g].id,callbackArray[g].value);}
-                else if(callbackArray[g].type=="local"){
+                if(callbackArray[g].type=="local"){
                     local(callbackArray[g].id,callbackArray[g].value);}
+                else{
+                    display(callbackArray[g].id,callbackArray[g].value);}
                 }
             },500);
+}
         }
+
         viewer.onload = refreshScenesTree;
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
         var nodeBuffer;
@@ -590,7 +612,7 @@ if (!window.performance || !window.performance.now) {
             if(assets&&(assets.length==0||assets==null)){
                 nodeBuffer.attr("rel","empty");
             }
-            else if(param_in.type == "folder"){
+            else if(param_in.type == "folder"||param_in.type == "asset"){
                 var result = {};
                 var path = param_in.children;
                 try{result.data = param_in.name.substr(0,60)}
@@ -739,6 +761,13 @@ if (!window.performance || !window.performance.now) {
     })
         
         var searchInput = GUI.addInput("searchInputWarehouse", "Paris", accor.search).width("77%");
+        searchInput.keypress(
+          function(e){
+          if (e.keyCode==13){
+            var im = GUI.image(accor.search, "img-loadingWarehouse", "../gui/images/loadingV2.gif", 15, 15);
+            searchTree.warehouseSearch.jstree("refresh");
+            } 
+        });
         var submitSearch = GUI.button("search", accor.search, function(){
             var im = GUI.image(accor.search, "img-loadingWarehouse", "../gui/images/loadingV2.gif", 15, 15);
             searchTree.warehouseSearch.jstree("refresh");
@@ -768,6 +797,7 @@ if (!window.performance || !window.performance.now) {
                     "success": function (new_data) {
                         var result = [];
                         $("#img-loadingWarehouse").remove();
+                        console.debug(new_data);
                         result=parseWarehouseJson(new_data,result);
                         return result;
                     }
