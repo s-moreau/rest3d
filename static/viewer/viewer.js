@@ -320,6 +320,7 @@ viewer.parse_gltf = function(gltf) {
                   // initialize picking ID
                 var pickID = viewer.pickName.length;
                 viewer.pickId[this.id]=this.id;
+                console.debug(viewer.pickId)
                 viewer.pickName.push(viewer.nowParsing+"#"+this.id+"["+i+"]");
                 glprim.pickColor = [(pickID & 0xff)/255,((pickID>>8)&0xff)/255,((pickID>>16)&0xff)/255,1];
                 glprim.pickID = pickID;
