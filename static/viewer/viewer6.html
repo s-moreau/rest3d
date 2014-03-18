@@ -408,7 +408,7 @@ if (!window.performance || !window.performance.now) {
                         if(i==0){title = "geometry"}
                         var subchild = {
                             "data":title,
-                            "rel":"geometry",
+                            "attr":{"rel":"geometry","id":title+"_"++Math.floor(Math.random() * 1000000) + 1},
                             "children":[
                                 {"data":"materials",
                                 "children":[material],
