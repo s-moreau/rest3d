@@ -33,6 +33,7 @@ require.config({
         screenfull:"../deps/screenfull",
         gui:"../gui/gui6",
         utilMatrix: '../lib/utils',
+        viewer: '../viewer/viewer'
     },
     shim: {
         'codemirror':{
@@ -120,23 +121,15 @@ require.config({
             deps: ['jquerymin'],
             exports: 'RENDERER',
         },
-        'rest3d':{
-            deps: ['jquerymin','upload'],
-            exports: 'rest3d',
-        },
         'state':{
             deps: ['jquerymin'],
             exports: 'State',
-        },
-        'viewer':{
-             deps: ['glmatrixExt'],
-             exports: 'viewer',
         },
         'camera':{
             exports: 'Camera',
         },
         'channel':{
-            deps: ['state'],
+            deps: ['webglUtils','state'],
             exports: 'Channel',
         },
         'screenfull':{
@@ -159,10 +152,6 @@ require.config({
         },
         "searchCursor":{
             deps: ['codemirror']
-        },
-        "gui":{
-            deps: ['jquerylayout'],
-            exports: 'GUI',
         },
     },
 })
@@ -193,11 +182,18 @@ function loadStyle(){
 };
 
 loadStyle();
-require(['jquerymin','jqueryui','codemirror','javascript','showHint','javacriptHint','dialog','search','searchCursor','jquerylayout','upload','uploadProcess','uploadValidate','uploadTransport',
+require(['viewer'], function(viewer) { 
+    viewer.INIT(); 
+});
+
+/*
+require(['rest3d','jquerymin','jqueryui','codemirror','javascript','showHint','javacriptHint','dialog','search','searchCursor','jquerylayout','upload','uploadProcess','uploadValidate','uploadTransport',
     'skinner','jstree','glmatrixExt','toolbar','terminal','pnotify','colorpicker','eye','utils','webglUtils','WebGLDebugUtils','collada','gltf','console','screenfull','gui',
-    'camera','channel','renderer','rest3d','state','viewer','utilMatrix'],function(e){
+    'camera','channel','renderer',,'state','viewer','utilMatrix'],
+    function(){
     INIT();
 })
+*/
 
 
 // var dep = [{

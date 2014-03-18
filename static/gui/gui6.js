@@ -43,7 +43,9 @@ THE SOFTWARE.
     // The top-level namespace. All public GUI classes and modules will
     // be attached to this. Exported for both CommonJS and the browser.
 
-define("gui", (function (global) {
+
+define(['channel','codemirror','webglUtils', 'WebGLDebugUtils','pnotify','colorpicker','jquerylayout','toolbar','terminal','jstree','upload'], 
+  function () {
     
     var GUI;
 
@@ -2911,7 +2913,5 @@ define("gui", (function (global) {
         tmp.create();
         return tmp;
 }
-return function () {
-        return global.GUI;
-    };
-}(this)));
+return GUI;
+});

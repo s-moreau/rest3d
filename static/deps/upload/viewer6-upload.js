@@ -75,14 +75,14 @@ setViewer6Upload=function(upload){
                         // ennumerate all resulting files
                         var $conve = upload.header(data.file.name);
                         $.each(data.result.files, function (index, file) {
-                            var href = $('<a style="display:none" href="'+decodeURIComponent(file.url)+'" target="_blank"></a>');
+                            var href = $('<a style="display:none" href="'+decodeURIComponent(file.name)+'" target="_blank"></a>');
                             upload.filesArea.append(href);
                             var $download = $("<button>Download</button>").on("click",function(){
                                 href[0].click();
                                 href[0].remove();
                             });
 
-                        var url = decodeURIComponent(file.url);
+                        var url = decodeURIComponent(file.name);
                         var ext = url.match(/\.[^.]+$/);
                         if(ext==".json"){
                             var $dialog = $("<button>Launch</button>").on("click",function(){

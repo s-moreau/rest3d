@@ -1,5 +1,3 @@
-// https://www.khronos.org/registry/webgl/sdk/debug/webgl-debug.js
-
 /*
 ** Copyright (c) 2012 The Khronos Group Inc.
 **
@@ -24,7 +22,7 @@
 */
 
 // Various functions for helping debug WebGL apps.
-define("WebGLDebugUtils", (function (global) {
+
 WebGLDebugUtils = function() {
 
 /**
@@ -49,85 +47,112 @@ var error = function(msg) {
   }
 };
 
+
 /**
- * Which arguements are enums.
- * @type {!Object.<number, string>}
+ * Which arguments are enums based on the number of arguments to the function.
+ * So
+ *    'texImage2D': {
+ *       9: { 0:true, 2:true, 6:true, 7:true },
+ *       6: { 0:true, 2:true, 3:true, 4:true },
+ *    },
+ *
+ * means if there are 9 arguments then 6 and 7 are enums, if there are 6
+ * arguments 3 and 4 are enums
+ *
+ * @type {!Object.<number, !Object.<number, string>}
  */
 var glValidEnumContexts = {
-
   // Generic setters and getters
 
-  'enable': { 0:true },
-  'disable': { 0:true },
-  'getParameter': { 0:true },
+  'enable': {1: { 0:true }},
+  'disable': {1: { 0:true }},
+  'getParameter': {1: { 0:true }},
 
   // Rendering
 
-  'drawArrays': { 0:true },
-  'drawElements': { 0:true, 2:true },
+  'drawArrays': {3:{ 0:true }},
+  'drawElements': {4:{ 0:true, 2:true }},
 
   // Shaders
 
-  'createShader': { 0:true },
-  'getShaderParameter': { 1:true },
-  'getProgramParameter': { 1:true },
+  'createShader': {1: { 0:true }},
+  'getShaderParameter': {2: { 1:true }},
+  'getProgramParameter': {2: { 1:true }},
+  'getShaderPrecisionFormat': {2: { 0: true, 1:true }},
 
   // Vertex attributes
 
-  'getVertexAttrib': { 1:true },
-  'vertexAttribPointer': { 2:true },
+  'getVertexAttrib': {2: { 1:true }},
+  'vertexAttribPointer': {6: { 2:true }},
 
   // Textures
 
-  'bindTexture': { 0:true },
-  'activeTexture': { 0:true },
-  'getTexParameter': { 0:true, 1:true },
-  'texParameterf': { 0:true, 1:true },
-  'texParameteri': { 0:true, 1:true, 2:true },
-  'texImage2D': { 0:true, 2:true, 6:true, 7:true },
-  'texSubImage2D': { 0:true, 6:true, 7:true },
-  'copyTexImage2D': { 0:true, 2:true },
-  'copyTexSubImage2D': { 0:true },
-  'generateMipmap': { 0:true },
+  'bindTexture': {2: { 0:true }},
+  'activeTexture': {1: { 0:true }},
+  'getTexParameter': {2: { 0:true, 1:true }},
+  'texParameterf': {3: { 0:true, 1:true }},
+  'texParameteri': {3: { 0:true, 1:true, 2:true }},
+  'texImage2D': {
+     9: { 0:true, 2:true, 6:true, 7:true },
+     6: { 0:true, 2:true, 3:true, 4:true },
+  },
+  'texSubImage2D': {
+    9: { 0:true, 6:true, 7:true },
+    7: { 0:true, 4:true, 5:true },
+  },
+  'copyTexImage2D': {8: { 0:true, 2:true }},
+  'copyTexSubImage2D': {8: { 0:true }},
+  'generateMipmap': {1: { 0:true }},
+  'compressedTexImage2D': {7: { 0: true, 2:true }},
+  'compressedTexSubImage2D': {8: { 0: true, 6:true }},
 
   // Buffer objects
 
-  'bindBuffer': { 0:true },
-  'bufferData': { 0:true, 2:true },
-  'bufferSubData': { 0:true },
-  'getBufferParameter': { 0:true, 1:true },
+  'bindBuffer': {2: { 0:true }},
+  'bufferData': {3: { 0:true, 2:true }},
+  'bufferSubData': {3: { 0:true }},
+  'getBufferParameter': {2: { 0:true, 1:true }},
 
   // Renderbuffers and framebuffers
 
-  'pixelStorei': { 0:true, 1:true },
-  'readPixels': { 4:true, 5:true },
-  'bindRenderbuffer': { 0:true },
-  'bindFramebuffer': { 0:true },
-  'checkFramebufferStatus': { 0:true },
-  'framebufferRenderbuffer': { 0:true, 1:true, 2:true },
-  'framebufferTexture2D': { 0:true, 1:true, 2:true },
-  'getFramebufferAttachmentParameter': { 0:true, 1:true, 2:true },
-  'getRenderbufferParameter': { 0:true, 1:true },
-  'renderbufferStorage': { 0:true, 1:true },
+  'pixelStorei': {2: { 0:true, 1:true }},
+  'readPixels': {7: { 4:true, 5:true }},
+  'bindRenderbuffer': {2: { 0:true }},
+  'bindFramebuffer': {2: { 0:true }},
+  'checkFramebufferStatus': {1: { 0:true }},
+  'framebufferRenderbuffer': {4: { 0:true, 1:true, 2:true }},
+  'framebufferTexture2D': {5: { 0:true, 1:true, 2:true }},
+  'getFramebufferAttachmentParameter': {3: { 0:true, 1:true, 2:true }},
+  'getRenderbufferParameter': {2: { 0:true, 1:true }},
+  'renderbufferStorage': {4: { 0:true, 1:true }},
 
   // Frame buffer operations (clear, blend, depth test, stencil)
 
-  'clear': { 0:true },
-  'depthFunc': { 0:true },
-  'blendFunc': { 0:true, 1:true },
-  'blendFuncSeparate': { 0:true, 1:true, 2:true, 3:true },
-  'blendEquation': { 0:true },
-  'blendEquationSeparate': { 0:true, 1:true },
-  'stencilFunc': { 0:true },
-  'stencilFuncSeparate': { 0:true, 1:true },
-  'stencilMaskSeparate': { 0:true },
-  'stencilOp': { 0:true, 1:true, 2:true },
-  'stencilOpSeparate': { 0:true, 1:true, 2:true, 3:true },
+  'clear': {1: { 0:true }},
+  'depthFunc': {1: { 0:true }},
+  'blendFunc': {2: { 0:true, 1:true }},
+  'blendFuncSeparate': {4: { 0:true, 1:true, 2:true, 3:true }},
+  'blendEquation': {1: { 0:true }},
+  'blendEquationSeparate': {2: { 0:true, 1:true }},
+  'stencilFunc': {3: { 0:true }},
+  'stencilFuncSeparate': {4: { 0:true, 1:true }},
+  'stencilMaskSeparate': {2: { 0:true }},
+  'stencilOp': {3: { 0:true, 1:true, 2:true }},
+  'stencilOpSeparate': {4: { 0:true, 1:true, 2:true, 3:true }},
 
   // Culling
 
-  'cullFace': { 0:true },
-  'frontFace': { 0:true },
+  'cullFace': {1: { 0:true }},
+  'frontFace': {1: { 0:true }},
+
+  // ANGLE_instanced_arrays extension
+
+  'drawArraysInstancedANGLE': {4: { 0:true }},
+  'drawElementsInstancedANGLE': {5: { 0:true, 2:true }},
+
+  // EXT_blend_minmax extension
+
+  'blendEquationEXT': {1: { 0:true }},
 };
 
 /**
@@ -182,26 +207,29 @@ function mightBeEnum(value) {
  * @return {string} The string version of the enum.
  */
 function glEnumToString(value) {
-  if (value === undefined) return "undefined";
   checkInit();
   var name = glEnums[value];
-  return (name !== undefined) ? name :
-      ("*UNKNOWN WebGL ENUM (0x" + value.toString(16) + ")");
+  return (name !== undefined) ? ("gl." + name) :
+      ("/*UNKNOWN WebGL ENUM*/ 0x" + value.toString(16) + "");
 }
 
 /**
  * Returns the string version of a WebGL argument.
  * Attempts to convert enum arguments to strings.
  * @param {string} functionName the name of the WebGL function.
+ * @param {number} numArgs the number of arguments passed to the function.
  * @param {number} argumentIndx the index of the argument.
  * @param {*} value The value of the argument.
  * @return {string} The value as a string.
  */
-function glFunctionArgToString(functionName, argumentIndex, value) {
+function glFunctionArgToString(functionName, numArgs, argumentIndex, value) {
   var funcInfo = glValidEnumContexts[functionName];
   if (funcInfo !== undefined) {
-    if (funcInfo[argumentIndex]) {
-      return glEnumToString(value);
+    var funcInfo = funcInfo[numArgs];
+    if (funcInfo !== undefined) {
+      if (funcInfo[argumentIndex]) {
+        return glEnumToString(value);
+      }
     }
   }
   if (value === null) {
@@ -224,9 +252,10 @@ function glFunctionArgToString(functionName, argumentIndex, value) {
 function glFunctionArgsToString(functionName, args) {
   // apparently we can't do args.join(",");
   var argStr = "";
-  for (var ii = 0; ii < args.length; ++ii) {
+  var numArgs = args.length;
+  for (var ii = 0; ii < numArgs; ++ii) {
     argStr += ((ii == 0) ? '' : ', ') +
-        glFunctionArgToString(functionName, ii, args[ii]);
+        glFunctionArgToString(functionName, numArgs, ii, args[ii]);
   }
   return argStr;
 };
@@ -270,15 +299,19 @@ function makeFunctionWrapper(original, functionName) {
  * @param {!function(funcName, args): void} opt_onFunc The
  *        function to call when each webgl function is called.
  *        You can use this to log all calls for example.
+ * @param {!WebGLRenderingContext} opt_err_ctx The webgl context
+ *        to call getError on if different than ctx.
  */
-function makeDebugContext(ctx, opt_onErrorFunc, opt_onFunc) {
+function makeDebugContext(ctx, opt_onErrorFunc, opt_onFunc, opt_err_ctx) {
+  opt_err_ctx = opt_err_ctx || ctx;
   init(ctx);
   opt_onErrorFunc = opt_onErrorFunc || function(err, functionName, args) {
         // apparently we can't do args.join(",");
         var argStr = "";
-        for (var ii = 0; ii < args.length; ++ii) {
+        var numArgs = args.length;
+        for (var ii = 0; ii < numArgs; ++ii) {
           argStr += ((ii == 0) ? '' : ', ') +
-              glFunctionArgToString(functionName, ii, args[ii]);
+              glFunctionArgToString(functionName, numArgs, ii, args[ii]);
         }
         error("WebGL error "+ glEnumToString(err) + " in "+ functionName +
               "(" + argStr + ")");
@@ -295,7 +328,7 @@ function makeDebugContext(ctx, opt_onErrorFunc, opt_onFunc) {
         opt_onFunc(functionName, arguments);
       }
       var result = ctx[functionName].apply(ctx, arguments);
-      var err = ctx.getError();
+      var err = opt_err_ctx.getError();
       if (err != 0) {
         glErrorShadow[err] = true;
         opt_onErrorFunc(err, functionName, arguments);
@@ -309,7 +342,15 @@ function makeDebugContext(ctx, opt_onErrorFunc, opt_onFunc) {
   var wrapper = {};
   for (var propertyName in ctx) {
     if (typeof ctx[propertyName] == 'function') {
-       wrapper[propertyName] = makeErrorWrapper(ctx, propertyName);
+       if (propertyName != 'getExtension') {
+    wrapper[propertyName] = makeErrorWrapper(ctx, propertyName);
+       } else {
+    var wrapped = makeErrorWrapper(ctx, propertyName);
+    wrapper[propertyName] = function () {
+       var result = wrapped.apply(ctx, arguments);
+       return makeDebugContext(result, opt_onErrorFunc, opt_onFunc, opt_err_ctx);
+    };
+       }
      } else {
        makePropertyWrapper(wrapper, ctx, propertyName);
      }
@@ -760,10 +801,9 @@ function makeLostContextSimulatingCanvas(canvas) {
 }
 
 return {
-    /**
-     * Initializes this module. Safe to call more than once.
-     * @param {!WebGLRenderingContext} ctx A WebGL context. If
-    }
+  /**
+   * Initializes this module. Safe to call more than once.
+   * @param {!WebGLRenderingContext} ctx A WebGL context. If
    *    you have more than one context it doesn't matter which one
    *    you pass in, it is only used to pull out constants.
    */
@@ -794,11 +834,12 @@ return {
    *
    * Example:
    *   WebGLDebugUtil.init(ctx);
-   *   var str = WebGLDebugUtil.glFunctionArgToString('bindTexture', 0, gl.TEXTURE_2D);
+   *   var str = WebGLDebugUtil.glFunctionArgToString('bindTexture', 2, 0, gl.TEXTURE_2D);
    *
    * would return 'TEXTURE_2D'
    *
    * @param {string} functionName the name of the WebGL function.
+   * @param {number} numArgs The number of arguments
    * @param {number} argumentIndx the index of the argument.
    * @param {*} value The value of the argument.
    * @return {string} The value as a string.
@@ -875,10 +916,3 @@ return {
 };
 
 }();
-
-return function () {
-        return global.WebGLDebugUtils;
-    };
-}(this)));
-
-

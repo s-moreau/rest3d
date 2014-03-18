@@ -21,9 +21,15 @@ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.*/
-define("rest3d", (function (global) {
 
-var rest3d = this.rest3d = {};
+'use strict';
+
+define(["jquerymin","upload"], function($) {
+
+// rest3d convert API
+// this is draft -> should create a convert request, and then do a long pull for query status
+
+var rest3d = {};
 rest3d.convert = function(_params, _cb) {
     var params=_params || {};
     var cb=_cb;
@@ -85,7 +91,7 @@ rest3d.fileUpload = function(_params,_cb){
         console.error("upload error: "+textStatus+", "+errorThrown);
         $input.remove();
 })
-}
+};
 
 // rest3d.urlUpload = function(_params,_cb){
 //     _params = warehouse.zip;
@@ -112,7 +118,6 @@ rest3d.fileUpload = function(_params,_cb){
 //     rest3d.upload(data,getData);
 // }
 
-return function () {
-        return global.rest3d;
-    };
-}(this)));
+return rest3d;
+
+});
