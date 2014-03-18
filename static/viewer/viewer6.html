@@ -538,7 +538,8 @@ if (!window.performance || !window.performance.now) {
         
         treeScene.Tree.bind(
         "select_node.jstree", function(evt, data){
-            console.debug(data.inst.get_json()[0].attr.id);
+            var tmp = data.inst.get_json()[0];
+            console.debug(tmp.attr.id+" "+tmp.attr.rel);
             //selected node object: data.inst.get_json()[0];
             //selected node text: data.inst.get_json()[0].data
         }
