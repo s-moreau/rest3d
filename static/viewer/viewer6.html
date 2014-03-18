@@ -409,9 +409,10 @@ if (!window.performance || !window.performance.now) {
                         if(i==0){title = "geometry"}
                         var subchild = {
                             "data":title,
-                            "attr":{"rel":"children","id":title+"_"+Math.floor(Math.random() * 1000000) + 1},
+                            "attr":{"rel":"geometry","id":title+"_"+Math.floor(Math.random() * 1000000) + 1},
                             "children":[
                                 {"data":"materials",
+                                "attr":{"rel":"children","id":"material"+"_"+Math.floor(Math.random() * 1000000) + 1},
                                 "children":[material],
                                 },
                             ],
@@ -580,7 +581,7 @@ if (!window.performance || !window.performance.now) {
                     },
                 "material": {
                     "icon" : {
-                        "image" : "../gui/images/cross.jpg",
+                        "image" : "../gui/images/material.png",
                     },
                     },
                 "camera_child": {
