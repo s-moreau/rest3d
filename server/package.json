@@ -15,7 +15,8 @@
     "blueimp-file-upload":"",
     "formidable":"",
     "imagemagick":"",
-    "memorystream":""
+    "memorystream":"",
+    "node-uuid":""
   },
   "devDependencies": {
     "mocha": "1.7.4",

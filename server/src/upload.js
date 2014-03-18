@@ -8,11 +8,17 @@ module.exports = function (server) {
   var fs = require('fs');
   var path = require('path');
   var imageMagick = require('imagemagick');
+  var uuid = require('node-uuid');
+
+  var memoryStream = require('memorystream');
+  var request = require('request');
 
   var FileInfo = require('./fileinfo');
   var sendFile = require('./sendfile');
 
   var UploadHandler = require('./handler');
+  var zipFile = require('./zipfile')(server);;
+
   var utf8encode = function (str) {
    return unescape(encodeURIComponent(str));
   };
@@ -22,7 +28,6 @@ module.exports = function (server) {
    res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate');
    res.setHeader('Content-Disposition', 'inline; filename="files.json"');
   };
-
 
   UploadHandler.prototype.post = function () {
     console.log ("upload requested");
@@ -41,7 +46,7 @@ module.exports = function (server) {
 
             console.log ('file '+fileInfo.name+' was uploaded succesfully');
 
-              fileInfo.initUrls(handler.req);
+              //fileInfo.initUrls(handler.req);
 
               var timeout = function() {
                 fileInfo.delete();
@@ -64,8 +69,9 @@ module.exports = function (server) {
         tmpFiles.push(file.path);
         var fileInfo = new FileInfo(file);
         fileInfo.safeName();
-        map[path.basename(file.path)] = fileInfo;
+        map[file.path] = fileInfo;
         files.push(fileInfo);
+
       } catch(e) {
         handler.handleError( e);
         return 
@@ -74,8 +80,72 @@ module.exports = function (server) {
       if (name === 'redirect') {
         redirect = value;
       }
+      if (name === 'url')
+      {
+        // downloading file and uncompressing if needed
+        var params={};
+        params.uid = uuid.v1(); // time based uuid generation
+        params.cb = function(error,result){
+          if (error)
+            handler.handleError(error);
+          else {
+            // turn {asset} into fileInfos
+            var getFileInfos = function(results) {
+
+              if (results.type === 'file') {
+                var fileInfo = new FileInfo(results);
+                fileInfo.safeName();
+                files.push(fileInfo);
+                //fileInfo.size =
+                // if (!fileInfo.validate()) {
+                //  fs.unlink(file.path);
+                //  return;
+                //}
+              }
+              if (results.children) {
+                for (var i=0; i<results.children.length;i++){
+                  getFileInfos(results.children[i]);
+                }
+              }
+            };
+            getFileInfos(result);
+            finish();
+          }
+        };
+        params.url = value;
+        params.where = FileInfo.options.uploadDir;
+
+        counter ++;
+        server.diskcache.hit(params.url,function(err,entry){
+          if (entry) 
+          {
+            console.log('zip disk cache HIT!='+entry.filename);
+            zipFile.unzip(entry,params);
+          } else {
+            var buffer = new memoryStream(null, {readable : false});
+            buffer.on('error', function(error) {
+               params.cb(error);
+            });
+            buffer.on('end', function () {
+              params.req.response.body = this.toBuffer();
+              server.diskcache.store(params.url,params.req.response,function(err,entry){
+                zipFile.unzip(entry,params);
+             });
+            });
+
+           
+            // for some reason, request(url, cb) returns an incmplete body
+            // but pipe() provides the right body
+            // but I need the response headers, so I split this in half
+            // and I can get to the header in 'close'
+            params.req=request.get(params.url); 
+            params.req.pipe(buffer);
+
+          }
+        });
+      }
     }).on('file', function (name, file) {
-      var fileInfo = map[path.basename(file.path)];
+      var fileInfo = map[file.path];
       fileInfo.size = file.size;
       if (!fileInfo.validate()) {
         fs.unlink(file.path);
@@ -83,6 +153,7 @@ module.exports = function (server) {
       }
       fs.renameSync(file.path, FileInfo.options.uploadDir + '/' + fileInfo.name);
       console.log("uploaded "+FileInfo.options.uploadDir + '/' + fileInfo.name);
+      fileInfo.path = FileInfo.options.uploadDir + '/' + fileInfo.name;
       /* Image resize 
 
       if (FileInfo.options.imageTypes.test(fileInfo.name)) {
@@ -125,7 +196,8 @@ module.exports = function (server) {
         if (stats.isFile() && name[0] !== '.') {
           fileInfo = new FileInfo({
             name: name,
-            size: stats.size
+            size: stats.size,
+            path: FileInfo.options.uploadDir + '/' + name
           });
           fileInfo.initUrls(handler.req);
           files.push(fileInfo);

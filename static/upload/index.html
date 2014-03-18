@@ -246,7 +246,7 @@ function INIT (){
         $.each(data.result.files, function (index, file) {
             var link = $('<a>')
                 .attr('target', '_blank')
-                .prop('href', file.url);
+                .prop('href', '../rest3d/'+file.path);
             $(data.context.children()[index])
                 .find('span').text(file.name);
 
@@ -255,7 +255,7 @@ function INIT (){
             file.assetName = data.result.files[index].name;
             var $node = convertButton.clone(true).data({file: file, context: data.context})
                 .text('Convert')
-                .prop('disabled', !/dae$/i.test(file.url));
+                .prop('disabled', !/dae$/i.test(file.path));
             $(data.context.children()[index]).parent() // the <a>
                 .append($node);
         });

@@ -642,7 +642,7 @@ server.post(/^\/rest3d\/convert.*/,function(req,res,next){
 		                    name: output_dir+'/'+name,
 		                    size: stats.size
 		                });
-		                fileInfo.initUrls(req);
+		                //fileInfo.initUrls(req);
 		                files.push(fileInfo);
 		            }
 		        });
@@ -667,7 +667,7 @@ server.get(/^\/.*/, function (req, res, next) {
 	var filename = req.url.split('\?')[0];
 	var p=path.resolve(staticPath + filename);
 
-	console.log('http get path='+p);
+	console.log('http get path='+filename);
 
 	sendFile(req,res,p);
 	return next();
