@@ -13,7 +13,7 @@ git reset --hard origin/master
 cd server
 npm install
 
-pm2 --silent -f stop logs
+pm2 --silent -f stop logs &
 pm2 --silent -f delete all
 
 #pm2 flush
