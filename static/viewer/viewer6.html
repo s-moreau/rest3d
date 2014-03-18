@@ -432,9 +432,9 @@ if (!window.performance || !window.performance.now) {
                     if(position.hasOwnProperty("children")){
                         sub.attr = {"id":id,"rel":"children"};
                     }
-                    if(position.hasOwnProperty("local")){
-                         sub.attr = {"id":id,"rel":"local"};
-                    }
+                    // if(position.hasOwnProperty("local")){
+                    //      sub.attr = {"id":id,"rel":"local"};
+                    // }
                     else{
                         sub.attr = {"id":id,"rel":"sub"};
                     }
@@ -545,7 +545,7 @@ if (!window.performance || !window.performance.now) {
         "select_node.jstree", function(evt, data){
             var tmp = data.inst.get_json()[0];
             if(tmp.attr.hasOwnProperty("id")){
-                var id = tmp.attr.id.substr(0,4);
+                var id = tmp.attr.id.substr(4,0);
                 if(viewer.pickName[id]!="undefined"&&viewer.pickName[id]!=null){
                     if (!viewer.channel.selected) viewer.channel.selected = {};
                     if (viewer.channel.selected[id]) {
