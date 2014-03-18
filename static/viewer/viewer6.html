@@ -294,7 +294,7 @@ if (!window.performance || !window.performance.now) {
             function displayConfig (parent,object,attr){
                 if(parent.hasOwnProperty(attr)){
                     var id = attr+"_"+Math.floor(Math.random() * 1000000) + 1;
-                    {"data":attr,"attr":{"id":id}}
+                    // {"data":attr,"attr":{"id":id}}
                     var data = {};
                     data.data = attr;
                     if(attr == "znear"||"zfar"||"yfov"||"projection"||"aspect_ratio"){
