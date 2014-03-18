@@ -485,6 +485,9 @@ if (!window.performance || !window.performance.now) {
                     if(position.hasOwnProperty("children")){
                          sub.attr = {"id":id,"rel":"children"};
                     }
+                    if(position.hasOwnProperty("local")){
+                         sub.attr = {"id":id,"rel":"local"};
+                    }
                     else{
                         sub.attr = {"id":id,"rel":"sub"};}
                     sub.children = [];
@@ -536,29 +539,29 @@ if (!window.performance || !window.performance.now) {
                         "image" : "../favicon.ico",
                     },
                     },
-                "collection": {
+                "camera": {
                     "icon" : {
-                        "image" : "../gui/images/menu-scenes.png",
+                        "image" : "../gui/images/camera-anim.gif",
                     },
                     },
-                "collada": {
+                "children": {
                     "icon" : {
-                        "image" : "../favicon.ico",
+                        "image" : "../gui/images/folder.png",
                     },
                     },
-                "text": {
+                "local": {
                     "icon" : {
-                        "image" : "../gui/images/file.png",
+                        "image" : "../gui/images/Photoshop3DAxis.png",
                     },
                     },
-                "kml": {
+                "geometry": {
                     "icon" : {
                         "image" : "../gui/images/kml.png",
                     },
                     },
-                 "image": {
+                 "sub": {
                     "icon" : {
-                        "image" : "../gui/images/media-image.png",
+                        "image" : "../gui/images/file.png",
                     },
                     },
                 "model": {
