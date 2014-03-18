@@ -324,7 +324,7 @@ if (!window.performance || !window.performance.now) {
                 for(var z=0; z<stock.materials.length;z++){
                     var subsel_material = stock.materials[z];
                     material.data  = subsel_material.name||subsel_material.id||subsel_material.symbol||subsel_material.target;
-                    material.attr =  {"rel":"children","id":title+"_"+Math.floor(Math.random() * 1000000) + 1};
+                    material.attr =  {"rel":"children","id":material.data+"_"+Math.floor(Math.random() * 1000000) + 1};
                     material.children = [];
                     var material_parameter = subsel_material.overrides||subsel_material.parameters;
                     displayConfig(material_parameter,material.children,"ambient");
