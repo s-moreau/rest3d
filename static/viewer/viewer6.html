@@ -340,65 +340,6 @@ if (!window.performance || !window.performance.now) {
             }
             return material;
             } 
-            /* we do not display glprimitives
-
-            window.primitives = function(param_in){
-                var glprimitives = {};
-                if(param_in.hasOwnProperty('glprimitives')){
-                     for(var w=0; w<param_in.glprimitives.length;w++){
-                        var subsel_glprimitives = param_in.glprimitives[w];
-                        glprimitives.data  =subsel_glprimitives.name||subsel_glprimitives.id||"gl_"+Math.floor(Math.random() * 1000000) + 1;
-                        glprimitives.children = [];
-                        displayConfig(subsel_glprimitives,glprimitives.children,"binormalBuffer");
-                        displayConfig(subsel_glprimitives,glprimitives.children,"binormals");
-                        displayConfig(subsel_glprimitives,glprimitives.children,"buffer");
-                        displayConfig(subsel_glprimitives,glprimitives.children,"colorBuffer");
-                        displayConfig(subsel_glprimitives,glprimitives.children,"colors");
-                        displayConfig(subsel_glprimitives,glprimitives.children,"createMe");
-                        displayConfig(subsel_glprimitives,glprimitives.children,"defaultBinormal");
-                        displayConfig(subsel_glprimitives,glprimitives.children,"defaultColor");
-                        displayConfig(subsel_glprimitives,glprimitives.children,"defaultID");
-                        displayConfig(subsel_glprimitives,glprimitives.children,"defaultNormal");
-                        displayConfig(subsel_glprimitives,glprimitives.children,"defaultTexcoord");
-                        displayConfig(subsel_glprimitives,glprimitives.children,"defaultVertex");
-                        displayConfig(subsel_glprimitives,glprimitives.children,"glBuffer");
-                        displayConfig(subsel_glprimitives,glprimitives.children,"hasColorBuffer");
-                        displayConfig(subsel_glprimitives,glprimitives.children,"idBuffer");
-                        displayConfig(subsel_glprimitives,glprimitives.children,"ids");
-                        displayConfig(subsel_glprimitives,glprimitives.children,"indexBuffer");
-                        displayConfig(subsel_glprimitives,glprimitives.children,"indices");
-                        displayConfig(subsel_glprimitives,glprimitives.children,"normalBuffer");
-                        displayConfig(subsel_glprimitives,glprimitives.children,"normals");
-                        displayConfig(subsel_glprimitives,glprimitives.children,"vertices");
-                    }
-                }
-                return glprimitives;
-            }
-
-            */
-
-             // we do not display inside a mesh
-            // window.mesh= function(param_in){
-            //     var mesh = {};
-            //     if(param_in.hasOwnProperty('mesh')){
-            //         for(var y=0; y<param_in.mesh.length;y++){
-            //             var subsel_mesh = param_in.mesh[y];
-            //             mesh.data  = mesh.name||mesh.id||"mesh_"+Math.floor(Math.random() * 1000000) + 1;
-            //             mesh.children = [];
-            //             displayConfig(subsel_mesh,mesh.children,"NORMAL");
-            //             displayConfig(subsel_mesh,mesh.children,"POSITION");
-            //             displayConfig(subsel_mesh,mesh.children,"TEXCOORD_0");
-            //             displayConfig(subsel_mesh,mesh.children,"VERTEX");
-            //             displayConfig(subsel_mesh,mesh.children,"count");
-            //             displayConfig(subsel_mesh,mesh.children,"material");
-            //             displayConfig(subsel_mesh,mesh.children,"max_offset");
-            //             displayConfig(subsel_mesh,mesh.children,"p");
-            //             displayConfig(subsel_mesh,mesh.children,"primitives");
-            //         }
-            //     }
-            //     return mesh;
-            // }
-            
 
             window.geometry = function(param_in,param_out){
                 if(param_in.hasOwnProperty("geometries")&&$.isArray(param_in.geometries)){
@@ -594,6 +535,15 @@ if (!window.performance || !window.performance.now) {
                     "theme":"apple",
                 },
             });
+        
+        treeScene.Tree.bind(
+        "select_node.jstree", function(evt, data){
+            console.debug("IN")
+            //selected node object: data.inst.get_json()[0];
+            //selected node text: data.inst.get_json()[0].data
+        }
+);
+
         window.callbacks = function(){
             setTimeout(function(){
                 function display(id,value){
