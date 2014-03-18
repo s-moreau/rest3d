@@ -176,7 +176,7 @@ function INIT (){
                         // ennumerate all resulting files
                         $.each(data.result.files, function (index, file) {
 
-                            var span = '<p><span><a href="'+decodeURIComponent(file.url)+'" target="_blank"><p><span>'+formatName(data,file)+'</a>';
+                            var span = '<p><span><a href="'+decodeURIComponent(file.name)+'" target="_blank"><p><span>'+formatName(data,file)+'</a>';
                             // endsWith
                             if (file.name.indexOf('.json', file.url.length - '.json'.length) !== -1) {
                                 var url='/viewer/easy-viewer.html?file=/upload/'+decodeURIComponent(file.name);
