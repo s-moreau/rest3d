@@ -324,6 +324,7 @@ if (!window.performance || !window.performance.now) {
                 for(var z=0; z<stock.materials.length;z++){
                     var subsel_material = stock.materials[z];
                     material.data  = subsel_material.name||subsel_material.id||subsel_material.symbol||subsel_material.target;
+                    material.attr =  {"rel":"children","id":title+"_"+Math.floor(Math.random() * 1000000) + 1};
                     material.children = [];
                     var material_parameter = subsel_material.overrides||subsel_material.parameters;
                     displayConfig(material_parameter,material.children,"ambient");
@@ -408,7 +409,7 @@ if (!window.performance || !window.performance.now) {
                         if(i==0){title = "geometry"}
                         var subchild = {
                             "data":title,
-                            "attr":{"rel":"geometry","id":title+"_"+Math.floor(Math.random() * 1000000) + 1},
+                            "attr":{"rel":"children","id":title+"_"+Math.floor(Math.random() * 1000000) + 1},
                             "children":[
                                 {"data":"materials",
                                 "children":[material],
@@ -559,7 +560,7 @@ if (!window.performance || !window.performance.now) {
                     },
                 "geometry": {
                     "icon" : {
-                        "image" : "../gui/images/kml.png",
+                        "image" : "../gui/images/geometry.png",
                     },
                     },
                  "sub": {
@@ -575,6 +576,21 @@ if (!window.performance || !window.performance.now) {
                 "empty": {
                     "icon" : {
                         "image" : "../gui/images/cross.jpg",
+                    },
+                    },
+                "camera_child": {
+                    "icon" : {
+                        "image" : "../gui/images/cross.jpg",
+                    },
+                    },
+                "material": {
+                    "icon" : {
+                        "image" : "../gui/images/cross.jpg",
+                    },
+                    },
+                "camera_child": {
+                    "icon" : {
+                        "image" : "../gui/images/camera-anim.gif",
                     },
                     },
             }},
