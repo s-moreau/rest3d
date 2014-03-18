@@ -178,8 +178,8 @@ function INIT (){
 
                             var span = '<p><span><a href="'+decodeURIComponent(file.url)+'" target="_blank"><p><span>'+formatName(data,file)+'</a>';
                             // endsWith
-                            if (file.url.indexOf('.json', file.url.length - '.json'.length) !== -1) {
-                                var url='/viewer/viewer4.html?file=/rest3d/upload/'+decodeURIComponent(file.name);
+                            if (file.name.indexOf('.json', file.url.length - '.json'.length) !== -1) {
+                                var url='/viewer/easy-viewer.html?file=/upload/'+decodeURIComponent(file.name);
                                 span += ' -> <a href="'+url+'" target="_blank"> View '+formatName(data,file)+'</a>';
                             }
                             span += '</span></p>';
