@@ -547,7 +547,7 @@ if (!window.performance || !window.performance.now) {
         treeScene.Tree.bind(
         "select_node.jstree", function(evt, data){
             var tmp = data.inst.get_json()[0];
-            if(tmp.attr.hasOwnProperty("realid"){
+            if(tmp.attr.hasOwnProperty("realid")){
                 var id = tmp.attr.realid;
                 if(viewer.pickName[id]!="undefined"&&viewer.pickName[id]!=null){
                     if (!viewer.channel.selected) viewer.channel.selected = {};
