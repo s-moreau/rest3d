@@ -300,7 +300,7 @@ if (!window.performance || !window.performance.now) {
                     if(attr == "znear"||"zfar"||"yfov"||"projection"||"aspect_ratio"){
                         data.attr = {"id":id,'rel':'camera_child'}
                     }   
-                    if(attr == "local"){
+                    else if(attr == "local"){
                         data.attr = {"id":id,'rel':'local'}
                     }
                     else{
@@ -581,7 +581,7 @@ if (!window.performance || !window.performance.now) {
                     },
                 "material": {
                     "icon" : {
-                        "image" : "../gui/images/material.png",
+                        "image" : "../gui/images/material.pnga",
                     },
                     },
                 "camera_child": {
