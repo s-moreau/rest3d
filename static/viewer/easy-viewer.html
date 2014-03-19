@@ -180,32 +180,6 @@ require.config({
     },
 })
 
-var css = [
-"../gui/gui6.css",
-"../deps/codemirror/css/eclipse.css",
-"../deps/css/jquery-skinner.css",
-"../deps/codemirror/css/codemirror.css",
-"../deps/codemirror/css/show-hint.css",
-"../deps/codemirror/css/dialog.css",
-"../deps/css/bootstrap.icons.css",
-"../deps/css/jquery.toolbars.css",
-"../deps/css/jquery.terminal.css",
-"../deps/jstree/themes/apple/style.css",
-"../deps/css/jquery.pnotify.default.css",
-"../deps/colorpicker/css/colorpicker.css",
-"../deps/colorpicker/css/layout.css",
-]
-
-function loadStyle(){
-    for(var i=0;i<css.length;i++){
-        var s = document.createElement('link');
-        s.rel = 'stylesheet';
-        s.href = css[i];
-        document.getElementsByTagName('head').item(0).appendChild(s);
-    }
-};
-
-loadStyle();
 require(['viewer'], function(viewer) { 
     viewer.easyINIT(); 
 });

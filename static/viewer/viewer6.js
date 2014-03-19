@@ -2245,7 +2245,7 @@ function args() {
         };
 var $background = $('<div style="position: absolute; top: 0px; bottom: 0px; right:0px; left:0px; height: 100%; width:100%; background-color: white;">'); 
 $('body').append($background);
-$canvas = $('<canvas id="tmp" class="ui-resize-me" style="position: absolute; top: 0px; bottom: 0px; right:0px; margins: 10px;height: 100%; width:100%; " ></canvas>');
+$canvas = $('<canvas id="tmp" class="ui-resize-me" style="position: absolute; top: 0px; bottom: 0px; right:0px; margins: 0px;height: 100%; width:100%; " ></canvas>');
 $background.append($canvas);
 // initialize webGL
 viewer.channel = Channel.create($canvas[0]); 
@@ -2392,7 +2392,7 @@ if (arg.file) {
             fpsCounter.increment();}
     }
 
-     $("body").append('<div id="colorSelector"  style="z-index:9999!important;"><div style="background-color: #0000ff"></div></div>');
+     $("body").append('<div id="colorSelector"  style="z-index:9999!important; right:38px !important; bottom:35px !important;"><div style="background-color: #0000ff"></div></div>');
         var tmpPicker;
         var flagColorPicker="show";
         $('#colorSelector div').css('backgroundColor', '#ffffff');
@@ -2418,7 +2418,7 @@ if (arg.file) {
             }
         });
 
-
+        $('#colorSelector').css({'right':'100px !important'})
 };
 
   return viewer;
