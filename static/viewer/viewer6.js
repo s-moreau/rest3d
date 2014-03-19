@@ -1709,7 +1709,7 @@ if (!window.performance || !window.performance.now) {
                 },
                 convertButton = $('<button/>')
                     .addClass('btn')
-                    .prop('disabled', true)
+                    // .prop('disabled', true)
                     .on('click', function () {
                         var $this = $(this),
                             data = $this.data();
