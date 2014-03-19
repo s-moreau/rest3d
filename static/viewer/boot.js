@@ -19,7 +19,7 @@ require.config({
         jstree: '../deps/jstree/jquery.jstree',
         glmatrix: '../deps/gl-matrix-min',
         glmatrixExt: '../lib/gl-matrix-ext',
-        toolbar: "../deps/jquery.toolbar",
+        toolbar: "../deps/jquery.toolbar.min",
         terminal: "../deps/jquery.terminal-0.7.10.min",
         pnotify: "../deps/jquery.pnotify-1.3.1.min",
         colorpicker: "../deps/colorpicker/colorpicker",
