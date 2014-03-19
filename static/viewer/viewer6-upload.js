@@ -25,7 +25,7 @@ THE SOFTWARE.*/
 
 define(['jquerymin','rest3d','gltf','collada','viewer'], function ($,rest3d,glTF,COLLADA,viewer) {
 
-  var setViewer6Upload=function(upload,rest3d){
+  function setViewer6Upload(upload,rest3d){
             var header;
             var index;
             var buttonToReplace;
