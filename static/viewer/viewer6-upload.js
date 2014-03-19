@@ -123,7 +123,7 @@ define(['jquerymin','rest3d','gltf','collada','viewer'], function ($,rest3d,glTF
                     console.debug(file);
                     var ext = file.name.match(/\.[^.]+$/);//
                     console.debug(ext);//
-                    if(ext=".dae"){
+                    if(ext[0]==".dae"){
                         var url =  '/rest3d/upload/'+decodeURIComponent(file.name);//
                         var $dialog = $("<button>Launch</button>").on("click",function(){
                             COLLADA.load(url, viewer.parse_dae);
