@@ -78,7 +78,7 @@ define(['jquerymin','rest3d','gltf','collada','viewer'], function ($,rest3d,glTF
                                 // ennumerate all resulting files
                                 var $conve = upload.header(data.file.name);
                                 $.each(data.result.files, function (index, file) {
-                                    var href = $('<a style="display:none" href="'+decodeURIComponent(file.name)+'" target="_blank"></a>');
+                                    var href = $('<a style="display:none" href="/rest3d/upload/'+decodeURIComponent(file.name)+'" target="_blank"></a>');
                                     upload.filesArea.append(href);
                                     var $download = $("<button>Download</button>").on("click",function(){
                                         href[0].click();
