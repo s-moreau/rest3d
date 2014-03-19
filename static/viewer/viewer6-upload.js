@@ -144,7 +144,7 @@ define(['jquerymin','rest3d','gltf','collada','viewer'], function ($,rest3d,glTF
                         })
                          .prop("id","preview"+index);
                         var array = [];
-                        upload.upload(header,file.name,$preview,$dialog,uploadButton.clone(true).data(data));
+                        upload.upload(header,file.name,$preview,$dialog,uploadButton.clone(true).data(data).prop("disabled",false));
                         $('#dialog'+index).hide();
                         $('#preview'+index).hide();
                                     // rest3d.testUpload(file);
