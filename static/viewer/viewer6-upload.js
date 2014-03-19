@@ -119,6 +119,7 @@ setViewer6Upload=function(upload){
         $.each(data.files, function (index, file) {
             console.debug(file);
             var ext = file.name.match(/\.[^.]+$/);//
+            console.debug(ext);//
             if(ext=".dae"){
                 var url =  '/rest3d/upload/'+decodeURIComponent(file.name);//
                 var $dialog = $("<button>Launch</button>").on("click",function(){
