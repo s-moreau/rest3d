@@ -735,6 +735,12 @@ right: 34px !important;
     position: static;
     top: 0;
     right:0;
+}
 
+#fileArea_upModel button span{
+    margin-left: 8px !important;
+}
 
+#settings ul li a {
+width: 90% !important;
 }

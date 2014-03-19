@@ -1685,7 +1685,7 @@ if (!window.performance || !window.performance.now) {
         })
 
         var upload = GUI.upload({parent:accordionUp.upload, id:"upModel", url:'/rest3d/upload'});
-        upload.button.width("100%")
+        upload.button.width("80%");
         upload.progress.progress_upModel.width("100%");
         $.getScript("viewer6-upload.js").done(function( script, textStatus ) {
             setViewer6Upload(upload,rest3d,viewer);
@@ -2115,7 +2115,7 @@ if (!window.performance || !window.performance.now) {
             },
         },
         ]});
-
+        
         function FPSCoounter() {
     var counterID;
     var intervalID;
