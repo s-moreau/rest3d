@@ -1715,7 +1715,7 @@ if (!window.performance || !window.performance.now) {
                             data = $this.data();
                         $this
                             .off('click')
-                            .prop('disabled',true)
+                            // .prop('disabled',true)
                         // user rest to convert dae into glTF
                         var callback = function(data) {
                             $this.prop('disabled',true);
