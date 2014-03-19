@@ -287,7 +287,7 @@ define(['channel','codemirror','webglUtils', 'WebGLDebugUtils','pnotify','colorp
                         parent: button1,
                         content: tooltip,
                     });
-                   // / button1.hide();
+                    button1.hide();
 //
                     var $spanButton2 = htmlSpan($newLine,10);
                     var tooltip = button.html();
@@ -299,7 +299,7 @@ define(['channel','codemirror','webglUtils', 'WebGLDebugUtils','pnotify','colorp
                         parent: button,
                         content: tooltip,
                     });
-                   // button.hide();
+                    button.hide();
 
                     var $spanButton1 = htmlSpan($newLine,10);
                     var tooltip = button2.html();

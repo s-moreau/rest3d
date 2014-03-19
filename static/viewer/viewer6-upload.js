@@ -33,7 +33,7 @@ setViewer6Upload=function(upload){
     var url = '/rest3d/upload',
         uploadButton = $('<button/>')
             .addClass('btn')
-            .prop('disabled', true)
+            // .prop('disabled', true)
             .on('click', function (){
                 var $this = $(this),
                     data = $this.data();
