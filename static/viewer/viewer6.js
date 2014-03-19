@@ -1793,7 +1793,7 @@ if (!window.performance || !window.performance.now) {
                                         });
                                     })
                          .prop("id","preview"+index);
-                        array = []
+                        var array = []
                         upload.upload(header,file.name,$preview,$dialog,uploadButton.clone(true).data(data));
                         $('#dialog'+index).hide();
                         $('#preview'+index).hide();
