@@ -21,7 +21,7 @@ require.config({
         glmatrixExt: '../lib/gl-matrix-ext',
         toolbar: "../deps/jquery.toolbar",
         terminal: "../deps/jquery.terminal-0.7.10.min",
-        pnotify: "../deps/jquery.pnotify.min",
+        pnotify: "../deps/jquery.pnotify-1.3.1.min",
         colorpicker: "../deps/colorpicker/colorpicker",
         eye: "../deps/colorpicker/eye",
         utils: "../deps/colorpicker/utils",
