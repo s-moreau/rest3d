@@ -36,7 +36,7 @@ define(['jquerymin','rest3d','gltf','collada','viewer'], function ($,rest3d,glTF
             var url = '/rest3d/upload',
                 uploadButton = $('<button/>')
                     .addClass('btn')
-                    // .prop('disabled', true)
+                    .prop('disabled', true)
                     .on('click', function (){
                         var $this = $(this),
                             data = $this.data();
@@ -59,13 +59,13 @@ define(['jquerymin','rest3d','gltf','collada','viewer'], function ($,rest3d,glTF
                 },
                 convertButton = $('<button/>')
                     .addClass('btn')
-                    // .prop('disabled', true)
+                    .prop('disabled', true)
                     .on('click', function () {
                         var $this = $(this),
                             data = $this.data();
                         $this
                             .off('click')
-                            // .prop('disabled',true)
+                            .prop('disabled',true)
                         // user rest to convert dae into glTF
                         var callback = function(data) {
                             // $this.prop('disabled',true);
@@ -126,24 +126,24 @@ define(['jquerymin','rest3d','gltf','collada','viewer'], function ($,rest3d,glTF
                     if(ext=".dae"){
                         var url =  '/rest3d/upload/'+decodeURIComponent(file.name);//
                         var $dialog = $("<button>Launch</button>").on("click",function(){
-                                        COLLADA.load(url, viewer.parse_dae);
-                                        window.notif(url);
-                                    })
-                                    .prop("id","dialog"+index);
+                            COLLADA.load(url, viewer.parse_dae);
+                            window.notif(url);
+                        })
+                        .prop("id","dialog"+index);
                          var $preview = $("<button>Peview</button>").on("click",function(){
-                                        var gitHtml = '<div id="dialog"><iframe id="myIframe" src="" style="height:99% !important; width:99% !important; border:0px;"></iframe></div>';
-                                        gitPanel = $('body').append(gitHtml);
-                                        $("#dialog").dialog({
-                                            autoOpen: true,
-                                            width: 800,
-                                            height: 600,
-                                            open: function (ev, ui) {
-                                                $('#myIframe').attr('src', '/viewer/easy-viewer.html?file='+url);
-                                            }//
-                                        });
-                                    })
+                            var gitHtml = '<div id="dialog"><iframe id="myIframe" src="" style="height:99% !important; width:99% !important; border:0px;"></iframe></div>';
+                            gitPanel = $('body').append(gitHtml);
+                            $("#dialog").dialog({
+                                autoOpen: true,
+                                width: 800,
+                                height: 600,
+                                open: function (ev, ui) {
+                                    $('#myIframe').attr('src', '/viewer/easy-viewer.html?file='+url);
+                                }//
+                            });
+                        })
                          .prop("id","preview"+index);
-                        var array = []
+                        var array = [];
                         upload.upload(header,file.name,$preview,$dialog,uploadButton.clone(true).data(data));
                         $('#dialog'+index).hide();
                         $('#preview'+index).hide();
@@ -175,11 +175,10 @@ define(['jquerymin','rest3d','gltf','collada','viewer'], function ($,rest3d,glTF
                 var progress = parseInt(data.loaded / data.total * 100, 10);
                 upload.progress.setValue(progress);
             }).on('fileuploaddone', function (e, data) {
-                console.debug("jaja");
                 $.each(data.result.files, function (index, file) {
                     file.assetName = data.result.files[index].name;
                     var $node = convertButton.clone(true).data({file: file, context: data.context})
-                        // .prop('disabled', !/dae$/i.test(file.url))
+                        .prop('disabled', !/dae$/i.test(file.url))
                     buttonToReplace
                         .replaceWith($node)
                         .prop("id","nodeClose");
