@@ -1688,7 +1688,7 @@ if (!window.performance || !window.performance.now) {
         var upload = GUI.upload({parent:accordionUp.upload, id:"upModel", url:'/rest3d/upload'});
         upload.button.width("100%")
         upload.progress.progress_upModel.width("100%");
-        $.getScript("../deps/upload/viewer6-upload.js").done(function( script, textStatus ) {
+        $.getScript("viewer6-upload.js").done(function( script, textStatus ) {
             setViewer6Upload(upload);
           }).fail(function(err){
             console.error("upload external script failed to load");
