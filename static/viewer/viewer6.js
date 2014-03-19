@@ -1718,7 +1718,7 @@ if (!window.performance || !window.performance.now) {
                             // .prop('disabled',true)
                         // user rest to convert dae into glTF
                         var callback = function(data) {
-                            $this.prop('disabled',true);
+                            // $this.prop('disabled',true);
                             if(data.result.output){console.debug(data.result.output);}
                             if(data.result.code){console.debug("Exit code: "+data.result.code);}
                             if (data.error){
