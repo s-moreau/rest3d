@@ -538,6 +538,7 @@ return new counter();
     
 viewer.INIT =  function (){
     
+        "use strict";//
           var mask;
         var win =$('');
           
@@ -797,7 +798,13 @@ if (!window.performance || !window.performance.now) {
             treeJson.data = [];
             function displayConfig (parent,object,attr){
                 if(parent.hasOwnProperty(attr)){
-                    var id = attr+"_"+Math.floor(Math.random() * 1000000) + 1;
+                    if(parent.hasOwnProperty('parent')){
+                         var id = attr+"_"+(Math.floor(Math.random() * 1000000) + 1)+"__"+parent.parent;
+                    }
+                    else{
+                        var id = attr+"_"+(Math.floor(Math.random() * 1000000) + 1);
+                    }
+                   
                     // {"data":attr,"attr":{"id":id}}
                     var data = {};
                     data.data = attr;
@@ -824,13 +831,24 @@ if (!window.performance || !window.performance.now) {
                 var stock = param_in;
                 var material ={};
                 material.children = [];
+                if(param_in.hasOwnProperty('parent')){
+                    var pickId = param_in.parent;
+                }
               if(stock.hasOwnProperty('materials')){
                 for(var z=0; z<stock.materials.length;z++){
                     var subsel_material = stock.materials[z];
                     material.data  = subsel_material.name||subsel_material.id||subsel_material.symbol||subsel_material.target;
-                    material.attr =  {"rel":"children","id":material.data+"_"+Math.floor(Math.random() * 1000000) + 1};
+                    if(pickId){
+                        var id = material.data+"_"+(Math.floor(Math.random() * 1000000) + 1)+"__"+pickId;
+                    }
+                    else{
+                        var id = material.data+"_"+(Math.floor(Math.random() * 1000000) + 1);
+                    }
+                    material.attr =  {"rel":"children","id":id};
                     material.children = [];
                     var material_parameter = subsel_material.overrides||subsel_material.parameters;
+                    if(pickId){ 
+                        material_parameter.parent = pickId; }
                     displayConfig(material_parameter,material.children,"ambient");
                     displayConfig(material_parameter,material.children,"diffuse");
                     displayConfig(material_parameter,material.children,"emission");
@@ -844,79 +862,25 @@ if (!window.performance || !window.performance.now) {
             }
             return material;
             } 
-            /* we do not display glprimitives
-
-            window.primitives = function(param_in){
-                var glprimitives = {};
-                if(param_in.hasOwnProperty('glprimitives')){
-                     for(var w=0; w<param_in.glprimitives.length;w++){
-                        var subsel_glprimitives = param_in.glprimitives[w];
-                        glprimitives.data  =subsel_glprimitives.name||subsel_glprimitives.id||"gl_"+Math.floor(Math.random() * 1000000) + 1;
-                        glprimitives.children = [];
-                        displayConfig(subsel_glprimitives,glprimitives.children,"binormalBuffer");
-                        displayConfig(subsel_glprimitives,glprimitives.children,"binormals");
-                        displayConfig(subsel_glprimitives,glprimitives.children,"buffer");
-                        displayConfig(subsel_glprimitives,glprimitives.children,"colorBuffer");
-                        displayConfig(subsel_glprimitives,glprimitives.children,"colors");
-                        displayConfig(subsel_glprimitives,glprimitives.children,"createMe");
-                        displayConfig(subsel_glprimitives,glprimitives.children,"defaultBinormal");
-                        displayConfig(subsel_glprimitives,glprimitives.children,"defaultColor");
-                        displayConfig(subsel_glprimitives,glprimitives.children,"defaultID");
-                        displayConfig(subsel_glprimitives,glprimitives.children,"defaultNormal");
-                        displayConfig(subsel_glprimitives,glprimitives.children,"defaultTexcoord");
-                        displayConfig(subsel_glprimitives,glprimitives.children,"defaultVertex");
-                        displayConfig(subsel_glprimitives,glprimitives.children,"glBuffer");
-                        displayConfig(subsel_glprimitives,glprimitives.children,"hasColorBuffer");
-                        displayConfig(subsel_glprimitives,glprimitives.children,"idBuffer");
-                        displayConfig(subsel_glprimitives,glprimitives.children,"ids");
-                        displayConfig(subsel_glprimitives,glprimitives.children,"indexBuffer");
-                        displayConfig(subsel_glprimitives,glprimitives.children,"indices");
-                        displayConfig(subsel_glprimitives,glprimitives.children,"normalBuffer");
-                        displayConfig(subsel_glprimitives,glprimitives.children,"normals");
-                        displayConfig(subsel_glprimitives,glprimitives.children,"vertices");
-                    }
-                }
-                return glprimitives;
-            }
-
-            */
-
-             // we do not display inside a mesh
-            // window.mesh= function(param_in){
-            //     var mesh = {};
-            //     if(param_in.hasOwnProperty('mesh')){
-            //         for(var y=0; y<param_in.mesh.length;y++){
-            //             var subsel_mesh = param_in.mesh[y];
-            //             mesh.data  = mesh.name||mesh.id||"mesh_"+Math.floor(Math.random() * 1000000) + 1;
-            //             mesh.children = [];
-            //             displayConfig(subsel_mesh,mesh.children,"NORMAL");
-            //             displayConfig(subsel_mesh,mesh.children,"POSITION");
-            //             displayConfig(subsel_mesh,mesh.children,"TEXCOORD_0");
-            //             displayConfig(subsel_mesh,mesh.children,"VERTEX");
-            //             displayConfig(subsel_mesh,mesh.children,"count");
-            //             displayConfig(subsel_mesh,mesh.children,"material");
-            //             displayConfig(subsel_mesh,mesh.children,"max_offset");
-            //             displayConfig(subsel_mesh,mesh.children,"p");
-            //             displayConfig(subsel_mesh,mesh.children,"primitives");
-            //         }
-            //     }
-            //     return mesh;
-            // }
-            
 
             window.geometry = function(param_in,param_out){
+                if(param_in.hasOwnProperty("parent")){
+                    var pickID = param_in.parent;
+                }
                 if(param_in.hasOwnProperty("geometries")&&$.isArray(param_in.geometries)){
                     for(var i=0;i<param_in.geometries.length;i++){
                         var subsel_geometries = param_in.geometries[i];
+                        if(pickID){subsel_geometries.parent=pickID;}
                         var material =  self.material(subsel_geometries);
                         var title = "geometry_"+i;
                         if(i==0){title = "geometry"}
+                        var id = title+"__"+pickID;
                         var subchild = {
                             "data":title,
-                            "attr":{"rel":"geometry","id":title+"_"+Math.floor(Math.random() * 1000000) + 1},
+                            "attr":{"rel":"geometry","id":id},
                             "children":[
                                 {"data":"materials",
-                                "attr":{"rel":"children","id":"material"+"_"+Math.floor(Math.random() * 1000000) + 1},
+                                "attr":{"rel":"children","id":"material"+"__"+pickID},
                                 "children":[material],
                                 },
                             ],
@@ -928,8 +892,14 @@ if (!window.performance || !window.performance.now) {
             }
 
             window.camera = function (param_in,param_out){
+                if(param_in.hasOwnProperty("parent")){
+                    var pickID = param_in.parent;
+                }
                 if(param_in.hasOwnProperty("camera")){
                     var subsel_camera = param_in.camera;
+                    if(pickID){
+                        subsel_camera.parent = pickID;
+                    }
                     displayConfig(subsel_camera,param_out,"aspect_ratio");
                     displayConfig(subsel_camera,param_out,"projection");
                     displayConfig(subsel_camera,param_out,"yfov");
@@ -943,12 +913,27 @@ if (!window.performance || !window.performance.now) {
                 if(param_in.hasOwnProperty("children")){
                     for(var i=0; i<param_in.children.length;i++){
                         var sel = param_in.children[i];
+                        if(sel.hasOwnProperty("geometries")){
+                            var pickId = sel.geometries[0].glprimitives[0].pickID;
+                            sel.parent = pickId;
+                        }
+                        else{
+                            for(var z=0;z<length;z++){
+                                if(param_in.children[z].hasOwnProperty("parent")){
+                                    var pickId = target[z].parent;
+                                    sel.parent = pickId;
+                                }
+                            }
+                        }
                         var child = {};
-                        child.data = sel.name+" #"+sel.id||sel.id||sel.name;
+                        var title = sel.id||sel.name||"undefined_"+Math.floor(Math.random() * 1000000) + 1;
+                        child.data = sel.id||sel.name||title;
                         child.state = 'closed'; 
-                        var id = child.data+"_"+Math.floor(Math.random() * 1000000) + 1;
+                        var id = child.data;
+                        if(pickId){id=id+"__"+pickId}
                         window[id] = sel;         
                         child.attr = {"id":id,"rel":"child"};
+                        child.attr["type"] = sel.id;
                         param_out.push(child);
                     }
                 }
@@ -958,7 +943,6 @@ if (!window.performance || !window.performance.now) {
                 for(var i =0;i<param_in.length;i++){                          //{
                     var sel =  param_in[i]
                     var scene = {};
-                    console.debug(sel)
                     scene.data = sel.url.replace(/^.*[\\\/]/, '');                  //data:
                     scene.state = 'closed'; 
                     var id = scene.data+"_"+Math.floor(Math.random() * 1000000) + 1;
@@ -969,7 +953,6 @@ if (!window.performance || !window.performance.now) {
                 return param_out;
             }
             window.sub = function(param_in,param_out){
-                console.debug(param_in);
                 var length = param_in.length;
                 var target = param_in;
                 if(param_in.hasOwnProperty("id")){
@@ -980,9 +963,24 @@ if (!window.performance || !window.performance.now) {
                 for(var j=0;j<length;j++){
                     var position =target[j];
                     var sub = {};
-                    var id = sub.data+"_"+Math.floor(Math.random() * 1000000) + 1;
+               
                     sub.data = position.id||position.name;
+                    if(position.hasOwnProperty("geometries")){
+                        var pickId = position.geometries[0].glprimitives[0].pickID;
+                        position.parent = pickId;
+                    }
+                    else{
+                        for(var z=0;z<length;z++){
+                            if(target[z].hasOwnProperty("parent")){
+                                var pickId = target[z].parent;
+                                position.parent = pickId;
+                            }
+                        }
+                    }
+                    var id = sub.data;
+                    if(pickId){id = id+"__"+pickId;}
                     sub.state = 'open'; 
+
                     if(position.hasOwnProperty("camera")){
                         sub.attr = {"id":id,"rel":"camera"};
                     } 
@@ -990,14 +988,15 @@ if (!window.performance || !window.performance.now) {
                         sub.attr = {"id":id,"rel":"geometry"};
                     }
                     if(position.hasOwnProperty("children")){
-                         sub.attr = {"id":id,"rel":"children"};
+                        sub.attr = {"id":id,"rel":"children"};
                     }
                     // if(position.hasOwnProperty("local")){
                     //      sub.attr = {"id":id,"rel":"local"};
                     // }
                     else{
-                        sub.attr = {"id":id,"rel":"sub"};}
-
+                        sub.attr = {"id":id,"rel":"sub"};
+                    }
+                    // sub.attr["type"] = position.id;
                     sub.children = [];
                     window.geometry(position,sub.children);
                     window.camera(position,sub.children);
@@ -1095,11 +1094,53 @@ if (!window.performance || !window.performance.now) {
                     },
                     },
             }},
-
                 themes:{
                     "theme":"apple",
                 },
             });
+        
+        treeScene.Tree.bind(
+        "select_node.jstree", function(evt, data){
+            var tmp = data.inst.get_json()[0];
+            if(tmp.attr.hasOwnProperty("id")){
+                var id = tmp.attr.id.split("__").pop();
+                if(viewer.pickName[id]!="undefined"&&viewer.pickName[id]!=null){
+                        if (!viewer.channel.selected) viewer.channel.selected = {};
+                        if (viewer.channel.selected[id]) {
+                            // delete viewer.channel.selected[id];
+                            // window.fl4reStatus("",$("#mainLayout-south"),"selected "+viewer.pickName[Object.keys(viewer.channel.selected)[0]]);
+                        } else {
+                            viewer.channel.selected[id] = true;
+                            window.fl4reStatus("",$("#mainLayout-south"),"selected "+viewer.pickName[id]);
+                        }  
+                    } else{ 
+                        window.fl4reStatus("READY",$("#mainLayout-south"));
+                        delete viewer.channel.selected;
+                    }
+                    viewer.draw();
+                }
+            //     if(viewer.pickId.hasOwnProperty(id)){
+            //         if (!viewer.channel.selected) viewer.channel.selected = {};
+            //         if (viewer.channel.selected[id]) {
+            //             console.debug(id+" "+"selected")
+            //             delete viewer.channel.selected[id];
+            //             window.fl4reStatus("",$("#mainLayout-south"),"selected "+viewer.pickId[Object.keys(viewer.channel.selected)[0]]);
+            //         } else {
+            //             viewer.channel.selected[id] = true;
+            //             window.fl4reStatus("",$("#mainLayout-south"),"selected "+viewer.pickId[id]);
+            //              console.debug(id+" "+"selected")
+            //         }  
+            //     } else{ 
+            //         window.fl4reStatus("READY",$("#mainLayout-south"));
+            //          console.debug("no selected")
+            //         delete viewer.channel.selected;
+            //     }
+            // }
+            // console.debug(tmp.attr.id+" "+tmp.attr.rel);
+            //selected node object: data.inst.get_json()[0];
+            //selected node text: data.inst.get_json()[0].data
+        });
+
         window.callbacks = function(){
             setTimeout(function(){
                 function display(id,value){
@@ -1114,8 +1155,6 @@ if (!window.performance || !window.performance.now) {
                         trs.fromMat4(tmp, value);
                         var e = euler.create();
                         euler.fromQuat(e,tmp.localRotation);
-                        console.debug(tmp.localTranslation,e,tmp.localScale);
-
                         // var q = quat.create();
                         // quat.fromEuler(q,e);
                         // console.debug(q);
@@ -1269,10 +1308,8 @@ if (!window.performance || !window.performance.now) {
                         return url;
                     },
                     "success": function (new_data) {
-                        console.debug(new_data);
                         var result = [];
                         result=parseWarehouseJson(new_data,result);
-                         console.debug(result);
                         return result;
                     }
                 }
@@ -1373,7 +1410,6 @@ if (!window.performance || !window.performance.now) {
                     "success": function (new_data) {
                         var result = [];
                         $("#img-loadingWarehouse").remove();
-                        console.debug(new_data);
                         result=parseWarehouseJson(new_data,result);
                         return result;
                     }
@@ -1941,10 +1977,14 @@ if (!window.performance || !window.performance.now) {
                     if(viewer.pickName[id]!="undefined"&&viewer.pickName[id]!=null){
                         if (!viewer.channel.selected) viewer.channel.selected = {};
                         if (viewer.channel.selected[id]) {
-                            delete viewer.channel.selected[id];
-                            window.fl4reStatus("",$("#mainLayout-south"),"selected "+viewer.pickName[Object.keys(viewer.channel.selected)[0]]);
+                            // delete viewer.channel.selected[id];
+                            // window.fl4reStatus("",$("#mainLayout-south"),"selected "+viewer.pickName[Object.keys(viewer.channel.selected)[0]]);
                         } else {
-                            viewer.channel.selected [id] = true;
+                            var realId = viewer.pickName[id].split("#").pop();
+                            realId = realId.split("[")[0];
+                            console.debug("#"+realId+'__'+id+' '+$("#"+realId+'__'+id).length);
+                            treeScene.Tree.jstree("select_node", "#"+realId+'__'+id); 
+                            viewer.channel.selected[id] = true;
                             window.fl4reStatus("",$("#mainLayout-south"),"selected "+viewer.pickName[id]);
                         }  
                     } else{ 
@@ -2172,8 +2212,7 @@ if (!window.performance || !window.performance.now) {
       GUI.container.resizeAll();
                 GUI.container.initContent("center");
                 GUI.container.initContent("west");
-  };
-
+}
 
   return viewer;
 });
