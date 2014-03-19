@@ -85,7 +85,7 @@ define(['jquerymin','rest3d','gltf','collada','viewer'], function ($,rest3d,glTF
                                         href[0].remove();
                                     });
 
-                                var url = decodeURIComponent(file.name);
+                                var url = '/rest3d/upload/'+decodeURIComponent(file.name);
                                 var ext = url.match(/\.[^.]+$/);
                                 if(ext==".json"){
                                     var $dialog = $("<button>Launch</button>").on("click",function(){
