@@ -1261,7 +1261,7 @@ if (!window.performance || !window.performance.now) {
         }
         function preview(node){
             $("#dialog").dialog("close");
-            var gitHtml = $('<div id="dialog"><img src="'+node.attr("previewuri") + '" /></div>');
+            var gitHtml = $('<div id="dialog"><iframe id="myIframe" src="'+node.attr("previewuri") + '" style="height:99% !important; width:99% !important; border:0px;"></div>');
             gitPanel = $('body').append(gitHtml);
             $("#dialog").dialog({
                 title: node.attr('name'),
@@ -1440,6 +1440,8 @@ if (!window.performance || !window.performance.now) {
                         result.display = {'label':'Display model','action':display,};
                         result.download = {'label':'Download','action':download,};
                     }
+                    if(node.attr("previewuri")){
+                        result.preview = {'label':'Preview model','action':preview,};}
                     return result;
                 }
             },
