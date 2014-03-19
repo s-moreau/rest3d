@@ -25,7 +25,7 @@ THE SOFTWARE.*/
 
 define(['jquerymin','upload','uploadProcess','uploadValidate','uploadTransport'], function ($) {
 
-  var setViewer6Upload=function(upload){
+  var setViewer6Upload=function(upload,rest3d){
             var header;
             var index;
             var buttonToReplace;
