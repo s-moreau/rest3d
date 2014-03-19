@@ -38,7 +38,7 @@ setViewer6Upload=function(upload){
                 var $this = $(this),
                     data = $this.data();
                 $this
-                    // .off('click')
+                    .off('click')
                     .on('click', function () {
                         $this.remove();
                         data.abort();
@@ -172,6 +172,7 @@ setViewer6Upload=function(upload){
         var progress = parseInt(data.loaded / data.total * 100, 10);
         upload.progress.setValue(progress);
     }).on('fileuploaddone', function (e, data) {
+        console.debug("jaja");
         $.each(data.result.files, function (index, file) {
             file.assetName = data.result.files[index].name;
             var $node = convertButton.clone(true).data({file: file, context: data.context})
