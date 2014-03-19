@@ -38,7 +38,7 @@ setViewer6Upload=function(upload){
                 var $this = $(this),
                     data = $this.data();
                 $this
-                    .off('click')
+                    // .off('click')
                     .on('click', function () {
                         $this.remove();
                         data.abort();
@@ -135,7 +135,7 @@ setViewer6Upload=function(upload){
                                     width: 800,
                                     height: 600,
                                     open: function (ev, ui) {
-                                        $('#myIframe').attr('src', '/viewer/easy-viewer.html?file=/rest3d/upload/'+decodeURIComponent(file.name));
+                                        $('#myIframe').attr('src', '/viewer/easy-viewer.html?file='+url);
                                     }//
                                 });
                             })
