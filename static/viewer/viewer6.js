@@ -1674,8 +1674,8 @@ if (!window.performance || !window.performance.now) {
 
         GUI.label('welcome1', "Upload your own model:", renderMenu.render);
         jumpLine();
-        
-        setViewer6Upload=function(upload){
+
+        var setViewer6Upload=function(upload){
             var header;
             var index;
             var buttonToReplace;
