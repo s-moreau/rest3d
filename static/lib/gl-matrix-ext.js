@@ -30,28 +30,12 @@ THE SOFTWARE.
 */
   "use strict";
 
-  // var shim = {};
-  // if (typeof(exports) === 'undefined') {
-  //   if(typeof define == 'function' && typeof define.amd == 'object' && define.amd) {
-  //     shim.exports = {};
-  //     define(function() {
-  //       return shim.exports;
-  //     });
-  //   } else {
-  //     // gl-matrix lives in a browser, define its namespaces in global
-  //     shim.exports = typeof(window) !== 'undefined' ? window : _global;
-  //   }
-  // }
-  // else {
-  //   // gl-matrix lives in commonjs, define its namespaces in exports
-  //   shim.exports = exports;
-  // }
+define(['glmatrix'], function(glmatrix){
 
-  // (function(exports) {
-/**
-  calculate Translation, Rotation and Scale from a matrix
-*/
-// define(['./utils','glmatrix'], function(){
+// defines glmatrix as globals
+for (var key in glmatrix) {
+  window[key] = glmatrix[key];
+}
 
 var clamp = function(number,min, max) {
   return Math.min(Math.max(number, min), max);
@@ -243,7 +227,7 @@ mat3.squaredDistance = function(a, b) {
 
 
 // TODO - a aabb = null should be same as infinite small aabb
- var aabb = {};
+ window.aabb = {};
 
 // create a new bounding box that includes all the give vertices
  aabb.fromPositions = function(_positions) {
@@ -443,12 +427,8 @@ aabb.intersect = function(_bbox, _origin, _direction) {
 
 };
 
-if(typeof(exports) !== 'undefined') {
-    exports.aabb = aabb;
-};
-
 // todo -> use a floar[10] vertex array and views?
- var trs = {};
+ window.trs = {};
 
  trs.create = function () {
         var out={};
@@ -483,11 +463,8 @@ if(typeof(exports) !== 'undefined') {
     };
 
 
-    if(typeof(exports) !== 'undefined') {
-        exports.trs = trs;
-    };
 
-    var euler = {};
+    window.euler = {};
     euler.create = function(){
         out = vec3.create();
         return out;
@@ -525,10 +502,6 @@ if(typeof(exports) !== 'undefined') {
         return _out;
     };
 
-    if(typeof(exports) !== 'undefined') {
-    exports.euler = euler;
-    };
 
-
-// });
+});
 

@@ -17,7 +17,7 @@ require.config({
         uploadTransport: '../deps/upload/jquery.iframe-transport',
         skinner: '../deps/jquery-skinner',
         jstree: '../deps/jstree/jquery.jstree',
-        glmatrix: '../deps/gl-matrix',
+        glmatrix: '../deps/gl-matrix-min',
         glmatrixExt: '../lib/gl-matrix-ext',
         toolbar: "../deps/jquery.toolbar",
         terminal: "../deps/jquery.terminal-0.7.10.min",
@@ -94,10 +94,6 @@ require.config({
         'utils':{
             deps: ['eye'],
             exports: 'window.EYE',
-        },
-        'glmatrixExt':{
-            deps: ['glmatrix','utilMatrix'],
-            exports: 'vec3',
         },
         'webglUtils':{
             deps: ['glmatrixExt'],
