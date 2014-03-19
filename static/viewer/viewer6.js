@@ -21,8 +21,7 @@ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.*/
-define(['jquerymin','gui','console', 'gltf', 'collada', 'renderer','camera','glmatrixExt','rest3d','uploadViewer'], function ($,GUI,CONSOLE,glTF,COLLADA,rest3d,setViewer6Upload) {
-
+define(['jquerymin','gui','console', 'gltf', 'collada', 'renderer','camera','glmatrixExt','rest3d','uploadViewer'], function ($,GUI,CONSOLE,glTF,COLLADA,renderer,camera,mat3,rest3d,setViewer6Upload) {
 var viewer  = {};
 var scenes = [];
 viewer.currentZoom = 1;
@@ -1689,7 +1688,7 @@ if (!window.performance || !window.performance.now) {
         upload.button.width("100%")
         upload.progress.progress_upModel.width("100%");
         $.getScript("viewer6-upload.js").done(function( script, textStatus ) {
-            setViewer6Upload(upload,rest3d);
+            setViewer6Upload(upload);
           }).fail(function(err){
             console.error("upload external script failed to load");
           });
