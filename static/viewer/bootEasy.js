@@ -33,7 +33,8 @@ require.config({
         screenfull:"../deps/screenfull",
         gui:"../gui/gui6",
         utilMatrix: '../lib/utils',
-        viewer: '../viewer/viewer6'
+        viewer: '../viewer/viewer6',
+        uploadViewer: '../viewer/viewer6-upload',
     },
     shim: {
         'codemirror':{
