@@ -178,6 +178,7 @@ define(['jquerymin','rest3d','gltf','collada','viewer'], function ($,rest3d,glTF
                 $.each(data.result.files, function (index, file) {
                     file.assetName = data.result.files[index].name;
                     var $node = convertButton.clone(true).data({file: file, context: data.context})
+                        .prop('disabled', true)
                         .prop('disabled', !/dae$/i.test(file.url))
                     buttonToReplace
                         .replaceWith($node)
