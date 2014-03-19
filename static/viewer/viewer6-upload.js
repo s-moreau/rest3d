@@ -23,7 +23,7 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.*/
 //
 
-define(['jquerymin','upload','uploadProcess','uploadValidate','uploadTransport'], function ($) {
+define(['jquerymin','rest3d','gltf','collada'], function ($,rest3d,glTF,COLLADA) {
 
   var setViewer6Upload=function(upload,rest3d){
             var header;
