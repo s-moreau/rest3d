@@ -1675,7 +1675,7 @@ if (!window.performance || !window.performance.now) {
         GUI.label('welcome1', "Upload your own model:", renderMenu.render);
         jumpLine();
 
-        var setViewer6Upload=function(upload){
+        var setViewer6Upload=function(upload,rest3d){
             var header;
             var index;
             var buttonToReplace;
@@ -1871,7 +1871,7 @@ if (!window.performance || !window.performance.now) {
         upload.button.width("100%")
         upload.progress.progress_upModel.width("100%");
         $.getScript("viewer6-upload.js").done(function( script, textStatus ) {
-            setViewer6Upload(upload);
+            setViewer6Upload(upload,rest3d);
           }).fail(function(err){
             console.error("upload external script failed to load");
           });
