@@ -106,13 +106,6 @@ require.config({
         'WebGLDebugUtils':{
             exports: 'WebGLDebugUtils',
         },
-        'collada':{
-            exports: 'COLLADA',
-        },
-        'gltf':{
-            deps:['glmatrixExt'],
-            exports: 'glTF',
-        },
         'console':{
             deps: ['jquerymin'],
             exports: 'CONSOLE',
@@ -185,15 +178,6 @@ loadStyle();
 require(['viewer'], function(viewer) { 
     viewer.INIT(); 
 });
-
-/*
-require(['rest3d','jquerymin','jqueryui','codemirror','javascript','showHint','javacriptHint','dialog','search','searchCursor','jquerylayout','upload','uploadProcess','uploadValidate','uploadTransport',
-    'skinner','jstree','glmatrixExt','toolbar','terminal','pnotify','colorpicker','eye','utils','webglUtils','WebGLDebugUtils','collada','gltf','console','screenfull','gui',
-    'camera','channel','renderer',,'state','viewer','utilMatrix'],
-    function(){
-    INIT();
-})
-*/
 
 
 // var dep = [{

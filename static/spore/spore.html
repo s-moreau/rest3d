@@ -43,14 +43,11 @@ require.config({
     shim: {
         'glmatrixExt':{
             deps: ['glmatrix'],
-            exports: 'vec3',
+            exports: 'aabb',
         },
         'webglUtils':{
             deps: ['glmatrixExt'],
             exports: 'WebGLUtils',
-        },
-        'collada':{
-            exports: 'COLLADA',
         },
         'sporefile':{
           deps: ['collada']
@@ -58,9 +55,17 @@ require.config({
         'glUtil':{
           deps: ['glmatrix','glmatrixExt']
         },
+        'sporeview':{
+          deps: ['glmatrixExt','webglUtils','collada','sporefile','sylvestre','glUtil'],
+          exports: 'handleLoad',
+        }
     },
 })
-require(['glmatrixExt','webglUtils','collada','sporefile','sporeview','sylvestre','glUtil'],function(){handleLoad();});
+require(['collada','sporeview'],function(COLLADA){ 
+  // spore needs COLLADA in the global namespace
+  window.COLLADA = COLLADA;
+  handleLoad();
+});
 </script>
 
 <style type="text/css">

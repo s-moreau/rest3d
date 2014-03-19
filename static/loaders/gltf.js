@@ -23,35 +23,15 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 
- gltf.js needs gl-matrix.js gl-matrix-ext.js and glproperties.js
+ gltf.js needs gl-matrix.js gl-matrix-ext.js 
 */
+define(['glmatrixExt'],function(){
 
-define("gltf", (function (global) {
-  "use strict";
+	var glTF={};
 
-  // var shim = {};
-  // if (typeof(exports) === 'undefined') {
-  //   if(typeof define == 'function' && typeof define.amd == 'object' && define.amd) {
-  //     shim.exports = {};
-  //     define(function() {
-  //       return shim.exports;
-  //     });
-  //   } else {
-  //     // gl-matrix lives in a browser, define its namespaces in global
-  //     shim.exports = typeof(window) !== 'undefined' ? window : _global;
-  //   }
-  // }
-  // else {
-  //   // gl-matrix lives in commonjs, define its namespaces in exports
-  //   shim.exports = exports;
-  // }
-
-  // (function(exports) {
-  	var glTF={};
-
-  	glTF.glProperties={};
-     for (var property in WebGLRenderingContext)
-       glTF.glProperties[WebGLRenderingContext[property]] = property;
+	glTF.glProperties={};
+   for (var property in WebGLRenderingContext)
+     glTF.glProperties[WebGLRenderingContext[property]] = property;
 
 	glTF.log = function(msg){
 		if (console && console.log) console.log(msg);
@@ -638,14 +618,10 @@ define("gltf", (function (global) {
 
 		xhr.open("GET", _url, true);
 
-	    xhr.send(null);
-	    global.glTF = glTF;
-	    return document;
+    xhr.send(null);
+    return document;
 	};
-	
-	global.glTF = glTF;
-return function () {
-        return global.COLLADA;
-    };
-}(this)));
+		
+  return glTF;
+});
 

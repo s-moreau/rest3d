@@ -26,30 +26,9 @@ THE SOFTWARE.
  COLLADA.js needs gl-matrix.js
 */
 
-// if (window.mat4 === undefined)
-// {
-//     document.write('<script src="/deps/gl-matrix.js"><\/'+'script>');
-//     document.write('<script src="/loaders/gl-matrix-ext.js"><\/'+'script>');
-// }
-define("collada", (function (global) {
-    // Initial Setup
-    // -------------
-
-    // Save a reference to the global object (`window` in the browser, `exports`
-    // on the server).
-    // var root = this;
-    // The top-level namespace. All public COLLADA classes and modules will
-    // be attached to this. Exported for both CommonJS and the browser.
+define(["glmatrixExt"], function () {
+    
     var COLLADA = {};
-    global.COLLADA = COLLADA;
-    // if (typeof exports !== 'undefined') {
-    //     COLLADA = exports;
-    // } else {
-    //     COLLADA = root.COLLADA = {};
-    // };
-    // TODO: Keep in sync with `package.json`.
-    // COLLADA.VERSION = '0.0.3';
-    // COLLADA._validate = true;
 
     COLLADA.log = function(msg){
         if (console && console.log) console.log(msg);
@@ -83,7 +62,6 @@ define("collada", (function (global) {
                 result.push(elems[i]);
         return result;
     }
-
 
     // return child elemens with specific tagName, or all of them if tagName='*'
     Element.prototype.getChildrenByTagName = function(tagName) {
@@ -1072,8 +1050,6 @@ define("collada", (function (global) {
         xhr.send(null);
         return document;
     }
-    global.COLLADA = COLLADA;
-return function () {
-        return global.COLLADA;
-    };
-}(this)));
+    
+    return COLLADA;
+});
