@@ -149,7 +149,7 @@ define(['jquerymin','rest3d','gltf','collada','viewer'], function ($,rest3d,glTF
                         $('#preview'+index).hide();
                                     // rest3d.testUpload(file);
                     }
-                    else{this.upload(header,file.name);}//
+                    else{upload.upload(header,file.name);}//
                 });
             }).on('fileuploadprocessalways', function (e, data) {
                     var indexI = data.index,
