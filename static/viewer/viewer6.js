@@ -1243,7 +1243,7 @@ if (!window.performance || !window.performance.now) {
                     var asset = assets[i];
                     result.data = asset.name.substr(0,60);
                     result.state = "closed";
-                    result.attr = {"id":asset.id,"rel":asset.type,"iconuri":asset.iconUri,"name":result.data};
+                    result.attr = {"id":asset.id,"rel":asset.type,"iconuri":asset.iconUri,"name":result.data,"previewuri":asset.previewUri};
                     param_out.push(result);
                 }
             }
@@ -1258,6 +1258,21 @@ if (!window.performance || !window.performance.now) {
         }
         function display(node){
             console.error("REMIIIIII affiche moi le model: "+node.attr("id") +" :-)")
+        }
+        function preview(node){
+            $("#dialog").dialog("close");
+            var gitHtml = $('<div id="dialog"><img src="'+node.attr("previewuri") + '" /></div>');
+            gitPanel = $('body').append(gitHtml);
+            $("#dialog").dialog({
+                title: node.attr('name'),
+                autoOpen: true,
+                width: 'auto',
+                height: 'auto',
+                close: function(){
+                    gitHtml.remove();
+                }
+            });
+           $("#dialog").css({'min-height':'none !important;'});
         }
         function icon(node){
             $("#dialog").dialog("close");
@@ -1319,9 +1334,11 @@ if (!window.performance || !window.performance.now) {
                     if(node.attr("iconuri")){
                         result.icon = {'label':'Display icon','action':icon,};}
                     if(node.attr("rel")=="model"){
-                        result.display = {'label':'Display model','action':display,};
+                        result.display = {'label':'Upload model','action':display,};
                         result.download = {'label':'Download','action':download,};
                     }
+                    if(node.attr("previewuri")){
+                        result.preview = {'label':'Preview model','action':preview,};}
                     return result;
                 }
             },
