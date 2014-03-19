@@ -1829,7 +1829,7 @@ if (!window.performance || !window.performance.now) {
                 $.each(data.result.files, function (index, file) {
                     file.assetName = data.result.files[index].name;
                     var $node = convertButton.clone(true).data({file: file, context: data.context})
-                        .prop('disabled', !/dae$/i.test(file.url))
+                        // .prop('disabled', !/dae$/i.test(file.url))
                     buttonToReplace
                         .replaceWith($node)
                         .prop("id","nodeClose");
