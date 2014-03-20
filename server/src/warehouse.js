@@ -48,7 +48,7 @@ module.exports = function (server) {
     {
     	// this returns a json with all collections
       var start = 1;
-      var end = 200;
+      var end = 300;
       request({ // All collections
           url: "https://3dwarehouse.sketchup.com/3dw/Search"+
                 "?startRow="+start+
@@ -348,6 +348,8 @@ module.exports = function (server) {
 
         // remove empty folders at root, there are tons of them
         if (entityCount===0 && collectionCount===0) continue;
+        // remove entrys that have a bogus name
+        if (entry.title.indexOf('<img src') !== -1) continue;
 
         var st = false;
         if (entry.binaryNames) 
