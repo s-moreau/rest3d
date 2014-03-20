@@ -156,6 +156,9 @@ define(['jquerymin','rest3d','gltf','collada','viewer'], function ($,rest3d,glTF
                         $('#preview'+index).hide();
                                     // rest3d.testUpload(file);
                     }
+                    else if(ext[0]==".png"||".jpg"||".tga"||".png"){
+                        upload.upload(header,file.name,uploadButton.clone(true).data(data).prop("disabled",false));
+                    }
                     else{upload.upload(header,file.name);}//
                 });
             }).on('fileuploadprocessalways', function (e, data) {
