@@ -1290,6 +1290,8 @@ if (!window.performance || !window.performance.now) {
             $.ajax({
                        'type': "POST",
                        'url': "/rest3d/upload/"+uri,
+                       'size': 150,
+                       'name':"url",
                        "Content-type": "application/x-www-form-urlencoded",
                        success: function(data)
                        {
