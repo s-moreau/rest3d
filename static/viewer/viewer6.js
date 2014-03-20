@@ -1269,7 +1269,7 @@ if (!window.performance || !window.performance.now) {
             href[0].remove();
         }
         function display(node){
-            // var uri = node.attr("asseturi");
+            var uri = node.attr("asseturi");
             // var http = new XMLHttpRequest();
             // http.open("POST", "/rest3d/upload/"+uri, true);
             // http.setRequestHeader("Content-type","application/x-www-form-urlencoded");
