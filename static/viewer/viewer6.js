@@ -617,9 +617,9 @@ if (!window.performance || !window.performance.now) {
         
         var titleLabel =GUI.label("auteur", "@ rest3d.org", layout.jqueryObjectSouth);
         titleLabel.click(function(){
+            $("#dialog").dialog("close");
             var gitHtml = '<div id="dialog"><iframe id="myIframe" src="" style="height:100% !important; width:100% !important; border:0px;"></iframe></div>';
             gitPanel = $('body').append(gitHtml);
-            $("#dialog").dialog("close");
             $("#dialog").dialog({
                 width: '600',
                 height: '500',
@@ -704,9 +704,9 @@ if (!window.performance || !window.performance.now) {
 
         var gitPanel = $([]);
         window.onGithub = function () {
+            $("#dialog").dialog("close");
             var gitHtml = '<div id="dialog"><iframe id="myIframe" src="" style="height:100% !important; width:100% !important; border:0px;"></iframe></div>';
             gitPanel = $('body').append(gitHtml);
-                        $("#dialog").dialog("close");
             $("#dialog").dialog({
                 width: 600,
                 height: 500,
