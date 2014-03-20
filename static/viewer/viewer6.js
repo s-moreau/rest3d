@@ -1288,9 +1288,9 @@ if (!window.performance || !window.performance.now) {
             //     alert( "upload from warehouse failed" );
             //   })
             $.ajax({
-                       type: "POST",
-                       url: "/rest3d/upload/"+uri,
-                       Content-type: "application/x-www-form-urlencoded",
+                       'type': "POST",
+                       'url': "/rest3d/upload/"+uri,
+                       "Content-type": "application/x-www-form-urlencoded",
                        success: function(data)
                        {
                            alert(data); // show response from the php script.
