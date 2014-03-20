@@ -619,6 +619,9 @@ if (!window.performance || !window.performance.now) {
         titleLabel.click(function(){
             var gitHtml = '<div id="dialog"><iframe id="myIframe" src="" style="height:100% !important; width:100% !important; border:0px;"></iframe></div>';
             gitPanel = $('body').append(gitHtml);
+            $("#dialog").dialog("close");
+                   
+                             $("#dialog").remove();
             $("#dialog").dialog({
                 autoOpen: true,
                 width: '600',
@@ -701,6 +704,8 @@ if (!window.performance || !window.performance.now) {
 
         var gitPanel = $([]);
         window.onGithub = function () {
+            $("#dialog").dialog("close");
+                             $("#dialog").remove();
             var gitHtml = '<div id="dialog"><iframe id="myIframe" src="" style="height:100% !important; width:100% !important; border:0px;"></iframe></div>';
             gitPanel = $('body').append(gitHtml);
             $("#dialog").dialog({
@@ -1262,6 +1267,7 @@ if (!window.performance || !window.performance.now) {
         }
         function preview(node){
             $("#dialog").dialog("close");
+                             $("#dialog").remove();
             var gitHtml = $('<div id="dialog"><iframe id="myIframe" src="'+node.attr("previewuri") + '" style="height:100% !important; width:100% !important; border:0px;"></div>');
             gitPanel = $('body').append(gitHtml);
             $("#dialog").dialog({

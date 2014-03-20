@@ -99,6 +99,8 @@ define(['jquerymin','rest3d','gltf','collada','viewer'], function ($,rest3d,glTF
                                     var $preview = $("<button>Peview</button>").on("click",function(){
                                         var gitHtml = '<div id="dialog"><iframe id="myIframe" src="" style="height:99% !important; width:99% !important; border:0px;"></iframe></div>';
                                         gitPanel = $('body').append(gitHtml);
+            $("#dialog").dialog("close");
+                             $("#dialog").remove();
                                         $("#dialog").dialog({
                                             autoOpen: true,
                                             width: '600',
@@ -140,6 +142,8 @@ define(['jquerymin','rest3d','gltf','collada','viewer'], function ($,rest3d,glTF
                          var $preview = $("<button>Peview</button>").on("click",function(){
                             var gitHtml = '<div id="dialog"><iframe id="myIframe" src="" style="height:99% !important; width:99% !important; border:0px;"></iframe></div>';
                             gitPanel = $('body').append(gitHtml);
+                             $("#dialog").dialog("close");
+                             $("#dialog").remove();
                             $("#dialog").dialog({
                                 autoOpen: true,
                                 width: '600',
