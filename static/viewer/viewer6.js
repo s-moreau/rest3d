@@ -1286,25 +1286,17 @@ if (!window.performance || !window.performance.now) {
       
             //          });
             // console.error("REMIIIIII affiche moi le model: "+node.attr("id") +" :-)")
-            var $html = '<form id="url-upload" action="/rest3d/upload/" enctype="application/x-www-form-urlencoded" method="POST" ></form>';
+            var $html = '<form id="url-upload" action="/rest3d/upload/" enctype="application/x-www-form-urlencoded" method="POST" >
+                  <input id="url" size="150" name="url" value="'+uri+'" style="display:none !important;"/>
+                  <input id="acceptSubmit" type="submit" value="Upload" style="display:none !important;"/>
+                </form>';
             $('body').append($html);
-    //         $("#url-upload").submit(function() {
-    // var url = "path/to/your/script.php"; // the script where you handle the form input.
-
-       $.ajax({
-                       type: "POST",
-                       url: "/rest3d/upload/https://3dwarehouse.sketchup.com/3dw/getbinary?subjectId=ac9c3413d59e8e4a7f7fbfb94ac070c5&subjectClass=entity&name=k2",
-                    data:  $html.serialize,
-                       success: function(data)
-                       {
-                           alert(data); // show response from the php script.
-                       },
-      
-                     });
-
-            // $('#acceptSubmit').click();
-            
-        };
+            var data;
+            $html.submit(function(e){
+                console.debug(e);
+            })
+            $('#acceptSubmit').click()
+        }
         function preview(node){
             $("#dialog").dialog("close");
             var gitHtml = $('<div id="dialog"><iframe id="myIframe" src="" style="height:100% !important; width:100% !important; border:0px;"></div>');
