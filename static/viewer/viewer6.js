@@ -2054,6 +2054,7 @@ if (!window.performance || !window.performance.now) {
                         }  
                     } else{ 
                         window.fl4reStatus("READY",$("#mainLayout-south"));
+                        treeScene.Tree.jstree._focused().deselect_all();
                         delete viewer.channel.selected;
                     }
                     viewer.draw();
