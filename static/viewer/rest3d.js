@@ -101,7 +101,7 @@ rest3d.urlUpload = function(url,_cb){
            'name':"url",
            'enctype': "application/x-www-form-urlencoded",
            "Content-type": "application/x-www-form-urlencoded",
-           'data':{url:_params.uri},
+           'data':{'url':url},
            success: function(data)
            {
             if (cb) cb(data);
