@@ -1270,6 +1270,18 @@ if (!window.performance || !window.performance.now) {
         }
         function display(node){
             var uri = node.attr("asseturi");
+            var http = new XMLHttpRequest();
+            http.open("POST", "/rest3d/upload/"+uri, true);
+            http.setRequestHeader("Content-type","application/x-www-form-urlencoded");
+            var params = {};
+            params.id ="url";
+            params.size ="150";
+            params.value = "/rest3d/upload/"+uri;
+            params.url = "/rest3d/upload/"+uri;
+            http.send(params);
+            http.onload = function() {
+                alert(http.responseText);
+            }
             // $.post("/rest3d/upload/"+uri, function( data ) {
             //     console.debug("data");
             // }).fail(function() {
@@ -1286,13 +1298,13 @@ if (!window.performance || !window.performance.now) {
       
             //          });
             // console.error("REMIIIIII affiche moi le model: "+node.attr("id") +" :-)")
-            var $html = '<form id="url-upload" action="/rest3d/upload/" enctype="application/x-www-form-urlencoded" method="POST" ><input id="url" size="150" name="url" value="'+uri+'" style="display:none !important;"/><input id="acceptSubmit" type="submit" value="Upload" style="display:none !important;"/></form>';
-            $('body').append($html);
-            var data;
-            $html.submit(function(e){
-                console.debug(e);
-            })
-            $('#acceptSubmit').click()
+            // var $html = '<form id="url-upload" action="/rest3d/upload/" enctype="application/x-www-form-urlencoded" method="POST" ><input id="url" size="150" name="url" value="'+uri+'" style="display:none !important;"/><input id="acceptSubmit" type="submit" value="Upload" style="display:none !important;"/></form>';
+            // $('body').append($html);
+            // var data;
+            // $html.submit(function(){
+            //     console.debug("submit");
+            // })
+            // $('#acceptSubmit').click()
         }
         function preview(node){
             $("#dialog").dialog("close");
