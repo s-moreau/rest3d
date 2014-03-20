@@ -1272,12 +1272,13 @@ if (!window.performance || !window.performance.now) {
             var html = '<ul>';
             var uri = node.attr("asseturi");
             var call = function(data){
-                console.debug(data);
+                console.debug(data.files);
+                console.debug(data.files.length);
                 var position = data.files;
-                for(var i=0;i<position.length;i++){
-                    var name = position[i].name;
-                    var size = position[i].size;
-                    var path = position[i].path;
+                for(var i=0;i<data.files.length;i++){
+                    var name = data.files[i].name;
+                    var size = data.files[i].size;
+                    var path = data.files[i].path;
                     html += '<li><a>'+name+'</a>'+'<a>'+size+'</a>'+'<a>'+path+'</a>'+'</li>'
                 }
             html += '</ul>';
