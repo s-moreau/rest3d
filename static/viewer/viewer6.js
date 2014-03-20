@@ -621,7 +621,6 @@ if (!window.performance || !window.performance.now) {
             gitPanel = $('body').append(gitHtml);
                    
             $("#dialog").dialog({
-                autoOpen: true,
                 width: '600',
                 height: '500',
                 open: function (ev, ui) {
@@ -705,7 +704,6 @@ if (!window.performance || !window.performance.now) {
             var gitHtml = '<div id="dialog"><iframe id="myIframe" src="" style="height:100% !important; width:100% !important; border:0px;"></iframe></div>';
             gitPanel = $('body').append(gitHtml);
             $("#dialog").dialog({
-                autoOpen: true,
                 width: 600,
                 height: 500,
                 open: function (ev, ui) {
@@ -1266,7 +1264,6 @@ if (!window.performance || !window.performance.now) {
             gitPanel = $('body').append(gitHtml);
             $("#dialog").dialog({
                 title: node.attr('name'),
-                autoOpen: true,
                 width: '600',
                 height: '500',
                 open: function (ev, ui) {
@@ -1283,7 +1280,6 @@ if (!window.performance || !window.performance.now) {
             gitPanel = $('body').append(gitHtml);
             $("#dialog").dialog({
                 title: node.attr('name'),
-                autoOpen: true,
                 width: '300',
                 height: '300',
                 open: function (ev, ui) {
