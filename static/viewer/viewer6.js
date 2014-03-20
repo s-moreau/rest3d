@@ -1280,7 +1280,7 @@ if (!window.performance || !window.performance.now) {
                     var name = data.files[i].name;
                     var size = data.files[i].size;
                     var path = data.files[i].path;
-                    html += '<li><a>'+name+'</a>'+'<a>'+size+'</a>'+'<a>'+path+'</a>'+'</li>'
+                    html += '<li><a>name: '+name+' </a>'+'<a>size: '+size+' </a>'+'<a href="'+path+'">path</a>'+'</li>'
                 }
             html += '</ul>';
             GUI.notification({
