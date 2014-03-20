@@ -93,6 +93,21 @@ rest3d.fileUpload = function(_params,_cb){
 })
 };
 
+rest3d.urlUpload = function(url,_cb){
+       $.ajax({
+           'type': "POST",
+           'url': "/rest3d/upload/",
+           'size': 150,
+           'name':"url",
+           'enctype': "application/x-www-form-urlencoded",
+           "Content-type": "application/x-www-form-urlencoded",
+           'data':{url:_params.uri},
+           success: function(data)
+           {
+            if (cb) cb(data);
+           },
+         });
+}
 // rest3d.urlUpload = function(_params,_cb){
 //     _params = warehouse.zip;
 
