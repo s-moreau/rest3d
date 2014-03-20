@@ -1271,7 +1271,7 @@ if (!window.performance || !window.performance.now) {
                 height: '500',
                 open: function (ev, ui) {
                     $('#myIframe').attr('src',node.attr("previewuri"));
-                }
+                },
                 close: function(){
                     gitHtml.remove();
                 }
