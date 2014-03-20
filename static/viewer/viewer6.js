@@ -1207,7 +1207,7 @@ if (!window.performance || !window.performance.now) {
                         result.attr = {"id":result.data,"rel":ext,"name":result.data};
                         param_out.push(result);
                         }
-                        else if(ext=='.jpg'||ext=='.png'||ext=='.jpeg'){
+                        else if(ext=='.jpg'||ext=='.png'||ext=='.jpeg'||ext=='.tga'){
                             ext = "image";
                              result.data = tmp.name.substr(0,60);
                         result.attr = {"id":result.data,"rel":ext,"name":result.data};
@@ -1255,7 +1255,7 @@ if (!window.performance || !window.performance.now) {
                     var asset = assets[i];
                     result.data = asset.name.substr(0,60);
                     result.state = "closed";
-                    result.attr = {"id":asset.id,"rel":asset.type,"iconuri":asset.iconUri,"name":result.data,"previewuri":asset.previewUri};
+                    result.attr = {"id":asset.id,"rel":asset.type,"iconuri":asset.iconUri,"name":result.data,"previewuri":asset.previewUri,"asseturi":asset.assetUri};
                     param_out.push(result);
                 }
             }
@@ -1269,7 +1269,23 @@ if (!window.performance || !window.performance.now) {
             href[0].remove();
         }
         function display(node){
-            console.error("REMIIIIII affiche moi le model: "+node.attr("id") +" :-)")
+            var uri = node.attr("asseturi");
+            // $.post("/rest3d/upload/"+uri, function( data ) {
+            //     console.debug("data");
+            // }).fail(function() {
+            //     alert( "upload from warehouse failed" );
+            //   })
+            $.ajax({
+                       type: "POST",
+                       url: "/rest3d/upload/"+uri,
+                       enctype: "application/x-www-form-urlencoded"
+                       success: function(data)
+                       {
+                           alert(data); // show response from the php script.
+                       },
+      
+                     });
+            // console.error("REMIIIIII affiche moi le model: "+node.attr("id") +" :-)")
         }
         function preview(node){
             $("#dialog").dialog("close");
@@ -1349,8 +1365,9 @@ if (!window.performance || !window.performance.now) {
                     var result = {};
                     if(node.attr("iconuri")){
                         result.icon = {'label':'Display icon','action':icon,};}
+                    if(node.attr("asseturi")){
+                        result.display = {'label':'Upload','action':display,};}
                     if(node.attr("rel")=="model"){
-                        result.display = {'label':'Upload','action':display,};
                         result.download = {'label':'Download','action':download,};
                     }
                     if(node.attr("previewuri")){
