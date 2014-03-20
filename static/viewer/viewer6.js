@@ -1289,10 +1289,12 @@ if (!window.performance || !window.performance.now) {
             var $html = '<form id="url-upload" action="/rest3d/upload/" enctype="application/x-www-form-urlencoded" method="POST" ></form>';
             $('body').append($html);
             $("#url-upload").submit(function() {
+    var url = "path/to/your/script.php"; // the script where you handle the form input.
+
        $.ajax({
                        type: "POST",
-                       url: "/rest3d/upload/"+uri,
-                       data: $("#url-upload").serialize(),
+                       url: "/rest3d/upload/https://3dwarehouse.sketchup.com/3dw/getbinary?subjectId=ac9c3413d59e8e4a7f7fbfb94ac070c5&subjectClass=entity&name=k2",
+                    data:  $html.serialize,
                        success: function(data)
                        {
                            alert(data); // show response from the php script.
@@ -1302,7 +1304,7 @@ if (!window.performance || !window.performance.now) {
 
     return false; // avoid to execute the actual submit of the form.
 });
-           $("#url-upload").submit();
+            // $('#acceptSubmit').click();
             
         }
         function preview(node){
