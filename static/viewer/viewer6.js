@@ -1157,12 +1157,15 @@ if (!window.performance || !window.performance.now) {
                     });
                 }
                 function local(id,value){
-                    console.debug("local "+id)
                     $("#"+id).click(function(){
                         var tmp = trs.create();
                         trs.fromMat4(tmp, value);
                         var e = euler.create();
                         euler.fromQuat(e,tmp.localRotation);
+                        console.debug("translation",tmp.localTranslation);
+                        console.debug("scale",tmp.localScale);
+                        console.debug("rotation",e);
+
                         // var q = quat.create();
                         // quat.fromEuler(q,e);
                         // console.debug(q);
