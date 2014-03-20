@@ -93,7 +93,7 @@ rest3d.fileUpload = function(_params,_cb){
 })
 };
 
-rest3d.urlUpload = function(url,_cb){
+rest3d.urlUpload = function(url,cb){
        $.ajax({
            'type': "POST",
            'url': "/rest3d/upload/",
