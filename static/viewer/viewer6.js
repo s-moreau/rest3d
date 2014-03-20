@@ -925,7 +925,7 @@ if (!window.performance || !window.performance.now) {
                         }
                         else{
                             for(var z=0;z<length;z++){
-                                if(param_in.children[z].hasOwnProperty("parent")){
+                                if(param_in.children[z].hasOwnProperty("pickid")){
                                     var pickId = target[z].pickid;
                                     sel.pickid = pickId;
                                 }
@@ -977,8 +977,8 @@ if (!window.performance || !window.performance.now) {
                     }
                     else{
                         for(var z=0;z<length;z++){
-                            if(target[z].hasOwnProperty("parent")){
-                                var pickId = target[z].parent;
+                            if(target[z].hasOwnProperty("pickid")){
+                                var pickId = target[z].pickid;
                                 position.pickid = pickId;
                             }
                         }
