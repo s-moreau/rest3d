@@ -1280,8 +1280,8 @@ if (!window.performance || !window.performance.now) {
                     var name = data.files[i].name;
                     var size = data.files[i].size;
                     var path = data.files[i].path;
-                    html += '<li><a>name: '+name+' </a>'+'<a>size: '+size+' </a>'+'<a href="'+location.host+'/rest3d/'+path+'">path</a>'+'</li>'
-                }
+                    html += '<li><a>name: '+name+' </a>'+'<a>size: '+size+' </a>'+'<a href="http://'+location.host+'/rest3d/'+path+'">path</a>'+'</li>'
+                }//://node.fl4re.com/viewer/node.fl4re.com/rest3d/upload/5e968750-b05c-11e3-81c0-1b60def22770/doc.kmlnode.fl4re.com/viewer/node.fl4re.com/rest3d/upload/5e968750-b05c-11e3-81c0-1b60def22770/doc.kml
             html += '</ul>';
             GUI.notification({
                 title: "Upload "+node.id,
