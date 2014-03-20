@@ -627,7 +627,7 @@ if (!window.performance || !window.performance.now) {
                     $('#myIframe').attr('src', "http://rest3d.wordpress.com/");
                 },
                 close: function(){
-                    gitHtml.remove();
+                    gitHtml.empty();
                 },
             });
             $("#dialog").css({
@@ -714,7 +714,7 @@ if (!window.performance || !window.performance.now) {
                     $('#myIframe').attr('src', url);
                 },
                  close: function(){
-                    gitHtml.remove();
+                    gitHtml.empty();
                 },
             });
             $("#dialog").css({
