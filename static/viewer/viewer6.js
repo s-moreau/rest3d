@@ -804,8 +804,8 @@ if (!window.performance || !window.performance.now) {
             treeJson.data = [];
             function displayConfig (parent,object,attr){
                 if(parent.hasOwnProperty(attr)){
-                    if(parent.hasOwnProperty('parent')){
-                         var id = attr+"_"+(Math.floor(Math.random() * 1000000) + 1)+"__"+parent.parent;
+                    if(parent.hasOwnProperty('pickid')){
+                         var id = attr+"_"+(Math.floor(Math.random() * 1000000) + 1)+"__"+parent.pickid;
                     }
                     else{
                         var id = attr+"_"+(Math.floor(Math.random() * 1000000) + 1);
@@ -837,8 +837,8 @@ if (!window.performance || !window.performance.now) {
                 var stock = param_in;
                 var material ={};
                 material.children = [];
-                if(param_in.hasOwnProperty('parent')){
-                    var pickId = param_in.parent;
+                if(param_in.hasOwnProperty('pickid')){
+                    var pickId = param_in.pickid;
                 }
               if(stock.hasOwnProperty('materials')){
                 for(var z=0; z<stock.materials.length;z++){
@@ -854,7 +854,7 @@ if (!window.performance || !window.performance.now) {
                     material.children = [];
                     var material_parameter = subsel_material.overrides||subsel_material.parameters;
                     if(pickId){ 
-                        material_parameter.parent = pickId; }
+                        material_parameter.pickid = pickId; }
                     displayConfig(material_parameter,material.children,"ambient");
                     displayConfig(material_parameter,material.children,"diffuse");
                     displayConfig(material_parameter,material.children,"emission");
@@ -870,13 +870,13 @@ if (!window.performance || !window.performance.now) {
             } 
 
             window.geometry = function(param_in,param_out){
-                if(param_in.hasOwnProperty("parent")){
-                    var pickID = param_in.parent;
+                if(param_in.hasOwnProperty("pickid")){
+                    var pickID = param_in.pickid;
                 }
                 if(param_in.hasOwnProperty("geometries")&&$.isArray(param_in.geometries)){
                     for(var i=0;i<param_in.geometries.length;i++){
                         var subsel_geometries = param_in.geometries[i];
-                        if(pickID){subsel_geometries.parent=pickID;}
+                        if(pickID){subsel_geometries.pickid=pickID;}
                         var material =  self.material(subsel_geometries);
                         var title = "geometry_"+i;
                         if(i==0){title = "geometry"}
@@ -898,13 +898,13 @@ if (!window.performance || !window.performance.now) {
             }
 
             window.camera = function (param_in,param_out){
-                if(param_in.hasOwnProperty("parent")){
-                    var pickID = param_in.parent;
+                if(param_in.hasOwnProperty("pickid")){
+                    var pickID = param_in.pickid;
                 }
                 if(param_in.hasOwnProperty("camera")){
                     var subsel_camera = param_in.camera;
                     if(pickID){
-                        subsel_camera.parent = pickID;
+                        subsel_camera.pickid = pickID;
                     }
                     displayConfig(subsel_camera,param_out,"aspect_ratio");
                     displayConfig(subsel_camera,param_out,"projection");
@@ -921,13 +921,13 @@ if (!window.performance || !window.performance.now) {
                         var sel = param_in.children[i];
                         if(sel.hasOwnProperty("geometries")){
                             var pickId = sel.geometries[0].glprimitives[0].pickID;
-                            sel.parent = pickId;
+                            sel.pickid = pickId;
                         }
                         else{
                             for(var z=0;z<length;z++){
                                 if(param_in.children[z].hasOwnProperty("parent")){
-                                    var pickId = target[z].parent;
-                                    sel.parent = pickId;
+                                    var pickId = target[z].pickid;
+                                    sel.pickid = pickId;
                                 }
                             }
                         }
@@ -973,13 +973,13 @@ if (!window.performance || !window.performance.now) {
                     sub.data = position.id||position.name;
                     if(position.hasOwnProperty("geometries")){
                         var pickId = position.geometries[0].glprimitives[0].pickID;
-                        position.parent = pickId;
+                        position.pickid = pickId;
                     }
                     else{
                         for(var z=0;z<length;z++){
                             if(target[z].hasOwnProperty("parent")){
                                 var pickId = target[z].parent;
-                                position.parent = pickId;
+                                position.pickid = pickId;
                             }
                         }
                     }
