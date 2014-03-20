@@ -1278,7 +1278,7 @@ if (!window.performance || !window.performance.now) {
             $.ajax({
                        type: "POST",
                        url: "/rest3d/upload/"+uri,
-                       enctype: "application/x-www-form-urlencoded"
+                       enctype: "application/x-www-form-urlencoded",
                        success: function(data)
                        {
                            alert(data); // show response from the php script.
