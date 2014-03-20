@@ -1041,7 +1041,7 @@ if (!window.performance || !window.performance.now) {
                     },
                 },
             },
-            "plugins": ["themes", "json_data", "ui", "types", "sort","contextmenu","search"],
+            "plugins": ["themes", "json_data", "ui", "types", "sort","search"],
              type:  { "types": {
                 "main": {
                     "icon" : {
