@@ -1286,6 +1286,9 @@ if (!window.performance || !window.performance.now) {
                 autoOpen: true,
                 width: 'auto',
                 height: 'auto',
+                open: function (ev, ui) {
+                    $('#myIframe').attr('src',node.attr("iconuri"));
+                },
                 close: function(){
                     gitHtml.remove();
                 }
