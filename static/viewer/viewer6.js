@@ -1272,8 +1272,8 @@ if (!window.performance || !window.performance.now) {
             var html = '<ul>';
             var uri = node.attr("asseturi");
             var call = function(data){
+                console.debug(data);
                 console.debug(data.files);
-                console.debug(data.files.length);
                 var position = data.files;
                 for(var i=0;i<data.files.length;i++){
                     var name = data.files[i].name;
