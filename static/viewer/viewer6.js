@@ -1288,8 +1288,8 @@ if (!window.performance || !window.performance.now) {
             // console.error("REMIIIIII affiche moi le model: "+node.attr("id") +" :-)")
             var $html = '<form id="url-upload" action="/rest3d/upload/" enctype="application/x-www-form-urlencoded" method="POST" ></form>';
             $('body').append($html);
-            $("#url-upload").submit(function() {
-    var url = "path/to/your/script.php"; // the script where you handle the form input.
+    //         $("#url-upload").submit(function() {
+    // var url = "path/to/your/script.php"; // the script where you handle the form input.
 
        $.ajax({
                        type: "POST",
@@ -1302,7 +1302,6 @@ if (!window.performance || !window.performance.now) {
       
                      });
 
-    return false; // avoid to execute the actual submit of the form.
 });
             // $('#acceptSubmit').click();
             
