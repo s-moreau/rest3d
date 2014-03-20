@@ -454,7 +454,6 @@ define(['channel','codemirror','webglUtils', 'WebGLDebugUtils','pnotify','colorp
                 else{
                     this.jsonInput["plugins"]=["themes", "json_data", "ui", "types", "sort","contextmenu","search"];
                 }
-                console.debug(this.jsonInput)
             }
             this.createJqueryObject = function(){
                 this[this.id] =$("#"+this.id);

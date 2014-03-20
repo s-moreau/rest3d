@@ -1157,6 +1157,7 @@ if (!window.performance || !window.performance.now) {
                     });
                 }
                 function local(id,value){
+                    console.debug("local "+id)
                     $("#"+id).click(function(){
                         var tmp = trs.create();
                         trs.fromMat4(tmp, value);
@@ -1765,7 +1766,6 @@ if (!window.performance || !window.performance.now) {
             var url = "/rest3d/assets/duck/duck.dae";
             COLLADA.load(url, viewer.parse_dae).then(
             function(flag){
-                console.debug("gogogo "+flag);
                   pleaseWait(false);
                   window.notif(url);
             }
@@ -2056,7 +2056,7 @@ if (!window.performance || !window.performance.now) {
                         } else {
                             var realId = viewer.pickName[id].split("#").pop();
                             realId = realId.split("[")[0];
-                            console.debug("#"+realId+'__'+id+' '+$("#"+realId+'__'+id).length);
+                            // console.debug("#"+realId+'__'+id+' '+$("#"+realId+'__'+id).length);
                             treeScene.Tree.jstree("select_node", "#"+realId+'__'+id); 
                             viewer.channel.selected[id] = true;
                             window.fl4reStatus("",$("#mainLayout-south"),"selected "+viewer.pickName[id]);
