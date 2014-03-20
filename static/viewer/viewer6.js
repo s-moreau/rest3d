@@ -1261,13 +1261,13 @@ if (!window.performance || !window.performance.now) {
         }
         function preview(node){
             $("#dialog").dialog("close");
-            var gitHtml = $('<div id="dialog"><iframe id="myIframe" src="'+node.attr("previewuri") + '" style="height:99% !important; width:99% !important; border:0px;"></div>');
+            var gitHtml = $('<div id="dialog"><iframe id="myIframe" src="'+node.attr("previewuri") + '" style="height:100% !important; width:100% !important; border:0px;"></div>');
             gitPanel = $('body').append(gitHtml);
             $("#dialog").dialog({
                 title: node.attr('name'),
                 autoOpen: true,
-                width: 'auto',
-                height: 'auto',
+                width: '1000px',
+                height: '800px',
                 close: function(){
                     gitHtml.remove();
                 }
