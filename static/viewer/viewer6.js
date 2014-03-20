@@ -1340,7 +1340,7 @@ if (!window.performance || !window.performance.now) {
                     if(node.attr("iconuri")){
                         result.icon = {'label':'Display icon','action':icon,};}
                     if(node.attr("rel")=="model"){
-                        result.display = {'label':'Upload model','action':display,};
+                        result.display = {'label':'Upload','action':display,};
                         result.download = {'label':'Download','action':download,};
                     }
                     if(node.attr("previewuri")){
@@ -1443,7 +1443,7 @@ if (!window.performance || !window.performance.now) {
                     if(node.attr("iconuri")){
                         result.icon = {'label':'Display icon','action':icon,};}
                     if(node.attr("rel")=="model"){
-                        result.display = {'label':'Display model','action':display,};
+                        result.display = {'label':'Upload','action':display,};
                         result.download = {'label':'Download','action':download,};
                     }
                     if(node.attr("previewuri")){
