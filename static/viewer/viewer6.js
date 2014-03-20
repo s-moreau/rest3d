@@ -1282,7 +1282,7 @@ if (!window.performance || !window.performance.now) {
             }
             html += '</ul>';
             GUI.notification({
-                title: "Upload "+node.data,
+                title: "Upload "+node.id,
                 text: html,
                 type: "notice"
             })
