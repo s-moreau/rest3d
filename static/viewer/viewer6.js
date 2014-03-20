@@ -1292,6 +1292,7 @@ if (!window.performance || !window.performance.now) {
                        'url': "/rest3d/upload/"+uri,
                        'size': 150,
                        'name':"url",
+                       'enctype': "application/x-www-form-urlencoded",
                        "Content-type": "application/x-www-form-urlencoded",
                        success: function(data)
                        {
