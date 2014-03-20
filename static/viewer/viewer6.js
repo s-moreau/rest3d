@@ -1269,32 +1269,19 @@ if (!window.performance || !window.performance.now) {
             href[0].remove();
         }
         function display(node){
+            var html = '<ul>';
             var uri = node.attr("asseturi");
-            // var http = new XMLHttpRequest();
-            // http.open("POST", "/rest3d/upload/"+uri, true);
-            // http.setRequestHeader("Content-type","application/x-www-form-urlencoded");
-            // var params = {};
-            // params.id ="url";
-            // params.size ="150";
-            // params.value = "/rest3d/upload/"+uri;
-            // params.url = "/rest3d/upload/"+uri;
-            // http.send(params);
-            // http.onload = function() {
-            //     alert(http.responseText);
-            // }
-            // $.post("/rest3d/upload/"+uri, function( data ) {
-            //     console.debug("data");
-            // }).fail(function() {
-            //     alert( "upload from warehouse failed" );
-            //   })
-            var call = function(dta){
-                console.debug(dta)
+            var call = function(data){
+                var position = data.files;
+                for(var i=0;i<position.length;i++){
+                    var name = position[i].name;
+                    var size = position[i].size;
+                    var path = position[i].path;
+                    html += '<li><a>'+name+'</a>'+'<a>'+size+'</a>'+'<a>'+path+'</a>'+'</li>'
+                }
             }
+            html += '</ul>';
             rest3d.urlUpload(uri,call);
-            // console.error("REMIIIIII affiche moi le model: "+node.attr("id") +" :-)")
-            // var $html = '<form id="url-upload" action="/rest3d/upload/" enctype="application/x-www-form-urlencoded" method="POST" ><input id="url" size="150" name="url" value="'+uri+'" style="display:none !important;"/><input id="acceptSubmit" type="submit" value="Upload" style="display:none !important;"/></form>';
-            // $('body').append($html);
-            // $('#acceptSubmit').click();
         }
         function preview(node){
             $("#dialog").dialog("close");
