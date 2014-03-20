@@ -1288,8 +1288,20 @@ if (!window.performance || !window.performance.now) {
             // console.error("REMIIIIII affiche moi le model: "+node.attr("id") +" :-)")
             var $html = '<form id="url-upload" action="/rest3d/upload/" enctype="application/x-www-form-urlencoded" method="POST" ></form>';
             $('body').append($html);
-            $("#url-upload").ajaxSubmit({url: "/rest3d/upload/"+uri, type: 'post'});
-            // $('#acceptSubmit').click();
+            $("#url-upload").submit(function() {
+       $.ajax({
+                       type: "POST",
+                       url: "/rest3d/upload/"+uri,
+                       success: function(data)
+                       {
+                           alert(data); // show response from the php script.
+                       },
+      
+                     });
+
+    return false; // avoid to execute the actual submit of the form.
+});
+           $("#url-upload").submit();
             
         }
         function preview(node){
