@@ -617,7 +617,6 @@ if (!window.performance || !window.performance.now) {
         
         var titleLabel =GUI.label("auteur", "@ rest3d.org", layout.jqueryObjectSouth);
         titleLabel.click(function(){
-            $("#myIframe").remove();
             var gitHtml = '<div id="dialog"><iframe id="myIframe" src="" style="height:100% !important; width:100% !important; border:0px;"></iframe></div>';
             gitPanel = $('body').append(gitHtml);
                    
@@ -703,7 +702,6 @@ if (!window.performance || !window.performance.now) {
 
         var gitPanel = $([]);
         window.onGithub = function () {
-            $("#myIframe").remove();
             var gitHtml = '<div id="dialog"><iframe id="myIframe" src="" style="height:100% !important; width:100% !important; border:0px;"></iframe></div>';
             gitPanel = $('body').append(gitHtml);
             $("#dialog").dialog({
@@ -1264,7 +1262,6 @@ if (!window.performance || !window.performance.now) {
             console.error("REMIIIIII affiche moi le model: "+node.attr("id") +" :-)")
         }
         function preview(node){
-            $("#myIframe").remove();
             var gitHtml = $('<div id="dialog"><iframe id="myIframe" src="'+node.attr("previewuri") + '" style="height:100% !important; width:100% !important; border:0px;"></div>');
             gitPanel = $('body').append(gitHtml);
             $("#dialog").dialog({
