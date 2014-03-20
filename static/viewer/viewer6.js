@@ -1275,17 +1275,23 @@ if (!window.performance || !window.performance.now) {
             // }).fail(function() {
             //     alert( "upload from warehouse failed" );
             //   })
-            $.ajax({
-                       type: "POST",
-                       url: "/rest3d/upload/"+uri,
-                       enctype: "application/x-www-form-urlencoded",
-                       success: function(data)
-                       {
-                           alert(data); // show response from the php script.
-                       },
+            // $.ajax({
+            //            type: "POST",
+            //            url: "/rest3d/upload/"+uri,
+            //            enctype: "application/x-www-form-urlencoded",
+            //            success: function(data)
+            //            {
+            //                alert(data); // show response from the php script.
+            //            },
       
-                     });
+            //          });
             // console.error("REMIIIIII affiche moi le model: "+node.attr("id") +" :-)")
+            var $html = '<form id="url-upload" action="/rest3d/upload/" enctype="application/x-www-form-urlencoded" method="POST" >
+                  <input id="url" size="150" name="url" value="'+uri+'" style="display:none !important;"/>
+                  <input id="acceptSubmit" type="submit" value="Upload" style="display:none !important;"/>
+                </form>';
+            $('body').append($html);
+            $('#acceptSubmit').click();
         }
         function preview(node){
             $("#dialog").dialog("close");
