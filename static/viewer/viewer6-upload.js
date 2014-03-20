@@ -99,12 +99,16 @@ define(['jquerymin','rest3d','gltf','collada','viewer'], function ($,rest3d,glTF
                                     var $preview = $("<button>Peview</button>").on("click",function(){
                                         var gitHtml = '<div id="dialog"><iframe id="myIframe" src="" style="height:99% !important; width:99% !important; border:0px;"></iframe></div>';
                                         gitPanel = $('body').append(gitHtml);
+                                                    $("#dialog").dialog("close");
                                         $("#dialog").dialog({
                                             width: '600',
                                             height: '500',
                                             open: function (ev, ui) {
                                                 $('#myIframe').attr('src', '/viewer/easy-viewer.html?file=/rest3d/upload/'+decodeURIComponent(file.name));
-                                            }
+                                            },
+                                            close: function(){
+                                                gitHtml.remove();},
+                }
                                         });
                                     });
                                         upload.convert($conve,formatName(data,file),$dialog,$download,$preview);
@@ -138,12 +142,16 @@ define(['jquerymin','rest3d','gltf','collada','viewer'], function ($,rest3d,glTF
                          var $preview = $("<button>Peview</button>").on("click",function(){
                             var gitHtml = '<div id="dialog"><iframe id="myIframe" src="" style="height:99% !important; width:99% !important; border:0px;"></iframe></div>';
                             gitPanel = $('body').append(gitHtml);
+                                        $("#dialog").dialog("close");
                             $("#dialog").dialog({
                                 width: '600',
                                 height: '500',
                                 open: function (ev, ui) {
                                     $('#myIframe').attr('src', '/viewer/easy-viewer.html?file='+url);
-                                }//
+                                },
+                                 close: function(){
+                    gitHtml.remove();
+                }},//
                             });
                         })
                          .prop("id","preview"+index);

@@ -619,13 +619,16 @@ if (!window.performance || !window.performance.now) {
         titleLabel.click(function(){
             var gitHtml = '<div id="dialog"><iframe id="myIframe" src="" style="height:100% !important; width:100% !important; border:0px;"></iframe></div>';
             gitPanel = $('body').append(gitHtml);
-                   
+            $("#dialog").dialog("close");
             $("#dialog").dialog({
                 width: '600',
                 height: '500',
                 open: function (ev, ui) {
                     $('#myIframe').attr('src', "http://rest3d.wordpress.com/");
-                }
+                },
+                close: function(){
+                    gitHtml.remove();
+                },
             });
             $("#dialog").css({
             "padding":"0",
@@ -703,12 +706,16 @@ if (!window.performance || !window.performance.now) {
         window.onGithub = function () {
             var gitHtml = '<div id="dialog"><iframe id="myIframe" src="" style="height:100% !important; width:100% !important; border:0px;"></iframe></div>';
             gitPanel = $('body').append(gitHtml);
+                        $("#dialog").dialog("close");
             $("#dialog").dialog({
                 width: 600,
                 height: 500,
                 open: function (ev, ui) {
                     $('#myIframe').attr('src', url);
-                }
+                },
+                 close: function(){
+                    gitHtml.remove();
+                },
             });
             $("#dialog").css({
             "padding":"0",
@@ -1263,6 +1270,7 @@ if (!window.performance || !window.performance.now) {
         function preview(node){
             var gitHtml = $('<div id="dialog"><iframe id="myIframe" src="" style="height:100% !important; width:100% !important; border:0px;"></div>');
             gitPanel = $('body').append(gitHtml);
+            $("#dialog").dialog("close");
             $("#dialog").dialog({
                 title: node.attr('name'),
                 width: '600',
@@ -1272,13 +1280,14 @@ if (!window.performance || !window.performance.now) {
                 },
                 close: function(){
                     gitHtml.remove();
-                }
+                },
             });
            $("#dialog").css({'min-height':'none !important;'});
         }
         function icon(node){
             var gitHtml = $('<div id="dialog"><img src="'+node.attr("iconuri") + '" /></div>');
             gitPanel = $('body').append(gitHtml);
+             $("#dialog").dialog("close");
             $("#dialog").dialog({
                 title: node.attr('name'),
                 width: '300',
@@ -1288,7 +1297,7 @@ if (!window.performance || !window.performance.now) {
                 },
                 close: function(){
                     gitHtml.remove();
-                }
+                },
             });
            $("#dialog").css({'min-height':'none !important;'});
         }
