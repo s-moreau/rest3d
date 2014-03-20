@@ -269,7 +269,7 @@ define(['channel','codemirror','webglUtils', 'WebGLDebugUtils','pnotify','colorp
                     var $span = htmlSpan($newLine,100,link);
                     $span.css("text-align","left");}
                 else if(!button1&&!button2){
-                    var $span = htmlSpan($newLine,70,link);
+                    var $span = htmlSpan($newLine,90,link);
                     $span.css("text-align","left");
                     var $spanButton = htmlSpan($newLine,10);
                     $spanButton.append(button);

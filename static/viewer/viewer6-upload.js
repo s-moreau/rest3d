@@ -126,7 +126,7 @@ define(['jquerymin','rest3d','gltf','collada','viewer'], function ($,rest3d,glTF
                     console.debug(file);
                     var ext = file.name.match(/\.[^.]+$/);//
                     console.debug(ext);//
-                    if(ext[0]==".dae"){
+                    if(ext[0]==".dae"||ext[0]==".DAE"){
                         var url =  '/rest3d/upload/'+decodeURIComponent(file.name);//
                         var $dialog = $("<button>Launch</button>").on("click",function(){
                             window.pleaseWait(true);
@@ -156,7 +156,7 @@ define(['jquerymin','rest3d','gltf','collada','viewer'], function ($,rest3d,glTF
                         $('#preview'+index).hide();
                                     // rest3d.testUpload(file);
                     }
-                    else if(ext[0]==".png"||".jpg"||".tga"||".png"){
+                    else if(ext[0]==".png"||ext[0]==".jpg"||ext[0]==".tga"||ext[0]==".png"||ext[0]==".jpeg"||ext[0]==".glsl"){
                         upload.upload(header,file.name,uploadButton.clone(true).data(data).prop("disabled",false));
                     }
                     else{upload.upload(header,file.name);}//
