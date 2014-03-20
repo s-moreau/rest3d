@@ -626,9 +626,9 @@ if (!window.performance || !window.performance.now) {
                 open: function (ev, ui) {
                     $('#myIframe').attr('src', "http://rest3d.wordpress.com/");
                 },
-                close: function(){
-                    gitHtml.empty();
-                },
+                // close: function(){
+                //     gitHtml.empty();
+                // },
             });
             $("#dialog").css({
             "padding":"0",
@@ -713,9 +713,9 @@ if (!window.performance || !window.performance.now) {
                 open: function (ev, ui) {
                     $('#myIframe').attr('src', url);
                 },
-                 close: function(){
-                    gitHtml.empty();
-                },
+                //  close: function(){
+                //     gitHtml.empty();
+                // },
             });
             $("#dialog").css({
             "padding":"0",
@@ -1278,9 +1278,9 @@ if (!window.performance || !window.performance.now) {
                 open: function (ev, ui) {
                     $('#myIframe').attr('src',node.attr("previewuri"));
                 },
-                close: function(){
-                    gitHtml.remove();
-                },
+                // close: function(){
+                //     gitHtml.remove();
+                // },
             });
            $("#dialog").css({'min-height':'none !important;'});
         }

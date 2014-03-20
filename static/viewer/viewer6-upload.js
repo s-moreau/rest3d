@@ -106,8 +106,8 @@ define(['jquerymin','rest3d','gltf','collada','viewer'], function ($,rest3d,glTF
                                             open: function (ev, ui) {
                                                 $('#myIframe').attr('src', '/viewer/easy-viewer.html?file=/rest3d/upload/'+decodeURIComponent(file.name));
                                             },
-                                            close: function(){
-                                                gitHtml.remove();},
+                                            // close: function(){
+                                            //     gitHtml.remove();},
                                         });
                                     });
                                         upload.convert($conve,formatName(data,file),$dialog,$download,$preview);
@@ -148,9 +148,9 @@ define(['jquerymin','rest3d','gltf','collada','viewer'], function ($,rest3d,glTF
                                 open: function (ev, ui) {
                                     $('#myIframe').attr('src', '/viewer/easy-viewer.html?file='+url);
                                 },
-                                 close: function(){
-                    gitHtml.remove();
-                },//
+                    //              close: function(){
+                    // gitHtml.remove();
+                //},//
                             });
                         })
                          .prop("id","preview"+index);
