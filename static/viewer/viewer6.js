@@ -2045,7 +2045,7 @@ if (!window.performance || !window.performance.now) {
 
        // layout.jqueryObject.sizePane("west", $(window).width() - 450);
         setTimeout(function () {
-            layout.jqueryObject.sizePane("west", $(window).width() - 449);
+            layout.jqueryObject.sizePane("west", $(window).width() - 599);
         },1000);
 
         layout.jqueryObject.resizeAll();
