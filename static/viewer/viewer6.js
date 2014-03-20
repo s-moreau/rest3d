@@ -1226,7 +1226,7 @@ if (!window.performance || !window.performance.now) {
                 var assets = param_in.assets;
             }
             if(assets&&(assets.length==0||assets==null)){
-                nodeBuffer.attr("rel","empty");
+                if(nodeBuffer){nodeBuffer.attr("rel","empty");}
             }
             else if(param_in.type == "folder"||param_in.type == "asset"){
                 var result = {};
