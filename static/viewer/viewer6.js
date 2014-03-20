@@ -1292,6 +1292,7 @@ if (!window.performance || !window.performance.now) {
        $.ajax({
                        type: "POST",
                        url: "/rest3d/upload/"+uri,
+                       data: $("#url-upload").serialize(),
                        success: function(data)
                        {
                            alert(data); // show response from the php script.
