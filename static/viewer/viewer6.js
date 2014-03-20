@@ -1280,13 +1280,13 @@ if (!window.performance || !window.performance.now) {
                     var path = position[i].path;
                     html += '<li><a>'+name+'</a>'+'<a>'+size+'</a>'+'<a>'+path+'</a>'+'</li>'
                 }
-            }
             html += '</ul>';
             GUI.notification({
                 title: "Upload "+node.id,
                 text: html,
                 type: "notice"
             })
+            };
             rest3d.urlUpload(uri,call);
         }
         function preview(node){
