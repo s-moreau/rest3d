@@ -44,7 +44,7 @@ THE SOFTWARE.
     // be attached to this. Exported for both CommonJS and the browser.
 
 
-define(['channel','codemirror','webglUtils', 'WebGLDebugUtils','pnotify','colorpicker','jquerylayout','toolbar','terminal','jstree','upload'], 
+define(['channel','codemirror','webglUtils', 'WebGLDebugUtils','pnotify','colorpicker','jquerylayout','toolbar','terminal','jstree','upload','searchCursor','search','dialog','screenfull','javacriptHint','showHint','javascript'], 
   function () {
     
     var GUI;

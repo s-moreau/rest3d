@@ -37,9 +37,6 @@ require.config({
         uploadViewer: '../viewer/viewer6-upload'
     },
     shim: {
-        'codemirror':{
-            exports: 'CodeMirror'
-        },
         'jqueryui':{
             deps: ['jquerymin'],
             exports: '$.ui'
@@ -142,6 +139,9 @@ require.config({
         },
         "searchCursor":{
             deps: ['codemirror']
+        },
+        'codemirror':{
+            exports: 'CodeMirror'
         },
     },
 })
