@@ -34,7 +34,8 @@ require.config({
         gui:"../gui/gui6",
         utilMatrix: '../lib/utils',
         viewer: '../viewer/viewer6',
-        uploadViewer: '../viewer/viewer6-upload'
+        uploadViewer: '../viewer/viewer6-upload',
+        q: '../deps/q',
     },
     shim: {
         'jqueryui':{
@@ -142,6 +143,9 @@ require.config({
         },
         'codemirror':{
             exports: 'CodeMirror'
+        },
+        'q':{
+            exports: 'Q'
         },
     },
 })

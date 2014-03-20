@@ -25,7 +25,7 @@ THE SOFTWARE.
 
  gltf.js needs gl-matrix.js gl-matrix-ext.js 
 */
-define(['glmatrixExt'],function(){
+define(['glmatrixExt','q'],function(a,Q){
 
 	var glTF={};
 
@@ -586,7 +586,7 @@ define(['glmatrixExt'],function(){
 	glTF.load = function(_url, _callback) {
 		var document = new glTF.document();
 		var cb = _callback;
-
+		  var deferred = Q.defer();
 		document.url = _url;
 		document.baseURI = _url.substring(0,_url.lastIndexOf('/'));
 
@@ -601,17 +601,21 @@ define(['glmatrixExt'],function(){
 					if (xhr.responseText == null) {
 						if (xhr.response == null) {
 							glTF.log("Error loading "+document.url+" [most likely a cross origin issue]")
+							deferred.reject(new Error("Error loading "+document.url+" [most likely a cross origin issue]"));
 						} else
 						{
 							glTF.log("Error loading "+document.url+" [most likely not a glTF json document]")
+                            deferred.reject(new Error("Error loading "+document.url+" [most likely not a collada/xml document]"));
 						}
 					} else {
 						document.json=JSON.parse(xhr.responseText);
 						document.parse_glTF(cb);
+						deferred.resolve(document);
 					}
 				}
 				else {
 					glTF.log("Error Loading "+document.url+" [http request status="+xhr.status+"]");
+					deferred.reject(new Error("Error Loading "+document.url+" [http request status="+xhr.status+"]"));
 				}
 			}
 		};
@@ -619,7 +623,7 @@ define(['glmatrixExt'],function(){
 		xhr.open("GET", _url, true);
 
     xhr.send(null);
-    return document;
+    return deferred.promise;
 	};
 		
   return glTF;

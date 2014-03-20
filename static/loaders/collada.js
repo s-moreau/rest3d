@@ -26,7 +26,7 @@ THE SOFTWARE.
  COLLADA.js needs gl-matrix.js
 */
 
-define(["glmatrixExt"], function () {
+define(["glmatrixExt",'q'], function (a,Q) {
     
     var COLLADA = {};
 
@@ -1017,6 +1017,7 @@ define(["glmatrixExt"], function () {
 
     // download the document, and call the parser
     COLLADA.load = function(url, callback) {
+        var deferred = Q.defer();
         var document = new COLLADA.document();
         var cb=callback;
         document.url = url;
@@ -1029,16 +1030,20 @@ define(["glmatrixExt"], function () {
                     if (xhr.responseXML == null) {
                         if (xhr.responseText == null) {
                             COLLADA.log("Error loading "+document.url+" [most likely a cross origin issue]")
+                            deferred.reject(new Error("Error loading "+document.url+" [most likely a cross origin issue]"));
                         } else
                         {
                             COLLADA.log("Error loading "+document.url+" [most likely not a collada/xml document]")
+                            deferred.reject(new Error("Error loading "+document.url+" [most likely not a collada/xml document]"));
                         }
                     }
                     document.xml=xhr.responseXML;
                     document.parseCOLLADA(cb);
+                    deferred.resolve(true);
                 }
                 else {
                     COLLADA.log("Error Loading "+document.url+" [http request status="+xhr.status+"]");
+                    deferred.reject(new Error("Error Loading "+document.url+" [http request status="+xhr.status+"]"));
                 }
             }
         };
@@ -1048,7 +1053,7 @@ define(["glmatrixExt"], function () {
         xhr.overrideMimeType("text/xml");
         xhr.setRequestHeader("Content-Type", "text/xml");
         xhr.send(null);
-        return document;
+        return deferred.promise;
     }
     
     return COLLADA;

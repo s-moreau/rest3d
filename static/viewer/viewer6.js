@@ -21,7 +21,7 @@ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.*/
-define(['jquerymin','gui','console', 'gltf', 'collada', 'renderer','camera','glmatrixExt','rest3d','uploadViewer'], function ($,GUI,CONSOLE,glTF,COLLADA,renderer,camera,mat3,rest3d,setViewer6Upload) {
+define(['jquerymin','gui','console', 'gltf', 'collada', 'renderer','camera','glmatrixExt','rest3d','uploadViewer','q'], function ($,GUI,CONSOLE,glTF,COLLADA,renderer,camera,mat3,rest3d,setViewer6Upload,Q) {
 var viewer  = {};
 var scenes = [];
 viewer.currentZoom = 1;
@@ -30,7 +30,7 @@ var mvMatrix = mat4.create();
 var deg2rad = 0.0174532925; // constant
 viewer.currentRotationX = 0;
 viewer.currentRotationY = 0;
-
+var deferred = Q.defer();
 var pmMatrix = mat4.create();
 
 var canvas = null;
@@ -602,9 +602,10 @@ if (!window.performance || !window.performance.now) {
         }
         function pleaseWait(_displayMode) {
             if (_displayMode == true) {
+                 var deferred = Q.defer();
                 mask = GUI.mask("mask-loading", "Please wait ...", $("body"));
                 GUI.image($('#mask-loading'), "img-loading", "../gui/images/loading.gif", 30, 30, "before");
-                return mask;
+                return deferred;
             } else if (_displayMode == false) {
                 setTimeout(function(){mask.remove();},500);
             }
@@ -1751,54 +1752,78 @@ if (!window.performance || !window.performance.now) {
         GUI.button('duck rest3d(need database)', accordion.collada, function () {
             pleaseWait(true);
             var url = "/rest3d/assets/duck/duck.dae";
-            COLLADA.load(url, viewer.parse_dae);
-            window.notif(url);
-            pleaseWait(false);
+            COLLADA.load(url, viewer.parse_dae).then(
+            function(flag){
+                console.debug("gogogo "+flag);
+                  pleaseWait(false);
+                  window.notif(url);
+            }
+            ,function (error) {
+                // If there's an error or a non-200 status code, log the error.
+                console.error("cs "+error);
+            });
+                        
+          
         }).width("90%");
         accordion.collada.append("<hr></hr>");
 
         GUI.button('duck', accordion.collada, function () {
             pleaseWait(true);
             var url = "/models/duck/duck.dae"
-            COLLADA.load(url, viewer.parse_dae);
-            window.notif(url);
-            pleaseWait(false);
+            COLLADA.load(url, viewer.parse_dae).then(
+            function(flag){
+                  pleaseWait(false);
+                  window.notif(url);
+            }
+            ,function (error) {
+                // If there's an error or a non-200 status code, log the error.
+                 pleaseWait(false);
+                console.error("cs "+error);
+            });
         }).width("90%");
         accordion.collada.append("<hr></hr>");
 
         GUI.button('creature', accordion.collada, function () {
             pleaseWait(true);
             var url = "/models/Amahani/Amahani.dae";
-            COLLADA.load(url, viewer.parse_dae);
-            window.notif(url);
-            pleaseWait(false);
+            COLLADA.load(url, viewer.parse_dae).then(
+            function(flag){
+                  pleaseWait(false);
+                  window.notif(url);
+            })
         }).width("90%");
         accordion.collada.append("<hr></hr>");
 
         GUI.button('skinned creature (fix me!!)', accordion.gltf, function () {
             pleaseWait(true);
             var url = "/models/Amahani/Amahani.json";
-            glTF.load(url, viewer.parse_gltf);
-            window.notif(url);
-            pleaseWait(false);
+            glTF.load(url, viewer.parse_gltf).then(
+            function(flag){
+                  pleaseWait(false);
+                  window.notif(url);
+            })
         }).width("90%");
         accordion.gltf.append("<hr></hr>");
 
         GUI.button('duck', accordion.gltf, function () {
             pleaseWait(true);
             var url = "/models/duck-glft/duck_triangulate.json"
-            glTF.load(url, viewer.parse_gltf);
-            window.notif(url);
-            pleaseWait(false);
+            glTF.load(url, viewer.parse_gltf).then(
+            function(flag){
+                  pleaseWait(false);
+                  window.notif(url);
+            })
         }).width("90%");
         accordion.gltf.append("<hr></hr>");
 
         GUI.button('rambler', accordion.gltf, function () {
               pleaseWait(true);
             var url = "/models/rambler/Rambler.json";
-            glTF.load(url, viewer.parse_gltf);
-            window.notif(url);
-            pleaseWait(false);
+            glTF.load(url, viewer.parse_gltf).then(
+            function(flag){
+                  pleaseWait(false);
+                  window.notif(url);
+            })
 
         }).width("90%");
         accordion.gltf.append("<hr></hr>");
@@ -1806,9 +1831,11 @@ if (!window.performance || !window.performance.now) {
         GUI.button('rambler-min', accordion.collada, function () {
             pleaseWait(true);
             var url = "/models/rambler/Rambler-min.dae";
-            COLLADA.load(url, viewer.parse_dae);
-            window.notif(url);
-            pleaseWait(false);
+            COLLADA.load(url, viewer.parse_dae).then(
+            function(flag){
+                  pleaseWait(false);
+                  window.notif(url);
+            })
 
         }).width("90%");
         accordion.collada.append("<hr></hr>");
@@ -1816,45 +1843,55 @@ if (!window.performance || !window.performance.now) {
         GUI.button('rambler', accordion.collada, function () {
             pleaseWait(true);
             var url = "/models/rambler/Rambler.dae";
-            COLLADA.load(url, viewer.parse_dae);
-            window.notif(url);
-            pleaseWait(false);
+            COLLADA.load(url, viewer.parse_dae).then(
+            function(flag){
+                  pleaseWait(false);
+                  window.notif(url);
+            })
         }).width("90%");
         accordion.collada.append("<hr></hr>");
 
         GUI.button('supermurdoch', accordion.collada, function () {
               pleaseWait(true);
               var url = "/models/SuperMurdoch/SuperMurdoch.dae";
-            COLLADA.load(url, viewer.parse_dae);
-            window.notif(url);
-               pleaseWait(false);
+            COLLADA.load(url, viewer.parse_dae).then(
+            function(flag){
+                  pleaseWait(false);
+                  window.notif(url);
+            })
         }).width("90%");
         accordion.collada.append("<hr></hr>");
 
         GUI.button('supermurdoch', accordion.gltf, function () {
               pleaseWait(true);
               var url = "/models/SuperMurdoch/SuperMurdoch.json";
-            glTF.load(url, viewer.parse_gltf);
-            window.notif(url);
-               pleaseWait(false);
+            glTF.load(url, viewer.parse_gltf).then(
+            function(flag){
+                  pleaseWait(false);
+                  window.notif(url);
+            })
         }).width("90%");
         accordion.gltf.append("<hr></hr>");
 
         GUI.button('wine', accordion.collada, function () {
               pleaseWait(true);
               var url = "/models/wine/wine.dae";
-            COLLADA.load(url, viewer.parse_dae);
-            window.notif(url);
-               pleaseWait(false);
+            COLLADA.load(url, viewer.parse_dae).then(
+            function(flag){
+                  pleaseWait(false);
+                  window.notif(url);
+            })
         }).width("90%");
         accordion.collada.append("<hr></hr>");
 
         GUI.button('wine', accordion.gltf, function () {
               pleaseWait(true);
               var url = "/models/wine/wine.json";
-            glTF.load(url, viewer.parse_gltf);
-            window.notif(url);
-               pleaseWait(false);
+            glTF.load(url, viewer.parse_gltf).then(
+            function(flag){
+                  pleaseWait(false);
+                  window.notif(url);
+            })
         }).width("90%");
         accordion.gltf.append("<hr></hr>");
 
@@ -1862,35 +1899,43 @@ if (!window.performance || !window.performance.now) {
         GUI.button('uh-1n', accordion.collada, function () {
               pleaseWait(true);
               var url = "/models/uh-1n/uh-1n.dae"
-              COLLADA.load(url, viewer.parse_dae);
-            window.notif(url);
-               pleaseWait(false);
+              COLLADA.load(url, viewer.parse_dae).then(
+            function(flag){
+                  pleaseWait(false);
+                  window.notif(url);
+            })
         }).width("90%");
         accordion.collada.append("<hr></hr>");
 
         GUI.button('uh-1n', accordion.gltf, function () {
               pleaseWait(true);
               var url = "/models/uh-1n/uh-1n.json";
-            glTF.load(url, viewer.parse_gltf);
-            window.notif(url);
-               pleaseWait(false);
+            glTF.load(url, viewer.parse_gltf).then(
+            function(flag){
+                  pleaseWait(false);
+                  window.notif(url);
+            })
         }).width("90%");
         accordion.gltf.append("<hr></hr>");
 
         GUI.button('cow', accordion.collada, function () {
               pleaseWait(true);
               var url = "/models/cow/cow.dae"
-            COLLADA.load(url, viewer.parse_dae);
-            window.notif(url);
-               pleaseWait(false);
+            COLLADA.load(url, viewer.parse_dae).then(
+            function(flag){
+                  pleaseWait(false);
+                  window.notif(url);
+            })
         }).width("90%");
 
         GUI.button('cow', accordion.gltf, function () {
               pleaseWait(true);
               var url = "/models/cow/cow.json";
-            glTF.load(url, viewer.parse_gltf);
-            window.notif(url);
-               pleaseWait(false);
+            glTF.load(url, viewer.parse_gltf).then(
+            function(flag){
+                  pleaseWait(false);
+                  window.notif(url);
+            })
         }).width("90%");
 
         var colladaMenu = [];
@@ -2045,7 +2090,7 @@ if (!window.performance || !window.performance.now) {
 
        // layout.jqueryObject.sizePane("west", $(window).width() - 450);
         setTimeout(function () {
-            layout.jqueryObject.sizePane("west", $(window).width() - 599);
+            layout.jqueryObject.sizePane("west", $(window).width() - 499);
         },1000);
 
         layout.jqueryObject.resizeAll();
