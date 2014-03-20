@@ -125,8 +125,7 @@ define(['jquerymin','rest3d','gltf','collada','viewer'], function ($,rest3d,glTF
                 $.each(data.files, function (index, file) {
                     console.debug(file);
                     var ext = file.name.match(/\.[^.]+$/);//
-                    console.debug(ext);//
-                    if(ext[0]==".dae"){
+                    if(ext[0]==".dae"||ext[0]==".DAE"){
                         var url =  '/rest3d/upload/'+decodeURIComponent(file.name);//
                         var $dialog = $("<button>Launch</button>").on("click",function(){
                             window.pleaseWait(true);
@@ -155,6 +154,9 @@ define(['jquerymin','rest3d','gltf','collada','viewer'], function ($,rest3d,glTF
                         $('#dialog'+index).hide();
                         $('#preview'+index).hide();
                                     // rest3d.testUpload(file);
+                    }
+                    else if(ext[0]==".png"||ext[0]==".jpg"||ext[0]==".tga"||ext[0]==".png"||ext[0]==".jpeg"||ext[0]==".glsl"){
+                        upload.upload(header,file.name,uploadButton.clone(true).data(data).prop("disabled",false));
                     }
                     else{upload.upload(header,file.name);}//
                 });
@@ -185,13 +187,16 @@ define(['jquerymin','rest3d','gltf','collada','viewer'], function ($,rest3d,glTF
                 $.each(data.result.files, function (index, file) {
                     file.assetName = data.result.files[index].name;
                     var $node = convertButton.clone(true).data({file: file, context: data.context})
-                        .prop('disabled', false)
                         // .prop('disabled', !/dae$/i.test(file.url))
                     buttonToReplace
                         .replaceWith($node)
                         .prop("id","nodeClose");
                     GUI.addIcon($node, "ui-icon-check", "", "before");
                     $node.parent().parent().show().find("button").show();
+                    var ext = file.name.match(/\.[^.]+$/);
+                    if(ext[0]==".dae"||ext[0]==".DAE"){
+                        $node.prop('disabled',false);
+                    }
                 });
             }).on('fileuploadfail', function (e, data) {
                 if (!data.result) {
