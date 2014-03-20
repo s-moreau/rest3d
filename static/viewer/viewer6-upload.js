@@ -29,10 +29,10 @@ define(['jquerymin','rest3d','gltf','collada','viewer'], function ($,rest3d,glTF
             var header;
             var index;
             var buttonToReplace;
-            upload.callOnClick(function(){
-                header = upload.header();
-                index=0;
-            });
+            // upload.callOnClick(function(){
+            //     header = upload.header();
+            //     index=0;
+            // });
             var url = '/rest3d/upload',
                 uploadButton = $('<button/>')
                     .addClass('btn')
@@ -122,6 +122,7 @@ define(['jquerymin','rest3d','gltf','collada','viewer'], function ($,rest3d,glTF
                     });
 
             upload.object.on('fileuploadadd', function (e, data) {
+                header = upload.header();
                 upload.object=$(this);
                 data.context = header;
                 $.each(data.files, function (index, file) {
