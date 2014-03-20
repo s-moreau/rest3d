@@ -35,9 +35,18 @@ define(["glmatrixExt",'q'], function (a,Q) {
     }
 
     COLLADA.logError = function(msg) {
+        /*
         if (console && console.logError) console.logError(msg)
-        else if (console && console.error) console.error(msg)
+        else
+            */
+         if (console && console.error) console.error(msg)
         else COLLADA.log('ERROR '+msg);
+    }
+
+    COLLADA.logWarning = function(msg) {
+        if (console && console.warn) console.warn(msg);
+        else COLLADA.log('WARN '+msg);
+
     }
 
     Element.prototype.getAttribute = function(attr) {
@@ -358,7 +367,7 @@ define(["glmatrixExt",'q'], function (a,Q) {
 
                     if (this.onload) this.images[init_from].onload = this.onload;
                     this.images[init_from].onerror = function () {
-                        COLLADA.logError('Could not load "'+imagePath+'"');
+                        COLLADA.logWarning('Could not load "'+imagePath+'"');
                     }
                     this.images[init_from].src = uri;
                 }
