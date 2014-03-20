@@ -1262,13 +1262,16 @@ if (!window.performance || !window.performance.now) {
             console.error("REMIIIIII affiche moi le model: "+node.attr("id") +" :-)")
         }
         function preview(node){
-            var gitHtml = $('<div id="dialog"><iframe id="myIframe" src="'+node.attr("previewuri") + '" style="height:100% !important; width:100% !important; border:0px;"></div>');
+            var gitHtml = $('<div id="dialog"><iframe id="myIframe" src="" style="height:100% !important; width:100% !important; border:0px;"></div>');
             gitPanel = $('body').append(gitHtml);
             $("#dialog").dialog({
                 title: node.attr('name'),
                 autoOpen: true,
                 width: '600',
                 height: '500',
+                open: function (ev, ui) {
+                    $('#myIframe').attr('src',node.attr("previewuri"));
+                }
                 close: function(){
                     gitHtml.remove();
                 }
