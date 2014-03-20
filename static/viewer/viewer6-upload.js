@@ -101,8 +101,8 @@ define(['jquerymin','rest3d','gltf','collada','viewer'], function ($,rest3d,glTF
                                         gitPanel = $('body').append(gitHtml);
                                         $("#dialog").dialog({
                                             autoOpen: true,
-                                            width: 800,
-                                            height: 600,
+                                            width: '600',
+                                            height: '500',
                                             open: function (ev, ui) {
                                                 $('#myIframe').attr('src', '/viewer/easy-viewer.html?file=/rest3d/upload/'+decodeURIComponent(file.name));
                                             }
@@ -142,8 +142,8 @@ define(['jquerymin','rest3d','gltf','collada','viewer'], function ($,rest3d,glTF
                             gitPanel = $('body').append(gitHtml);
                             $("#dialog").dialog({
                                 autoOpen: true,
-                                width: 800,
-                                height: 600,
+                                width: '600',
+                                height: '500',
                                 open: function (ev, ui) {
                                     $('#myIframe').attr('src', '/viewer/easy-viewer.html?file='+url);
                                 }//

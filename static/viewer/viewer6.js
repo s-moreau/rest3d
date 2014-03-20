@@ -621,8 +621,8 @@ if (!window.performance || !window.performance.now) {
             gitPanel = $('body').append(gitHtml);
             $("#dialog").dialog({
                 autoOpen: true,
-                width: 800,
-                height: 600,
+                width: '600',
+                height: '500',
                 open: function (ev, ui) {
                     $('#myIframe').attr('src', "http://rest3d.wordpress.com/");
                 }
@@ -705,8 +705,8 @@ if (!window.performance || !window.performance.now) {
             gitPanel = $('body').append(gitHtml);
             $("#dialog").dialog({
                 autoOpen: true,
-                width: 800,
-                height: 600,
+                width: 600,
+                height: 500,
                 open: function (ev, ui) {
                     $('#myIframe').attr('src', url);
                 }

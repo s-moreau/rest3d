@@ -744,3 +744,7 @@ right: 34px !important;
 #settings ul li a {
 width: 90% !important;
 }
+
+#vakata-contextmenu{
+    font-family: Trebuchet MS,Tahoma,Verdana,Arial,sans-serif !important;
+}
