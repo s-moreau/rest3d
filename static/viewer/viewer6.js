@@ -1281,6 +1281,11 @@ if (!window.performance || !window.performance.now) {
                 }
             }
             html += '</ul>';
+            GUI.notification({
+                title: "Upload "+node.data,
+                text: html,
+                type: "notice"
+            })
             rest3d.urlUpload(uri,call);
         }
         function preview(node){
