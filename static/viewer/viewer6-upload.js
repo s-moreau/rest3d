@@ -89,10 +89,10 @@ define(['jquerymin','rest3d','gltf','collada','viewer'], function ($,rest3d,glTF
                                 var ext = url.match(/\.[^.]+$/);
                                 if(ext==".json"){
                                     var $dialog = $("<button>Launch</button>").on("click",function(){
-                                        pleaseWait(true);
+                                        window.pleaseWait(true);
                                         glTF.load(url, viewer.parse_gltf).then(
                                             function(flag){
-                                                  pleaseWait(false);
+                                                  window.pleaseWait(false);
                                                   window.notif(url);
                                             })
                                     });
@@ -129,10 +129,10 @@ define(['jquerymin','rest3d','gltf','collada','viewer'], function ($,rest3d,glTF
                     if(ext[0]==".dae"){
                         var url =  '/rest3d/upload/'+decodeURIComponent(file.name);//
                         var $dialog = $("<button>Launch</button>").on("click",function(){
-                            pleaseWait(true);
+                            window.pleaseWait(true);
                             COLLADA.load(url, viewer.parse_dae).then(
                             function(flag){
-                                  pleaseWait(false);
+                                  window.pleaseWait(false);
                                   window.notif(url);
                             })
                         })
@@ -191,10 +191,6 @@ define(['jquerymin','rest3d','gltf','collada','viewer'], function ($,rest3d,glTF
                         .replaceWith($node)
                         .prop("id","nodeClose");
                     GUI.addIcon($node, "ui-icon-check", "", "before");
-                    GUI.addTooltip({
-                        parent: $node,
-                        content: "Convert",
-                    })
                     $node.parent().parent().show().find("button").show();
                 });
             }).on('fileuploadfail', function (e, data) {

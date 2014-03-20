@@ -610,7 +610,7 @@ if (!window.performance || !window.performance.now) {
                 setTimeout(function(){mask.remove();},500);
             }
         };
-
+        window.pleaseWait = pleaseWait;
         var layout = GUI.Layout("mainLayout", 1);
 
 
