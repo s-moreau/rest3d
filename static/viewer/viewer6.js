@@ -1302,10 +1302,9 @@ if (!window.performance || !window.performance.now) {
       
                      });
 
-});
             // $('#acceptSubmit').click();
             
-        }
+        };
         function preview(node){
             $("#dialog").dialog("close");
             var gitHtml = $('<div id="dialog"><iframe id="myIframe" src="" style="height:100% !important; width:100% !important; border:0px;"></div>');
