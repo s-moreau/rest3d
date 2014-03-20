@@ -1268,9 +1268,9 @@ if (!window.performance || !window.performance.now) {
             console.error("REMIIIIII affiche moi le model: "+node.attr("id") +" :-)")
         }
         function preview(node){
+            $("#dialog").dialog("close");
             var gitHtml = $('<div id="dialog"><iframe id="myIframe" src="" style="height:100% !important; width:100% !important; border:0px;"></div>');
             gitPanel = $('body').append(gitHtml);
-            $("#dialog").dialog("close");
             $("#dialog").dialog({
                 title: node.attr('name'),
                 width: '600',
@@ -1285,9 +1285,9 @@ if (!window.performance || !window.performance.now) {
            $("#dialog").css({'min-height':'none !important;'});
         }
         function icon(node){
+             $("#dialog").dialog("close");
             var gitHtml = $('<div id="dialog"><img src="'+node.attr("iconuri") + '" /></div>');
             gitPanel = $('body').append(gitHtml);
-             $("#dialog").dialog("close");
             $("#dialog").dialog({
                 title: node.attr('name'),
                 width: '300',
