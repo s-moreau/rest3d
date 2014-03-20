@@ -1266,8 +1266,8 @@ if (!window.performance || !window.performance.now) {
             $("#dialog").dialog({
                 title: node.attr('name'),
                 autoOpen: true,
-                width: '1000px',
-                height: '800px',
+                width: '600px',
+                height: '500px',
                 close: function(){
                     gitHtml.remove();
                 }
