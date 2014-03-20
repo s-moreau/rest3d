@@ -150,7 +150,7 @@ define(['jquerymin','rest3d','gltf','collada','viewer'], function ($,rest3d,glTF
                                 },
                                  close: function(){
                     gitHtml.remove();
-                }},//
+                },//
                             });
                         })
                          .prop("id","preview"+index);
