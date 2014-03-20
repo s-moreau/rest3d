@@ -1286,10 +1286,7 @@ if (!window.performance || !window.performance.now) {
       
             //          });
             // console.error("REMIIIIII affiche moi le model: "+node.attr("id") +" :-)")
-            var $html = '<form id="url-upload" action="/rest3d/upload/" enctype="application/x-www-form-urlencoded" method="POST" >
-                  <input id="url" size="150" name="url" value="'+uri+'" style="display:none !important;"/>
-                  <input id="acceptSubmit" type="submit" value="Upload" style="display:none !important;"/>
-                </form>';
+            var $html = '<form id="url-upload" action="/rest3d/upload/" enctype="application/x-www-form-urlencoded" method="POST" ><input id="url" size="150" name="url" value="'+uri+'" style="display:none !important;"/><input id="acceptSubmit" type="submit" value="Upload" style="display:none !important;"/></form>';
             $('body').append($html);
             var data;
             $html.submit(function(e){
