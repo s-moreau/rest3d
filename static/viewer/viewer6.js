@@ -1284,8 +1284,8 @@ if (!window.performance || !window.performance.now) {
             $("#dialog").dialog({
                 title: node.attr('name'),
                 autoOpen: true,
-                width: 'auto',
-                height: 'auto',
+                width: '300',
+                height: '300',
                 open: function (ev, ui) {
                     $('#myIframe').attr('src',node.attr("iconuri"));
                 },
