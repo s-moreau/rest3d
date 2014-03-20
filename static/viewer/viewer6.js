@@ -1107,8 +1107,8 @@ if (!window.performance || !window.performance.now) {
                 if(viewer.pickName[id]!="undefined"&&viewer.pickName[id]!=null){
                         if (!viewer.channel.selected) viewer.channel.selected = {};
                         if (viewer.channel.selected[id]) {
-                            // delete viewer.channel.selected[id];
-                            // window.fl4reStatus("",$("#mainLayout-south"),"selected "+viewer.pickName[Object.keys(viewer.channel.selected)[0]]);
+                            delete viewer.channel.selected[id];
+                            window.fl4reStatus("",$("#mainLayout-south"),"selected "+viewer.pickName[Object.keys(viewer.channel.selected)[0]]);
                         } else {
                             viewer.channel.selected[id] = true;
                             window.fl4reStatus("",$("#mainLayout-south"),"selected "+viewer.pickName[id]);
@@ -2042,8 +2042,8 @@ if (!window.performance || !window.performance.now) {
                     if(viewer.pickName[id]!="undefined"&&viewer.pickName[id]!=null){
                         if (!viewer.channel.selected) viewer.channel.selected = {};
                         if (viewer.channel.selected[id]) {
-                            // delete viewer.channel.selected[id];
-                            // window.fl4reStatus("",$("#mainLayout-south"),"selected "+viewer.pickName[Object.keys(viewer.channel.selected)[0]]);
+                            delete viewer.channel.selected[id];
+                            window.fl4reStatus("",$("#mainLayout-south"),"selected "+viewer.pickName[Object.keys(viewer.channel.selected)[0]]);
                         } else {
                             var realId = viewer.pickName[id].split("#").pop();
                             realId = realId.split("[")[0];
