@@ -2104,7 +2104,7 @@ if (!window.performance || !window.performance.now) {
                         }  
                     } else{ 
                         window.fl4reStatus("READY",$("#mainLayout-south"));
-                        treeScene.Tree.jstree("deselect_all");
+                        if(treeScene){treeScene.Tree.jstree("deselect_all");}
                         delete viewer.channel.selected;
                     }
                     viewer.draw();
