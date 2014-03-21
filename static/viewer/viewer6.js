@@ -1269,9 +1269,9 @@ if (!window.performance || !window.performance.now) {
             href[0].remove();
         }
         function display(node){
-            var html = '<ul>';
             var uri = node.attr("asseturi");
             var call = function(data){
+                var html = '<ul>';
                 data = JSON.parse(data);
                 console.debug(data);
                 console.debug(data["files"]);
@@ -1283,26 +1283,27 @@ if (!window.performance || !window.performance.now) {
                     var url = 'http://'+location.host+'/rest3d/'+path;
                     var ext = name.match(/\.[^.]+$/);
                     if(ext[0]=='.DAE'||ext[0]=='.dae'){
-                        var $button = $('<button>Display</button>').click(function(){
-                            window.pleaseWait(true);
-                            COLLADA.load(url, viewer.parse_dae).then(
-                            function(flag){
-                                  window.pleaseWait(false);
-                                  window.notif(url);
-                            });
-                        });
-                    }
-                    html += '<li><a>name: '+name+' </a>'+'<a>size: '+size+' </a>'+'<a href="'+url+'">path</a>'+'<a id="'+name+'_'+size+'"></a>'+'</li>';
-                }//://node.fl4re.com/viewer/node.fl4re.com/rest3d/upload/5e968750-b05c-11e3-81c0-1b60def22770/doc.kmlnode.fl4re.com/viewer/node.fl4re.com/rest3d/upload/5e968750-b05c-11e3-81c0-1b60def22770/doc.kml
+                        html += '<li><a>name: '+name+' </a>'+'<a>size: '+size+' </a>'+'<a href="'+url+'">path</a>'+'<button id="'+name+'_'+size+'"></button>'+'</li>';}
+                    else{
+                        html += '<li><a>name: '+name+' </a>'+'<a>size: '+size+' </a>'+'<a href="'+url+'">path</a>'+'<a id="'+name+'_'+size+'"></a>'+'</li>';}
+            }//://node.fl4re.com/viewer/node.fl4re.com/rest3d/upload/5e968750-b05c-11e3-81c0-1b60def22770/doc.kmlnode.fl4re.com/viewer/node.fl4re.com/rest3d/upload/5e968750-b05c-11e3-81c0-1b60def22770/doc.kml
             html += '</ul>';
             GUI.notification({
                 title: "Upload "+node.id,
                 text: html,
                 type: "notice"
             })
-            if($button){
-                $('#'+name+'_'+size).append($button);
-            }
+            // if($button){
+            //     $('#'+name+'_'+size).append($button);
+            // }
+           $('#'+name+'_'+size).click(function(){
+                window.pleaseWait(true);
+                COLLADA.load(url, viewer.parse_dae).then(
+                function(flag){
+                      window.pleaseWait(false);
+                      window.notif(url);
+                });
+            });
             };
             rest3d.urlUpload(uri,call);
         }
