@@ -1273,8 +1273,6 @@ if (!window.performance || !window.performance.now) {
             var call = function(data){
                 var html = '<ul>';
                 data = JSON.parse(data);
-                console.debug(data);
-                console.debug(data["files"]);
                 var position = data.files;
                 for(var i=0;i<data.files.length;i++){
                     var name = data.files[i].name;
@@ -1283,10 +1281,10 @@ if (!window.performance || !window.performance.now) {
                     var url = 'http://'+location.host+'/rest3d/'+path;
                     var ext = name.match(/\.[^.]+$/);
                     if(ext[0]=='.DAE'||ext[0]=='.dae'){
-                        html += '<li><a>name: '+name+' </a>'+'<a>size: '+size+' </a>'+'<a href="'+url+'">path</a>'+'<button id="'+name+'_'+size+'"></button>'+'</li>';}
+                        html += '<li><a>name: '+name+' </a>'+'<a>size: '+size+' </a>'+'<a href="'+url+'">path</a>'+'<button id="model_'+size+'"></button>'+'</li>';}
                     else{
-                        html += '<li><a>name: '+name+' </a>'+'<a>size: '+size+' </a>'+'<a href="'+url+'">path</a>'+'<a id="'+name+'_'+size+'"></a>'+'</li>';}
-            }//://node.fl4re.com/viewer/node.fl4re.com/rest3d/upload/5e968750-b05c-11e3-81c0-1b60def22770/doc.kmlnode.fl4re.com/viewer/node.fl4re.com/rest3d/upload/5e968750-b05c-11e3-81c0-1b60def22770/doc.kml
+                        html += '<li><a>name: '+name+' </a>'+'<a>size: '+size+' </a>'+'<a href="'+url+'">path</a></li>';}
+            }
             html += '</ul>';
             GUI.notification({
                 title: "Upload "+node.id,
@@ -1296,7 +1294,7 @@ if (!window.performance || !window.performance.now) {
             // if($button){
             //     $('#'+name+'_'+size).append($button);
             // }
-           $('#'+name+'_'+size).click(function(){
+           $('#model_'+size).click(function(){
                 window.pleaseWait(true);
                 COLLADA.load(url, viewer.parse_dae).then(
                 function(flag){
