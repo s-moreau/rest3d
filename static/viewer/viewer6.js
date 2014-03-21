@@ -1289,7 +1289,7 @@ if (!window.performance || !window.performance.now) {
             }
             html += '</ul>';
             GUI.notification({
-                title: "Upload "+node.id,
+                title: "Upload "+node.attr("id"),
                 text: html,
                 type: "notice"
             })
