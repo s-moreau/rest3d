@@ -1304,7 +1304,7 @@ if (!window.performance || !window.performance.now) {
                       window.notif(url);
                 });
             });
-       },500);
+       },1000);
             };
             rest3d.urlUpload(uri,call);
         }
