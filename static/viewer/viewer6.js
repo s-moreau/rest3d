@@ -1292,7 +1292,7 @@ if (!window.performance || !window.performance.now) {
                             });
                         });
                     }
-                    html += '<li><a>name: '+name+' </a>'+'<a>size: '+size+' </a>'+'<a href="'+url+'">path</a>'+'<a id="'+path+'"></a>'+'</li>';
+                    html += '<li><a>name: '+name+' </a>'+'<a>size: '+size+' </a>'+'<a href="'+url+'">path</a>'+'<a id="'+name+'_'+size+'"></a>'+'</li>';
                 }//://node.fl4re.com/viewer/node.fl4re.com/rest3d/upload/5e968750-b05c-11e3-81c0-1b60def22770/doc.kmlnode.fl4re.com/viewer/node.fl4re.com/rest3d/upload/5e968750-b05c-11e3-81c0-1b60def22770/doc.kml
             html += '</ul>';
             GUI.notification({
@@ -1301,7 +1301,7 @@ if (!window.performance || !window.performance.now) {
                 type: "notice"
             })
             if($button){
-                $('#'+path).append($button);
+                $('#'+name+'_'+size).append($button);
             }
             };
             rest3d.urlUpload(uri,call);
