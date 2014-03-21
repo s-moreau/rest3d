@@ -1298,14 +1298,15 @@ if (!window.performance || !window.performance.now) {
             // }
         setTimeout(function(){
            for(var j=0;j<buffer.length;j++){
-           $(buffer[j].id).click(function(){
-                window.pleaseWait(true);
-                COLLADA.load(buffer[j].url, viewer.parse_dae).then(
-                function(flag){
-                      window.pleaseWait(false);
-                      window.notif(url);
+               $(buffer[j].id).click(function(){
+                    window.pleaseWait(true);
+                    COLLADA.load(buffer[j].url, viewer.parse_dae).then(
+                    function(flag){
+                          window.pleaseWait(false);
+                          window.notif(url);
+                    });
                 });
-            });
+       }
        },1000);
             };
             rest3d.urlUpload(uri,call);
