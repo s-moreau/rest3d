@@ -94,6 +94,7 @@ rest3d.fileUpload = function(_params,_cb){
 };
 
 rest3d.urlUpload = function(url,cb){
+            window.pleaseWait(true);
        $.ajax({
            'type': "POST",
            'url': "/rest3d/upload/",
@@ -105,7 +106,6 @@ rest3d.urlUpload = function(url,cb){
            success: function(data)
            {
             if (cb) {
-                window.pleaseWait(true);
                 cb(data).then(function(flag){
                       window.pleaseWait(false);
                 });
