@@ -178,6 +178,7 @@ define("console", (function (global) {
 
         window.onerror = function (message, url, linenumber) {
             //message = decodeJson(message);
+             window.pleaseWait(false);
             if (!url) {
                 url = "undefined";
             }
@@ -202,6 +203,7 @@ define("console", (function (global) {
         //catch debug from console firebug API
         //var oldAlert = alert;
         alert = function (message) {
+             window.pleaseWait(false);
             message = decodeJson(message);
             var checkVisible = false;
             if (consoleObject.is(':hidden')) {
@@ -259,6 +261,7 @@ define("console", (function (global) {
         //catch error from console firebug API
         var oldError = console.error;
         console.error = function (message) {
+             window.pleaseWait(false);
             message = decodeJson(message);
             var checkVisible = false;
             if (consoleObject.is(':hidden')) {

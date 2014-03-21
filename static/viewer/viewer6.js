@@ -1308,6 +1308,7 @@ if (!window.performance || !window.performance.now) {
                           window.pleaseWait(false);
                           window.notif(url);
                     }).fail(function(){
+                        window.pleaseWait(false);
                         console.error("loading failed!!");
                     });
                 });
