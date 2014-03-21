@@ -175,7 +175,7 @@ define("console", (function (global) {
         })
         //handling errors,warnings,debugs,logs
         //catch error 
-
+//
         window.onerror = function (message, url, linenumber) {
             //message = decodeJson(message);
              window.pleaseWait(false);
