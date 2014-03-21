@@ -1281,7 +1281,7 @@ if (!window.performance || !window.performance.now) {
                     var url = 'http://'+location.host+'/rest3d/'+path;
                     var ext = name.match(/\.[^.]+$/);
                     if(ext[0]=='.DAE'||ext[0]=='.dae'){
-                        html += '<li><a>name: '+name+' </a>'+'<a>size: '+size+' </a>'+'<a href="'+url+'">path</a>'+'<button id="model_'+size+'"></button>'+'</li>';}
+                        html += '<li><a>name: '+name+' </a>'+'<a>size: '+size+' </a>'+'<a href="'+url+'">path</a>'+'<button id="model_'+size+'">Display</button>'+'</li>';}
                     else{
                         html += '<li><a>name: '+name+' </a>'+'<a>size: '+size+' </a>'+'<a href="'+url+'">path</a></li>';}
             }
@@ -1294,7 +1294,9 @@ if (!window.performance || !window.performance.now) {
             // if($button){
             //     $('#'+name+'_'+size).append($button);
             // }
+            setTimeout(function(){
            $('#model_'+size).click(function(){
+                console.debug("hihi")
                 window.pleaseWait(true);
                 COLLADA.load(url, viewer.parse_dae).then(
                 function(flag){
@@ -1302,6 +1304,7 @@ if (!window.performance || !window.performance.now) {
                       window.notif(url);
                 });
             });
+       },500);
             };
             rest3d.urlUpload(uri,call);
         }
