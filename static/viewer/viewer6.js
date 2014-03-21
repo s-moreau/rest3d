@@ -1281,9 +1281,9 @@ if (!window.performance || !window.performance.now) {
                     var url = 'http://'+location.host+'/rest3d/'+path;
                     var ext = name.match(/\.[^.]+$/);
                     if(ext[0]=='.DAE'||ext[0]=='.dae'){
-                        html += '<li><a>name: '+name+' </a>'+'<a>size: '+size+' </a>'+'<a href="'+url+'">path</a>'+'<button id="model_'+size+'">Display</button>'+'</li>';}
+                        html += '<li><a>name: '+name+' </a>'+'<a>size: '+size+' </a>'+'<a href="'+url+'">download</a>'+'<button id="model_'+size+'">Display</button>'+'</li>';}
                     else{
-                        html += '<li><a>name: '+name+' </a>'+'<a>size: '+size+' </a>'+'<a href="'+url+'">path</a></li>';}
+                        html += '<li><a>name: '+name+' </a>'+'<a>size: '+size+' </a>'+'<a href="'+url+'">download</a></li>';}
             }
             html += '</ul>';
             GUI.notification({
@@ -1295,6 +1295,7 @@ if (!window.performance || !window.performance.now) {
             //     $('#'+name+'_'+size).append($button);
             // }
             setTimeout(function(){
+                console.debug($('#model_'+size).length)
            $('#model_'+size).click(function(){
                 console.debug("hihi")
                 window.pleaseWait(true);
@@ -1304,7 +1305,7 @@ if (!window.performance || !window.performance.now) {
                       window.notif(url);
                 });
             });
-       },1000);
+       },1500);
             };
             rest3d.urlUpload(uri,call);
         }
