@@ -1282,8 +1282,8 @@ if (!window.performance || !window.performance.now) {
                     var url = 'http://'+location.host+'/rest3d/'+path;
                     var ext = name.match(/\.[^.]+$/);
                     if(ext[0]=='.DAE'||ext[0]=='.dae'){
-                        html += '<li><a>name: '+name+' </a>'+'<a>size: '+size+' </a>'+'<a href="'+url+'">download</a>'+'<button id="model_'+size+'">Display</button>'+'</li>';}
-                        buffer.push({'id':'#model_'+size,'url':url});
+                        html += '<li><a>name: '+name+' </a>'+'<a>size: '+size+' </a>'+'<a href="'+url+'">download</a>'+'<button id="model_'+size+'">Display</button>'+'</li>';
+                        buffer.push({'id':'#model_'+size,'url':url});}
                     else{
                         html += '<li><a>name: '+name+' </a>'+'<a>size: '+size+' </a>'+'<a href="'+url+'">download</a></li>';}
             }
