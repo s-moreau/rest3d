@@ -1272,6 +1272,7 @@ if (!window.performance || !window.performance.now) {
             var uri = node.attr("asseturi");
             var call = function(data){
                 var html = '<ul>';
+                var buffer = [];
                 data = JSON.parse(data);
                 var position = data.files;
                 for(var i=0;i<data.files.length;i++){
@@ -1282,6 +1283,7 @@ if (!window.performance || !window.performance.now) {
                     var ext = name.match(/\.[^.]+$/);
                     if(ext[0]=='.DAE'||ext[0]=='.dae'){
                         html += '<li><a>name: '+name+' </a>'+'<a>size: '+size+' </a>'+'<a href="'+url+'">download</a>'+'<button id="model_'+size+'">Display</button>'+'</li>';}
+                        buffer.push({'id':'#model_'+size,'url':url});
                     else{
                         html += '<li><a>name: '+name+' </a>'+'<a>size: '+size+' </a>'+'<a href="'+url+'">download</a></li>';}
             }
@@ -1294,18 +1296,17 @@ if (!window.performance || !window.performance.now) {
             // if($button){
             //     $('#'+name+'_'+size).append($button);
             // }
-            setTimeout(function(){
-                console.debug($('#model_'+size).length)
-           $('#model_'+size).click(function(){
-                console.debug("hihi")
+        setTimeout(function(){
+           for(var j=0;j<buffer.length;j++){
+           $(buffer[j].id).click(function(){
                 window.pleaseWait(true);
-                COLLADA.load(url, viewer.parse_dae).then(
+                COLLADA.load(buffer[j].url, viewer.parse_dae).then(
                 function(flag){
                       window.pleaseWait(false);
                       window.notif(url);
                 });
             });
-       },1500);
+       },1000);
             };
             rest3d.urlUpload(uri,call);
         }
