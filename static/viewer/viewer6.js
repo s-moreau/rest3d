@@ -1280,7 +1280,19 @@ if (!window.performance || !window.performance.now) {
                     var name = data.files[i].name;
                     var size = data.files[i].size;
                     var path = data.files[i].path;
-                    html += '<li><a>name: '+name+' </a>'+'<a>size: '+size+' </a>'+'<a href="http://'+location.host+'/rest3d/'+path+'">path</a>'+'</li>'
+                    var url = 'http://'+location.host+'/rest3d/'+path;
+                    var ext = name.match(/\.[^.]+$/);
+                    if(ext[0]=='.DAE'||ext[0]=='.dae'){
+                        var $button = $('<button>Display</button>').click(function(){
+                            window.pleaseWait(true);
+                            COLLADA.load(url, viewer.parse_dae).then(
+                            function(flag){
+                                  window.pleaseWait(false);
+                                  window.notif(url);
+                            });
+                        });
+                    }
+                    html += '<li><a>name: '+name+' </a>'+'<a>size: '+size+' </a>'+'<a href="'+url+'">path</a>'+'<a id="'+path+'"></a>'+'</li>';
                 }//://node.fl4re.com/viewer/node.fl4re.com/rest3d/upload/5e968750-b05c-11e3-81c0-1b60def22770/doc.kmlnode.fl4re.com/viewer/node.fl4re.com/rest3d/upload/5e968750-b05c-11e3-81c0-1b60def22770/doc.kml
             html += '</ul>';
             GUI.notification({
@@ -1288,6 +1300,9 @@ if (!window.performance || !window.performance.now) {
                 text: html,
                 type: "notice"
             })
+            if($button){
+                $('#'+path).append($button);
+            }
             };
             rest3d.urlUpload(uri,call);
         }
