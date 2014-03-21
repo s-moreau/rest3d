@@ -104,7 +104,12 @@ rest3d.urlUpload = function(url,cb){
            'data':{'url':url},
            success: function(data)
            {
-            if (cb) cb(data);
+            if (cb) {
+                window.pleaseWait(true);
+                cb(data).then(function(flag){
+                      window.pleaseWait(false);
+                });
+            }
            },
          });
 }

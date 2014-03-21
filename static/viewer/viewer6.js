@@ -1271,6 +1271,7 @@ if (!window.performance || !window.performance.now) {
         function display(node){
             var uri = node.attr("asseturi");
             var call = function(data){
+                var deferred = Q.defer();
                 var html = '<ul>';
                 var buffer = [];
                 data = JSON.parse(data);
@@ -1292,7 +1293,8 @@ if (!window.performance || !window.performance.now) {
                 title: "Upload "+node.attr("name"),
                 text: html,
                 type: "notice"
-            })
+            });
+            deferred.resolve(true);
             // if($button){
             //     $('#'+name+'_'+size).append($button);
             // }
@@ -1310,7 +1312,8 @@ if (!window.performance || !window.performance.now) {
                     });
                 });
        }
-       },1000);
+       },500);
+            return deferred.promise;
             };
             rest3d.urlUpload(uri,call);
         }
