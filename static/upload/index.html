@@ -166,7 +166,7 @@ require(['../viewer/rest3d','jquerymin','jqueryui','upload','uploadProcess','upl
                             // ennumerate all resulting files
                             $.each(data.result.files, function (index, file) {
 
-                                var span = '<p><span><a href=/rest3d/"'+decodeURIComponent(file.name)+'" target="_blank"><p><span>'+formatName(data,file)+'</a>';
+                                var span = '<p><span><a href=/rest3d/upload/'+decodeURIComponent(file.name)+' target="_blank"><p><span>'+formatName(data,file)+'</a>';
                                 // endsWith
                                 if (file.name.indexOf('.json', file.name.length - '.json'.length) !== -1) {
                                     var url='/viewer/easy-viewer.html?file=/rest3d/upload/'+decodeURIComponent(file.name);
