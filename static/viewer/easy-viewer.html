@@ -70,6 +70,7 @@ require.config({
         viewer: '../viewer/viewer6',
         uploadViewer: '../viewer/viewer6-upload',
         q: '../deps/q',
+        fpsCounter: '../viewer/fpscounter'
     },
     shim: {
         'codemirror':{
@@ -184,7 +185,7 @@ require.config({
     },
 })
 
-require(['viewer'], function(viewer) { 
+require(['viewer','fpscounter'], function(viewer, FPSCounter) { 
     viewer.easyINIT(); 
 });
 

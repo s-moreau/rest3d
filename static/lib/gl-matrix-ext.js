@@ -145,9 +145,9 @@ vec3.getTranslationFromMat4 = function(out, mat)
 mat4.fromTrs = function (out, trs) {
     
     // Quaternion math
-    var q = trs.localRotation;
-    var s = trs.localScale;
-    var v = trs.localTranslation;
+    var q = trs.rotation;
+    var s = trs.scale;
+    var v = trs.translation;
 
     var x = q[0], y = q[1], z = q[2], w = q[3],
         x2 = x + x,
@@ -431,76 +431,89 @@ aabb.intersect = function(_bbox, _origin, _direction) {
  window.trs = {};
 
  trs.create = function () {
-        var out={};
-        out.localTranslation   = vec3.create();
-        out.localRotation      = quat.create();
-        out.localScale         = vec3.fromValues(1., 1., 1.);
-        return out;
-    };
+    var out={};
+    out.translation   = vec3.create();
+    out.rotation      = quat.create();
+    out.scale         = vec3.fromValues(1., 1., 1.);
+    return out;
+  };
 
-    trs.fromValues = function(t,r,s){
-        var out={};
-        out.localTranslation   = vec3.clone(t);
-        out.localRotation      = quat.clone(r);
-        out.localScale         = vec3.clone(s);
-        return out;
+  trs.clone = function(_in) {
+     var out={};
+     out.translation = vec3.clone(_in.translation);
+     out.rotation = quat.clone(_in.rotation);
+     out.scale = vec3.clone(_in.scale);
 
-    }
+  };
 
-    trs.fromMat4 = function(out,_mat) {
-        vec3.getTranslationFromMat4(out.localTranslation,_mat);
-        quat.fromMat4(out.localRotation,_mat);
-        vec3.getScaleFromMat4(out.localScale,_mat);
-        return out;
-     };
+  trs.copy = function(_out, _in){
+    vec3.copy(_out.translation, _in.translation);
+    quat.copy(_out.rotation, _in.rotation);
+    vec3.copy(_out.scale, _in.scale);
+  };
 
-    trs.fromPrs = function(_out,_position,_rotation,_scale) {
-        vec3.copy(_out.localTranslation,_position);
-        quat.copy(_out.localRotation, _rotation);
-        vec3.copy(_out.localScale, _scale);
+  trs.fromValues = function(t,r,s){
+      var out={};
+      out.translation   = vec3.clone(t);
+      out.rotation      = quat.clone(r);
+      out.scale         = vec3.clone(s);
+      return out;
 
-        return _out;
-    };
+  }
+
+  trs.fromMat4 = function(_out,_mat) {
+      vec3.getTranslationFromMat4(_out.translation,_mat);
+      quat.fromMat4(_out.rotation,_mat);
+      vec3.getScaleFromMat4(_out.scale,_mat);
+      return _out;
+   };
+
+  trs.fromPrs = function(_out,_position,_rotation,_scale) {
+      vec3.copy(_out.translation,_position);
+      quat.copy(_out.rotation, _rotation);
+      vec3.copy(_out.scale, _scale);
+
+      return _out;
+  };
 
 
+  window.euler = {};
+  euler.create = function(){
+      out = vec3.create();
+      return out;
+  };
+  euler.fromQuat = function(_out,_quat){
+      // ZXY
+      var qx=_quat[0];
+      var qy=_quat[1];
+      var qz=_quat[2];
+      var qw=_quat[3];
+      var sqx = qx * qx;
+      var sqy = qy * qy;
+      var sqz = qz * qz;
+      var sqw = qw * qw;
+      vec3.set(_out,
+               Math.asin(clamp( 2. * ( qx * qw + qy * qz ),-1., 1.)),
+               Math.atan2( 2. * ( qy * qw - qz * qx ), ( sqw - sqx - sqy + sqz )),
+               Math.atan2( 2. * ( qz * qw - qx * qy ), ( sqw - sqx + sqy - sqz )));
+      return _out;
+  };
+  quat.fromEuler = function(_out,_euler){
+      // ZXY
+      var c1 = Math.cos(_euler[0] / 2. );
+      var c2 = Math.cos(_euler[1] / 2. );
+      var c3 = Math.cos(_euler[2] / 2. );
+      var s1 = Math.sin(_euler[0] / 2. );
+      var s2 = Math.sin(_euler[1] / 2. );
+      var s3 = Math.sin(_euler[2] / 2. );
+      quat.set(_out,
+               s1 * c2 * c3 - c1 * s2 * s3,
+               c1 * s2 * c3 + s1 * c2 * s3,
+               c1 * c2 * s3 + s1 * s2 * c3,
+               c1 * c2 * c3 - s1 * s2 * s3);
 
-    window.euler = {};
-    euler.create = function(){
-        out = vec3.create();
-        return out;
-    };
-    euler.fromQuat = function(_out,_quat){
-        // ZXY
-        var qx=_quat[0];
-        var qy=_quat[1];
-        var qz=_quat[2];
-        var qw=_quat[3];
-        var sqx = qx * qx;
-        var sqy = qy * qy;
-        var sqz = qz * qz;
-        var sqw = qw * qw;
-        vec3.set(_out,
-                 Math.asin(clamp( 2. * ( qx * qw + qy * qz ),-1., 1.)),
-                 Math.atan2( 2. * ( qy * qw - qz * qx ), ( sqw - sqx - sqy + sqz )),
-                 Math.atan2( 2. * ( qz * qw - qx * qy ), ( sqw - sqx + sqy - sqz )));
-        return _out;
-    };
-    quat.fromEuler = function(_out,_euler){
-        // ZXY
-        var c1 = Math.cos(_euler[0] / 2. );
-        var c2 = Math.cos(_euler[1] / 2. );
-        var c3 = Math.cos(_euler[2] / 2. );
-        var s1 = Math.sin(_euler[0] / 2. );
-        var s2 = Math.sin(_euler[1] / 2. );
-        var s3 = Math.sin(_euler[2] / 2. );
-        quat.set(_out,
-                 s1 * c2 * c3 - c1 * s2 * s3,
-                 c1 * s2 * c3 + s1 * c2 * s3,
-                 c1 * c2 * s3 + s1 * s2 * c3,
-                 c1 * c2 * c3 - s1 * s2 * s3);
-
-        return _out;
-    };
+      return _out;
+  };
 
 
 });

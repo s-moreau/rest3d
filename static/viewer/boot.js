@@ -36,6 +36,7 @@ require.config({
         viewer: '../viewer/viewer6',
         uploadViewer: '../viewer/viewer6-upload',
         q: '../deps/q',
+        fpsCounter: '../viewer/fpscounter'
     },
     shim: {
         'jqueryui':{
@@ -176,7 +177,7 @@ function loadStyle(){
 };
 
 loadStyle();
-require(['viewer'], function(viewer) { 
+require(['viewer','fpsCounter'], function(viewer, FPSCounter) { 
     viewer.INIT(); 
 });
 
