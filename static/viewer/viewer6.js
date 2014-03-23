@@ -2108,7 +2108,7 @@ define(['jquerymin', 'gui', 'console', 'gltf', 'collada', 'renderer', 'camera', 
         })
     }).width("90%");
 
-    GUI.button('cat', accordion.gltf, function () {
+    GUI.button('cat (do not use - work in progress)', accordion.gltf, function () {
       pleaseWait(true);
       var url = "/models/cat/20_cat_smooth_bake_channel.json";
       glTF.load(url, viewer.parse_gltf).then(
