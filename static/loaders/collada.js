@@ -206,10 +206,10 @@ define(['q','glmatrixExt'], function (Q) {
                 case 'perspective':
                     camera.projection = 'perspective';
 
-                    aspect_ratioXML = cameraXML.getChildrenByTagName('aspect_ratio')
-                    yfovXML = cameraXML.getChildrenByTagName('yfov')
-                    zfarXML = cameraXML.getChildrenByTagName('zfar')
-                    znearXML = cameraXML.getChildrenByTagName('znear')
+                    var aspect_ratioXML = cameraXML.getChildrenByTagName('aspect_ratio');
+                    var yfovXML = cameraXML.getChildrenByTagName('yfov');
+                    var zfarXML = cameraXML.getChildrenByTagName('zfar');
+                    var znearXML = cameraXML.getChildrenByTagName('znear');
 
                     // NOTE - COLLADA does not define default values for camera properties!
                     if (COLLADA._validate) {
@@ -505,7 +505,7 @@ define(['q','glmatrixExt'], function (Q) {
                         mat4.multiply(mat,mat,lookat);
                         break;
                     case 'matrix':
-                        cmat = mat4.transpose(new Float32Array(16),JSON.parse("["+child.textContent.trim().replace(/\s+/g,",")+"]"));
+                        var cmat = mat4.transpose(new Float32Array(16),JSON.parse("["+child.textContent.trim().replace(/\s+/g,",")+"]"));
                         mat4.multiply(mat,mat,cmat);
                         break;
                     case 'rotate':
@@ -702,7 +702,7 @@ define(['q','glmatrixExt'], function (Q) {
                 var instance_materials = bind_material.getElementsByTagName('instance_material');
                 geometry.materials=[];
                 for (var i=0; i<instance_materials.length;i++) {
-                    material={};
+                    var material={};
                     var instance_material = instance_materials[i];
                     material.symbol = instance_material.getAttribute('symbol');
                     material.target = instance_material.getAttribute('target').substring(1);
@@ -814,8 +814,8 @@ define(['q','glmatrixExt'], function (Q) {
                 }
             }
             var effectID = materialXML.getChildrenByTagName('instance_effect')[0].getAttribute('url').substring(1);
-            if (!this.effects[effectID]) effect=this.parse_effect(effectID);
-            material = {};
+            if (!this.effects[effectID]) var effect=this.parse_effect(effectID);
+            var material = {};
             material.name = materialXML.getAttribute('name');
             material.parameters = effect.parameters;
             this.materials[_matID] = material;
@@ -923,7 +923,7 @@ define(['q','glmatrixExt'], function (Q) {
                     // get all inputs for that triangle
                     triangle.inputs = {};
                     triangle.max_offset = 0;
-                    inputsXML = topoXML[i].getElementsByTagName('input');
+                    var inputsXML = topoXML[i].getElementsByTagName('input');
                     for (var j=0; j<inputsXML.length;j++){
 
 

@@ -247,7 +247,7 @@ define(['jquerymin', 'gui', 'console', 'gltf', 'collada', 'renderer', 'camera', 
     scene.endtime = window.performance.now();
 
     scenes.push(scene);
-    $('#loadtimer').text('load time=' + (scene.endtime - scene.starttime));
+    //$('#loadtimer').text('load time=' + (scene.endtime - scene.starttime));
     viewer.draw();
     if (viewer.onload)
       viewer.onload.call();
@@ -357,7 +357,7 @@ define(['jquerymin', 'gui', 'console', 'gltf', 'collada', 'renderer', 'camera', 
 
     scene.starttime = starttime;
     scene.endtime = window.performance.now();
-    $('#loadtimer').text('load time=' + (scene.endtime - scene.starttime));
+    //$('#loadtimer').html('load time=' + (scene.endtime - scene.starttime));
     scenes.push(scene);
     viewer.draw();
     if (viewer.onload)
@@ -481,8 +481,8 @@ define(['jquerymin', 'gui', 'console', 'gltf', 'collada', 'renderer', 'camera', 
     } 
 
     if (!pick) {
-      $('#zoom').text('currentZoom is ' + viewer.currentZoom);
-      $('#rot').text('currentRotation is ' + viewer.currentRotationX.toFixed(2) + ',' + viewer.currentRotationY.toFixed(2));
+      //$('#zoom').text('currentZoom is ' + viewer.currentZoom);
+      //$('#rot').text('currentRotation is ' + viewer.currentRotationX.toFixed(2) + ',' + viewer.currentRotationY.toFixed(2));
     }
 
     if (pick) {
