@@ -12,7 +12,6 @@
 /*jslint nomen: true, unparam: true */
 /*global define, window */
 
-define("uploadProcess", (function (global) {
     'use strict';
 
     var originalAdd = $.blueimp.fileupload.prototype.options.add;
@@ -146,7 +145,3 @@ define("uploadProcess", (function (global) {
         }
 
 });
-return function () {
-        return originalAdd;
-    };
-}(this)));

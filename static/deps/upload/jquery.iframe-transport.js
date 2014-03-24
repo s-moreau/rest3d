@@ -11,8 +11,6 @@
 
 /*jslint unparam: true, nomen: true */
 /*global define, window, document */
-
-define("uploadTransport", (function (global) {
     'use strict';
 
     // Helper variable to create unique names for the transport iframes:
@@ -193,8 +191,4 @@ define("uploadTransport", (function (global) {
         }
     });
 
-return function () {
-        return $;
-    };
-}(this)));
 

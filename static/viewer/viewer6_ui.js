@@ -1238,11 +1238,11 @@ if (!window.performance || !window.performance.now) {
         var upload = GUI.upload({parent:accordionUp.upload, id:"upModel", url:'/rest3d/upload'});
         upload.button.width("80%");
         upload.progress.progress_upModel.width("100%");
-        $.getScript("viewer6-upload.js").done(function( script, textStatus ) {
-            setViewer6Upload(upload,rest3d,viewer);
-          }).fail(function(err){
-            console.error("upload external script failed to load");
-          });
+        // $.getScript("viewer6-upload.js").done(function( script, textStatus ) {
+        setViewer6Upload($,upload,rest3d,viewer);
+          // }).fail(function(err){
+          //   console.error("upload external script failed to load");
+          // });
 
         jumpLine();
         GUI.label('welcome', "Load some sample models among those accordions:", renderMenu.render);

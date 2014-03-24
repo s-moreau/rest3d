@@ -4,7 +4,6 @@
  * Author: Stefan Petre www.eyecon.ro
  * 
  */
-define("eye", (function (global) {
 (function($){
 	var EYE = window.EYE = function() {
 		var _registered = {
@@ -33,7 +32,3 @@ define("eye", (function (global) {
 	}();
 	$(EYE.init);
 })(jQuery);
-return function () {
-        return global.EYE;
-    };
-}(this)));
