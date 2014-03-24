@@ -56,7 +56,7 @@
  * of your display but will stop rendering if your app is not
  * visible.
  */
-define("WebGLUtils", (function (global) {
+
 WebGLUtils = function() {
 
 /**
@@ -99,24 +99,36 @@ var OTHER_PROBLEM = '' +
  *     context from.
  * @param {WebGLContextCreationAttirbutes} opt_attribs Any
  *     creation attributes you want to pass in.
+ * @param {function:(msg)} opt_onError An function to call
+ *     if there is an error during creation.
  * @return {WebGLRenderingContext} The created context.
  */
-var setupWebGL = function(canvas, opt_attribs) {
-  function showLink(str) {
+var setupWebGL = function(canvas, opt_attribs, opt_onError) {
+  function handleCreationError(msg) {
     var container = canvas.parentNode;
     if (container) {
+      var str = window.WebGLRenderingContext ?
+           OTHER_PROBLEM :
+           GET_A_WEBGL_BROWSER;
+      if (msg) {
+        str += "<br/><br/>Status: " + msg;
+      }
       container.innerHTML = makeFailHTML(str);
     }
   };
 
-  if (!window.WebGLRenderingContext) {
-    showLink(GET_A_WEBGL_BROWSER);
-    return null;
-  }
+  opt_onError = opt_onError || handleCreationError;
 
+  if (canvas.addEventListener) {
+    canvas.addEventListener("webglcontextcreationerror", function(event) {
+          opt_onError(event.statusMessage);
+        }, false);
+  }
   var context = create3DContext(canvas, opt_attribs);
   if (!context) {
-    showLink(OTHER_PROBLEM);
+    if (!window.WebGLRenderingContext) {
+      opt_onError("");
+    }
   }
   return context;
 };
@@ -157,24 +169,7 @@ window.requestAnimFrame = (function() {
          window.oRequestAnimationFrame ||
          window.msRequestAnimationFrame ||
          function(/* function FrameRequestCallback */ callback, /* DOMElement Element */ element) {
-           return window.setTimeout(callback, 1000/60);
+           window.setTimeout(callback, 1000/60);
          };
 })();
-
-/**
- * Provides cancelAnimationFrame in a cross browser way.
- */
-window.cancelAnimFrame = (function() {
-  return window.cancelAnimationFrame ||
-         window.webkitCancelAnimationFrame ||
-         window.mozCancelAnimationFrame ||
-         window.oCancelAnimationFrame ||
-         window.msCancelAnimationFrame ||
-         window.clearTimeout;
-})();
-return function () {
-        return global.WebGLUtils;
-    };
-}(this)));
-
 

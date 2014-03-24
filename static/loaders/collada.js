@@ -25,8 +25,8 @@ THE SOFTWARE.
 
  COLLADA.js needs gl-matrix.js
 */
-
-define(["glmatrixExt",'q'], function (a,Q) {
+'use strict';
+define(['q','glmatrixExt'], function (Q) {
     
     var COLLADA = {};
 
