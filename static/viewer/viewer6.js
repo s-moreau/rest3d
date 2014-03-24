@@ -21,7 +21,7 @@ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.*/
-define(['jquerymin', 'gui', 'console', 'gltf', 'collada', 'renderer', 'camera', 'glmatrixExt', 'rest3d', 'uploadViewer', 'q'], function ($, GUI, CONSOLE, glTF, COLLADA, renderer, camera, mat3, rest3d, setViewer6Upload, Q) {
+define(['jquerymin', 'gui', 'console', 'gltf', 'collada', 'renderer', 'camera', 'glmatrixExt', 'rest3d', 'uploadViewer', 'q'], function ($, GUI, CONSOLE, glTF, COLLADA, RENDERER, camera, mat3, rest3d, setViewer6Upload, Q) {
   var viewer = {};
   var scenes = [];
   var animations = {};
@@ -117,7 +117,7 @@ define(['jquerymin', 'gui', 'console', 'gltf', 'collada', 'renderer', 'camera', 
             var vget = triangles.VERTEX;
             for (var i = 0; i < triangles.count * 3; ++i)
               ppush.apply(position, vget.call(triangles, i));
-            primitive.position = new Float32Array(position);
+            primitive.POSITION = new Float32Array(position);
           }
           if (triangles.NORMAL) {
             normal = []
@@ -125,7 +125,7 @@ define(['jquerymin', 'gui', 'console', 'gltf', 'collada', 'renderer', 'camera', 
             var nget = triangles.NORMAL;
             for (var i = 0; i < triangles.count * 3; ++i)
               npush.apply(normal, nget.call(triangles, i));
-            primitive.normal = new Float32Array(normal);
+            primitive.NORMAL = new Float32Array(normal);
           }
           if (triangles.TEXCOORD_0) {
             texcoord = [];
@@ -133,7 +133,7 @@ define(['jquerymin', 'gui', 'console', 'gltf', 'collada', 'renderer', 'camera', 
             var tget = triangles.TEXCOORD_0;
             for (var i = 0; i < triangles.count * 3; ++i)
               tpush.apply(texcoord, tget.call(triangles, i))
-            primitive.texcoord = new Float32Array(texcoord);
+            primitive.TEXCOORD_0 = new Float32Array(texcoord);
           }
 
           if (triangles.COLOR) {
@@ -142,10 +142,10 @@ define(['jquerymin', 'gui', 'console', 'gltf', 'collada', 'renderer', 'camera', 
             var cget = triangles.COLOR;
             for (var i = 0; i < triangles.count * 3; ++i)
               cpush.apply(color, cget.call(triangles, i))
-            primitive.color = new Float32Array(color);
+            primitive.COLOR = new Float32Array(color);
           }
 
-          primitive.index = null;
+          primitive.INDEX = null;
 
           var state = State.clone(State.basicState);
           var material = geometry.materials[p];
@@ -216,9 +216,7 @@ define(['jquerymin', 'gui', 'console', 'gltf', 'collada', 'renderer', 'camera', 
             }
           }
 
-          var glprim = new RENDERER.primitive(primitive.position, primitive.color,
-            primitive.normal, null, primitive.texcoord,
-            primitive.index, state);
+          var glprim = new RENDERER.primitive(primitive, state);
 
           // initialize picking ID
           var pickID = viewer.pickName.length;
@@ -277,9 +275,6 @@ define(['jquerymin', 'gui', 'console', 'gltf', 'collada', 'renderer', 'camera', 
       // each instance is a single mesh
       // each mesh has several primitives
 
-
-
-
       for (var j = 0; j < geometries.length; j++) {
         var geometry = geometries[j];
 
@@ -306,14 +301,22 @@ define(['jquerymin', 'gui', 'console', 'gltf', 'collada', 'renderer', 'camera', 
           // fill up my primitive structure
           var primitive = {};
 
-          primitive.position = triangles.POSITION;
-          primitive.normal = triangles.NORMAL;
-          primitive.texcoord = triangles.TEXCOORD_0;
-          primitive.index = triangles.INDEX;
+          primitive.POSITION = triangles.POSITION;
+          primitive.NORMAL = triangles.NORMAL;
+          primitive.TEXCOORD_0 = triangles.TEXCOORD_0;
+          primitive.WEIGHT = triangles.WEIGHT;
+          primitive.COLOR = triangles.COLOR;
+          primitive.BINORMAL = triangles.BINORMAL;
+          primitive.INDEX = triangles.INDEX;
+          primitive.JOINT = triangles.JOINT;
 
+/*
           var glprim = new RENDERER.primitive(primitive.position, null,
             primitive.normal, null,
             primitive.texcoord, primitive.index, state);
+*/
+
+          var glprim = new RENDERER.primitive(primitive,state);
 
           // initialize picking ID
           var pickID = viewer.pickName.length;
@@ -455,6 +458,48 @@ define(['jquerymin', 'gui', 'console', 'gltf', 'collada', 'renderer', 'camera', 
     // get the animations
     var delta = window.performance.now() - animation_timer;
     animation_timer += delta;
+    if (delta >1000) // one frame per second
+    {
+      delta = 1000; // jump in time, breakpoint?
+    }
+    for (var key in animations) {
+      for (var i=0; i<animations[key].length; i++) {
+        var animation = animations[key][i];
+        var index_min = 0;
+        var index_max = animation.count;
+        var index = index_min;
+
+        var time = animation_timer/100;
+        if (index_max - index_min >1) {
+          while (time < animation.time_min) time += (animation.time_max-animation.time_min);
+          while (time > animation.time_max) time -= (animation.time_max-animation.time_min);
+        }
+
+        // find time interval
+        while (index_max - index_min >1) {
+          index = (index_max+index_min)>>1;
+          if (time > animation.input[index]) {
+            index_min = index;
+          } else {
+            index_max = index;
+          }
+        }
+        // interpolate output to find result
+
+        if (animation.path === 'rotation') {
+          var interp = (time - animation.input[index_max]) / (animation.input[index_min]-animation.input[index_max]);
+          quat.lerp(animation.target.trs.rotation, 
+            [animation.output[index_min*4], animation.output[index_min*4+1], animation.output[index_min*4+2], animation.output[index_min*4+3] ],
+            [animation.output[index_max*4], animation.output[index_max*4+1], animation.output[index_max*4+2], animation.output[index_max*4+3] ],
+            interp);
+          mat4.fromTrs(animation.target.local, animation.target.trs);
+
+        } else
+        console.error('unknown animation type');
+      }
+
+    }
+
     if (flagTick) {
         console.log('delta=' + delta);
     } 

@@ -30,7 +30,7 @@ require.config({
         collada:"../loaders/collada",
         gltf:"../loaders/gltf",
         console:"../deps/console",
-        screenfull:"../deps/screenfull",
+        screenfull:"../deps/screenfull.min",
         gui:"../gui/gui6",
         utilMatrix: '../lib/utils',
         viewer: '../viewer/viewer6',
@@ -105,10 +105,6 @@ require.config({
         'console':{
             deps: ['jquerymin'],
             exports: 'CONSOLE',
-        },
-        'renderer':{
-            deps: ['jquerymin'],
-            exports: 'RENDERER',
         },
         'state':{
             deps: ['jquerymin'],

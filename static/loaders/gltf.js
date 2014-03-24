@@ -98,6 +98,8 @@ define(['q','glmatrixExt'], function (Q) {
       this.images = {};
       this.materials = {};
       this.animations = {};
+      this.skins = {};
+      this.deferredInstanceSkins = []; // postpone process of instanceSkin after scene is traversed
 
       // ok, now load all the shaders
       var shaders = this.json.shaders;
@@ -358,6 +360,7 @@ define(['q','glmatrixExt'], function (Q) {
       var bb = undefined;
       if (node.name) transform.name = node.name;
       if (node.tags) transform.tags = node.tags;
+      if (node.jointId) transform.jointID = node.jointId;
 
       transform.local = mat4.create();
       transform.trs = trs.create();
@@ -395,10 +398,9 @@ define(['q','glmatrixExt'], function (Q) {
           if (childTransform.bounds) {
             if (!bb) bb = aabb.create();
             aabb.add(bb, bb, childTransform.bounds);
-
-            transform.children.push(childTransform);
-            childTransform.parent = transform;
           }
+          transform.children.push(childTransform);
+          childTransform.parent = transform;
         }
       }
 
@@ -425,15 +427,110 @@ define(['q','glmatrixExt'], function (Q) {
           aabb.add(bb, bb, geo.bounds);
         }
       };
+
+      if (node.instanceSkin){
+        // deferred all instanceSkin after all the nodes are created
+        this.deferredInstanceSkins.push({transform:transform, node_instanceSkin:node.instanceSkin});
+
+        if (!bb) bb = aabb.create();
+        transform.geometries=[];
+        var sources = node.instanceSkin.sources;
+        for (var i=0;i<sources.length;i++){
+          var geo = this.instance_geometry(sources[i]);
+          geo.transform = transform;
+          transform.geometries.push(geo);
+          aabb.add(bb, bb, geo.bounds);
+        }
+      }
+
       if (bb) transform.bounds = bb;
 
       this.transforms[_nodeID] = (transform);
 
       return transform;
     },
+    _parse_deferredInstanceSkins: function()
+    {
+      for (var i=0; i< this.deferredInstanceSkins.length; i++) {
+        var transform = this.deferredInstanceSkins[i].transform;
+        var node_instanceSkin = this.deferredInstanceSkins[i].node_instanceSkin;
+        
+        var skinID = node_instanceSkin.skin;
+        var skeletons = node_instanceSkin.skeletons; // array of skeleton root
+        // at this point, transform already contains geometries -> meshes used for skinning
+        var skin = this.parse_skin(skeletons,skinID);
+
+        skin.transform = transform;
+        transform.skin = skin;
+      }
+    },
+    _find_joint: function(_skeletons, _jointID) {
+
+      for (var i=0; i<_skeletons.length; i++) {
+        var transform = _skeletons[i];
+        if (!transform)
+          glTF.logError('Internal error: could not find node in _find_joint');
+        // parse hierarchy from skeleton roots
+        if (transform.jointID === _jointID)
+          return transform;
+        if (transform.children) {
+          var result= this._find_joint(transform.children, _jointID);
+          if (result) return result;
+        }
+      }
+      return null;
+
+    },
+    parse_skin: function(_skeletons, _skinID) {
+      // create one skin per combo of skinID and skeletons
+      var skinUID = _skinID;
+      for (var i=0;i<_skeletons.length;i++) skinUID += '+'+_skeletons[i];
+
+      if (this.skins[skinUID]) return this.skins[skinUID];
+
+      var skin={};
+      var skin_json = this.json.skins[_skinID];
+      skin.bindShapeMatrix = mat4.clone(skin_json.bindShapeMatrix);
+
+      var skeletons = [];
+      for (var i=0;i<_skeletons.length;i++)
+        skeletons.push(this.transforms[_skeletons[i]]);
+      skin.joints = [];
+      for (var i=0; i<skin_json.joints.length; i++) {
+        var jointID = skin_json.joints[i];
+        var joint = this._find_joint(skeletons, jointID);
+        if (!joint)
+          glTF.logError('Internal error: could not find joint '+jointID+' in _find_joint');
+        skin.joints.push(joint);
+      }
+      var inverseBindMatrices = skin_json.inverseBindMatrices;
+      var bufferview = this.json.bufferViews[inverseBindMatrices.bufferView];
+      var buffer = this.buffers[bufferview.buffer]; // arraybuffer
+      var count = inverseBindMatrices.count;
+      var offset = inverseBindMatrices.byteOffset + bufferview.byteOffset;
+      var byteStride = inverseBindMatrices.byteStride;
+      var type = inverseBindMatrices.type;
+
+      if (byteStride)
+          glTF.logError('cannot use inverseBindMatrices accessor ['+_skinID+'] with byteStride - fix me !!');
+
+      switch (type) {
+      case WebGLRenderingContext.FLOAT_MAT4:
+        skin.inverseBindMatrices = new Float32Array(buffer, offset, count * 16); // mat = 16 floats
+        break;
+      default:
+        glTF.logError('inverseBindMatrices of type' + glTF.glProperties[attr.type] + '] is not allowed in skin '+_skinID);
+        return;
+        break;
+      };
+
+      this.skins[skinUID] = skin;
+      return skin;
+    },
     // this create a geometry (mesh,material) for the scene
     // as discussed for glTF spec
     instance_geometry: function (_meshID) {
+      if (this.geometries[_meshID]) return this.geometries[_meshID] ;
       var geometry = {};
       geometry.meshes = this.meshes[_meshID];
       geometry.bounds = aabb.create();
@@ -452,7 +549,7 @@ define(['q','glmatrixExt'], function (Q) {
       }
       geometry.materials = materials;
 
-      this.geometries[_meshID] = (geometry);
+      this.geometries[_meshID] = geometry;
       return geometry;
 
     },
@@ -500,8 +597,7 @@ define(['q','glmatrixExt'], function (Q) {
       var animation_json = this.json.animations[_animID];
       var document = this;
 
-      var anim = {};
-      anim.channels = [];
+      var anims = [];
 
       for (var i = 0; i < animation_json.channels.length; i++) {
         var nodeID = animation_json.channels[i].target.id;
@@ -519,9 +615,15 @@ define(['q','glmatrixExt'], function (Q) {
         var count_in = attr_in.count;
         var offset_in = attr_in.byteOffset + bufferview_in.byteOffset;
         var byteStride_in = attr_in.byteStride;
+        if (byteStride_in)
+          glTF.logError('cannot use animation accessor ['+input+'] with byteStride - fix me !!');
 
         // input only recognize 'TIME' ATM
         var values_in = new Float32Array(buffer_in, offset_in, count_in);
+
+        // get min and max time
+        var min_time = values_in[0];
+        var max_time = (count_in > 0 ? values_in[count_in-1] : values_in[0]);
 
         // output array
         var attr_out = this.json.accessors[output];
@@ -530,6 +632,11 @@ define(['q','glmatrixExt'], function (Q) {
         var count_out = attr_out.count;
         var offset_out = attr_out.byteOffset + bufferview_out.byteOffset;
         var byteStride_out = attr_out.byteStride;
+        if (byteStride_out)
+          glTF.logError('cannot use animation accessor ['+output+'] with byteStride - fix me !!');
+
+        if (count_in !== count_out)
+          gltf.logError('inconsistent counters in animation accessor ['+input+'] and accessor ['+output+']');
 
         var output = {};
         switch (path) {
@@ -542,8 +649,11 @@ define(['q','glmatrixExt'], function (Q) {
           break;
         }
 
-        anim.channels.push({
+        anims.push({
           input: values_in,
+          time_min: min_time,
+          time_max: max_time,
+          count: count_in,
           output: values_out,
           interpolation: interpolation,
           target: transform,
@@ -552,7 +662,7 @@ define(['q','glmatrixExt'], function (Q) {
 
 
       }
-      document.animations[_animID] = anim;
+      document.animations[_animID] = anims;
     },
     cloneValue: function (_value, _type) {
       var document = this;
@@ -612,6 +722,8 @@ define(['q','glmatrixExt'], function (Q) {
       this.bounds = bb; // do not add bounds to scene, incase there is a node called bounds
       this.scene = scene;
       this.upAxis = vec3.fromValues(0, 1, 0); // gltf is always Y_up
+      // treat the deferred instance skins
+      this._parse_deferredInstanceSkins();
       return scene;
     },
     // parse the mesh id="_mesh"
@@ -640,7 +752,7 @@ define(['q','glmatrixExt'], function (Q) {
           mesh.INDEX = new Int16Array(buffer, offset, count);
           break;
         default:
-          glTF.log('indices ' + attr.type + '[' + glTF.glProperties[attr.type] + '] is not allowed');
+          glTF.logError('indices ' + attr.type + '[' + glTF.glProperties[attr.type] + '] is not allowed');
         }
 
         for (var semantic in prim.attributes) {
@@ -655,12 +767,18 @@ define(['q','glmatrixExt'], function (Q) {
           case WebGLRenderingContext.FLOAT_VEC3:
             // this is a new view (no copy)
             mesh[semantic] = new Float32Array(buffer, offset, count * 3);
+            //glTF.log('byteStried='+byteStride+' multipler=3');
             break;
           case WebGLRenderingContext.FLOAT_VEC2:
             mesh[semantic] = new Float32Array(buffer, offset, count * 2);
+            //glTF.log('byteStried='+byteStride+' multipler=2');
+            break;
+          case WebGLRenderingContext.FLOAT_VEC4:
+            mesh[semantic] = new Float32Array(buffer, offset, count * 4);
+            //glTF.log('byteStried='+byteStride+' multipler=4');
             break;
           default:
-            glTF.log('attribute ' + attr.type + ' is not allowed');
+            glTF.logError('attribute ' + attr.type + '[' + glTF.glProperties[attr.type] + ' is not allowed');
           }
           // get bounding box
           if (semantic === "POSITION") {

@@ -27,74 +27,49 @@ THE SOFTWARE.*/
   gl-matrix and gl-matrix-extended
   textureloader
 */
-
-// Here's a simple webGL  renderer
-
-// if (window.WebGLUtils === undefined) {
-//     document.write('<script src="/deps/webgl-utils.js"><\/' + 'script>');
-//     document.write('<script src="/deps/webgl-debug.js"><\/' + 'script>');
-// }
-
-// if (window.mat4 === undefined)
-// {
-//     document.write('<script src="/deps/gl-matrix.js"><\/'+'script>');
-//     document.write('<script src="/loaders/gl-matrix-ext.js"><\/'+'script>');
-// }
-
-/*
-if (window.TextureUtil === undefined)
-{
-    document.write('<script src="/deps/texture-util.min.js"><\/'+'script>');
-}
-*/
-define("renderer", (function (global) {
-  // Initial Setup
-  // -------------
-
-  // Save a reference to the global object (`window` in the browser, `exports`
-  // on the server).
-  // var root = this;
-  // The top-level namespace. All public COLLADA classes and modules will
-  // be attached to this. Exported for both CommonJS and the browser.
-  var RENDERER = this.RENDERER = {};
-  // if (typeof exports !== 'undefined') {
-  //   RENDERER = exports;
-  // } else {
-  //   RENDERER = root.RENDERER = {};
-  // } 
-
-
+"use strict";
+define(['glmatrixExt'], function () {
   
-  // log wrapper
-  RENDERER.log = function(_msg) { 
-    if (console && console.log) console.log(_msg);
-  }
-  // log error wrapper
-  RENDERER.logError = function(_msg) { 
-    throw _msg;
-    /*
-    if (console && console.logError) console.logError(_msg);
-    else RENDERER.log(_msg);
-    */
-  }
+  var RENDERER = {};
+  RENDERER.default = {
+    POSITION :new Float32Array([0, 0, 0]),
+    NORMAL : new Float32Array([0, 0, 1]),
+    BINORMAL : new Float32Array([0, 0, 1]),
+    COLOR : new Float32Array([1, 1, 1, 1]),
+    TEXCOORD_0 : new Float32Array([0, 0])
+  };
 
-RENDERER.primitive = function(_vertices, _colors, _normals, _binormals, _texcoords, _indices, _state) { 
+
+  // log wrapper
+  RENDERER.log = function(_msg) {
+    if (console && console.log) console.log(_msg);
+  };
+  // log error wrapper
+    // throw msg ??
+  RENDERER.logError = function (msg) {
+    if (console && console.logError) console.logError(msg);
+    else if (console && console.error) console.error(msg);
+    else RENDERER.log('ERROR ' + msg);
+
+  };
+
+  RENDERER.primitive = function(_primitive, _state) { 
 
     this.clear();
-    this.buffer = {};
+    
+    // TODO call gldeletebuffer
     this.glBuffer = {};
-    this.value = {};
 
-    this.setprimitive(_vertices, _colors, _normals, _binormals, _texcoords, _indices);
+    this.setprimitive(_primitive);
 
     this.state = _state;
 
     // add primitive to list of primitives - needed for context loss
     this.primitiveID = State.primitives.length;
     State.primitives.push(this);
-}
+  }
 
-RENDERER.primitive.prototype = {
+  RENDERER.primitive.prototype = {
     delete: function () {
       this.clear();
       // remove this primitive from the list of primitives
@@ -102,92 +77,65 @@ RENDERER.primitive.prototype = {
       // delete this
       this.primitiveID = -1;
     },
+    // todo - create static default values in function constructor
     clear: function () {
       this.prim = State.TRIANGLES;
-      this.defaultVertex = new Float32Array([0, 0, 0]); 
-      this.defaultNormal = new Float32Array([0, 0, 1]); 
-      this.defaultBinormal = new Float32Array([0, 0, 1]); 
-      this.defaultColor= new Float32Array([1, 1, 1, 1]); 
-      this.defaultTexcoord = new Float32Array([0, 0]); 
-      this.defaultID = 0; 
-      this.hasColorBuffer = false; 
-      this.numIndices = this.numVertices = 0; 
+      this.value = {};
 
-      // should we call gldeletebuffer?
 
-      this.indexBuffer = this.indices = this.idBuffer = this.ids = this.texcoordsBuffer = null; 
-      this.texcoords = this.binormalBuffer = this.binormals = this.normalBuffer = this.normals = null; 
-      this.colorBuffer = this.colors = this.vertexBuffer = this.vertices = null; 
+      this.buffer = {};
 
-      this.updateMe = this.createMe = false; 
-      this.numIndices = this.numVertices = 0;
+      this.value.POSITION = RENDERER.default.POSITION; 
+      this.value.NORMAL = RENDERER.default.NORMAL;
+      this.value.BINORMAL = RENDERER.default.BINORMAL;
+      this.value.COLOR= RENDERER.default.COLOR;
+      this.value.TEXCOORD_0 = RENDERER.default.TEXCOORD_0;
+
+      this.numVertices = 1;
+      this.numIndices  = 0; 
+
+      this.updateMe = this.createMe = true; 
 
     },
-    setprimitive: function (_vertices, _colors, _normals, _binormals, _texcoords, _indices) {
+    setprimitive: function (_primitive) {
 
-        if (_vertices) {
-          this.vertices = _vertices;
-          this.numVertices = this.vertices.length/3;
-          this.buffer.POSITION = this.vertices;
-          delete this.value.POSITION;
-        } else {
-          this.vertices = this.defaultVertex;
-          this.numVertices = 1;
-          this.value.POSITION = this.vertices;
-          delete this.buffer.POSITION;
+      for (var key in _primitive) {
+        switch (key) {
+          case 'POSITION':
+            if (_primitive.POSITION) {
+              this.buffer.POSITION  = _primitive.POSITION;
+              this.numVertices = _primitive.POSITION.length/3;
+              delete this.value.POSITION;
+            } else {
+              this.vertices = RENDERER.default.POSITION;
+              this.numVertices = 1;
+              this.value.POSITION = this.vertices;
+              delete this.buffer.POSITION;
+            }
+            break;
+          case 'INDEX':
+            if (_primitive.INDEX) {
+              this.numIndices=_primitive.INDEX.length;
+              this.buffer.INDEX = _primitive.INDEX;
+            } else {    
+              delete this.buffer.INDEX;
+              this.numIndices  = 0; 
+            }
+            break;
+          default:
+            if (_primitive[key]){
+              this.buffer[key] = _primitive[key];
+              if (this.value[key])
+                delete this.value[key];
+            } else {
+              this.value[key] = RENDERER.default[key];
+              if (this.buffer[key])
+                delete this.buffer[key];
+            }
         }
+      }
 
-
-        if (_colors ) {
-          this.colors = _colors;
-          this.buffer.COLOR = this.colors;
-          delete this.value.COLOR;
-        } else {
-          this.colors = this.defaultColor;
-          this.value.COLOR = this.colors;
-          delete this.buffer.COLOR;
-        }
-
-        if (_normals) {
-          this.normals = _normals;
-          this.buffer.NORMAL = this.normals;
-          delete this.value.NORMAL;
-        } else {
-          this.normals = this.defaultNormal;
-          delete this.buffer.NORMAL;
-          this.value.NORMAL = this.normals;
-        }
-
-        if (_binormals  ) {
-          this.binormals = _binormals;
-          this.buffer.BINORMAL = this.binormals
-          delete this.value.BINORMAL;
-        } else {
-          this.binormals = this.defaultBinormal;
-          delete this.buffer.BINORMAL;
-          this.value.BINORMAL = this.binormals;
-        }
-
-        if (_texcoords) {
-          this.texcoords = _texcoords;
-          this.buffer.TEXCOORD_0 = this.texcoords;
-          delete this.value.TEXCOORD_0;
-        } else {
-          this.texcoords = this.defaultTexcoord;
-          delete this.buffer.TEXCOORD_0;
-          this.value.TEXCOORD_0 = this.texcoords;
-        }
- 
-        if (_indices ) {
-          this.indices = _indices, this.numIndices=_indices.length;
-          this.buffer.INDEX = _indices;
-        } else {
-
-          this.indices = null;
-          delete this.buffer.INDEX;
-        }
-
-        this.createMe=true;
+      this.createMe=true;
     },
     // separate function to be called in context loss
     createAttributeBuffers: function(_state){
@@ -269,6 +217,7 @@ RENDERER.primitive.prototype = {
             // if this attribute is connected to an array
             if (this.glBuffer[semantic]) {            
               
+              // enable if not already enabled, or if marked for disable
               if (_channel.VertexAttribBool[attribute.location] === undefined) 
                 gl.enableVertexAttribArray(attribute.location); 
               _channel.VertexAttribBool[attribute.location] = true;
@@ -292,13 +241,14 @@ RENDERER.primitive.prototype = {
               }
             // if the material overide the primitive settings
             } else {
+              // lazy disable - if it was enabled, or marked for disable
               if (_channel.VertexAttribBool[attribute.location] !== undefined) {
                 gl.disableVertexAttribArray(attribute.location); 
                 delete _channel.VertexAttribBool[attribute.location];
               }
 
-              // per state value if exists, then per program value
-              var value = state.values[semantic] || attribute.value || this.value[semantic];
+              // per state value if exists, then per program value, then per primitive value
+              var value = state.values[semantic] || attribute.value || this.value[semantic] || RENDERER.default[semantic];
               switch (attribute.type) {
                 case gl.FLOAT:
                   gl.vertexAttrib1f(attribute.location, value);
@@ -317,6 +267,7 @@ RENDERER.primitive.prototype = {
           }        
         }
 
+        // flush remeining disable attributes
         for (var location in _channel.VertexAttribBool) {
           if (_channel.VertexAttribBool[location] === false) {
             delete _channel.VertexAttribBool[location] ;
@@ -330,15 +281,14 @@ RENDERER.primitive.prototype = {
         } else
             gl.drawArrays(this.prim, 0, this.numVertices);
 
+        // lazy vertex attrib disable
         for (var location in _channel.VertexAttribBool) 
-          _channel.VertexAttribBool[location] = false; // lazy disable
+          _channel.VertexAttribBool[location] = false; 
         
       }
 
     }
-};
+  };
 
-return function () {
-        return global.RENDERER;
-    };
-}(this)));
+  return RENDERER;
+});

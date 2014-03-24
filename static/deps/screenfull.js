@@ -1,6 +1,10 @@
-	/*global Element */
-
-define("screenfull", (function (global) {
+/*!
+* screenfull
+* v1.1.1 - 2013-11-20
+* https://github.com/sindresorhus/screenfull.js
+* (c) Sindre Sorhus; MIT License
+*/
+/*global Element */
 (function (window, document) {
 	'use strict';
 
@@ -137,7 +141,3 @@ define("screenfull", (function (global) {
 
 	window.screenfull = screenfull;
 })(window, document);
-return function () {
-        return global.screenfull;
-    };
-}(this)));
