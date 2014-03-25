@@ -879,7 +879,7 @@ if (!window.performance || !window.performance.now) {
                         result.download = {'label':'Download','action':download,};
                     }
                     if(node.attr("type")=="uploaded"){
-                        result.convert = {'label':'Convert','action':download,};
+                        result.convert = {'label':'Convert','action':convert,};
                     }
                     if(node.attr("previewuri")){
                         result.preview = {'label':'Preview model','action':preview,};}
