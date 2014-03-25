@@ -773,7 +773,7 @@ if (!window.performance || !window.performance.now) {
                     glTF.load(uri, viewer.parse_gltf).then(
                     function(flag){
                           window.pleaseWait(false);
-                          window.notif(url);
+                          window.notif(uri);
                     }).fail(function(){
                         window.pleaseWait(false);
                         console.error("loading failed!!");
