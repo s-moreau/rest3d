@@ -738,6 +738,7 @@ if (!window.performance || !window.performance.now) {
         function convert(node){
             var url = node.attr("path");
             var params= {};
+            params.file = {};
             params.file.name = url;
             var callback = function(data){
                 console.debug(data.file.name)
