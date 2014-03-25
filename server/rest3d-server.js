@@ -586,11 +586,11 @@ server.post(/^\/rest3d\/convert.*/,function(req,res,next){
      		h.handleError({error: 'invalid file '+params.name+' in convert'});
      		return;
      	}
-     	if(params.file.hasOwnProperty("uri")){
+     	if(params.hasOwnProperty("uri")){
      		var output_dir = params.file.uri.split('/')[1]+'_gltf';
 	     	var output_file = params.file.uri.split('/').pop().replace('.dae','.json');
 	     	fs.mkdirSync('upload/'+output_dir);
-
+	     	console.log("INNNNNNNNN")
 	     	var cmd = collada2gltf+" -p -f \"upload" + params.uri+"\" -o \""+'upload/'+output_dir+'/'+output_file+"\"";
 
      	}
