@@ -736,7 +736,7 @@ if (!window.performance || !window.performance.now) {
             href[0].remove();
         }
         function convert(node){
-            var url = node.attr("path");
+            var url = node.attr("path").split("/");
             var params= {};
             params.file = {};
             params.file.uri = "";
