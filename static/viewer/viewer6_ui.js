@@ -736,8 +736,11 @@ if (!window.performance || !window.performance.now) {
             href[0].remove();
         }
         function display(node){
-            var tefa = $('#warehouse').jstree("get_children_dom",node);
-            console.debug(tefa);
+            // var tefa = $('#warehouse').jstree("get_children_dom",node);
+            // console.debug(tefa);
+            var id = "#"+node.attr("id");
+            var modify = $(id).children();
+            console.debug(modify);
             var uri = node.attr("asseturi");
             var call = function(data){
                 var deferred = Q.defer();
