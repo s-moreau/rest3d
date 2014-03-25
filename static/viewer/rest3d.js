@@ -24,7 +24,7 @@ THE SOFTWARE.*/
 
 'use strict';//
 
-define(["jquerymin","gui","viewer","jqueryui","upload"], function($,GUI,viewer) {
+define(["jquerymin"], function($) {
 
 // rest3d convert API
 // this is draft -> should create a convert request, and then do a long pull for query status
