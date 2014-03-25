@@ -583,11 +583,11 @@ server.post(/^\/rest3d\/convert.*/,function(req,res,next){
      	console.log('now converting collada');
      	console.log(params);
      	 	console.log(params.uri);
-     	if (!params.name || !params.name.toLowerCase().endsWith('dae')) { 
+     	if (!params.name && !params.uri || !params.name.toLowerCase().endsWith('dae')) { 
      		h.handleError({error: 'invalid file '+params.name+' in convert'});
      		return;
      	}
-     	if(params.uri){
+     	if(params.hasOwnProperty("uri")){
      		var output_dir = params.file.uri.split('/')[1]+'_gltf';
      		console.log(output_dir);
 	     	var output_file = params.file.uri.split('/').pop().replace('.dae','.json');
