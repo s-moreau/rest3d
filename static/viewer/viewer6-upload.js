@@ -129,7 +129,7 @@ define(['jquerymin','rest3d','gltf','collada','viewer'], function ($,rest3d,glTF
                 }
                 data.context = header;
                 $.each(data.files, function (index, file) {
-                    file.id = id;
+                    // file.id = id;
                     var ext = file.name.match(/\.[^.]+$/);//
                     if(ext[0]==".dae"||ext[0]==".DAE"){
                         var url =  '/rest3d/upload/'+decodeURIComponent(file.name);//
