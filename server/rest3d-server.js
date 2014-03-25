@@ -586,11 +586,21 @@ server.post(/^\/rest3d\/convert.*/,function(req,res,next){
      		h.handleError({error: 'invalid file '+params.name+' in convert'});
      		return;
      	}
-     	var output_dir = params.name.split('\.')[0]+'_gltf';
-     	var output_file = params.name.replace('.dae','.json');
-     	fs.mkdirSync('upload/'+output_dir);
+     	if(params.hasOwnProperty("uri")){
+     		var output_dir = params.uri.split('/')[1]+'_gltf';
+	     	var output_file = params.uri.split('/').pop().replace('.dae','.json');
+	     	fs.mkdirSync('upload/'+output_dir);
 
-     	var cmd = collada2gltf+" -p -f \"upload/" + params.name+"\" -o \""+'upload/'+output_dir+'/'+output_file+"\"";
+	     	var cmd = collada2gltf+" -p -f \"upload" + params.uri+"\" -o \""+'upload/'+output_dir+'/'+output_file+"\"";
+
+     	}
+     	else{
+	     	var output_dir = params.name.split('\.')[0]+'_gltf';
+	     	var output_file = params.name.replace('.dae','.json');
+	     	fs.mkdirSync('upload/'+output_dir);
+
+	     	var cmd = collada2gltf+" -p -f \"upload/" + params.name+"\" -o \""+'upload/'+output_dir+'/'+output_file+"\"";
+     }
      	console.log('exec '+cmd);
      	// todo -> manage progress !!!
 		var outputC2J;
