@@ -744,8 +744,42 @@ if (!window.performance || !window.performance.now) {
                 params.file.uri += '/'+url[i];
             }
             var callback = function(data){
-                console.debug(data.file.uri)
-            }
+                var html = "<ul>";
+                var buffer = [];
+                for(var i = 0; i<data.result.files.length;i++){
+                    var tmp = data.result.files[i];
+                    var ext = tmp.name.match(/\.[^.]+$/);
+                    if(ext[0]=='.DAE'||ext[0]=='.dae'||ext[0]=='.json'){
+                        html += '<li><a>name: '+tmp.name+' </a>'+'<a>size: '+tmp.size+' </a>'+'<a href="rest3d/upload/'+tmp.name+'">download</a>'+'<button id="model_'+size+'">Display</button>'+'</li>';
+                        buffer.push({'id':'#model_'+size,'url':'rest3d/upload/'+tmp.name});
+                    }
+                    else{
+                        html += '<li><a>name: '+tmp.name+' </a>'+'<a>size: '+tmp.size+' </a>'+'<a href="rest3d/upload/'+tmp.name+'">download</a></li>';
+                    }
+                }
+                 html += '</ul>';
+                 GUI.notification({
+                title: "convert "+node.attr("name"),
+                text: html,
+                type: "notice"
+            });
+                 setTimeout(function(){
+           for(var j=0;j<buffer.length;j++){
+                var uri = buffer[j].url;
+               $(buffer[j].id).click(function(){
+                    window.pleaseWait(true);
+                    glTF.load(uri, viewer.parse_gltf).then(
+                    function(flag){
+                          window.pleaseWait(false);
+                          window.notif(url);
+                    }).fail(function(){
+                        window.pleaseWait(false);
+                        console.error("loading failed!!");
+                    });
+                });
+       }
+       },500);
+                }
             rest3d.convert(params,callback);
         }
 
