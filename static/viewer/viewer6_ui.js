@@ -739,7 +739,7 @@ if (!window.performance || !window.performance.now) {
             var url = node.attr("path").split('/');
             var params= {};
             params.file = {};
-            params.file.name = url[4]+'/'+url[5]+'/'+url[6]+'/'+url[7];
+            params.file.name = url[5]+'/'+url[6]+'/'+url[7];
             var callback = function(data){
                 console.debug(data.file.name)
             }
