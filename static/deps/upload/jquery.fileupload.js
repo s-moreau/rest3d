@@ -11,7 +11,6 @@
 
 /*jslint nomen: true, unparam: true, regexp: true */
 /*global define, window, document, location, File, Blob, FormData */
-define("upload", (function (global) {
 
     'use strict';
 
@@ -1313,8 +1312,3 @@ define("upload", (function (global) {
         }
 
     });
-
-return function () {
-        return $.fn.fileupload;
-    };
-}(this)));

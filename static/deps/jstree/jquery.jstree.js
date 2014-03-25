@@ -14,7 +14,6 @@
 
 /*jslint browser: true, onevar: true, undef: true, bitwise: true, strict: true */
 /*global window : false, clearInterval: false, clearTimeout: false, document: false, setInterval: false, setTimeout: false, jQuery: false, navigator: false, XSLTProcessor: false, DOMParser: false, XMLSerializer: false*/
-define("jstree", (function (global) {
 
 "use strict";
 
@@ -4550,7 +4549,3 @@ define("jstree", (function (global) {
 //*/
 
 })();
-return function () {
-        return global.$.fn.jstree;
-    };
-}(this)));

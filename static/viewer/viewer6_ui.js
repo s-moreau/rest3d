@@ -736,6 +736,8 @@ if (!window.performance || !window.performance.now) {
             href[0].remove();
         }
         function display(node){
+            var tefa = $('#warehouse').jstree("get_children_dom",node);
+            console.debug(tefa);
             var uri = node.attr("asseturi");
             var call = function(data){
                 var deferred = Q.defer();
@@ -796,9 +798,6 @@ if (!window.performance || !window.performance.now) {
                 open: function (ev, ui) {
                     $('#myIframe').attr('src',node.attr("previewuri"));
                 },
-                // close: function(){
-                //     gitHtml.remove();
-                // },
             });
            $("#dialog").css({'min-height':'none !important;'});
         }
@@ -842,12 +841,12 @@ if (!window.performance || !window.performance.now) {
                         var url = "";
                         if (node == -1)
                         {
-                            url = "/rest3d/warehouse/";
+                            url = "http://rest3d.fl4re.com/rest3d/warehouse/";
                         }
                         else if(node.attr('rel')=="collection"||"model")
                         {
                             nodeId = node.attr('id');
-                            url = "/rest3d/warehouse/" + nodeId;
+                            url = "http://rest3d.fl4re.com/rest3d/warehouse/" + nodeId;
                         }
                         return url;
                     },
@@ -1238,11 +1237,11 @@ if (!window.performance || !window.performance.now) {
         var upload = GUI.upload({parent:accordionUp.upload, id:"upModel", url:'/rest3d/upload'});
         upload.button.width("80%");
         upload.progress.progress_upModel.width("100%");
-        $.getScript("viewer6-upload.js").done(function( script, textStatus ) {
-            setViewer6Upload(upload,rest3d,viewer);
-          }).fail(function(err){
-            console.error("upload external script failed to load");
-          });
+        // $.getScript("viewer6-upload.js").done(function( script, textStatus ) {
+        setViewer6Upload($,upload,rest3d,viewer);
+          // }).fail(function(err){
+          //   console.error("upload external script failed to load");
+          // });
 
         jumpLine();
         GUI.label('welcome', "Load some sample models among those accordions:", renderMenu.render);

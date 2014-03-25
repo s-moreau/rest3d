@@ -19,7 +19,6 @@
 						- false > show all item without scollbar
 **************************************************************************
 *************************************************************************/
-define("jquery-skinner", (function (global) {
 	$.fn.skinner = function(opt){
 		var cfg = {'type':'block','width':'auto','textwrap':false,'maxitem':'6'};    
 	    if(opt){$.extend(cfg,opt);}
@@ -117,7 +116,3 @@ define("jquery-skinner", (function (global) {
 		skin.selectskinned(element);		
 		return this;	
 	}
-return function () {
-        return global.$.fn.skinner;
-    };
-}(this)));

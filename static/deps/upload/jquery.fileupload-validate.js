@@ -12,8 +12,6 @@
 /*jslint nomen: true, unparam: true, regexp: true */
 /*global define, window */
 
-
-define("uploadValidate", (function (global) {
     'use strict';
 
     // Append to the default processQueue:
@@ -100,8 +98,4 @@ define("uploadValidate", (function (global) {
 
     });
 
-return function () {
-        return $.blueimp.fileupload;
-    };
-}(this)));
 

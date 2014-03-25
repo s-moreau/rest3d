@@ -25,16 +25,15 @@ THE SOFTWARE.*/
 
 define(['jquerymin','rest3d','gltf','collada','viewer'], function ($,rest3d,glTF,COLLADA,viewer) {
 
-  function setViewer6Upload(upload,rest3d,viewer){
-            var header;
+  function setViewer6Upload($,upload,rest3d,viewer){
+            var header=false;
             var index;
             var buttonToReplace;
-            // upload.callOnClick(function(){
-            //     header = upload.header();
-            //     index=0;
-            // });
-            var url = '/rest3d/upload',
-                uploadButton = $('<button/>')
+            upload.callOnClick(function(){
+                header = upload.header();
+            });
+            var url = '/rest3d/upload';
+            var uploadButton = $('<button/>')
                     .addClass('btn')
                     .prop('disabled', true)
                     .on('click', function (){
@@ -120,10 +119,12 @@ define(['jquerymin','rest3d','gltf','collada','viewer'], function ($,rest3d,glTF
                         }
                         rest3d.convert(data,callback);
                     });
-
-            upload.object.on('fileuploadadd', function (e, data) {
-                header = upload.header();
+            
+            upload.object.on('fileuploadadd', function (e, data) {               
                 upload.object=$(this);
+                if(!header){
+                    header = upload.header();
+                }
                 data.context = header;
                 $.each(data.files, function (index, file) {
                     var ext = file.name.match(/\.[^.]+$/);//

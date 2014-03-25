@@ -144,6 +144,9 @@ require.config({
         'q':{
             exports: 'Q'
         },
+        'gui':{
+            deps: ['jquerymin']
+        }
     },
 })
 

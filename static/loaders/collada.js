@@ -206,10 +206,10 @@ define(['q','glmatrixExt'], function (Q) {
                 case 'perspective':
                     camera.projection = 'perspective';
 
-                    var aspect_ratioXML = cameraXML.getChildrenByTagName('aspect_ratio')
-                    var yfovXML = cameraXML.getChildrenByTagName('yfov')
-                    var zfarXML = cameraXML.getChildrenByTagName('zfar')
-                    var znearXML = cameraXML.getChildrenByTagName('znear')
+                    var aspect_ratioXML = cameraXML.getChildrenByTagName('aspect_ratio');
+                    var yfovXML = cameraXML.getChildrenByTagName('yfov');
+                    var zfarXML = cameraXML.getChildrenByTagName('zfar');
+                    var znearXML = cameraXML.getChildrenByTagName('znear');
 
                     // NOTE - COLLADA does not define default values for camera properties!
                     if (COLLADA._validate) {
