@@ -736,10 +736,10 @@ if (!window.performance || !window.performance.now) {
             href[0].remove();
         }
         function convert(node){
-            var url = node.attr("path");
+            var url = node.attr("path").split('/');
             var params= {};
             params.file = {};
-            params.file.name = url;
+            params.file.name = url[4]+'/'+url[5]+'/'+url[6];
             var callback = function(data){
                 console.debug(data.file.name)
             }
