@@ -450,7 +450,12 @@ THE SOFTWARE.*/
       var attribute = _state.program.attributes[semantic];
       attribute.location = _gl.getAttribLocation(glProgram, attribute.symbol);
     }
-      
+      /*
+for (var i = _gl.getProgramParameter(glProgram, _gl.ACTIVE_UNIFORMS) - 1; i >= 0; i--) {
+  var uno = _gl.getActiveUniform(glProgram, i);
+  console.log('uniform.'+uno.name+'='+ JSON.stringify(uno));
+}
+*/
     // find uniforms location, remove non active ones
     for (var uniformID in _state.program.uniforms)
     {
@@ -692,6 +697,12 @@ THE SOFTWARE.*/
 
     State.setViewProj= function (_mat) { 
       mat4.copy(State.Uniforms.PROJECTION, _mat); 
+    };
+
+    State.setJointMat = function(_bone,_mat) {
+      // we need a pointer to the JOINT_MATRIX uniform values
+      //mat4.copy(State.Uniforms.MODEL, _mat);
+       var toto = 'titi';
     };
     
     State.setViewport = function(_state,_x1, _y1, _x2, _y2) {

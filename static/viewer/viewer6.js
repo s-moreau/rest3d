@@ -296,7 +296,16 @@ define(['jquerymin', 'gui', 'console', 'gltf', 'collada', 'renderer', 'camera', 
           var material = materials[i];
 
           // create a new state with this material override
-          //console.debug(material.pass);
+          
+          // special case for skins
+          if (this.skin) {
+            if (!material.overrides) material.overrides={};
+            material.overrides.JOINT_MATRIX = this.skin.jointMatrix;
+           // this.skin.bindShapeMatrix;
+           // this.skin.inverseBindMatrices;
+          }
+
+
           var state = State.fromPassAndOverrides(material.pass, material.overrides);
           // fill up my primitive structure
           var primitive = {};
@@ -309,12 +318,6 @@ define(['jquerymin', 'gui', 'console', 'gltf', 'collada', 'renderer', 'camera', 
           primitive.BINORMAL = triangles.BINORMAL;
           primitive.INDEX = triangles.INDEX;
           primitive.JOINT = triangles.JOINT;
-
-/*
-          var glprim = new RENDERER.primitive(primitive.position, null,
-            primitive.normal, null,
-            primitive.texcoord, primitive.index, state);
-*/
 
           var glprim = new RENDERER.primitive(primitive,state);
 
@@ -385,6 +388,27 @@ define(['jquerymin', 'gui', 'console', 'gltf', 'collada', 'renderer', 'camera', 
   };
 
   viewer.drawnode = function () {
+    if (this.skin)
+      for (var i =0, j=0; i< this.skin.joints.length; i++) {
+        var k=0;
+        var local = this.skin.joints[i].local;
+        this.skin.jointMatrix[j++] = local[0];
+        this.skin.jointMatrix[j++] = local[1];
+        this.skin.jointMatrix[j++] = local[2];
+        this.skin.jointMatrix[j++] = local[3];
+        this.skin.jointMatrix[j++] = local[4];
+        this.skin.jointMatrix[j++] = local[5];
+        this.skin.jointMatrix[j++] = local[6];
+        this.skin.jointMatrix[j++] = local[7];
+        this.skin.jointMatrix[j++] = local[8];
+        this.skin.jointMatrix[j++] = local[9];
+        this.skin.jointMatrix[j++] = local[10];
+        this.skin.jointMatrix[j++] = local[11];
+        this.skin.jointMatrix[j++] = local[12];
+        this.skin.jointMatrix[j++] = local[13];
+        this.skin.jointMatrix[j++] = local[14];
+        this.skin.jointMatrix[j++] = local[15];
+      }
     if (!this.geometries || this.geometries.length == 0)
       return true;
 
@@ -408,8 +432,11 @@ define(['jquerymin', 'gui', 'console', 'gltf', 'collada', 'renderer', 'camera', 
       // console.debug(node.local)
 
       viewer.pushMatrix();
-      mat4.multiply(mvMatrix, mvMatrix, node.local);
-      //State.setModelView(this.state,mvMatrix);
+      mat4.multiply(mvMatrix, mvMatrix, node.local)
+      if (this.skin) {
+
+      }
+      //State.setJointMat(joint, node.local);
 
       if (node.children)
         viewer.render_scene.call(this, node.children, _callback)
@@ -508,7 +535,6 @@ define(['jquerymin', 'gui', 'console', 'gltf', 'collada', 'renderer', 'camera', 
         mat4.rotate(mvMatrix, mvMatrix, -90 * deg2rad, vec3.fromValues(1, 0, 0));
       };
 
-      //State.setModelView(mvMatrix);
       State.setViewProj(pmMatrix);
 
       // depth first scene drawing

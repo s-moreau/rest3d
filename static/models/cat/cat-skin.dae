@@ -1,0 +1,351 @@
+<?xml version="1.0" encoding="utf-8"?>
+<COLLADA xmlns="http://www.collada.org/2005/11/COLLADASchema" version="1.4.1">
+  <asset>
+    <contributor>
+      <author>katopz</author>
+      <authoring_tool>Maya8.5 | ColladaMaya v3.05B</authoring_tool>
+      <comments>ColladaMaya export options: bakeTransforms=0;exportPolygonMeshes=1;bakeLighting=0;isSampling=0;
+curveConstrainSampling=0;removeStaticCurves=1;exportCameraAsLookat=0;
+exportLights=0;exportCameras=0;exportJointsAndSkin=1;
+exportAnimations=1;exportTriangles=1;exportInvisibleNodes=0;
+exportNormals=0;exportTexCoords=1;
+exportVertexColors=0;exportVertexColorsAnimation=0;exportTangents=0;
+exportTexTangents=0;exportConstraints=0;exportPhysics=0;exportXRefs=1;
+dereferenceXRefs=0;cameraXFov=0;cameraYFov=1</comments>
+      <source_data>file:///C:/Inetpub/wwwroot/labs/as3/Away3D/ColladaAnimation/src/demos/Maya8.5/ColladaMaya3.05B/advance/20_cat_smooth_bake_channel.mb</source_data>
+    </contributor>
+    <created>2008-06-25T16:27:54Z</created>
+    <modified>2008-06-25T16:27:54Z</modified>
+    <unit meter="0.01" name="centimeter"/>
+    <up_axis>Y_UP</up_axis>
+  </asset>
+  
+  <library_images>
+    <image id="lambert1_color" name="lambert1_color">
+      <init_from>./20_cat.png</init_from>
+      <extra>
+        <technique profile="MAYA">
+          <dgnode_type>kPSDFile</dgnode_type>
+          <image_sequence>0</image_sequence>
+        </technique>
+      </extra>
+    </image>
+  </library_images>
+  <library_materials>
+    <material id="lambert1" name="lambert1">
+      <instance_effect url="#lambert1-fx"/>
+    </material>
+  </library_materials>
+  <library_effects>
+    <effect id="lambert1-fx">
+      <profile_COMMON>
+        <newparam sid="lambert1_color-surface">
+          <surface type="2D">
+            <init_from>lambert1_color</init_from>
+            <format>A8R8G8B8</format>
+          </surface>
+        </newparam>
+        <newparam sid="lambert1_color-sampler">
+          <sampler2D>
+            <source>lambert1_color-surface</source>
+            <wrap_s>WRAP</wrap_s>
+            <wrap_t>WRAP</wrap_t>
+            <minfilter>NONE</minfilter>
+            <magfilter>NONE</magfilter>
+            <mipfilter>NONE</mipfilter>
+          </sampler2D>
+        </newparam>
+        <technique sid="common">
+          <lambert>
+            <emission>
+              <color>0 0 0 1</color>
+            </emission>
+            <ambient>
+              <color>0 0 0 1</color>
+            </ambient>
+            <diffuse>
+              <texture texture="lambert1_color-sampler" texcoord="TEX0">
+                <extra>
+                  <technique profile="MAYA">
+                    <wrapU>1</wrapU>
+                    <wrapV>1</wrapV>
+                    <mirrorU>0</mirrorU>
+                    <mirrorV>0</mirrorV>
+                    <coverageU>1</coverageU>
+                    <coverageV>1</coverageV>
+                    <translateFrameU>0</translateFrameU>
+                    <translateFrameV>0</translateFrameV>
+                    <rotateFrame>0</rotateFrame>
+                    <stagger>0</stagger>
+                    <fast>0</fast>
+                    <repeatU>1</repeatU>
+                    <repeatV>1</repeatV>
+                    <offsetU>0</offsetU>
+                    <offsetV>0</offsetV>
+                    <rotateUV>0</rotateUV>
+                    <noiseU>0</noiseU>
+                    <noiseV>0</noiseV>
+                    <blend_mode>NONE</blend_mode>
+                  </technique>
+                </extra>
+              </texture>
+            </diffuse>
+            <transparent opaque="A_ONE">
+              <texture texture="lambert1_color-sampler" texcoord="TEX1">
+                <extra>
+                  <technique profile="MAYA">
+                    <wrapU>1</wrapU>
+                    <wrapV>1</wrapV>
+                    <mirrorU>0</mirrorU>
+                    <mirrorV>0</mirrorV>
+                    <coverageU>1</coverageU>
+                    <coverageV>1</coverageV>
+                    <translateFrameU>0</translateFrameU>
+                    <translateFrameV>0</translateFrameV>
+                    <rotateFrame>0</rotateFrame>
+                    <stagger>0</stagger>
+                    <fast>0</fast>
+                    <repeatU>1</repeatU>
+                    <repeatV>1</repeatV>
+                    <offsetU>0</offsetU>
+                    <offsetV>0</offsetV>
+                    <rotateUV>0</rotateUV>
+                    <noiseU>0</noiseU>
+                    <noiseV>0</noiseV>
+                    <blend_mode>NONE</blend_mode>
+                  </technique>
+                </extra>
+              </texture>
+            </transparent>
+            <transparency>
+              <float>1</float>
+            </transparency>
+          </lambert>
+          <extra>
+            <technique profile="FCOLLADA"/>
+          </extra>
+        </technique>
+      </profile_COMMON>
+    </effect>
+  </library_effects>
+  <library_geometries>
+    <geometry id="nekoShape" name="nekoShape">
+      <mesh>
+        <source id="nekoShape-positions" name="position">
+          <float_array id="nekoShape-positions-array" count="375">3.65523 17.5152 1.72539 5.32224 14.7595 -0.140403 2.51375 19.2442 3.95074 7.14722 13.0466 5.68319 6.70161 23.8252 0.774676 7.94914 24.0635 0.57338 6.78111 22.9156 0.088251 7.60216 22.7766 -0.055207 5.58337 16.9908 4.42568 0 4.04799 10.9428 2.51376 3.98031 8.14374 5.80834 5.64192 6.30494 4.39584 6.61114 1.38013 0 6.81517 -0.654785 0 5.17059 12.6192 4.72485 5.36611 9.60555 5.12636 8.31985 0.510651 0 8.29021 -1.17062 0 9.66109 15.247 6.55327 9.21542 10.9788 7.5289 9.44514 5.50106 5.91095 11.7868 -0.286436 0 12.2105 -2.14611 0 10.3919 14.2734 6.08988 10.6613 10.3343 7.43294 11.0337 5.57171 0 14.5376 -1.66942 0 13.4773 13.8859 5.81377 13.3871 10.1838 0 17.4469 0.100958 0 16.2663 12.6659 4.50009 16.755 9.5584 5.50182 16.8585 6.14125 0 19.5292 3.69055 0 18.585 10.0114 2.26574 18.5305 7.77195 2.65472 18.8224 6.25765 0 19.449 6.24823 0 3.66743 8.40906 4.57183 0.000000 6.57418 5.47289 0 6.44519 4.75683 0 7.35696 5.65788 0 7.22798 2.73575 2.23968 7.47228 5.21728 4.24251 6.32223 2.7819 1.36674 4.48913 4.56734 1.67652 3.97254 3.00025 0.000000 -5.42127 3.99755 0.000000 -5.51277 3.04295 0.000000 -4.68227 3.99471 0 -4.77377 1.28736 1.27365 -2.70175 4.26744 1.64883 -2.70486 0.690206 1.72391 -5.07911 3.13712 4.3104 -4.20939 0 1.81578 -5.0587 1.85455 5.47159 -3.92008 2.75808 5.75018 -3.03435 3.51684 6.03076 -1.26408 0 6.45917 -2.218 0 1.57609 -2.02329 0 1.76504 4.2966 0.463638 5.54856 -4.18702 0 5.04463 -4.48687 0 5.85416 -3.80534 0 8.06421 -6.32351 0 7.75343 -8.07503 0.858568 7.4726 -6.73943 4.80181 4.31884 2.32579 4.28423 4.23873 -1.7278 0 7.09951 14.0136 6.0515 7.41546 10.6351 6.84749 7.63953 5.60942 5.62969 9.96742 0.017137 0 10.3173 -1.85898 -3.65523 17.5152 1.72539 -5.32224 14.7595 -0.140403 -2.51375 19.2442 3.95074 -7.14722 13.0466 5.68319 -6.70161 23.8252 0.774676 -7.94914 24.0635 0.57338 -6.78111 22.9156 0.088251 -7.60216 22.7766 -0.055207 -5.58337 16.9908 4.42568 -2.51376 3.98031 8.14374 -5.80834 5.64192 6.30494 -4.39584 6.61114 1.38013 -4.72485 5.36611 9.60555 -5.12636 8.31985 0.510651 -6.55327 9.21542 10.9788 -7.5289 9.44514 5.50106 -5.91095 11.7868 -0.286436 -6.08988 10.6613 10.3343 -7.43294 11.0337 5.57171 -5.81377 13.3871 10.1838 -4.50009 16.755 9.5584 -5.50182 16.8585 6.14125 -2.26574 18.5305 7.77195 -2.65472 18.8224 6.25765 -4.57183 0.000000 6.57418 -5.47289 0 6.44519 -4.75683 0 7.35696 -5.65788 0 7.22798 -2.73575 2.23968 7.47228 -5.21728 4.24251 6.32223 -2.7819 1.36674 4.48913 -4.56734 1.67652 3.97254 -3.00025 0.000000 -5.42127 -3.99755 0.000000 -5.51277 -3.04295 0.000000 -4.68227 -3.99471 0 -4.77377 -1.28736 1.27365 -2.70175 -4.26744 1.64883 -2.70486 -0.690206 1.72391 -5.07911 -3.13712 4.3104 -4.20939 -1.85455 5.47159 -3.92008 -2.75808 5.75018 -3.03435 -3.51684 6.03076 -1.26408 -0.463638 5.54856 -4.18702 -0.858568 7.4726 -6.73943 -4.80181 4.31884 2.32579 -4.28423 4.23873 -1.7278 -6.0515 7.41546 10.6351 -6.84749 7.63953 5.60942 -5.62969 9.96742 0.017137</float_array>
+          <technique_common>
+            <accessor source="#nekoShape-positions-array" count="125" stride="3">
+              <param name="X" type="float"/>
+              <param name="Y" type="float"/>
+              <param name="Z" type="float"/>
+            </accessor>
+          </technique_common>
+        </source>
+        <source id="nekoShape-map1" name="map1">
+          <float_array id="nekoShape-map1-array" count="608">0.348201 0.987337 0.174167 0.796963 0.30173 0.703319 0.400044 0.997239 0.400044 0.997239 0.069703 0.165105 0.069703 0.805477 0.37564 0.539412 0.069703 0.212111 0.174167 0.162647 0.266054 0.220237 0.31108 0.231698 0.186435 0.779435 0.186435 0.779435 0.186435 0.779435 0.069703 0.805477 0.069703 0.398722 0.321184 0.305401 0.342037 0.380201 0.174167 0.796963 0.069703 0.805477 0.354263 0.314713 0.163861 0.767305 0.163861 0.767305 0.069703 0.79271 0.32278 0.440289 0.069703 0.429091 0.378593 0.455765 0.174167 0.796963 0.303739 0.553563 0.069703 0.55731 0.31108 0.231698 0.262727 0.679902 0.069703 0.673214 0.298342 0.697823 0.163861 0.767305 0.163861 0.767305 0.069703 0.769569 0.186435 0.779435 0.069703 0.805477 0.069703 0.16546 0.069703 0.149645 0.069703 0.769569 0.378593 0.455765 0.30173 0.703319 0.378593 0.455765 0.342037 0.380201 0.342037 0.380201 0.342037 0.380201 0.342037 0.380201 0.30173 0.703319 0.30173 0.703319 0.37564 0.539412 0.37564 0.539412 0.37564 0.539412 0.32278 0.440289 0.32278 0.440289 0.32278 0.440289 0.32278 0.440289 0.32278 0.440289 0.262727 0.679902 0.38258 0.389748 0.262727 0.679902 0.37564 0.539412 0.069703 0.398722 0.069703 0.398722 0.266054 0.220237 0.266054 0.220237 0.266054 0.220237 0.069703 0.292271 0.069703 0.292271 0.262727 0.679902 0.174167 0.162647 0.069703 0.673214 0.174167 0.162647 0.069703 0.212111 0.174167 0.796963 0.31108 0.231698 0.069703 0.55731 0.069703 0.429091 0.321184 0.305401 0.321184 0.305401 0.321184 0.305401 0.321184 0.305401 0.354263 0.314713 0.38258 0.389748 0.303739 0.553563 0.303739 0.553563 0.303739 0.553563 0.303739 0.553563 0.298342 0.697823 0.298342 0.697823 0.298342 0.697823 0.298342 0.697823 0.298342 0.697823 0.174167 0.796963 0.616828 0.990098 0.625194 1 0.651316 0.946524 0.645354 0.952297 0.654856 0.613358 0.57732 0.727876 0.412847 0.542173 0.484841 0.799725 0.591668 0.274738 0.676232 0.283217 0.697669 0.344514 0.6278 0.345746 0.648309 0.414214 0.726274 0.428753 0.738207 0.507428 0.660925 0.48982 0.420415 0.39251 0.417479 0.458527 0.644826 0.725036 0.37582 0 0.38118 0 0.34865 0 0.34329 0 0.38629 0.176305 0.338498 0.093074 0.462468 0.056797 0.483936 0.06967 0.874312 0 0.878114 0 0.847404 0 0.843601 0 0.761427 0.06852 0.761298 0.052928 0.860093 0.07164 0.82395 0.179126 0.859245 0.075458 0.733103 0.065497 0.299568 0.152406 0.310594 0.165409 0.775119 0.238959 0.811927 0.227382 0.552369 0.179477 0.387008 0.23446 0.701553 0.250619 0.720823 0.176148 0.470469 0.073349 0.835482 0.209638 0.823021 0.23058 0.911806 0.335122 0.92909 0.310537 0.984593 0.322208 0.807159 0.24328 0.415912 0.317474 0.741194 0.268422 0.718397 0.604138 0.495654 0.811572 0.348201 0.987337 0.174167 0.796963 0.30173 0.703319 0.400044 0.997239 0.616828 0.990098 0.625194 1 0.651316 0.946524 0.645354 0.952297 0.654856 0.613358 0.57732 0.727876 0.412847 0.542173 0.484841 0.799725 0.30173 0.703319 0.37564 0.539412 0.400044 0.997239 0.069703 0.16546 0.266054 0.220237 0.069703 0.212111 0.174167 0.162647 0.31108 0.231698 0.266054 0.220237 0.591668 0.274738 0.676232 0.283217 0.697669 0.344514 0.6278 0.345746 0.342037 0.380201 0.069703 0.398722 0.321184 0.305401 0.321184 0.305401 0.354263 0.314713 0.38258 0.389748 0.342037 0.380201 0.648309 0.414214 0.726274 0.428753 0.738207 0.507428 0.660925 0.48982 0.069703 0.398722 0.32278 0.440289 0.069703 0.429091 0.342037 0.380201 0.378593 0.455765 0.32278 0.440289 0.420415 0.39251 0.417479 0.458527 0.069703 0.429091 0.303739 0.553563 0.069703 0.55731 0.32278 0.440289 0.37564 0.539412 0.303739 0.553563 0.644826 0.725036 0.069703 0.55731 0.262727 0.679902 0.069703 0.673214 0.298342 0.697823 0.262727 0.679902 0.303739 0.553563 0.37564 0.539412 0.30173 0.703319 0.298342 0.697823 0.069703 0.673214 0.262727 0.679902 0.069703 0.769569 0.262727 0.679902 0.186435 0.779435 0.163861 0.767305 0.186435 0.779435 0.298342 0.697823 0.174167 0.796963 0.174167 0.796963 0.069703 0.79271 0.069703 0.805477 0.069703 0.769569 0.163861 0.767305 0.069703 0.805477 0.163861 0.767305 0.186435 0.779435 0.069703 0.805477 0.186435 0.779435 0.174167 0.796963 0.069703 0.805477 0.174167 0.162647 0.069703 0.165105 0.069703 0.149645 0.37582 0 0.38118 0 0.34865 0 0.34329 0 0.38629 0.176305 0.338498 0.093074 0.462468 0.056797 0.483936 0.06967 0.874312 0 0.878114 0 0.847404 0 0.843601 0 0.761427 0.06852 0.761298 0.052928 0.860093 0.07164 0.82395 0.179126 0.859245 0.075458 0.733103 0.065497 0.299568 0.152406 0.310594 0.165409 0.775119 0.238959 0.811927 0.227382 0.552369 0.179477 0.387008 0.23446 0.701553 0.250619 0.720823 0.176148 0.470469 0.073349 0.835482 0.209638 0.823021 0.23058 0.911806 0.335122 0.92909 0.310537 0.984593 0.322208 0.807159 0.24328 0.069703 0.212111 0.321184 0.305401 0.069703 0.292271 0.321184 0.305401 0.31108 0.231698 0.354263 0.314713 0.415912 0.317474 0.741194 0.268422 0.342037 0.380201 0.32278 0.440289 0.069703 0.398722 0.342037 0.380201 0.38258 0.389748 0.378593 0.455765 0.32278 0.440289 0.378593 0.455765 0.37564 0.539412 0.266054 0.220237 0.31108 0.231698 0.321184 0.305401 0.298342 0.697823 0.303739 0.553563 0.37564 0.539412 0.174167 0.796963 0.298342 0.697823 0.30173 0.703319 0.163861 0.767305 0.298342 0.697823 0.174167 0.162647 0.266054 0.220237 0.069703 0.292271 0.32278 0.440289 0.303739 0.553563 0.718397 0.604138 0.495654 0.811572</float_array>
+          <technique_common>
+            <accessor source="#nekoShape-map1-array" count="304" stride="2">
+              <param name="S" type="float"/>
+              <param name="T" type="float"/>
+            </accessor>
+          </technique_common>
+        </source>
+        <vertices id="nekoShape-vertices">
+          <input semantic="POSITION" source="#nekoShape-positions"/>
+        </vertices>
+        <triangles material="initialShadingGroup" count="246">
+          <input semantic="VERTEX" source="#nekoShape-vertices" offset="0"/>
+          <input semantic="TEXCOORD" source="#nekoShape-map1" offset="1" set="0"/>
+          <p>2 28 8 44 4 0 4 0 8 44 5 3 5 97 7 98 4 96 4 96 7 98 6 99 6 99 7 98 0 101 0 101 7 98 1 100 5 97 3 102 7 98 1 100 7 98 3 102 0 101 2 103 6 99 6 99 2 103 4 96 8 50 3 52 5 4 9 40 15 66 14 75 10 74 11 31 15 67 13 105 17 106 12 104 12 104 17 106 16 107 19 48 18 64 71 82 71 81 72 21 19 49 19 49 72 21 20 85 73 108 74 109 21 111 21 111 74 109 22 110 18 16 24 57 23 79 19 46 25 27 24 59 20 112 21 111 25 113 22 110 1 100 21 111 23 26 28 88 27 78 24 55 3 7 28 89 25 113 21 111 3 102 3 102 21 111 1 100 0 101 1 100 29 114 27 30 31 62 30 73 32 92 31 60 28 86 3 53 8 51 32 90 29 114 2 103 0 101 30 33 31 71 34 42 31 32 36 13 35 22 36 14 32 94 2 1 2 76 33 24 37 39 34 37 35 35 37 20 35 36 36 12 37 15 36 38 2 95 37 6 10 72 9 5 38 41 39 115 40 116 41 118 41 118 40 116 42 117 41 118 42 117 43 120 43 120 42 117 44 119 45 121 46 122 39 115 39 115 46 122 40 116 42 117 40 116 44 119 40 116 46 122 44 119 45 121 39 115 43 120 43 120 39 115 41 118 48 124 50 125 47 123 47 123 50 125 49 126 50 125 52 127 49 126 49 126 52 127 51 128 48 124 47 123 54 130 53 129 54 130 47 123 48 124 54 130 50 125 54 130 52 127 50 125 47 123 49 126 53 129 53 129 49 126 51 128 53 129 51 128 55 131 55 131 51 128 60 132 38 133 43 120 10 134 57 135 54 130 56 136 68 137 12 104 11 138 54 130 57 135 69 140 69 140 57 135 58 139 69 140 58 139 12 104 13 105 12 104 58 139 45 121 52 127 46 122 61 141 43 120 38 133 56 136 63 142 62 143 65 144 67 145 66 146 66 146 67 145 63 142 63 142 67 145 62 143 64 147 62 143 65 144 65 144 62 143 67 145 46 122 68 137 44 119 46 122 69 140 68 137 54 130 69 140 52 127 63 142 56 136 54 130 14 8 71 83 70 69 71 80 11 11 72 84 11 138 12 104 72 148 72 148 12 104 16 107 73 108 20 112 16 107 16 107 20 112 72 148 16 107 17 106 73 108 73 108 17 106 74 109 57 135 64 147 59 149 56 136 62 143 64 147 57 135 59 149 58 139 10 134 44 119 11 138 10 134 43 120 44 119 68 137 11 138 44 119 13 105 58 139 59 149 19 47 24 58 18 65 19 18 20 61 25 43 24 25 25 45 3 63 73 108 21 111 20 112 54 130 53 129 63 142 63 142 53 129 55 131 52 127 69 140 46 122 15 68 11 77 71 17 56 136 64 147 57 135 32 91 28 29 3 54 2 19 32 34 8 2 61 141 45 121 43 120 51 128 45 121 60 132 60 132 45 121 61 141 45 121 51 128 52 127 34 42 31 71 35 23 31 32 32 93 36 13 10 9 15 66 9 40 15 10 71 83 14 8 71 82 18 64 70 70 23 26 24 56 28 88 27 30 28 87 31 62 29 114 1 100 26 150 33 151 2 103 29 114 69 140 12 104 68 137 26 150 1 100 22 110 80 155 83 154 79 152 79 152 83 154 77 153 81 159 82 158 79 156 79 156 82 158 80 157 81 159 75 161 82 158 82 158 75 161 76 160 80 157 82 158 78 162 76 160 78 162 82 158 79 156 77 163 81 159 81 159 77 163 75 161 83 164 80 166 78 165 9 167 14 169 87 168 84 170 87 172 85 171 88 176 17 175 86 173 86 173 17 175 13 174 89 177 122 179 18 178 122 180 89 183 123 181 123 181 89 183 90 182 124 184 91 187 74 185 74 185 91 187 22 186 18 188 23 190 92 189 89 191 92 193 93 192 90 194 93 195 91 187 22 186 91 187 76 160 23 196 27 198 94 197 92 199 94 201 78 200 93 195 78 162 91 187 91 187 78 162 76 160 75 161 29 202 76 160 27 203 30 205 95 204 96 206 94 208 95 207 78 209 96 211 83 210 29 202 75 161 77 163 30 212 34 214 95 213 95 215 97 217 98 216 98 218 77 220 96 219 77 221 37 223 33 222 34 224 37 226 97 225 97 227 37 229 98 228 98 230 37 232 77 231 84 233 38 235 9 234 99 236 101 239 100 237 100 237 101 239 102 238 101 239 103 241 102 238 102 238 103 241 104 240 105 242 99 236 106 243 106 243 99 236 100 237 102 238 104 240 100 237 100 237 104 240 106 243 105 242 103 241 99 236 99 236 103 241 101 239 109 247 110 246 107 244 107 244 110 246 108 245 111 249 112 248 109 247 109 247 112 248 110 246 108 245 114 251 107 244 113 250 107 244 114 251 108 245 110 246 114 251 110 246 112 248 114 251 111 249 109 247 113 250 113 250 109 247 107 244 60 253 111 249 55 252 55 252 111 249 113 250 38 254 84 255 103 241 116 256 115 257 114 251 120 258 85 259 86 173 114 251 121 261 116 256 116 256 121 261 117 260 121 261 86 173 117 260 13 174 117 260 86 173 105 242 106 243 112 248 61 262 38 254 103 241 115 257 118 264 63 263 65 265 66 267 119 266 66 267 63 263 119 266 119 266 63 263 118 264 64 268 65 265 118 264 118 264 65 265 119 266 106 243 104 240 120 258 106 243 120 258 121 261 114 251 112 248 121 261 63 263 114 251 115 257 14 269 70 271 122 270 122 272 123 274 85 273 85 259 123 275 86 173 86 173 123 275 88 176 123 275 90 194 88 176 88 176 90 194 124 184 88 176 124 184 17 175 17 175 124 184 74 185 116 256 59 276 64 268 115 257 64 268 118 264 116 256 117 260 59 276 84 255 85 259 104 240 84 255 104 240 103 241 120 258 104 240 85 259 13 174 59 276 117 260 89 277 18 279 92 278 89 280 93 282 90 281 92 283 78 285 93 284 124 184 90 194 91 187 55 252 113 250 63 263 63 263 113 250 114 251 112 248 106 243 121 261 87 286 122 288 85 287 115 257 116 256 64 268 96 289 78 291 94 290 77 292 83 294 96 293 61 262 103 241 105 242 61 262 105 242 60 253 60 253 105 242 111 249 105 242 112 248 111 249 34 214 97 295 95 213 95 215 98 216 96 296 84 297 9 167 87 168 87 298 14 269 122 270 122 179 70 299 18 178 23 196 94 197 92 300 27 203 95 204 94 301 29 202 26 302 76 160 33 303 29 202 77 163 121 261 120 258 86 173 26 302 22 186 76 160</p>
+        </triangles>
+      </mesh>
+      <extra>
+        <technique profile="MAYA">
+          <double_sided>0</double_sided>
+        </technique>
+      </extra>
+    </geometry>
+  </library_geometries>
+  <library_controllers>
+    <controller id="nekoShape-skin" name="skinCluster1">
+      <skin source="#nekoShape">
+        <bind_shape_matrix>1 0 0 0 0 1 0 0 0 0 1 0 0 0 0 1</bind_shape_matrix>
+        <source id="nekoShape-skin-joints">
+          <Name_array id="nekoShape-skin-joints-array" count="7">bone0 bone1 bone2 bone3 bone4 bone5 bone6</Name_array>
+          <technique_common>
+            <accessor source="#nekoShape-skin-joints-array" count="7" stride="1">
+              <param name="JOINT" type="Name"/>
+            </accessor>
+          </technique_common>
+        </source>
+        <source id="nekoShape-skin-bind_poses">
+          <float_array id="nekoShape-skin-bind_poses-array" count="112">0 -0.169391 -0.985549 5.45762 0 0.985549 -0.169391 -4.21052 1 0 0 0 0 0 0 1 1 0 0 0.000000 0 1 0 -11.0337 0 0 1 -6.24823 0 0 0 1 1 0 0 -3.62391 0 1 0 -2.34136 0 0 1 -5.43668 0 0 0 1 1 0 0 3.7888 0 1 0 -2.63851 0 0 1 -6.04112 0 0 0 1 1 0 0 -2.19577 0 1 0 -1.95263 0 0 1 4.38459 0 0 0 1 1 0 0 2.38225 0 1 0 -1.63781 0 0 1 4.13532 0 0 0 1 1 0 0 0 0 1 0 -5.46413 0 0 1 4.1242 0 0 0 1</float_array>
+          <technique_common>
+            <accessor source="#nekoShape-skin-bind_poses-array" count="7" stride="16">
+              <param name="TRANSFORM" type="float4x4"/>
+            </accessor>
+          </technique_common>
+        </source>
+        <source id="nekoShape-skin-weights">
+          <float_array id="nekoShape-skin-weights-array" count="1">1</float_array>
+          <technique_common>
+            <accessor source="#nekoShape-skin-weights-array" count="1" stride="1">
+              <param name="WEIGHT" type="float"/>
+            </accessor>
+          </technique_common>
+        </source>
+        <joints>
+          <input semantic="JOINT" source="#nekoShape-skin-joints"/>
+          <input semantic="INV_BIND_MATRIX" source="#nekoShape-skin-bind_poses"/>
+        </joints>
+        <vertex_weights count="125">
+          <input semantic="JOINT" source="#nekoShape-skin-joints" offset="0"/>
+          <input semantic="WEIGHT" source="#nekoShape-skin-weights" offset="1"/>
+          <vcount>1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 </vcount>
+          <v>1 0 1 0 1 0 1 0 1 0 1 0 1 0 1 0 1 0 1 0 0 0 0 0 0 0 0 0 1 0 1 0 1 0 1 0 1 0 1 0 1 0 1 0 1 0 1 0 1 0 1 0 1 0 1 0 1 0 1 0 1 0 1 0 1 0 1 0 1 0 1 0 1 0 1 0 0 0 2 0 2 0 2 0 2 0 0 0 0 0 0 0 0 0 4 0 4 0 4 0 4 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 6 0 6 0 6 0 0 0 0 0 1 0 1 0 1 0 1 0 1 0 1 0 1 0 1 0 1 0 1 0 1 0 1 0 1 0 1 0 0 0 0 0 0 0 1 0 1 0 1 0 1 0 1 0 1 0 1 0 1 0 1 0 1 0 1 0 1 0 3 0 3 0 3 0 3 0 0 0 0 0 0 0 0 0 5 0 5 0 5 0 5 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 6 0 0 0 0 0 1 0 1 0 1 0</v>
+        </vertex_weights>
+      </skin>
+    </controller>
+  </library_controllers>
+  <library_visual_scenes>
+    <visual_scene id="VisualSceneNode" name="_0_cat_smooth_bake_channel">
+      <node id="neko" name="neko" type="NODE">
+        <rotate sid="rotateZ">0 0 1 0</rotate>
+        <rotate sid="rotateY">0 1 0 0</rotate>
+        <rotate sid="rotateX">1 0 0 0</rotate>
+        <instance_controller url="#nekoShape-skin">
+          <skeleton>#root</skeleton>
+          <skeleton>#bl</skeleton>
+          <skeleton>#br</skeleton>
+          <skeleton>#tail</skeleton>
+          <bind_material>
+            <technique_common>
+              <instance_material symbol="initialShadingGroup" target="#lambert1">
+                <bind_vertex_input semantic="TEX0" input_semantic="TEXCOORD" input_set="0"/>
+                <bind_vertex_input semantic="TEX1" input_semantic="TEXCOORD" input_set="0"/>
+              </instance_material>
+            </technique_common>
+          </bind_material>
+        </instance_controller>
+      </node>
+      <node id="root" name="root" sid="bone0" type="JOINT">
+        <translate sid="translate">0 5.07414 4.66552</translate>
+        <rotate sid="jointOrientZ">0 0 1 -90</rotate>
+        <rotate sid="jointOrientY">0 1 0 80.2476</rotate>
+        <rotate sid="jointOrientX">1 0 0 -90</rotate>
+        <node id="ass" name="ass" type="JOINT">
+          <translate sid="translate">7.9993 0.379292 0</translate>
+          <rotate sid="jointOrientZ">0 0 1 -51.6605</rotate>
+          <rotate sid="jointOrientY">0 1 0 -40.6172</rotate>
+          <rotate sid="jointOrientX">1 0 0 50.0688</rotate>
+          <node id="bl" name="bl" sid="bone4" type="JOINT">
+            <translate sid="translate">3.25637 0.040483 0.107336</translate>
+            <rotate sid="jointOrientZ">0 0 1 79.6034</rotate>
+            <rotate sid="jointOrientY">0 1 0 -28.7412</rotate>
+            <rotate sid="jointOrientX">1 0 0 6.01133</rotate>
+            <rotate sid="rotateZ">0 0 1 -31.8968</rotate>
+            <rotate sid="rotateY">0 1 0 -8.68171</rotate>
+            <rotate sid="rotateX">1 0 0 -22.3473</rotate>
+            <extra>
+              <technique profile="MAYA">
+                <dynamic_attributes>
+                  <blendOrient1 short_name="blendOrient1" type="float">0</blendOrient1>
+                </dynamic_attributes>
+                <segment_scale_compensate>1</segment_scale_compensate>
+              </technique>
+            </extra>
+          </node>
+          <node id="br" name="br" sid="bone5" type="JOINT">
+            <translate sid="translate">0.395374 -2.93988 -1.90551</translate>
+            <rotate sid="jointOrientZ">0 0 1 96.0959</rotate>
+            <rotate sid="jointOrientY">0 1 0 62.9594</rotate>
+            <rotate sid="jointOrientX">1 0 0 69.7915</rotate>
+            <rotate sid="rotateZ">0 0 1 -62.5208</rotate>
+            <rotate sid="rotateY">0 1 0 -115.999</rotate>
+            <rotate sid="rotateX">1 0 0 42.7996</rotate>
+            <extra>
+              <technique profile="MAYA">
+                <segment_scale_compensate>1</segment_scale_compensate>
+              </technique>
+            </extra>
+          </node>
+          <node id="tail" name="tail" sid="bone6" type="JOINT">
+            <translate sid="translate">-0.608201 1.29555 -0.735102</translate>
+            <rotate sid="jointOrientZ">0 0 1 41.8004</rotate>
+            <rotate sid="jointOrientY">0 1 0 -29.0573</rotate>
+            <rotate sid="jointOrientX">1 0 0 37.7825</rotate>
+            <rotate sid="rotateZ">0 0 1 0.061993</rotate>
+            <rotate sid="rotateY">0 1 0 -0.079972</rotate>
+            <rotate sid="rotateX">1 0 0 -37.7826</rotate>
+            <extra>
+              <technique profile="MAYA">
+                <segment_scale_compensate>1</segment_scale_compensate>
+              </technique>
+            </extra>
+          </node>
+          <extra>
+            <technique profile="MAYA">
+              <segment_scale_compensate>1</segment_scale_compensate>
+            </technique>
+          </extra>
+        </node>
+        <node id="head" name="head" sid="bone1" type="JOINT">
+          <translate sid="translate">-2.56934 5.60539 -0.000000</translate>
+          <rotate sid="jointOrientZ">0 0 1 0</rotate>
+          <rotate sid="jointOrientY">0 1 0 0</rotate>
+          <rotate sid="jointOrientX">1 0 0 0</rotate>
+          <rotate sid="rotateZ">0 0 1 0</rotate>
+          <rotate sid="rotateY">0 1 0 -90</rotate>
+          <rotate sid="rotateX">1 0 0 9.75243</rotate>
+          <extra>
+            <technique profile="MAYA">
+              <segment_scale_compensate>1</segment_scale_compensate>
+            </technique>
+          </extra>
+        </node>
+        <node id="fl" name="fl" sid="bone2" type="JOINT">
+          <translate sid="translate">-0.297102 -2.82392 3.62391</translate>
+          <rotate sid="jointOrientZ">0 0 1 0</rotate>
+          <rotate sid="jointOrientY">0 1 0 0</rotate>
+          <rotate sid="jointOrientX">1 0 0 -33.1525</rotate>
+          <rotate sid="rotateZ">0 0 1 -90</rotate>
+          <rotate sid="rotateY">0 1 0 -56.8475</rotate>
+          <rotate sid="rotateX">1 0 0 99.7524</rotate>
+          <extra>
+            <technique profile="MAYA">
+              <segment_scale_compensate>1</segment_scale_compensate>
+            </technique>
+          </extra>
+        </node>
+        <node id="fr" name="fr" sid="bone3" type="JOINT">
+          <translate sid="translate">-0.943144 -2.63345 -3.7888</translate>
+          <rotate sid="jointOrientZ">0 0 1 0</rotate>
+          <rotate sid="jointOrientY">0 1 0 0</rotate>
+          <rotate sid="jointOrientX">1 0 0 28.7114</rotate>
+          <rotate sid="rotateZ">0 0 1 90</rotate>
+          <rotate sid="rotateY">0 1 0 -61.2886</rotate>
+          <rotate sid="rotateX">1 0 0 -80.2476</rotate>
+          <extra>
+            <technique profile="MAYA">
+              <segment_scale_compensate>1</segment_scale_compensate>
+            </technique>
+          </extra>
+        </node>
+        <extra>
+          <technique profile="MAYA">
+            <segment_scale_compensate>1</segment_scale_compensate>
+          </technique>
+        </extra>
+      </node>
+      <extra>
+        <technique profile="FCOLLADA">
+          <start_time>0.041666</start_time>
+          <end_time>2</end_time>
+        </technique>
+      </extra>
+    </visual_scene>
+  </library_visual_scenes>
+  <scene>
+    <instance_visual_scene url="#VisualSceneNode"/>
+  </scene>
+</COLLADA>

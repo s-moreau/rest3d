@@ -381,6 +381,7 @@ define(['q','glmatrixExt'], function (Q) {
         },
         // parse an effect node
         parse_effect: function(_effectID) {
+            if (this.effects[_effectID]) return this.effects[_effectID];
             if (!this.xml) return null;
             var effectXML = this.xml.getElementById(_effectID);
             if (COLLADA._validate) {
@@ -459,6 +460,7 @@ define(['q','glmatrixExt'], function (Q) {
             }
             effect.newparams = newparams;
 
+            this.effects[_effectID] = effect;
             return effect;
         },
         _parseEffectParam: function(node) {
@@ -814,7 +816,7 @@ define(['q','glmatrixExt'], function (Q) {
                 }
             }
             var effectID = materialXML.getChildrenByTagName('instance_effect')[0].getAttribute('url').substring(1);
-            if (!this.effects[effectID]) var effect=this.parse_effect(effectID);
+            var effect=this.parse_effect(effectID);
             var material = {};
             material.name = materialXML.getAttribute('name');
             material.parameters = effect.parameters;

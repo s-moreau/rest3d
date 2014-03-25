@@ -1,0 +1,565 @@
+{
+    "accessors": {
+        "accessor_15": {
+            "bufferView": "bufferView_35",
+            "byteOffset": 0,
+            "byteStride": 0,
+            "count": 738,
+            "type": 5123
+        },
+        "accessor_17": {
+            "bufferView": "bufferView_36",
+            "byteOffset": 0,
+            "byteStride": 12,
+            "count": 304,
+            "max": [
+                7.94914,
+                24.0635,
+                15.247
+            ],
+            "min": [
+                -7.94914,
+                0,
+                -8.07503
+            ],
+            "type": 35665
+        },
+        "accessor_19": {
+            "bufferView": "bufferView_36",
+            "byteOffset": 3648,
+            "byteStride": 8,
+            "count": 304,
+            "max": [
+                0.984593,
+                1
+            ],
+            "min": [
+                0.069703,
+                0
+            ],
+            "type": 35664
+        },
+        "accessor_28": {
+            "bufferView": "bufferView_36",
+            "byteOffset": 6080,
+            "byteStride": 16,
+            "count": 304,
+            "max": [
+                1,
+                0,
+                0,
+                0
+            ],
+            "min": [
+                1,
+                0,
+                0,
+                0
+            ],
+            "type": 35666
+        },
+        "accessor_31": {
+            "bufferView": "bufferView_36",
+            "byteOffset": 10944,
+            "byteStride": 16,
+            "count": 304,
+            "max": [
+                6,
+                0,
+                0,
+                0
+            ],
+            "min": [
+                0,
+                0,
+                0,
+                0
+            ],
+            "type": 35666
+        }
+    },
+    "animations": {},
+    "asset": {
+        "extras": {
+            "premultipliedAlpha": true
+        },
+        "generator": "collada2gltf@a7723392984b56c79c42c985f61661dc2fcd88ed"
+    },
+    "bufferViews": {
+        "bufferView_34": {
+            "buffer": "cat-skin",
+            "byteLength": 448,
+            "byteOffset": 0
+        },
+        "bufferView_35": {
+            "buffer": "cat-skin",
+            "byteLength": 1476,
+            "byteOffset": 448,
+            "target": 34963
+        },
+        "bufferView_36": {
+            "buffer": "cat-skin",
+            "byteLength": 15808,
+            "byteOffset": 1924,
+            "target": 34962
+        }
+    },
+    "buffers": {
+        "cat-skin": {
+            "byteLength": 17732,
+            "path": "cat-skin.bin",
+            "type": "arraybuffer"
+        }
+    },
+    "images": {
+        "image_0": {
+            "path": "20_cat.png"
+        }
+    },
+    "materials": {
+        "lambert1-fx": {
+            "instanceTechnique": {
+                "technique": "technique0",
+                "values": {
+                    "ambient": [
+                        0,
+                        0,
+                        0,
+                        1
+                    ],
+                    "diffuse": "texture_image_0",
+                    "emission": [
+                        0,
+                        0,
+                        0,
+                        1
+                    ]
+                }
+            },
+            "name": "lambert1"
+        }
+    },
+    "meshes": {
+        "nekoShape": {
+            "name": "nekoShape",
+            "primitives": [
+                {
+                    "attributes": {
+                        "JOINT": "accessor_31",
+                        "POSITION": "accessor_17",
+                        "TEXCOORD_0": "accessor_19",
+                        "WEIGHT": "accessor_28"
+                    },
+                    "indices": "accessor_15",
+                    "material": "lambert1-fx",
+                    "primitive": 4
+                }
+            ]
+        }
+    },
+    "nodes": {
+        "ass": {
+            "children": [
+                "bl",
+                "br",
+                "tail"
+            ],
+            "jointId": "ass",
+            "matrix": [
+                0.47087,
+                -0.59538,
+                0.651002,
+                0,
+                0.193785,
+                0.789709,
+                0.582071,
+                0,
+                -0.860656,
+                -0.147925,
+                0.487226,
+                0,
+                7.9993,
+                0.379292,
+                0,
+                1
+            ],
+            "name": "ass"
+        },
+        "bl": {
+            "children": [],
+            "jointId": "bone4",
+            "matrix": [
+                0.651001,
+                0.582072,
+                0.487227,
+                0,
+                -0.666538,
+                0.745471,
+                1.618e-07,
+                0,
+                -0.363213,
+                -0.324755,
+                0.873276,
+                0,
+                3.25637,
+                0.040483,
+                0.107336,
+                1
+            ],
+            "name": "bl"
+        },
+        "br": {
+            "children": [],
+            "jointId": "bone5",
+            "matrix": [
+                0.651002,
+                0.582071,
+                0.487227,
+                0,
+                -0.666537,
+                0.745472,
+                -2.20236e-07,
+                0,
+                -0.363214,
+                -0.324755,
+                0.873275,
+                0,
+                0.395374,
+                -2.93988,
+                -1.90551,
+                1
+            ],
+            "name": "br"
+        },
+        "fl": {
+            "children": [],
+            "jointId": "bone2",
+            "matrix": [
+                2.45526e-11,
+                -4.48967e-11,
+                1,
+                0,
+                -0.169391,
+                0.985549,
+                4.84069e-11,
+                0,
+                -0.985549,
+                -0.169391,
+                1.65927e-11,
+                0,
+                -0.297102,
+                -2.82392,
+                3.62391,
+                1
+            ],
+            "name": "fl"
+        },
+        "fr": {
+            "children": [],
+            "jointId": "bone3",
+            "matrix": [
+                2.15683e-11,
+                4.48965e-11,
+                1,
+                0,
+                -0.169391,
+                0.985549,
+                -4.05942e-11,
+                0,
+                -0.985549,
+                -0.169391,
+                2.88616e-11,
+                0,
+                -0.943144,
+                -2.63345,
+                -3.7888,
+                1
+            ],
+            "name": "fr"
+        },
+        "head": {
+            "children": [],
+            "jointId": "bone1",
+            "matrix": [
+                4.48966e-11,
+                0,
+                1,
+                0,
+                -0.169391,
+                0.985549,
+                7.6051e-12,
+                0,
+                -0.985549,
+                -0.169391,
+                4.42478e-11,
+                0,
+                -2.56934,
+                5.60539,
+                0,
+                1
+            ],
+            "name": "head"
+        },
+        "neko": {
+            "children": [],
+            "instanceSkin": {
+                "skeletons": [
+                    "root",
+                    "bl",
+                    "br",
+                    "tail"
+                ],
+                "skin": "nekoShape-skin",
+                "sources": [
+                    "nekoShape"
+                ]
+            },
+            "matrix": [
+                1,
+                0,
+                0,
+                0,
+                0,
+                1,
+                0,
+                0,
+                0,
+                0,
+                1,
+                0,
+                0,
+                0,
+                0,
+                1
+            ],
+            "name": "neko"
+        },
+        "root": {
+            "children": [
+                "ass",
+                "head",
+                "fl",
+                "fr"
+            ],
+            "jointId": "bone0",
+            "matrix": [
+                7.60508e-12,
+                -0.169391,
+                -0.985549,
+                0,
+                6.48803e-13,
+                0.985549,
+                -0.169391,
+                0,
+                1,
+                6.48803e-13,
+                7.60508e-12,
+                0,
+                0,
+                5.07414,
+                4.66552,
+                1
+            ],
+            "name": "root"
+        },
+        "tail": {
+            "children": [],
+            "jointId": "bone6",
+            "matrix": [
+                0.651002,
+                0.582071,
+                0.487227,
+                0,
+                -0.666537,
+                0.745472,
+                -8.4836e-07,
+                0,
+                -0.363214,
+                -0.324754,
+                0.873275,
+                0,
+                -0.608201,
+                1.29555,
+                -0.735102,
+                1
+            ],
+            "name": "tail"
+        }
+    },
+    "profile": "WebGL 1.0.2",
+    "programs": {
+        "program_0": {
+            "attributes": [
+                "a_joint",
+                "a_position",
+                "a_texcoord0",
+                "a_weight"
+            ],
+            "fragmentShader": "cat-skin0FS",
+            "vertexShader": "cat-skin0VS"
+        }
+    },
+    "samplers": {
+        "sampler_0": {
+            "magFilter": 9729,
+            "minFilter": 9729,
+            "wrapS": 10497,
+            "wrapT": 10497
+        }
+    },
+    "scene": "defaultScene",
+    "scenes": {
+        "defaultScene": {
+            "nodes": [
+                "neko",
+                "root"
+            ]
+        }
+    },
+    "shaders": {
+        "cat-skin0FS": {
+            "path": "cat-skin0FS.glsl",
+            "type": 35632
+        },
+        "cat-skin0VS": {
+            "path": "cat-skin0VS.glsl",
+            "type": 35633
+        }
+    },
+    "skins": {
+        "nekoShape-skin": {
+            "bindShapeMatrix": [
+                1,
+                0,
+                0,
+                0,
+                0,
+                1,
+                0,
+                0,
+                0,
+                0,
+                1,
+                0,
+                0,
+                0,
+                0,
+                1
+            ],
+            "inverseBindMatrices": {
+                "bufferView": "bufferView_34",
+                "byteOffset": 0,
+                "count": 7,
+                "type": 35676
+            },
+            "joints": [
+                "bone0",
+                "bone1",
+                "bone2",
+                "bone3",
+                "bone4",
+                "bone5",
+                "bone6"
+            ]
+        }
+    },
+    "techniques": {
+        "technique0": {
+            "parameters": {
+                "ambient": {
+                    "type": 35666
+                },
+                "diffuse": {
+                    "type": 35678
+                },
+                "emission": {
+                    "type": 35666
+                },
+                "joint": {
+                    "semantic": "JOINT",
+                    "type": 35666
+                },
+                "jointMat": {
+                    "semantic": "JOINT_MATRIX",
+                    "type": 35676
+                },
+                "modelViewMatrix": {
+                    "semantic": "MODELVIEW",
+                    "type": 35676
+                },
+                "position": {
+                    "semantic": "POSITION",
+                    "type": 35665
+                },
+                "projectionMatrix": {
+                    "semantic": "PROJECTION",
+                    "type": 35676
+                },
+                "texcoord0": {
+                    "semantic": "TEXCOORD_0",
+                    "type": 35664
+                },
+                "weight": {
+                    "semantic": "WEIGHT",
+                    "type": 35666
+                }
+            },
+            "pass": "defaultPass",
+            "passes": {
+                "defaultPass": {
+                    "details": {
+                        "commonProfile": {
+                            "extras": {
+                                "doubleSided": false
+                            },
+                            "lightingModel": "Lambert",
+                            "parameters": [
+                                "diffuse",
+                                "emission",
+                                "jointMat",
+                                "modelViewMatrix",
+                                "projectionMatrix"
+                            ],
+                            "texcoordBindings": {
+                                "diffuse": "TEXCOORD_0"
+                            }
+                        },
+                        "type": "COLLADA-1.4.1/commonProfile"
+                    },
+                    "instanceProgram": {
+                        "attributes": {
+                            "a_joint": "joint",
+                            "a_position": "position",
+                            "a_texcoord0": "texcoord0",
+                            "a_weight": "weight"
+                        },
+                        "program": "program_0",
+                        "uniforms": {
+                            "u_diffuse": "diffuse",
+                            "u_emission": "emission",
+                            "u_jointMat": "jointMat",
+                            "u_modelViewMatrix": "modelViewMatrix",
+                            "u_projectionMatrix": "projectionMatrix"
+                        }
+                    },
+                    "states": {
+                        "blendEnable": 0,
+                        "cullFaceEnable": 1,
+                        "depthMask": 1,
+                        "depthTestEnable": 1
+                    }
+                }
+            }
+        }
+    },
+    "textures": {
+        "texture_image_0": {
+            "format": 6408,
+            "internalFormat": 6408,
+            "sampler": "sampler_0",
+            "source": "image_0",
+            "target": 3553,
+            "type": 5121
+        }
+    }
+}
