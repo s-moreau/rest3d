@@ -735,6 +735,16 @@ if (!window.performance || !window.performance.now) {
             href[0].click();
             href[0].remove();
         }
+        function convert(node){
+            var url = node.attr("path");
+            var params= {};
+            params.name = url;
+            var callback = function(data){
+                console.debug(data.name)
+            }
+            rest3d.convert(params,callback);
+        }
+
         function display(node){
             node.attr("type","uploaded");
             var uri = node.attr("asseturi");
@@ -751,6 +761,7 @@ if (!window.performance || !window.performance.now) {
                     var url = 'http://'+location.host+'/rest3d/'+path;
                     var ext = name.match(/\.[^.]+$/);
                     if(ext[0]=='.DAE'||ext[0]=='.dae'){
+                        node.attr("path",url);
                         html += '<li><a>name: '+name+' </a>'+'<a>size: '+size+' </a>'+'<a href="'+url+'">download</a>'+'<button id="model_'+size+'">Display</button>'+'</li>';
                         buffer.push({'id':'#model_'+size,'url':url});}
                     else{
