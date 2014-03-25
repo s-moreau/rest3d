@@ -738,9 +738,9 @@ if (!window.performance || !window.performance.now) {
         function convert(node){
             var url = node.attr("path");
             var params= {};
-            params.name = url;
+            params.file.name = url;
             var callback = function(data){
-                console.debug(data.name)
+                console.debug(data.file.name)
             }
             rest3d.convert(params,callback);
         }
