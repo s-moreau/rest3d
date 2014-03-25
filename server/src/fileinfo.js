@@ -1,4 +1,3 @@
-
   'use strict';
 
   var fs = require('fs');
@@ -22,7 +21,6 @@
       //uploadDir: __dirname + '/../upload',
       tmpDir: 'tmp',
       uploadDir: 'upload',
-      uploadUserDir : '',
       uploadUrl: '/rest3d/upload/',
       maxPostSize: 11000000000, // 11 GB
       minFileSize: 1,

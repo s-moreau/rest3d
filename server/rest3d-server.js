@@ -582,7 +582,7 @@ server.post(/^\/rest3d\/convert.*/,function(req,res,next){
      }).on('end', function(){//
      	console.log('now converting collada');
      	console.log(params);
-     	console.log(params.uri);
+     	 	console.log(params.uri);
      	// if (!params.name && !params.uri || !params.name.toLowerCase().endsWith('dae')) { 
      	// 	h.handleError({error: 'invalid file '+params.name+' in convert'});
      	// 	return;
@@ -631,18 +631,7 @@ server.post(/^\/rest3d\/convert.*/,function(req,res,next){
 			outputC2J = output;
 			console.log('Exit code:', code);
 	  		console.log('Program output:', output);
-			// function getFiles(dir){
-			//     var files = fs.readdirSync(dir);
-			//     for(var i in files){
-			//         if (!files.hasOwnProperty(i)) continue;
-			//         var name = dir+'/'+files[i];
-			//         if (fs.statSync(name).isDirectory()){
-			//             getFiles(name);
-			//         }else{
-			//             console.log(name);
-			//         }
-			//     }
-			// }
+					
 			// hack, copy all images in the output_dir, so the viewer will work
 		    fs.readdir('upload/', function (err, list) {
                 list.forEach(function (name) {
