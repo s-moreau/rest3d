@@ -844,12 +844,12 @@ if (!window.performance || !window.performance.now) {
                         var url = "";
                         if (node == -1)
                         {
-                            url = "http://rest3d.fl4re.com/rest3d/warehouse/";
+                            url = "/rest3d/warehouse/";
                         }
                         else if(node.attr('rel')=="collection"||"model")
                         {
                             nodeId = node.attr('id');
-                            url = "http://rest3d.fl4re.com/rest3d/warehouse/" + nodeId;
+                            url = "/rest3d/warehouse/" + nodeId;
                         }
                         return url;
                     },
