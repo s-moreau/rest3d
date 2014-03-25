@@ -581,7 +581,8 @@ server.post(/^\/rest3d\/convert.*/,function(req,res,next){
      	h.handleError(e);
      }).on('end', function(){//
      	console.log('now converting collada');
-
+     	console.log(params);
+     	 	console.log(params.uri);
      	if (!params.name || !params.name.toLowerCase().endsWith('dae')) { 
      		h.handleError({error: 'invalid file '+params.name+' in convert'});
      		return;
