@@ -913,7 +913,7 @@ if (!window.performance || !window.performance.now) {
                     var result = {};
                     if(node.attr("iconuri")){
                         result.icon = {'label':'Display icon','action':icon,};}
-                    if(node.attr("asseturi")){
+                    if(node.attr("asseturi")&&node.attr("type")!="uploaded"){
                         result.display = {'label':'Upload','action':display,};}
                     if(node.attr("rel")=="model"){
                         result.download = {'label':'Download','action':download,};
