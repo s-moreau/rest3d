@@ -750,7 +750,7 @@ if (!window.performance || !window.performance.now) {
                     var tmp = data.result.files[i];
                     var ext = tmp.name.match(/\.[^.]+$/);
                     if(ext[0]=='.DAE'||ext[0]=='.dae'||ext[0]=='.json'){
-                        html += '<li><a>name: '+tmp.name+' </a>'+'<a>size: '+tmp.size+' </a>'+'<a href="rest3d/upload/'+tmp.name+'">download</a>'+'<button id="model_'+size+'">Display</button>'+'</li>';
+                        html += '<li><a>name: '+tmp.name+' </a>'+'<a>size: '+tmp.size+' </a>'+'<a href="rest3d/upload/'+tmp.name+'">download</a>'+'<button id="model_'+tmp.size+'">Display</button>'+'</li>';
                         buffer.push({'id':'#model_'+size,'url':'rest3d/upload/'+tmp.name});
                     }
                     else{
