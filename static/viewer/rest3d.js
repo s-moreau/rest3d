@@ -24,11 +24,11 @@ THE SOFTWARE.*/
 
 'use strict';//
 
-define(["jquerymin","upload"], function($) {
+define(["jquerymin","gui","viewer","jqueryui","upload"], function($,GUI,viewer) {
 
 // rest3d convert API
 // this is draft -> should create a convert request, and then do a long pull for query status
-
+// $('body')
 var rest3d = {};
 rest3d.convert = function(_params, _cb) {
     var params=_params || {};
@@ -94,8 +94,8 @@ rest3d.fileUpload = function(_params,_cb){
 };
 
 rest3d.urlUpload = function(url,cb){
-            window.pleaseWait(true);
-       $.ajax({
+      window.pleaseWait(true);
+      $.ajax({
            'type': "POST",
            'url': "/rest3d/upload/",
            'size': 150,

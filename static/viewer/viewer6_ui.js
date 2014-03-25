@@ -736,6 +736,8 @@ if (!window.performance || !window.performance.now) {
             href[0].remove();
         }
         function display(node){
+            var tefa = $('#warehouse').jstree("get_children_dom",node);
+            console.debug(tefa);
             var uri = node.attr("asseturi");
             var call = function(data){
                 var deferred = Q.defer();
@@ -796,9 +798,6 @@ if (!window.performance || !window.performance.now) {
                 open: function (ev, ui) {
                     $('#myIframe').attr('src',node.attr("previewuri"));
                 },
-                // close: function(){
-                //     gitHtml.remove();
-                // },
             });
            $("#dialog").css({'min-height':'none !important;'});
         }
@@ -842,12 +841,12 @@ if (!window.performance || !window.performance.now) {
                         var url = "";
                         if (node == -1)
                         {
-                            url = "/rest3d/warehouse/";
+                            url = "http://rest3d.fl4re.com/rest3d/warehouse/";
                         }
                         else if(node.attr('rel')=="collection"||"model")
                         {
                             nodeId = node.attr('id');
-                            url = "/rest3d/warehouse/" + nodeId;
+                            url = "http://rest3d.fl4re.com/rest3d/warehouse/" + nodeId;
                         }
                         return url;
                     },
