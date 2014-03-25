@@ -187,6 +187,7 @@ mat4.fromTrs = function (out, trs) {
     
     return out;
 };
+
 /**
  * Calculates the square distance between two n dimention elements
  */

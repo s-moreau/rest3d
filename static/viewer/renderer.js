@@ -93,6 +93,7 @@ define(['glmatrixExt'], function () {
 
       this.numVertices = 1;
       this.numIndices  = 0; 
+      this.numBones = 0
 
       this.updateMe = this.createMe = true; 
 
@@ -118,10 +119,21 @@ define(['glmatrixExt'], function () {
               this.numIndices=_primitive.INDEX.length;
               this.buffer.INDEX = _primitive.INDEX;
             } else {    
-              delete this.buffer.INDEX;
+              if (this.buffer.INDEX)
+                delete this.buffer.INDEX;
               this.numIndices  = 0; 
             }
             break;
+          case 'skin':
+            // special case - this is a uniform
+            if (_primitive.skin){
+              this.numBones = _primitive.skin.joints.length;
+              this.buffer.JOINT_MATRIX = new Float32Array(16*this.numBones);
+            } else {
+              this.numBones = 0;
+              if (this.buffer.JOINT_MATRIX)
+                delete this.buffer.JOINT_MATRIX;
+            }
           default:
             if (_primitive[key]){
               this.buffer[key] = _primitive[key];
@@ -156,6 +168,7 @@ define(['glmatrixExt'], function () {
             gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, this.glBuffer.INDEX);
             gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, this.buffer.INDEX, gl.STATIC_DRAW);
         };
+
         this.createMe = false; 
         this.updateMe = false;
     },
@@ -215,6 +228,7 @@ define(['glmatrixExt'], function () {
           var attribute = _channel.state.program.attributes[semantic];
           if (attribute.location>=0) {
             // if this attribute is connected to an array
+
             if (this.glBuffer[semantic]) {            
               
               // enable if not already enabled, or if marked for disable

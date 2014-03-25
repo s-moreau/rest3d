@@ -451,17 +451,21 @@ define(['q','glmatrixExt'], function (Q) {
     },
     _parse_deferredInstanceSkins: function()
     {
+      // at this point, transform already contains geometries -> meshes used for skinning
       for (var i=0; i< this.deferredInstanceSkins.length; i++) {
-        var transform = this.deferredInstanceSkins[i].transform;
         var node_instanceSkin = this.deferredInstanceSkins[i].node_instanceSkin;
         
         var skinID = node_instanceSkin.skin;
         var skeletons = node_instanceSkin.skeletons; // array of skeleton root
-        // at this point, transform already contains geometries -> meshes used for skinning
+
+        // parse_skin, resolve link to joints (nodes)
+
         var skin = this.parse_skin(skeletons,skinID);
+        var transform = this.deferredInstanceSkins[i].transform;
 
         skin.transform = transform;
         transform.skin = skin;
+
       }
     },
     _find_joint: function(_skeletons, _jointID) {
@@ -503,6 +507,8 @@ define(['q','glmatrixExt'], function (Q) {
           glTF.logError('Internal error: could not find joint '+jointID+' in _find_joint');
         skin.joints.push(joint);
       }
+
+      skin.jointMatrix = new Float32Array(skin_json.joints.length*16); // allocate value to be used by uniform
       var inverseBindMatrices = skin_json.inverseBindMatrices;
       var bufferview = this.json.bufferViews[inverseBindMatrices.bufferView];
       var buffer = this.buffers[bufferview.buffer]; // arraybuffer
