@@ -736,11 +736,7 @@ if (!window.performance || !window.performance.now) {
             href[0].remove();
         }
         function display(node){
-            // var tefa = $('#warehouse').jstree("get_children_dom",node);
-            // console.debug(tefa);
-            var id = "#"+node.attr("id");
-            var modify = $(id).children();
-            console.debug(modify);
+            node.attr("type","uploaded");
             var uri = node.attr("asseturi");
             var call = function(data){
                 var deferred = Q.defer();
@@ -870,6 +866,9 @@ if (!window.performance || !window.performance.now) {
                         result.display = {'label':'Upload','action':display,};}
                     if(node.attr("rel")=="model"){
                         result.download = {'label':'Download','action':download,};
+                    }
+                    if(node.attr("type")=="uploaded"){
+                        result.convert = {'label':'Convert','action':download,};
                     }
                     if(node.attr("previewuri")){
                         result.preview = {'label':'Preview model','action':preview,};}
