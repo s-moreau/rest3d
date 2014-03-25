@@ -68,12 +68,13 @@ module.exports = function (server) {
       try {
         tmpFiles.push(file.path);
         var fileInfo = new FileInfo(file);
+        fileInfo.options.uploadUserDir = file.id;
         fileInfo.safeName();
         map[file.path] = fileInfo;
         files.push(fileInfo);
 
       } catch(e) {
-        handler.handleError( e);
+        handler.handleError(e);
         return 
       };
     }).on('field', function (name, value) {
@@ -91,7 +92,6 @@ module.exports = function (server) {
           else {
             // turn {asset} into fileInfos
             var getFileInfos = function(results) {
-
               if (results.type === 'file') {
                 var fileInfo = new FileInfo(results);
                 fileInfo.safeName();
@@ -151,9 +151,9 @@ module.exports = function (server) {
         fs.unlinkSync(file.path);
         return;
       }
-      fs.renameSync(file.path, FileInfo.options.uploadDir + '/' + fileInfo.name);
-      console.log("uploaded "+FileInfo.options.uploadDir + '/' + fileInfo.name);
-      fileInfo.path = FileInfo.options.uploadDir + '/' + fileInfo.name;
+      fs.renameSync(file.path, FileInfo.options.uploadDir + '/' + FileInfo.options.uploadUserDir + '/'+ fileInfo.name);
+      console.log("uploaded "+FileInfo.options.uploadDir + '/' + FileInfo.options.uploadUserDir + '/'+ fileInfo.name);
+      fileInfo.path = FileInfo.options.uploadDir + '/' + FileInfo.options.uploadUserDir + '/'+ fileInfo.name;
       /* Image resize 
 
       if (FileInfo.options.imageTypes.test(fileInfo.name)) {

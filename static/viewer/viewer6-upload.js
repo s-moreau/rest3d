@@ -28,9 +28,11 @@ define(['jquerymin','rest3d','gltf','collada','viewer'], function ($,rest3d,glTF
   function setViewer6Upload($,upload,rest3d,viewer){
             var header=false;
             var index;
+            var id;
             var buttonToReplace;
             upload.callOnClick(function(){
                 header = upload.header();
+                id = "User_"+Math.floor(Math.random() * 1000000) + 1;
             });
             var url = '/rest3d/upload';
             var uploadButton = $('<button/>')
@@ -127,6 +129,7 @@ define(['jquerymin','rest3d','gltf','collada','viewer'], function ($,rest3d,glTF
                 }
                 data.context = header;
                 $.each(data.files, function (index, file) {
+                    file.id = id;
                     var ext = file.name.match(/\.[^.]+$/);//
                     if(ext[0]==".dae"||ext[0]==".DAE"){
                         var url =  '/rest3d/upload/'+decodeURIComponent(file.name);//
