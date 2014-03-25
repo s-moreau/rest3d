@@ -736,12 +736,15 @@ if (!window.performance || !window.performance.now) {
             href[0].remove();
         }
         function convert(node){
-            var url = node.attr("path").split('/');
+            var url = node.attr("path");
             var params= {};
             params.file = {};
-            params.file.name = url[5]+'/'+url[6]+'/'+url[7];
+            params.file.uri = "";
+            for(var i=5;i<url.length;i++){
+                params.file.uri += '/'+url[i];
+            }
             var callback = function(data){
-                console.debug(data.file.name)
+                console.debug(data.file.uri)
             }
             rest3d.convert(params,callback);
         }
