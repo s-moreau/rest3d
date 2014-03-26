@@ -249,7 +249,7 @@ define(   ['jquerymin','gltf','collada','renderer','camera','state','channel','q
     scene.endtime = window.performance.now();
 
     scenes.push(scene);
-    //$('#loadtimer').text('load time=' + (scene.endtime - scene.starttime));
+    $('#loadtimer').text('load time=' + (scene.endtime - scene.starttime));
     viewer.draw();
     if (viewer.onload)
       viewer.onload.call();
@@ -565,8 +565,8 @@ define(   ['jquerymin','gltf','collada','renderer','camera','state','channel','q
 
     }
     if (!pick) {
-      //$('#zoom').text('currentZoom is ' + viewer.currentZoom);
-      //$('#rot').text('currentRotation is ' + viewer.currentRotationX.toFixed(2) + ',' + viewer.currentRotationY.toFixed(2));
+      $('#zoom').text('currentZoom is ' + viewer.currentZoom);
+      $('#rot').text('currentRotation is ' + viewer.currentRotationX.toFixed(2) + ',' + viewer.currentRotationY.toFixed(2));
     }
 
     if (pick) {

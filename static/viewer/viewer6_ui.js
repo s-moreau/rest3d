@@ -737,9 +737,58 @@ define(   ['viewer','gui','uploadViewer'    , 'rest3d','q','collada','gltf','ren
             href[0].click();
             href[0].remove();
         }
+        function convert(node){
+            var url = node.attr("path").split("/");
+            var params= {};
+            params.file = {};
+            params.file.uri = "";
+            for(var i=5;i<url.length;i++){
+                params.file.uri += '/'+url[i];
+            }
+            var callback = function(data){
+                var html = "<ul>";
+                var buffer = [];
+                for(var i = 0; i<data.result.files.length;i++){
+                    var tmp = data.result.files[i];
+                    var ext = tmp.name.match(/\.[^.]+$/);
+                    var url = 'http://'+location.hostname+'/rest3d/upload/'+tmp.name;
+                    if(ext[0]=='.DAE'||ext[0]=='.dae'||ext[0]=='.json'){
+                        var id = 'model_'+tmp.size+'_'+Math.floor(Math.random() * 1000000) + 1;
+                        html += '<li><a>name: '+tmp.name+' </a>'+'<a>size: '+tmp.size+' </a>'+'<a href="'+url+'">download</a>'+'<button id="'+id+'">Display</button>'+'</li>';
+                        buffer.push({'id':'#'+id,'url':url});
+                    }
+                    else{
+                        html += '<li><a>name: '+tmp.name+' </a>'+'<a>size: '+tmp.size+' </a>'+'<a href="'+url+'">download</a></li>';
+                    }
+                }
+                 html += '</ul>';
+                 GUI.notification({
+                title: "convert "+node.attr("name"),
+                text: html,
+                type: "notice"
+            });
+                 setTimeout(function(){
+           for(var j=0;j<buffer.length;j++){
+                var uri = buffer[j].url;
+               $(buffer[j].id).click(function(){
+                    window.pleaseWait(true);
+                    glTF.load(uri, viewer.parse_gltf).then(
+                    function(flag){
+                          window.pleaseWait(false);
+                          window.notif(uri);
+                    }).fail(function(){
+                        window.pleaseWait(false);
+                        console.error("loading failed!!");
+                    });
+                });
+       }
+       },500);
+                }
+            rest3d.convert(params,callback);
+        }
+
         function display(node){
-            var tefa = $('#warehouse').jstree("get_children_dom",node);
-            console.debug(tefa);
+            node.attr("type","uploaded");
             var uri = node.attr("asseturi");
             var call = function(data){
                 var deferred = Q.defer();
@@ -754,6 +803,7 @@ define(   ['viewer','gui','uploadViewer'    , 'rest3d','q','collada','gltf','ren
                     var url = 'http://'+location.host+'/rest3d/'+path;
                     var ext = name.match(/\.[^.]+$/);
                     if(ext[0]=='.DAE'||ext[0]=='.dae'){
+                        node.attr("path",url);
                         html += '<li><a>name: '+name+' </a>'+'<a>size: '+size+' </a>'+'<a href="'+url+'">download</a>'+'<button id="model_'+size+'">Display</button>'+'</li>';
                         buffer.push({'id':'#model_'+size,'url':url});}
                     else{
@@ -843,12 +893,12 @@ define(   ['viewer','gui','uploadViewer'    , 'rest3d','q','collada','gltf','ren
                         var url = "";
                         if (node == -1)
                         {
-                            url = "http://rest3d.fl4re.com/rest3d/warehouse/";
+                            url = "/rest3d/warehouse/";
                         }
                         else if(node.attr('rel')=="collection"||"model")
                         {
                             nodeId = node.attr('id');
-                            url = "http://rest3d.fl4re.com/rest3d/warehouse/" + nodeId;
+                            url = "/rest3d/warehouse/" + nodeId;
                         }
                         return url;
                     },
@@ -865,10 +915,13 @@ define(   ['viewer','gui','uploadViewer'    , 'rest3d','q','collada','gltf','ren
                     var result = {};
                     if(node.attr("iconuri")){
                         result.icon = {'label':'Display icon','action':icon,};}
-                    if(node.attr("asseturi")){
+                    if(node.attr("asseturi")&&node.attr("type")!="uploaded"){
                         result.display = {'label':'Upload','action':display,};}
                     if(node.attr("rel")=="model"){
                         result.download = {'label':'Download','action':download,};
+                    }
+                    if(node.attr("type")=="uploaded"){
+                        result.convert = {'label':'Convert','action':convert,};
                     }
                     if(node.attr("previewuri")){
                         result.preview = {'label':'Preview model','action':preview,};}
