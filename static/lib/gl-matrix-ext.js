@@ -143,7 +143,11 @@ vec3.getTranslationFromMat4 = function(out, mat)
 };
 
 mat4.fromTrs = function (out, trs) {
-    
+
+  mat4.fromRotationTranslation(out,trs.rotation,trs.translation);
+  return mat4.scale(out,out,trs.scale);
+
+  /*
     // Quaternion math
     var q = trs.rotation;
     var s = trs.scale;
@@ -186,6 +190,8 @@ mat4.fromTrs = function (out, trs) {
     out[15] = 1;
     
     return out;
+
+    */
 };
 
 /**
@@ -428,7 +434,8 @@ aabb.intersect = function(_bbox, _origin, _direction) {
 
 };
 
-// todo -> use a floar[10] vertex array and views?
+// todo -> use a float[10] vertex array and views?
+
  window.trs = {};
 
  trs.create = function () {

@@ -1,15 +1,17 @@
-define(['viewer','gui','uploadViewer','rest3d','q','collada','gltf','renderer'], function (viewer,gui,setViewer6Upload,rest3d,Q,COLLADA,glTF,RENDERER) {
+'use strict';
+define(   ['viewer','gui','uploadViewer'    , 'rest3d','q','collada','gltf','renderer','state','channel'], 
+  function(viewer  , gui , setViewer6Upload , rest3d  , Q , COLLADA , glTF , RENDERER , State , Channel) {
 
-viewer.INIT =  function (){
+  viewer.INIT =  function (){
     
         "use strict";//
           var mask;
         var win =$('');
           
-if (!window.performance || !window.performance.now) {
-    window.performance = window.performance || {};
-    window.performance.now = $.now
-};
+    if (!window.performance || !window.performance.now) {
+        window.performance = window.performance || {};
+        window.performance.now = $.now
+    };
         var listThemes = ["black-tie", "blitzer", "cupertino", "dark-hive", "dot-luv", "eggplant", "excite-bike", "flick", "hot-sneaks", "humanity", "le-frog", "mint-choc", "overcast", "pepper-grinder", "redmond", "smoothness", "south-street", "start", "sunny", "swanky-purse", "trontastic", "ui-darkness", "ui-lightness", "vader"];
         var renderMenu = $('');
         var flagStatus = false;
@@ -628,15 +630,15 @@ if (!window.performance || !window.performance.now) {
                         var tmp = trs.create();
                         trs.fromMat4(tmp, value);
                         var e = euler.create();
-                        euler.fromQuat(e,tmp.localRotation);
-                        console.debug("translation",tmp.localTranslation);
-                        console.debug("scale",tmp.localScale);
+                        euler.fromQuat(e,tmp.rotation);
+                        console.debug("translation",tmp.translation);
+                        console.debug("scale",tmp.scale);
                         console.debug("rotation",e);
 
                         // var q = quat.create();
                         // quat.fromEuler(q,e);
                         // console.debug(q);
-                        // var trs1 = trs.fromValues(tmp.localTranslation,q,tmp.localScale);
+                        // var trs1 = trs.fromValues(tmp.tanslation,q,tmp.scale);
                         // var mat1 = mat4.create();
                         // mat4.fromTrs(mat1,trs1);
                         // console.debug("output "+mat1);
@@ -1279,7 +1281,7 @@ if (!window.performance || !window.performance.now) {
             GUI.label('rdm13','Use mouse wheel to zoom', win);
         }
 
-        GUI.button('cat-skin(work in progress)', accordion.collada, function () {
+        GUI.button('cat skinned (work in progress)', accordion.collada, function () {
             pleaseWait(true);
             var url = "/models/cat/cat-skin.dae";
             COLLADA.load(url, viewer.parse_dae).then(
@@ -1312,7 +1314,7 @@ if (!window.performance || !window.performance.now) {
         accordion.collada.append("<hr></hr>");
 
 
-        GUI.button('cat-skin(work in progress)', accordion.gltf, function () {
+        GUI.button('cat skinned', accordion.gltf, function () {
             pleaseWait(true);
             var url = "/models/cat/cat-skin.json";
             glTF.load(url, viewer.parse_gltf).then(
@@ -1496,7 +1498,7 @@ if (!window.performance || !window.performance.now) {
         }).width("90%");
 
 
-        GUI.button('cat (work in progress - fix me!', accordion.gltf, function () {
+        GUI.button('cat skinned + animation (fix me!', accordion.gltf, function () {
               pleaseWait(true);
               var url = "/models/cat/20_cat_smooth_bake_channel.json";
             glTF.load(url, viewer.parse_gltf).then(

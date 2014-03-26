@@ -24,9 +24,34 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 *///
 
-String.prototype.endsWith = function(suffix) {
-    return this.indexOf(suffix, this.length - suffix.length) !== -1;
-};
-String.prototype.startsWith = function(prefix) {
-  return this.lastIndexOf(prefix, 0) === 0;
-};
+"use strict";
+define([], function () {
+
+  String.prototype.endsWith = function(suffix) {
+      return this.indexOf(suffix, this.length - suffix.length) !== -1;
+  };
+  String.prototype.startsWith = function(prefix) {
+    return this.lastIndexOf(prefix, 0) === 0;
+  };
+
+  var utils={};
+  utils.log = function(msg){
+      if (console && console.log) console.log(msg);
+  }
+
+  utils.logError = function(msg) {
+      /*
+      if (console && console.logError) console.logError(msg)
+      else
+          */
+       if (console && console.error) console.error(msg)
+      else COLLADA.log('ERROR '+msg);
+  }
+
+  utils.logWarning = function(msg) {
+      if (console && console.warn) console.warn(msg);
+      else COLLADA.log('WARN '+msg);
+
+  }
+  return utils;
+});

@@ -28,7 +28,7 @@ THE SOFTWARE.*/
   textureloader
 */
 "use strict";
-define(['glmatrixExt'], function () {
+define(['state','glmatrixExt'], function (State) {
   
   var RENDERER = {};
   RENDERER.default = {
@@ -124,16 +124,6 @@ define(['glmatrixExt'], function () {
               this.numIndices  = 0; 
             }
             break;
-          case 'skin':
-            // special case - this is a uniform
-            if (_primitive.skin){
-              this.numBones = _primitive.skin.joints.length;
-              this.buffer.JOINT_MATRIX = new Float32Array(16*this.numBones);
-            } else {
-              this.numBones = 0;
-              if (this.buffer.JOINT_MATRIX)
-                delete this.buffer.JOINT_MATRIX;
-            }
           default:
             if (_primitive[key]){
               this.buffer[key] = _primitive[key];
