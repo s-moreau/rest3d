@@ -1658,7 +1658,7 @@ define(   ['viewer','gui','uploadViewer'    , 'rest3d','q','collada','gltf','ren
                     var x = ev.layerX / ev.currentTarget.clientWidth;
                     var y = 1.0 - (ev.layerY / ev.currentTarget.clientHeight);
 
-                    var id=viewer.draw(true,x,y);
+                    var id=viewer.pick(x,y);
                     
                     if(viewer.pickName[id]!="undefined"&&viewer.pickName[id]!=null){
                         if (!viewer.channel.selected) viewer.channel.selected = {};
@@ -1678,7 +1678,7 @@ define(   ['viewer','gui','uploadViewer'    , 'rest3d','q','collada','gltf','ren
                         if(treeScene){treeScene.Tree.jstree("deselect_all");}
                         delete viewer.channel.selected;
                     }
-                    viewer.draw();
+                    
 
                 }
             }

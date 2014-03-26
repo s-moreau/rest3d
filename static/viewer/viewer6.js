@@ -25,6 +25,10 @@ define(   ['jquerymin','gltf','collada','renderer','camera','state','channel','q
   function( $         , glTF , COLLADA , RENDERER , Camera , State,  Channel , Q , CONSOLE) {
 
   var viewer = {};
+  viewer.flagPick = false;
+  viewer.flagAnimation = true;
+
+
   var scenes = [];
   var animations = {};
   var animation_timer = 0;
@@ -508,7 +512,9 @@ define(   ['jquerymin','gltf','collada','renderer','camera','state','channel','q
   var q1=quat.create();
   var q2=quat.create();
 
-  viewer.draw = function (pick, x, y) {
+  // private function
+  // call viewer.draw() from outside
+  var draw = function (pick, x, y) {
 
     if (!scenes || scenes.length < 1) return null;
     if (viewer.dropTick && !pick) {
@@ -516,54 +522,56 @@ define(   ['jquerymin','gltf','collada','renderer','camera','state','channel','q
       return;
     }
 
-    // get the animations
-    var delta = window.performance.now() - animation_timer;
-    animation_timer += delta;
-    if (delta >1000) // one frame per second
-    {
-      delta = 1000; // jump in time, breakpoint?
-    }
-    for (var key in animations) {
-      for (var i=0; i<animations[key].length; i++) {
-        var animation = animations[key][i];
-        var index_min = 0;
-        var index_max = animation.count;
-        var index = index_min;
+    if (viewer.flagAnimation) {
 
-        var time = animation_timer/100;
-
-        var k = Math.floor((time - animation.time_min)/(animation.time_max - animation.time_min));
-
-        time -= k*(animation.time_max - animation.time_min);
-
-        // find time interval using dychotomia
-        while (index_max - index_min >1) {
-          index = (index_max+index_min)>>1;
-          if (time > animation.input[index]) {
-            index_min = index;
-          } else {
-            index_max = index;
-          }
-        }
-
-        // interpolate output to find result
-
-        // This is axis / angle ...
-        if (animation.path === 'rotation') {
-          var interp = (animation.input[index_min]-time) / (animation.input[index_min]-animation.input[index_max]);
-          quat.setAxisAngle(q1,[animation.output[index_min*4], animation.output[index_min*4+1], animation.output[index_min*4+2]],animation.output[index_min*4+3]);
-          quat.setAxisAngle(q2,[animation.output[index_max*4], animation.output[index_max*4+1], animation.output[index_max*4+2]],animation.output[index_max*4+3]);
-          
-          quat.lerp(animation.target.trs.rotation,q1,q2,interp);
-
-          //debug
-          mat4.fromTrs(animation.target.local, animation.target.trs);
-
-        } else
-        console.error('unknown animation type');
+      var delta = window.performance.now() - animation_timer;
+      animation_timer += delta;
+      if (delta >1000) // one frame per second
+      {
+        delta = 1000; // jump in time, breakpoint?
       }
+      for (var key in animations) {
+        for (var i=0; i<animations[key].length; i++) {
+          var animation = animations[key][i];
+          var index_min = 0;
+          var index_max = animation.count;
+          var index = index_min;
 
+          var time = animation_timer/100;
+
+          var k = Math.floor((time - animation.time_min)/(animation.time_max - animation.time_min));
+
+          time -= k*(animation.time_max - animation.time_min);
+
+          // find time interval using dychotomia
+          while (index_max - index_min >1) {
+            index = (index_max+index_min)>>1;
+            if (time > animation.input[index]) {
+              index_min = index;
+            } else {
+              index_max = index;
+            }
+          }
+
+          // interpolate output to find result
+
+          // This is axis / angle ...
+          if (animation.path === 'rotation') {
+            var interp = (animation.input[index_min]-time) / (animation.input[index_min]-animation.input[index_max]);
+            quat.setAxisAngle(q1,[animation.output[index_min*4], animation.output[index_min*4+1], animation.output[index_min*4+2]],animation.output[index_min*4+3]);
+            quat.setAxisAngle(q2,[animation.output[index_max*4], animation.output[index_max*4+1], animation.output[index_max*4+2]],animation.output[index_max*4+3]);
+            
+            quat.lerp(animation.target.trs.rotation,q1,q2,interp);
+
+            //debug
+            mat4.fromTrs(animation.target.local, animation.target.trs);
+
+          } else
+          console.error('unknown animation type');
+        }
+      }
     }
+
     if (!pick) {
       $('#zoom').text('currentZoom is ' + viewer.currentZoom);
       $('#rot').text('currentRotation is ' + viewer.currentRotationX.toFixed(2) + ',' + viewer.currentRotationY.toFixed(2));
@@ -630,8 +638,21 @@ define(   ['jquerymin','gltf','collada','renderer','camera','state','channel','q
 viewer.tick = function(){
    if(viewer.flagTick){
     requestAnimFrame(viewer.tick);
-    viewer.draw();
+    draw();
     viewer.fpsCounter.increment();}
+}
+
+viewer.draw = function() {
+  if (viewer.flagTick)
+    return; // update will be done automatically
+  else
+    draw();
+}
+
+viewer.pick = function(x,y) {
+  var id= draw(true,x,y);
+  draw();
+  return id;
 }
 
   return viewer;
