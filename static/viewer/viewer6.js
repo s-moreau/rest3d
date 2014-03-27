@@ -511,6 +511,10 @@ define(   ['jquerymin','gltf','collada','renderer','camera','state','channel','q
 
   var q1=quat.create();
   var q2=quat.create();
+  var v1=vec3.create();
+  var v2=vec3.create();
+  var v3=vec3.create();
+  var axis = vec3.create();
 
   // private function
   // call viewer.draw() from outside
@@ -531,43 +535,70 @@ define(   ['jquerymin','gltf','collada','renderer','camera','state','channel','q
         delta = 1000; // jump in time, breakpoint?
       }
       for (var key in animations) {
+      //var keys = Object.keys(animations); var key=keys[1]; {
         for (var i=0; i<animations[key].length; i++) {
-          var animation = animations[key][i];
-          var index_min = 0;
-          var index_max = animation.count;
-          var index = index_min;
-
-          var time = animation_timer/100;
-
-          var k = Math.floor((time - animation.time_min)/(animation.time_max - animation.time_min));
-
-          time -= k*(animation.time_max - animation.time_min);
-
-          // find time interval using dychotomia
-          while (index_max - index_min >1) {
-            index = (index_max+index_min)>>1;
-            if (time > animation.input[index]) {
-              index_min = index;
-            } else {
-              index_max = index;
+          var animation =animations[key][i];
+          if (!viewer.flagTick) {
+            if (animation.currentIndex === undefined)
+              animation.currentIndex = 0;
+            else {
+              animation.currentIndex+=1;
+              if (animation.currentIndex >= animation.count)
+                animation.currentIndex =0;
             }
+            var index = animation.currentIndex ;
+            console.log('index='+index);
+            vec3.normalize(axis,[animation.output[index*4], animation.output[index*4+1], animation.output[index*4+2]]);
+            var angle = animation.output[index*4+3];
+            console.log('axis='+vec3.str(axis)+' angle='+angle);
+            console.log('quat=['+animation.output[index*4]+' , '+animation.output[index*4+1]+' , '+animation.output[index*4+2] + ' , ' +animation.output[index*4+3])
+            quat.setAxisAngle(animation.target.trs.rotation, axis, angle);
+
+          } else {
+            var index_min = 0;
+            var index_max = animation.count;
+            var index = index_min;
+
+            var time = animation_timer/1000;
+
+            var k = Math.floor((time - animation.time_min)/(animation.time_max - animation.time_min));
+
+            time -= k*(animation.time_max - animation.time_min);
+
+            // find time interval using dychotomia
+            while (index_max - index_min >1) {
+              index = (index_max+index_min)>>1;
+              if (time > animation.input[index]) {
+                index_min = index;
+              } else {
+                index_max = index;
+              }
+            }
+
+            // interpolate output to find result
+
+            // This is axis / angle ...
+            if (animation.path === 'rotation') {
+              var interp = (animation.input[index_min]-time) / (animation.input[index_min]-animation.input[index_max]);
+
+              // interpolate axis
+              vec3.normalize(v1,[animation.output[index_min*4], animation.output[index_min*4+1], animation.output[index_min*4+2]]);
+              vec3.normalize(v2,[animation.output[index_max*4], animation.output[index_max*4+1], animation.output[index_max*4+2]]);
+              vec3.normalize(axis,vec3.lerp(v3,v1,v2, interp));
+
+              // interpolate angle
+              var angle = animation.output[index_min*4+3] + interp *(animation.output[index_max*4+3]-animation.output[index_min*4+3]);
+
+              quat.setAxisAngle(animation.target.trs.rotation, axis, angle);
+              //console.log('delta='+delta+' index_min='+index_min+' inter='+interp+'  axis='+vec3.str(axis)+' angle='+angle);
+
+            } else
+              console.error('unknown animation type');
           }
 
-          // interpolate output to find result
+          mat4.fromTrs(animation.target.local, animation.target.trs);
 
-          // This is axis / angle ...
-          if (animation.path === 'rotation') {
-            var interp = (animation.input[index_min]-time) / (animation.input[index_min]-animation.input[index_max]);
-            quat.setAxisAngle(q1,[animation.output[index_min*4], animation.output[index_min*4+1], animation.output[index_min*4+2]],animation.output[index_min*4+3]);
-            quat.setAxisAngle(q2,[animation.output[index_max*4], animation.output[index_max*4+1], animation.output[index_max*4+2]],animation.output[index_max*4+3]);
-            
-            quat.lerp(animation.target.trs.rotation,q1,q2,interp);
-
-            //debug
-            mat4.fromTrs(animation.target.local, animation.target.trs);
-
-          } else
-          console.error('unknown animation type');
+        
         }
       }
     }

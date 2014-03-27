@@ -832,7 +832,7 @@ for (var i = _gl.getProgramParameter(glProgram, _gl.ACTIVE_UNIFORMS) - 1; i >= 0
         if (_bool)
           _state.gl.enable(State.CULL_FACE);
         else
-         _state.gl.disable(Stata.CULL_FACE);
+         _state.gl.disable(State.CULL_FACE);
      } else
         _state.cullFaceEnableDirty = true;
       return _state;

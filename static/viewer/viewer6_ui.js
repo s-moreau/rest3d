@@ -1379,6 +1379,18 @@ define(   ['viewer','gui','uploadViewer'    , 'rest3d','q','collada','gltf','ren
         accordion.gltf.append("<hr></hr>");
 
 
+        GUI.button('gradient', accordion.gltf, function () {
+            pleaseWait(true);
+            var url = "/models/gradient/gradient.json";
+            glTF.load(url, viewer.parse_gltf).then(
+            function(flag){
+                  pleaseWait(false);
+                  window.notif(url);
+            })
+        }).width("90%");
+        accordion.gltf.append("<hr></hr>");
+
+
         GUI.button('duck', accordion.collada, function () {
             pleaseWait(true);
             var url = "/models/duck/duck.dae"
