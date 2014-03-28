@@ -27,7 +27,8 @@ THE SOFTWARE.
 */
 
 'use strict';
-
+console.log('env=');
+console.log(process.env);
 if (process.env['NODETIME_KEY']) {
 	console.log("+=+=+= Starting http://nodetime.com");
 	require('nodetime').profile({
