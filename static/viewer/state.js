@@ -112,7 +112,7 @@ THE SOFTWARE.*/
 
         State.setClearColor(state,0,0,0,0); // transparent, will show whatever is in the canvas
 
-        State.setClear(State.COLOR_BUFFER_BIT | State.DEPTH_BUFFER_BIT | State.STENCIL_BUFFER_BIT);
+        State.setClear(state,State.COLOR_BUFFER_BIT | State.DEPTH_BUFFER_BIT | State.STENCIL_BUFFER_BIT);
 
         State.setCullFace(state,State.BACK);
 
