@@ -16,7 +16,8 @@
     "formidable":"",
     "imagemagick":"",
     "memorystream":"",
-    "node-uuid":""
+    "node-uuid":"",
+    "nodetime":""
   },
   "devDependencies": {
     "mocha": "1.7.4",
