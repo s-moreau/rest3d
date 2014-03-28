@@ -27,17 +27,15 @@ THE SOFTWARE.
 */
 
 'use strict';
-console.log('env=');
-console.log(process.env);
+
 if (process.env['NODETIME_KEY']) {
 	console.log("+=+=+= Starting http://nodetime.com");
+	console.log("Key = '"+process.env['NODETIME_KEY']+"'");
 	require('nodetime').profile({
     accountKey: process.env['NODETIME_KEY'], 
     appName: 'rest3d.fl4re.com node server'
   });
 }
-
-
 
 var restify = require('restify');
 //var connect = require('connect');
