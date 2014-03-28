@@ -2,10 +2,32 @@
 
 'use strict';
 var toJSON = require('./tojson');
+var FileInfo = require('./fileinfo')
 var Handler = function (req, res, next) {
       this.req = req;
       this.res = res;
       this.next = next;
+
+};
+Handler.prototype.allowOrigin = function() {
+  this.res.setHeader(
+      'Access-Control-Allow-Origin',
+      FileInfo.options.accessControl.allowOrigin
+  );
+  this.res.setHeader(
+      'Access-Control-Allow-Methods',
+      FileInfo.options.accessControl.allowMethods
+  );
+  this.res.setHeader(
+      'Access-Control-Allow-Headers',
+      FileInfo.options.accessControl.allowHeaders
+  );
+};
+
+Handler.prototype.setNoCacheHeaders = function () {
+   this.res.setHeader('Pragma', 'no-cache');
+   this.res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate');
+   this.res.setHeader('Content-Disposition', 'inline; filename="files.json"');
 };
 
 Handler.prototype.handleError = function (error) {
@@ -20,8 +42,7 @@ Handler.prototype.handleError = function (error) {
 
        // console.log('returning error (500) ='+toJSON(error));
         this.res.writeHead(500, {
-            'Content-Type': this.req.headers.accept
-            .indexOf('application/json') !== -1 ?
+            'Content-Type': this.req.headers.accept.indexOf('application/json') !== -1 ?
               'application/json' : 'text/plain'
           });
           this.res.end(toJSON(error));
@@ -36,26 +57,18 @@ Handler.prototype.handleResult = function(result, redirect) {
         return this.handleError(error);
       
         if (redirect) {
-
-        
-        // console.log('returning redirect (302) ='+encodeURIComponent(toJSON(result)));
-
           this.res.writeHead(302, {
             'Location': redirect.replace(
-            /%s/,
-            encodeURIComponent(toJSON.stringify(result))
-            )
+                            /%s/,
+                            encodeURIComponent(toJSON.stringify(result)))
           });
           this.res.end();
         } else {
 
-        
-        // console.log('returning result (200) ='+toJSON(result));
-
           this.res.writeHead(200, {
-            'Content-Type': this.req.headers.accept
-            .indexOf('application/json') !== -1 ?
-              'application/json' : 'text/plain'
+            'Content-Type': this.req.headers.accept.indexOf('application/json') !== -1 ?
+                            'application/json' : 'text/plain',
+            'Access-Control-Allow-Origin' : '*'
           });
           this.res.end(toJSON(result));
         }

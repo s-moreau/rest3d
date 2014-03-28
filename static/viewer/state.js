@@ -178,12 +178,19 @@ THE SOFTWARE.*/
 
     state.program = {};
 
+
+    // HACK fragment shader to add tint
+    state.program.fragmentShader = _pass.program.fragmentShader.str.replace("uniform","uniform vec4 _tint;\nuniform")
+                          .replace("gl_FragColor =","gl_FragColor = _tint * ");
+
     state.program.vertexShader = _pass.program.vertexShader.str;
-    state.program.fragmentShader = _pass.program.fragmentShader.str;
 
     state.program.compileMe = true;
     state.program.glProgram = null;
 
+
+    // HACK - add TINT uniform
+   _pass.program.uniforms.TINT = { symbol: '_tint', type: WebGLRenderingContext.FLOAT_VEC4 , size:1, value: [1.,1.,1.,1.]};
 
     // allocate values from default values in program
     allocateUniformsAndAttributes(state,_pass.program.uniforms, _pass.program.attributes, _overrides);
@@ -287,7 +294,7 @@ THE SOFTWARE.*/
             break;
          
           default:
-            utils.logError('unknown type '+type+' in State.fromPass')
+            utils.logError('unknown type '+type+' in allocateUniformsAndAttributes')
             break;
         }
       }
@@ -433,8 +440,9 @@ THE SOFTWARE.*/
     // note: do not delete the previous program as this is not the owner 
     // TODO - State:delete
 
+
     var glVertexShader = createShader(_gl,State.VERTEX_SHADER,_state.program.vertexShader); 
-    var glFragmentShader = createShader(_gl,State.FRAGMENT_SHADER,_state.program.fragmentShader); 
+    var glFragmentShader = createShader(_gl,State.FRAGMENT_SHADER, _state.program.fragmentShader); 
 
     var glProgram = _gl.createProgram();
     if (glProgram == null) 
@@ -488,6 +496,7 @@ for (var i = _gl.getProgramParameter(glProgram, _gl.ACTIVE_UNIFORMS) - 1; i >= 0
       }
     }
 
+    
     // for context loss
     _state.program.ID = State.programs.length; 
     State.programs.push(_state.program);

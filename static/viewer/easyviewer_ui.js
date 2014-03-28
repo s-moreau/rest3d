@@ -102,13 +102,15 @@ define(['viewer', 'rest3d', 'collada', 'gltf', 'channel', 'colorpicker'],
 
       var arg = args();
       if (arg.file) {
-        var ext = arg.file.match(/\.[^.]+$/);
+        var file=decodeURIComponent(arg.file);
+        var ext = file.match(/\.[^.]+$/);
+        console.log('ext='+ext);
         if (ext == ".json") {
-          glTF.load(arg.file, viewer.parse_gltf);
+          glTF.load(file, viewer.parse_gltf);
         } else if (ext == ".dae") {
-          COLLADA.load(arg.file, viewer.parse_dae)
+          COLLADA.load(file, viewer.parse_dae)
         } else {
-          console.log("This file couldn't be loaded. Please make sure the file specified is a dae or json model");
+          console.log(file+" couldn't be loaded. Please make sure the file specified is a dae or json model");
         }
       } else {
         console.log("any file specified in url for loading");

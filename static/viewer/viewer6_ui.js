@@ -1690,8 +1690,7 @@ define(   ['viewer','gui','uploadViewer'    , 'rest3d','q','collada','gltf','ren
                         if(treeScene){treeScene.Tree.jstree("deselect_all");}
                         delete viewer.channel.selected;
                     }
-                    
-
+                    viewer.draw();                    
                 }
             }
 

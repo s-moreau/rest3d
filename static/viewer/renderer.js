@@ -188,6 +188,8 @@ define(['state','glmatrixExt'], function (State) {
     // optimize VertexAttrib
     VertexAttribBool: {},
     // this take a primitive (this), applies _state, and render to channel
+    dim: vec4.fromValues(0.35,0.35,0.35,0.5),
+    bright: vec4.fromValues(1.,1.,1.,1.),
     render: function(_channel) {
 
       var state = this.state;
@@ -198,8 +200,11 @@ define(['state','glmatrixExt'], function (State) {
         state.values.color = this.pickColor;
       } else if (_channel.selected && _channel.selected[this.pickID] !== true)
       {
-          state = State.greyState;
+          //state = State.greyState;
+          state.values.TINT = this.dim;
       }
+      else 
+        state.values.TINT = this.bright;
 
       if (0 !== this.numVertices) {
 

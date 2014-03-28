@@ -105,6 +105,7 @@ restify.defaultResponseHeaders = false;
 
 // include routes
 require('./src/warehouse')(server);
+require('./src/3dvia')(server);
 require('./src/upload')(server);
 
 // create diskcache (no mem caching, no gzip)

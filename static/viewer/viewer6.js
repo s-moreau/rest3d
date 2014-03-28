@@ -521,10 +521,7 @@ define(   ['jquerymin','gltf','collada','renderer','camera','state','channel','q
   var draw = function (pick, x, y) {
 
     if (!scenes || scenes.length < 1) return null;
-    if (viewer.dropTick && !pick) {
-      console.log("dropTick activated");
-      return;
-    }
+
 
     if (viewer.flagAnimation) {
 
@@ -609,14 +606,13 @@ define(   ['jquerymin','gltf','collada','renderer','camera','state','channel','q
     }
 
     if (pick) {
-      viewer.dropTick = true;
       Channel.pickMode(viewer.channel, true);
     }
 
     if (pick)
       Channel.clear(viewer.channel, [0, 0, 0, 0]);
     else
-      Channel.clear(viewer.channel, [0, 0, 0, 0]); // transparent background - so we see through the canvas
+      Channel.clear(viewer.channel, [0, 0, 0, 0]); // set clear color here
 
     Camera.rotateAround(mainCamera, viewer.currentZoom, viewer.currentRotationX, viewer.currentRotationY);
 
@@ -640,7 +636,6 @@ define(   ['jquerymin','gltf','collada','renderer','camera','state','channel','q
     }
 
     if (pick) {
-      viewer.dropTick = false;
       return Channel.pickMode(viewer.channel, false, x, y);
     }
 
@@ -681,9 +676,7 @@ viewer.draw = function() {
 }
 
 viewer.pick = function(x,y) {
-  var id= draw(true,x,y);
-  draw();
-  return id;
+  return draw(true,x,y);
 }
 
   return viewer;

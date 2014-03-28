@@ -149,6 +149,7 @@ define(['q','glmatrixExt'], function (Q) {
       // Note: a shader is either a vertex or a fragment shader
       // spec should be changed so shader type is in 'shaders'
       // also, spec should be changed so shader could be embedded as string
+      
       this.programs = {};
       var _programs = this.json.programs;
       for (var programID in _programs) {
