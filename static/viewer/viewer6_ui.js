@@ -1654,7 +1654,7 @@ define(   ['viewer','gui','uploadViewer'    , 'rest3d','q','collada','gltf','ren
 
                 var mdelta = ev.screenY - lastY;
                 lastY = ev.screenY;
-                viewer.currentRotationY -= mdelta / 2.5;
+                viewer.currentRotationY += mdelta / 2.5;
 
 
                 viewer.draw();

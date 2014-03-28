@@ -64,7 +64,7 @@ define(['viewer', 'rest3d', 'collada', 'gltf', 'channel', 'colorpicker'],
 
           var mdelta = ev.screenY - lastY;
           lastY = ev.screenY;
-          viewer.currentRotationY -= mdelta / 2.5;
+          viewer.currentRotationY += mdelta / 2.5;
 
 
           viewer.draw();
