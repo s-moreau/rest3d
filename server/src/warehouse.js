@@ -35,6 +35,7 @@ module.exports = function (server) {
   var handler = require('./handler');
   var zipFile = require('./zipfile')(server);
 
+  // return list of collections from 'root'
 
   server.get(/^\/rest3d\/warehouse.*/,function(req, res, next) {
     

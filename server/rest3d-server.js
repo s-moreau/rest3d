@@ -79,7 +79,7 @@ var ip_address = process.env.OPENSHIFT_NODEJS_IP || null;
 
 
 // see where collada2gltf is located
-var openshift = process.env['OPENSHIFT_DATA_DIR'];
+var openshift = process.env.OPENSHIFT_DATA_DIR;
 var collada2gltf = 'collada2gltf';
 if (openshift) 
     collada2gltf = openshift + 'bin/collada2gltf-latest';
@@ -110,6 +110,9 @@ server.use(restify.queryParser());
 //server.use(restify.bodyParser()); -> use formidable instead
 server.use(restify.gzipResponse());
 restify.defaultResponseHeaders = false;
+
+var session=require('./src/session')();
+server.use(session.sessionManager);
 
 // include routes
 require('./src/warehouse')(server);
@@ -292,5 +295,7 @@ process.on('SIGTERM', sigterm_handler);
 // run server
 server.listen( listenToPort, ip_address);
 console.log ('rest3d server running on port '+listenToPort);
+
+
 
 

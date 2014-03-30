@@ -29,9 +29,9 @@ var restify = require('restify');
 var basex = require('basex');
 
 
-var basex_port = process.env['DOTCLOUD_DATABASE_SERVERPORT_PORT'] || 1984;
-var basex_port_server = process.env['DOTCLOUD_DATABASE_SERVERPORT_HOST'];
-var basex_rest_server = process.env['DOTCLOUD_DATABASE_HTTP_HOST'];
+var basex_port = process.env.DOTCLOUD_DATABASE_SERVERPORT_PORT || 1984;
+var basex_port_server = process.env.DOTCLOUD_DATABASE_SERVERPORT_HOST;
+var basex_rest_server = process.env.DOTCLOUD_DATABASE_HTTP_HOST;
 var basex_rest = 80;
 var basex_rest_user = 'admin';
 var basex_rest_pass = 'admin';
@@ -87,8 +87,8 @@ var check_basex = function () {
 	      			console.log('ERROR: cannot get result from database');
 	      			test_count --;
 	      			if (test_count) {
-		      			console.log('trying again in 15 seconds')
-		      			setTimeout('check_basex',15000)
+		      			console.log('trying again in 5 seconds')
+		      			setTimeout('check_basex',5000)
 		      		} else
 		      		{
 		      			console.log('running without database');
@@ -144,6 +144,7 @@ exports.get = function(url, callback) {
 		
 	});
 };
+
 exports.post = function(url, body, callback) {
 	var cb=callback;
 	var opts = {};
