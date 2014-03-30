@@ -503,7 +503,7 @@ define(['q','glmatrixExt'], function (Q) {
                     case 'lookat':
                         var lookat = mat4.create();
                         var lookatmat = mat3.clone(JSON.parse("["+child.textContent.trim().replace(/\s+/g,",")+"]"));
-                        mat4.lookat(lookat,vec3.getRowFromMat3(lookatmat,0),vec3.getRowFromMat3(lookatmat,1),vec3.getRowFromMat3(lookatmat,2));
+                        mat4.lookAt(lookat,vec3.getRowFromMat3(lookatmat,0),vec3.getRowFromMat3(lookatmat,1),vec3.getRowFromMat3(lookatmat,2));
                         mat4.multiply(mat,mat,lookat);
                         break;
                     case 'matrix':
