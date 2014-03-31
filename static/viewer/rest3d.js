@@ -40,7 +40,7 @@ rest3d.convert = function(_params, _cb) {
       if (cb) cb(params);
     }).fail(function(data) {
         console.log("Error Converting "+params.file.name);
-        console.log(JSON.parse(data.error().responseText));
+        // console.log(JSON.parse(data.error().responseText));
     });
 };
 

@@ -62,6 +62,25 @@ define(['jquerymin', 'rest3d', 'gltf', 'collada', 'viewer'], function ($, rest3d
             this.header = upload.header(this.removeNodes);
         }
 
+        var cleanup = function(){
+            // console.debug("cleanup!")
+            // var counterBlock = 0;
+            // var counterBr = 0;
+            // $('#fileArea_upModel').children().each(function () {
+            //     if(this.style == "display: block;"){
+            //         counter++;
+            //     }
+            //     else if(this.style == "display: block;"){
+            //          $(this).remove();
+            //     }
+            //     else{
+            //         counterBr++;
+            //     }
+            // });
+            // if(counterBr!==counterBlock){
+            //     for(c)        
+            //     }
+        }
 
         var buttonToReplace;
         // upload.callOnClick(function(){
@@ -169,6 +188,7 @@ define(['jquerymin', 'rest3d', 'gltf', 'collada', 'viewer'], function ($, rest3d
                     rest3d.convert(data, callback);
                 });
         var sortAsset = function (e, data, node) {
+            cleanup();
             $("#uploadTree").jstree('open_all');
             data.tmp = new Buffer();
             var sort = [];
@@ -279,7 +299,7 @@ define(['jquerymin', 'rest3d', 'gltf', 'collada', 'viewer'], function ($, rest3d
         }, 1000);
 
         upload.callback = function (node) {
-            // this.object.on('fileuploadchange', false);
+            this.object.off('fileuploadchange');
             this.object.on('fileuploadchange', function (e, data) {
                 sortAsset(e, data, node);
             })
