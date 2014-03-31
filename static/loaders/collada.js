@@ -477,25 +477,25 @@ define(['q','glmatrixExt'], function (Q) {
             }
         },
         // recursive parse of a <node>
-        parse_node: function(node)
+        parse_node: function(_node, _world)
         {
             // create a new transform for that node
             var transform = {};
-            var id = node.getAttribute('id'); // TODO: check is this is unique ?
+            var id = _node.getAttribute('id'); // TODO: check is this is unique ?
             if (id) transform.id = id;
-            var name = node.getAttribute('name');
+            var name = _node.getAttribute('name');
             if (name) transform.name = name;
-            var type = node.getAttribute('type');  // JOINT or NODE
+            var type = _node.getAttribute('type');  // JOINT or NODE
             if (type) transform.type = type
-            var tags = node.getAttribute('layer')  // space separated list of layers
+            var tags = _node.getAttribute('layer')  // space separated list of layers
             if (tags) transform.tags = tags;
 
             this.transforms.push(transform);
 
 
             var mat=mat4.create();
-            var child = node.firstChild;
-            // TODO - a node can have multiple instance geometry/lights...
+            var child = _node.firstChild;
+            // This is assuming we have a valid collada document with all transforms first
             while (child != null)
             {
                 switch(child.tagName)
@@ -503,7 +503,7 @@ define(['q','glmatrixExt'], function (Q) {
                     case 'lookat':
                         var lookat = mat4.create();
                         var lookatmat = mat3.clone(JSON.parse("["+child.textContent.trim().replace(/\s+/g,",")+"]"));
-                        mat4.lookat(lookat,vec3.getRowFromMat3(lookatmat,0),vec3.getRowFromMat3(lookatmat,1),vec3.getRowFromMat3(lookatmat,2));
+                        mat4.lookAt(lookat,vec3.getRowFromMat3(lookatmat,0),vec3.getRowFromMat3(lookatmat,1),vec3.getRowFromMat3(lookatmat,2));
                         mat4.multiply(mat,mat,lookat);
                         break;
                     case 'matrix':
@@ -530,8 +530,29 @@ define(['q','glmatrixExt'], function (Q) {
                     case 'translate':
                         mat4.translate(mat,mat,JSON.parse("["+child.textContent.trim().replace(/\s+/g,",")+"]"));
                         break;
+                    default:
+                        // get all the transforms first
+                        break;
+                };
+                
+                child = child.nextSibling;
+            }
+
+            // now set the matrix
+            transform.local = mat;
+            transform.world = mat4.create();
+            mat4.multiply(transform.world, _world, transform.local);
+
+
+            var child = _node.firstChild;
+            // TODO - a node can have multiple instance geometry/lights...
+            while (child != null)
+            {
+                switch(child.tagName)
+                {
+
                     case 'node':
-                        var childTransform = this.parse_node(child);
+                        var childTransform = this.parse_node(child,transform.world);
                         if (!transform.children) transform.children=[];
                         transform.children.push(childTransform);
                         childTransform.parent = transform;
@@ -556,12 +577,12 @@ define(['q','glmatrixExt'], function (Q) {
                         break;
                     case 'instance_light':
                         transform.light = this.parse_instance_light(child);
+                        break;
+                    default:
+                        break;
                 }
                 child = child.nextSibling;
             }
-
-            // now set the matrix
-            transform.local = mat;
 
             return transform;
         },
@@ -746,7 +767,7 @@ define(['q','glmatrixExt'], function (Q) {
             var node = scene.firstChild;
             while (node != null){
                 if (node.nodeType === 1 && node.tagName === 'node')
-                    root.push(this.parse_node(node)); 
+                    root.push(this.parse_node(node, mat4.create())); 
                 node = node.nextSibling;
             }
             return root;

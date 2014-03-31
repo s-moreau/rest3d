@@ -21,9 +21,9 @@ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.*/
-
-define("channel", (function (global) {
-  var Channel= this.Channel = {}
+/// 'use strict'; problem witd defining function inside test
+define(['WebGLDebugUtils','state'], function (WebGLDebugUtils,State) {
+  var Channel=  {};
 
   // active channel
   Channel.active=null;
@@ -211,7 +211,6 @@ define("channel", (function (global) {
         
       }
     }
-return function () {
-        return global.Channel;
-    };
-}(this)));
+  return Channel;
+
+});

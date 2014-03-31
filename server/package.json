@@ -2,7 +2,7 @@
   "name" : "rest3d-server",
   "dependencies" : {
     "mime":"",
-    "restify":"",
+    "restify":"2.7.0",
     "send":"",
     "mkdirp":"",
     "shelljs":"",
@@ -16,7 +16,12 @@
     "formidable":"",
     "imagemagick":"",
     "memorystream":"",
-    "node-uuid":""
+    "node-uuid":"",
+    "nodetime":"",
+    "object_utils":"",
+    "secure-rnd":"",
+    "basex":"",
+    "cookies":""
   },
   "devDependencies": {
     "mocha": "1.7.4",

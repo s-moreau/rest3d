@@ -24,18 +24,19 @@ require.config({
         pnotify: "../deps/jquery.pnotify-1.3.1.min",
         colorpicker: "../deps/colorpicker/colorpicker",
         eye: "../deps/colorpicker/eye",
-        utils: "../deps/colorpicker/utils",
+        colorpickerUtils: "../deps/colorpicker/utils",
         webglUtils: "../deps/webgl-utils",
         WebGLDebugUtils:"../deps/webgl-debug",
+        q: '../deps/q',
         collada:"../loaders/collada",
         gltf:"../loaders/gltf",
         console:"../deps/console",
         screenfull:"../deps/screenfull.min",
         gui:"../gui/gui6",
-        utilMatrix: '../lib/utils',
+        rest3dUtils: '../lib/utils',
         viewer: '../viewer/viewer6',
+        channel:"../viewer/channel",
         uploadViewer: '../viewer/viewer6-upload',
-        q: '../deps/q',
         fpsCounter: '../viewer/fpscounter',
         viewer_ui : '../viewer/viewer6_ui',
     },
@@ -92,7 +93,7 @@ require.config({
             deps: ['jquerymin'],
             exports: 'window.EYE',
         },
-        'utils':{
+        'colorpickerUtils':{
             deps: ['eye'],
             exports: 'window.EYE',
         },
@@ -106,16 +107,8 @@ require.config({
             deps: ['jquerymin'],
             exports: 'CONSOLE',
         },
-        'state':{
-            deps: ['jquerymin'],
-            exports: 'State',
-        },
         'camera':{
             exports: 'Camera',
-        },
-        'channel':{
-            deps: ['webglUtils','state'],
-            exports: 'Channel',
         },
         'screenfull':{
             exports: 'screenfull',

@@ -344,7 +344,7 @@ define(['channel','codemirror','webglUtils', 'WebGLDebugUtils','pnotify','colorp
 
             this.header = function(flag){
                 var stock = this;
-                this.filesArea.append('<br>');
+                var $follow = this.filesArea.append($('<br>'));
                 var $frame = $('<div class="upload_header"></div>');
                 this.filesArea.append($frame);
                 var $head = htmlDiv($frame,true);
@@ -363,11 +363,14 @@ define(['channel','codemirror','webglUtils', 'WebGLDebugUtils','pnotify','colorp
                         }
                 });
                 $spanButton.append($j);
+                $follow.hide();
                 $frame.hide();
+                $frame.tmp = $follow;
                 return $frame;
             };
             this.upload = function(parent,link,button,button1,button2){
                 parent.show();
+                 parent.tmp.show();
                 var $newLine = htmlDiv(parent,false);
                 if(!button&&!button1&&!button2){
                     var $span = htmlSpan($newLine,100,link);
@@ -440,6 +443,8 @@ define(['channel','codemirror','webglUtils', 'WebGLDebugUtils','pnotify','colorp
             }
             this.download = function(parent,link,button){
                   parent.show();
+                 parent.tmp.show();
+
                 var $newLine = htmlDiv(parent,false);
                 var $span = htmlSpan($newLine,90,link);
                 $span.css("text-align","left");
@@ -456,6 +461,7 @@ define(['channel','codemirror','webglUtils', 'WebGLDebugUtils','pnotify','colorp
             }
             this.convert = function(parent,link,launch,download,preview){
                   parent.show();
+                 parent.tmp.show();
                 var $newLine = htmlDiv(parent,false);
                 var $span = htmlSpan($newLine,70,link);
                 $span.css("text-align","left");
@@ -563,7 +569,6 @@ define(['channel','codemirror','webglUtils', 'WebGLDebugUtils','pnotify','colorp
                 if(this.json.hasOwnProperty("dnd")){
                     this.jsonInput["dnd"]=this.json.dnd;
                 }
-                console.debug(this.json)
             }
             this.createJqueryObject = function(){
                 this[this.id] =$("#"+this.id);

@@ -1,13 +1,37 @@
+/*
+basexdriver.js
 
+The MIT License (MIT)
+
+Copyright (c) 2013 Rémi Arnaud - Advanced Micro Devices, Inc.
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in
+all copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+THE SOFTWARE.
+*/
 'use strict';
 
 var restify = require('restify');
 var basex = require('basex');
 
 
-var basex_port = process.env['DOTCLOUD_DATABASE_SERVERPORT_PORT'] || 1984;
-var basex_port_server = process.env['DOTCLOUD_DATABASE_SERVERPORT_HOST'];
-var basex_rest_server = process.env['DOTCLOUD_DATABASE_HTTP_HOST'];
+var basex_port = process.env.DOTCLOUD_DATABASE_SERVERPORT_PORT || 1984;
+var basex_port_server = process.env.DOTCLOUD_DATABASE_SERVERPORT_HOST;
+var basex_rest_server = process.env.DOTCLOUD_DATABASE_HTTP_HOST;
 var basex_rest = 80;
 var basex_rest_user = 'admin';
 var basex_rest_pass = 'admin';
@@ -63,8 +87,8 @@ var check_basex = function () {
 	      			console.log('ERROR: cannot get result from database');
 	      			test_count --;
 	      			if (test_count) {
-		      			console.log('trying again in 15 seconds')
-		      			setTimeout('check_basex',15000)
+		      			console.log('trying again in 5 seconds')
+		      			setTimeout('check_basex',5000)
 		      		} else
 		      		{
 		      			console.log('running without database');
@@ -120,6 +144,7 @@ exports.get = function(url, callback) {
 		
 	});
 };
+
 exports.post = function(url, body, callback) {
 	var cb=callback;
 	var opts = {};

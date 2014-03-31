@@ -22,13 +22,8 @@ module.exports = function (server) {
    return unescape(encodeURIComponent(str));
   };
 
-  var setNoCacheHeaders = function (res) {
-   res.setHeader('Pragma', 'no-cache');
-   res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate');
-   res.setHeader('Content-Disposition', 'inline; filename="files.json"');
-  };
-
   UploadHandler.prototype.post = function () {
+    console.log ("upload requested");
     var handler = this;
     var form = new formidable.IncomingForm();
     var tmpFiles = [];
@@ -143,7 +138,7 @@ module.exports = function (server) {
         });
       }
     }).on('file', function (name, file) {
-      var fileInfo = map[file.path];
+        var fileInfo = map[file.path];
       fileInfo.size = file.size;
       fileInfo.type = file.type;
       if (!fileInfo.validate()) {
@@ -252,24 +247,10 @@ module.exports = function (server) {
   // rest3d post upload API
   server.post(/^\/rest3d\/upload.*/, function(req,res,next){
 
-    //if (req.headers.content-type === "multipart/form-data")
-
-    res.setHeader(
-      'Access-Control-Allow-Origin',
-      FileInfo.options.accessControl.allowOrigin
-    );
-    res.setHeader(
-      'Access-Control-Allow-Methods',
-      FileInfo.options.accessControl.allowMethods
-    );
-    res.setHeader(
-      'Access-Control-Allow-Headers',
-      FileInfo.options.accessControl.allowHeaders
-    );
     var handler = new UploadHandler(req, res, next);
+    handler.allowOrigin();
 
-    setNoCacheHeaders(res);
-    var result = handler.post();
+    handler.post();
 
     return next();
   });
@@ -278,26 +259,15 @@ module.exports = function (server) {
   // rest3d get upload API
   server.get(/^\/rest3d\/upload.*/, function(req,res,next){
 
-      res.setHeader(
-          'Access-Control-Allow-Origin',
-          FileInfo.options.accessControl.allowOrigin
-      );
-      res.setHeader(
-          'Access-Control-Allow-Methods',
-          FileInfo.options.accessControl.allowMethods
-      );
-      res.setHeader(
-          'Access-Control-Allow-Headers',
-          FileInfo.options.accessControl.allowHeaders
-      );
       var handler = new UploadHandler(req, res, next);
+      handler.allowOrigin();
 
       var asset = req.url.split("/upload/")[1];
         
       console.log('in GET upload/ for asset='+asset)
 
       if (asset === undefined || asset === '') {
-          setNoCacheHeaders(res);
+          //handler.setNoCacheHeaders();
           if (req.method === 'GET') {
               handler.get();
           } else {

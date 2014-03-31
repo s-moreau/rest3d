@@ -149,6 +149,7 @@ define(['q','glmatrixExt'], function (Q) {
       // Note: a shader is either a vertex or a fragment shader
       // spec should be changed so shader type is in 'shaders'
       // also, spec should be changed so shader could be embedded as string
+      
       this.programs = {};
       var _programs = this.json.programs;
       for (var programID in _programs) {
@@ -352,7 +353,7 @@ define(['q','glmatrixExt'], function (Q) {
       this.lights[_lightID] = (light);
       return light;
     },
-    parse_node: function (_nodeID, _transform) {
+    parse_node: function (_nodeID, _world) {
 
       var node = this.json.nodes[_nodeID];
       var transform = {};
@@ -374,7 +375,8 @@ define(['q','glmatrixExt'], function (Q) {
       }
 
       if (node.rotation) {
-        quat.copy(transform.trs.rotation, node.rotation);
+
+        quat.setAxisAngle(transform.trs.rotation,[node.rotation[0],node.rotation[1],node.rotation[2]],node.rotation[3]);
         transform.calculateMe = true;
       }
 
@@ -388,13 +390,13 @@ define(['q','glmatrixExt'], function (Q) {
         transform.calculateMe = false;
       }
 
-      transform.global = mat4.create();
-      mat4.multiply(transform.global, transform.global, transform.local);
+      transform.world = mat4.create();
+      mat4.multiply(transform.world, _world, transform.local);
 
       if (node.children && node.children.length > 0) {
         transform.children = [];
         for (var i = 0, len = node.children.length; i < len; i++) {
-          var childTransform = this.parse_node(node.children[i], transform.global);
+          var childTransform = this.parse_node(node.children[i], transform.world);
           if (childTransform.bounds) {
             if (!bb) bb = aabb.create();
             aabb.add(bb, bb, childTransform.bounds);
@@ -494,6 +496,7 @@ define(['q','glmatrixExt'], function (Q) {
 
       var skin={};
       var skin_json = this.json.skins[_skinID];
+      // make this a Float32Array
       skin.bindShapeMatrix = mat4.clone(skin_json.bindShapeMatrix);
 
       var skeletons = [];
@@ -670,6 +673,7 @@ define(['q','glmatrixExt'], function (Q) {
       }
       document.animations[_animID] = anims;
     },
+    // do we really need that ? can't we just use the value in json ?
     cloneValue: function (_value, _type) {
       var document = this;
       if (!_value) {

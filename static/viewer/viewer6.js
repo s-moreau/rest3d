@@ -21,8 +21,14 @@ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.*/
-define(['jquerymin', 'gui', 'console', 'gltf', 'collada', 'renderer', 'camera', 'glmatrixExt', 'rest3d', 'q'], function ($, GUI, CONSOLE, glTF, COLLADA, RENDERER, camera, mat3, rest3d, Q) {
+define(   ['jquerymin','gltf','collada','renderer','camera','state','channel','q','console','glmatrixExt'], 
+  function( $         , glTF , COLLADA , RENDERER , Camera , State,  Channel , Q , CONSOLE) {
+
   var viewer = {};
+  viewer.flagPick = false;
+  viewer.flagAnimation = true;
+
+
   var scenes = [];
   var animations = {};
   var animation_timer = 0;
@@ -297,14 +303,15 @@ define(['jquerymin', 'gui', 'console', 'gltf', 'collada', 'renderer', 'camera', 
 
           // create a new state with this material override
           
+          
           // special case for skins
           if (this.skin) {
             if (!material.overrides) material.overrides={};
             material.overrides.JOINT_MATRIX = this.skin.jointMatrix;
-           // this.skin.bindShapeMatrix;
-           // this.skin.inverseBindMatrices;
+            // this is where we store the values for the skinning uniform
           }
 
+         
 
           var state = State.fromPassAndOverrides(material.pass, material.overrides);
           // fill up my primitive structure
@@ -344,7 +351,21 @@ define(['jquerymin', 'gui', 'console', 'gltf', 'collada', 'renderer', 'camera', 
     scene.upAxis = "Y_UP";
 
 
+    // do this after scene parse so it can resolve links to transforms
     animations = gltf.parse_animations();
+    
+    // resolve links to 'sources' in uniforms
+    for (var programID in this.programs) {
+      var program = this.programs[programID];
+       // look for sources ... could this be done in gltf with a deffered resolution ?
+        for (var uniformID in program.uniforms) {
+          var uniform = program.uniforms[uniformID];
+          if (uniform.source) {
+            var source = this.transforms[uniform.source].world;
+            uniform.value = source;
+          }
+        }
+    }
 
 
     // depth first traversal, create primitives, states and bounding boxes
@@ -387,35 +408,76 @@ define(['jquerymin', 'gui', 'console', 'gltf', 'collada', 'renderer', 'camera', 
     mvMatrix = mat4.create();
   };
 
+  // temporary storage space
+  var tmpMat = mat4.create();
+  var resultMat = mat4.create();
+  var inverseBindMatrix = mat4.create();
+  
   viewer.drawnode = function () {
-    if (this.skin)
-      for (var i =0, j=0; i< this.skin.joints.length; i++) {
-        var k=0;
-        var local = this.skin.joints[i].local;
-        this.skin.jointMatrix[j++] = local[0];
-        this.skin.jointMatrix[j++] = local[1];
-        this.skin.jointMatrix[j++] = local[2];
-        this.skin.jointMatrix[j++] = local[3];
-        this.skin.jointMatrix[j++] = local[4];
-        this.skin.jointMatrix[j++] = local[5];
-        this.skin.jointMatrix[j++] = local[6];
-        this.skin.jointMatrix[j++] = local[7];
-        this.skin.jointMatrix[j++] = local[8];
-        this.skin.jointMatrix[j++] = local[9];
-        this.skin.jointMatrix[j++] = local[10];
-        this.skin.jointMatrix[j++] = local[11];
-        this.skin.jointMatrix[j++] = local[12];
-        this.skin.jointMatrix[j++] = local[13];
-        this.skin.jointMatrix[j++] = local[14];
-        this.skin.jointMatrix[j++] = local[15];
-      }
+
     if (!this.geometries || this.geometries.length == 0)
       return true;
+
+    if (this.skin) {
+      // calculate matrices 
+      // inverse skin node world matrix * joint[i]*world matrix * inverse bind matrix[i] * bindshapematrix
+      // TODO -> create and use temporary matrices
+      var inverseSkinWorldMatrix = mat4.invert(tmpMat,this.world);
+      // this.world is mvMatrix ?
+      var bindShapeMatrix = this.skin.bindShapeMatrix;
+
+      var jointMatrix = this.skin.jointMatrix;
+
+      for (var i =0, j=0, k=0; i< this.skin.joints.length; i++) {
+
+        var nodeWorldMatrix = this.skin.joints[i].world;
+
+        inverseBindMatrix[0] = this.skin.inverseBindMatrices[k++];
+        inverseBindMatrix[1] = this.skin.inverseBindMatrices[k++];
+        inverseBindMatrix[2] = this.skin.inverseBindMatrices[k++];
+        inverseBindMatrix[3] = this.skin.inverseBindMatrices[k++];
+        inverseBindMatrix[4] = this.skin.inverseBindMatrices[k++];
+        inverseBindMatrix[5] = this.skin.inverseBindMatrices[k++];
+        inverseBindMatrix[6] = this.skin.inverseBindMatrices[k++];
+        inverseBindMatrix[7] = this.skin.inverseBindMatrices[k++];
+        inverseBindMatrix[8] = this.skin.inverseBindMatrices[k++];
+        inverseBindMatrix[9] = this.skin.inverseBindMatrices[k++];
+        inverseBindMatrix[10] = this.skin.inverseBindMatrices[k++];
+        inverseBindMatrix[11] = this.skin.inverseBindMatrices[k++];
+        inverseBindMatrix[12] = this.skin.inverseBindMatrices[k++];
+        inverseBindMatrix[13] = this.skin.inverseBindMatrices[k++];
+        inverseBindMatrix[14] = this.skin.inverseBindMatrices[k++];
+        inverseBindMatrix[15] = this.skin.inverseBindMatrices[k++];
+
+        mat4.multiply(resultMat, nodeWorldMatrix, inverseSkinWorldMatrix);
+        mat4.multiply(resultMat, resultMat, inverseBindMatrix);
+        mat4.multiply(resultMat, resultMat, bindShapeMatrix);
+
+        //mat4.identity(resultMat);
+
+        jointMatrix[j++] = resultMat[0];
+        jointMatrix[j++] = resultMat[1];
+        jointMatrix[j++] = resultMat[2];
+        jointMatrix[j++] = resultMat[3];
+        jointMatrix[j++] = resultMat[4];
+        jointMatrix[j++] = resultMat[5];
+        jointMatrix[j++] = resultMat[6];
+        jointMatrix[j++] = resultMat[7];
+        jointMatrix[j++] = resultMat[8];
+        jointMatrix[j++] = resultMat[9];
+        jointMatrix[j++] = resultMat[10];
+        jointMatrix[j++] = resultMat[11];
+        jointMatrix[j++] = resultMat[12];
+        jointMatrix[j++] = resultMat[13];
+        jointMatrix[j++] = resultMat[14];
+        jointMatrix[j++] = resultMat[15];
+      }
+    }
 
     for (var j = 0, len = this.geometries.length; j < len; j++) {
       var primitives = this.geometries[j].glprimitives;
       if (primitives) {
-        State.setModelView(mvMatrix);
+        State.setModelView(this.world);
         for (var i = 0; i < primitives.length; i++)
           primitives[i].render(viewer.channel);
       }
@@ -432,11 +494,8 @@ define(['jquerymin', 'gui', 'console', 'gltf', 'collada', 'renderer', 'camera', 
       // console.debug(node.local)
 
       viewer.pushMatrix();
-      mat4.multiply(mvMatrix, mvMatrix, node.local)
-      if (this.skin) {
-
-      }
-      //State.setJointMat(joint, node.local);
+      mat4.multiply(node.world, mvMatrix, node.local);
+      mat4.copy(mvMatrix, node.world);
 
       if (node.children)
         viewer.render_scene.call(this, node.children, _callback)
@@ -450,62 +509,96 @@ define(['jquerymin', 'gui', 'console', 'gltf', 'collada', 'renderer', 'camera', 
     return cont;
   };
 
-  viewer.draw = function (pick, x, y) {
+  var q1=quat.create();
+  var q2=quat.create();
+  var v1=vec3.create();
+  var v2=vec3.create();
+  var v3=vec3.create();
+  var axis = vec3.create();
+
+  // private function
+  // call viewer.draw() from outside
+  var draw = function (pick, x, y) {
 
     if (!scenes || scenes.length < 1) return null;
-    if (viewer.dropTick && !pick) {
-      console.log("dropTick activated");
-      return;
-    }
 
-    // get the animations
-    var delta = window.performance.now() - animation_timer;
-    animation_timer += delta;
-    if (delta >1000) // one frame per second
-    {
-      delta = 1000; // jump in time, breakpoint?
-    }
-    for (var key in animations) {
-      for (var i=0; i<animations[key].length; i++) {
-        var animation = animations[key][i];
-        var index_min = 0;
-        var index_max = animation.count;
-        var index = index_min;
 
-        var time = animation_timer/100;
-        if (index_max - index_min >1) {
-          while (time < animation.time_min) time += (animation.time_max-animation.time_min);
-          while (time > animation.time_max) time -= (animation.time_max-animation.time_min);
-        }
+    if (viewer.flagAnimation) {
 
-        // find time interval
-        while (index_max - index_min >1) {
-          index = (index_max+index_min)>>1;
-          if (time > animation.input[index]) {
-            index_min = index;
+      var delta = window.performance.now() - animation_timer;
+      animation_timer += delta;
+      if (delta >1000) // one frame per second
+      {
+        delta = 1000; // jump in time, breakpoint?
+      }
+      for (var key in animations) {
+      //var keys = Object.keys(animations); var key=keys[1]; {
+        for (var i=0; i<animations[key].length; i++) {
+          var animation =animations[key][i];
+          if (!viewer.flagTick) {
+            if (animation.currentIndex === undefined)
+              animation.currentIndex = 0;
+            else {
+              animation.currentIndex+=1;
+              if (animation.currentIndex >= animation.count)
+                animation.currentIndex =0;
+            }
+            var index = animation.currentIndex ;
+            console.log('index='+index);
+            vec3.normalize(axis,[animation.output[index*4], animation.output[index*4+1], animation.output[index*4+2]]);
+            var angle = animation.output[index*4+3];
+            console.log('axis='+vec3.str(axis)+' angle='+angle);
+            console.log('quat=['+animation.output[index*4]+' , '+animation.output[index*4+1]+' , '+animation.output[index*4+2] + ' , ' +animation.output[index*4+3])
+            quat.setAxisAngle(animation.target.trs.rotation, axis, angle);
+
           } else {
-            index_max = index;
-          }
-        }
-        // interpolate output to find result
+            var index_min = 0;
+            var index_max = animation.count;
+            var index = index_min;
 
-        if (animation.path === 'rotation') {
-          var interp = (time - animation.input[index_max]) / (animation.input[index_min]-animation.input[index_max]);
-          quat.lerp(animation.target.trs.rotation, 
-            [animation.output[index_min*4], animation.output[index_min*4+1], animation.output[index_min*4+2], animation.output[index_min*4+3] ],
-            [animation.output[index_max*4], animation.output[index_max*4+1], animation.output[index_max*4+2], animation.output[index_max*4+3] ],
-            interp);
+            var time = animation_timer/1000;
+
+            var k = Math.floor((time - animation.time_min)/(animation.time_max - animation.time_min));
+
+            time -= k*(animation.time_max - animation.time_min);
+
+            // find time interval using dychotomia
+            while (index_max - index_min >1) {
+              index = (index_max+index_min)>>1;
+              if (time > animation.input[index]) {
+                index_min = index;
+              } else {
+                index_max = index;
+              }
+            }
+
+            // interpolate output to find result
+
+            // This is axis / angle ...
+            if (animation.path === 'rotation') {
+              var interp = (animation.input[index_min]-time) / (animation.input[index_min]-animation.input[index_max]);
+
+              // interpolate axis
+              vec3.normalize(v1,[animation.output[index_min*4], animation.output[index_min*4+1], animation.output[index_min*4+2]]);
+              vec3.normalize(v2,[animation.output[index_max*4], animation.output[index_max*4+1], animation.output[index_max*4+2]]);
+              vec3.normalize(axis,vec3.lerp(v3,v1,v2, interp));
+
+              // interpolate angle
+              var angle = animation.output[index_min*4+3] + interp *(animation.output[index_max*4+3]-animation.output[index_min*4+3]);
+
+              quat.setAxisAngle(animation.target.trs.rotation, axis, angle);
+              //console.log('delta='+delta+' index_min='+index_min+' inter='+interp+'  axis='+vec3.str(axis)+' angle='+angle);
+
+            } else
+              console.error('unknown animation type');
+          }
+
           mat4.fromTrs(animation.target.local, animation.target.trs);
 
-        } else
-        console.error('unknown animation type');
+        
+        }
       }
-
     }
-
-    if (viewer.flagTick) {
-        console.log('delta=' + delta);
-    } 
 
     if (!pick) {
       $('#zoom').text('currentZoom is ' + viewer.currentZoom);
@@ -513,14 +606,13 @@ define(['jquerymin', 'gui', 'console', 'gltf', 'collada', 'renderer', 'camera', 
     }
 
     if (pick) {
-      viewer.dropTick = true;
       Channel.pickMode(viewer.channel, true);
     }
 
     if (pick)
       Channel.clear(viewer.channel, [0, 0, 0, 0]);
     else
-      Channel.clear(viewer.channel, [0, 0, 0, 0]); // transparent background - so we see through the canvas
+      Channel.clear(viewer.channel, [0, 0, 0, 0]); // set clear color here
 
     Camera.rotateAround(mainCamera, viewer.currentZoom, viewer.currentRotationX, viewer.currentRotationY);
 
@@ -544,7 +636,6 @@ define(['jquerymin', 'gui', 'console', 'gltf', 'collada', 'renderer', 'camera', 
     }
 
     if (pick) {
-      viewer.dropTick = false;
       return Channel.pickMode(viewer.channel, false, x, y);
     }
 
@@ -573,8 +664,19 @@ define(['jquerymin', 'gui', 'console', 'gltf', 'collada', 'renderer', 'camera', 
 viewer.tick = function(){
    if(viewer.flagTick){
     requestAnimFrame(viewer.tick);
-    viewer.draw();
+    draw();
     viewer.fpsCounter.increment();}
+}
+
+viewer.draw = function() {
+  if (viewer.flagTick)
+    return; // update will be done automatically
+  else
+    draw();
+}
+
+viewer.pick = function(x,y) {
+  return draw(true,x,y);
 }
 
   return viewer;

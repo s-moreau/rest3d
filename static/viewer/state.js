@@ -21,9 +21,10 @@ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.*/
+'use strict';
 
-  define("state", (function (global) {
-    var State = window.State ={};
+  define(["rest3dUtils"], function (utils) {
+    var State ={};
 
     State.create = function(_gl) {
       
@@ -111,7 +112,7 @@ THE SOFTWARE.*/
 
         State.setClearColor(state,0,0,0,0); // transparent, will show whatever is in the canvas
 
-        State.setClear(State.COLOR_BUFFER_BIT | State.DEPTH_BUFFER_BIT | State.STENCIL_BUFFER_BIT);
+        State.setClear(state,State.COLOR_BUFFER_BIT | State.DEPTH_BUFFER_BIT | State.STENCIL_BUFFER_BIT);
 
         State.setCullFace(state,State.BACK);
 
@@ -177,12 +178,19 @@ THE SOFTWARE.*/
 
     state.program = {};
 
+
+    // HACK fragment shader to add tint
+    state.program.fragmentShader = _pass.program.fragmentShader.str.replace("uniform","uniform vec4 _tint;\nuniform")
+                          .replace("gl_FragColor =","gl_FragColor = _tint * ");
+
     state.program.vertexShader = _pass.program.vertexShader.str;
-    state.program.fragmentShader = _pass.program.fragmentShader.str;
 
     state.program.compileMe = true;
     state.program.glProgram = null;
 
+
+    // HACK - add TINT uniform
+   _pass.program.uniforms.TINT = { symbol: '_tint', type: WebGLRenderingContext.FLOAT_VEC4 , size:1, value: [1.,1.,1.,1.]};
 
     // allocate values from default values in program
     allocateUniformsAndAttributes(state,_pass.program.uniforms, _pass.program.attributes, _overrides);
@@ -201,7 +209,7 @@ THE SOFTWARE.*/
           if (typeof arg[i] ==='string') {
             var value = State[arg[i]];
             if (value === undefined) 
-              RENDERER.logError("unknown parameter "+arg[i]+' in State.fromPass');
+              utils.logError("unknown parameter "+arg[i]+' in State.fromPass');
 
             args.push(State[arg[i]]); // convert string to enum value
           }
@@ -234,54 +242,70 @@ THE SOFTWARE.*/
       var value = State.Uniforms[semantic] || _overrides[semantic] || uniform.value; 
       var newvalue=null;
 
+      //special case -> should be in glTF
+      if (semantic ==="JOINT_MATRIX")
+        uniform.size = value.length>>4;
+      //todo -> allocate according to size !!!
+      //returns Float32Array(size*type);
+      var size = uniform.size || 1;
+
       _state.program.uniforms[semantic] = {};
 
-      // otherwise, allocate it for this state
-      switch (type) {
-        case WebGLRenderingContext.FLOAT:
-          if (!value) _state.values[semantic] = 0; else _state.values[semantic] = value;
-          break;
-        case WebGLRenderingContext.FLOAT_VEC2:
-          if (!value) _state.values[semantic]=vec2.create(); else _state.values[semantic]=value;
-          break;
-        case WebGLRenderingContext.FLOAT_VEC3:
-          if (!value) _state.values[semantic]=vec3.create(); else _state.values[semantic]=value;
-          break;
-        case WebGLRenderingContext.FLOAT_VEC4:
-          if (!value) _state.values[semantic]=vec4.create(); else _state.values[semantic]=value;
-          break;
-        case WebGLRenderingContext.INT_VEC4:
-          if (!value) _state.values[semantic]=[0,0,0,0]; else _state.values[semantic]=value;
-          break;
-        case WebGLRenderingContext.FLOAT_MAT3:
-          if (!value) _state.values[semantic]=mat3.create(); else _state.values[semantic]=value;
-          break;
-        case WebGLRenderingContext.FLOAT_MAT4:
-          if (!value) _state.values[semantic]=mat4.create(); else _state.values[semantic]=value;
-          break;
-        case WebGLRenderingContext.SAMPLER_2D:
+      if (type === WebGLRenderingContext.SAMPLER_2D) {
 
-          if (value && value.textureUnit) {
-            newvalue={};
-            newvalue.textureUnit = value.textureUnit;
-            if (value.flipY) newvalue.flipY = value.flipY; else newvalue.flipY=false;
-          } else {
-            newvalue={};
-            newvalue.textureUnit = textureUnit++;
-            newvalue.flipY = false;
-          }
-          _state.values[semantic] = value;
-          break;
-        default:
-          RENDERER.logError('unknown type '+type+' in State.fromPass')
-          break;
+            if (value && value.textureUnit) {
+              newvalue={};
+              newvalue.textureUnit = value.textureUnit;
+              if (value.flipY) newvalue.flipY = value.flipY; else newvalue.flipY=false;
+            } else {
+              newvalue={};
+              newvalue.textureUnit = textureUnit++;
+              newvalue.flipY = false;
+            }
+      } else
+      // otherwise, allocate it for this state
+      if (!value) {
+        switch (type) {
+          case WebGLRenderingContext.FLOAT:
+            value = 0; 
+            break;
+          case WebGLRenderingContext.FLOAT_VEC2:
+            if (size!==1)  value =  new Float32Array(2*size);
+            else value = vec2.create();
+            break;
+          case WebGLRenderingContext.FLOAT_VEC3:
+            if (size!==1) value = new Float32Array(2*size); 
+            else value = vec3.create();
+            break;
+          case WebGLRenderingContext.FLOAT_VEC4:
+            if (size!==1) value = new Float32Array(3*size); 
+            else value = vec4.create();
+            break;
+          case WebGLRenderingContext.INT_VEC4:
+            value = new Int32Array(4*size); 
+            break;
+          case WebGLRenderingContext.FLOAT_MAT3:
+            if (size!==1) value = new Float32Array(9*size); 
+            else value = mat3.create();
+            break;
+          case WebGLRenderingContext.FLOAT_MAT4:
+            if (size!==1) value = new Float32Array(16*size); 
+            else value = mat4.create();
+            break;
+         
+          default:
+            utils.logError('unknown type '+type+' in allocateUniformsAndAttributes')
+            break;
+        }
       }
 
+      _state.values[semantic] = value;
       // allocate program uniforms
       _state.program.uniforms[semantic] = {
         symbol: uniform.symbol,
         type: type,
-        value: newvalue 
+        value: newvalue,
+        size: size
       }
     }
 
@@ -361,12 +385,12 @@ THE SOFTWARE.*/
                 state.values[key][item] = value[item];
             break;
           default:
-            State.logError('unknown key type='+type+' in State.clone');
+            utils.logError('unknown key type='+type+' in State.clone');
             return this;
             break;
           }
         } else
-        State.log('cannot find attribute/uniform '+key+" in State.clone");
+        utils.log('cannot find attribute/uniform '+key+" in State.clone");
     }
     // copy states
     for (var key in _state) {
@@ -386,7 +410,7 @@ THE SOFTWARE.*/
     _gl.compileShader(shader);
     if (!_gl.getShaderParameter(shader, _gl.COMPILE_STATUS)) {
         var error = _gl.getShaderInfoLog(shader);
-        RENDERER.logError("Error compiling shader:\n" + error);
+        utils.logError("Error compiling shader:\n" + error);
         print(_gl.getShaderInfoLog(shader));
         _gl.deleteShader(shader);
         return null;
@@ -405,32 +429,35 @@ THE SOFTWARE.*/
       var program = State.programs[i];
       if (program.vertexShader === _state.program.vertexShader && program.fragmentShader === _state.program.fragmentShader) {
         if (program.compileMe === true) {
-          RENDERER.logError('this is impossible ... program should be compiled already')
+          utils.logError('this is impossible ... program should be compiled already')
         }
         _state.program = program;
         return program;
       }
     }
 
-    if (!_gl) { RENDERER.logError("Compiling program failed without context"); return _state.program;};
+    if (!_gl) { utils.logError("Compiling program failed without context"); return _state.program;};
     // note: do not delete the previous program as this is not the owner 
     // TODO - State:delete
 
+
     var glVertexShader = createShader(_gl,State.VERTEX_SHADER,_state.program.vertexShader); 
-    var glFragmentShader = createShader(_gl,State.FRAGMENT_SHADER,_state.program.fragmentShader); 
+    var glFragmentShader = createShader(_gl,State.FRAGMENT_SHADER, _state.program.fragmentShader); 
 
     var glProgram = _gl.createProgram();
     if (glProgram == null) 
-      RENDERER.logError("Creating program failed");
+      utils.logError("Creating program failed");
 
     _gl.attachShader(glProgram, glVertexShader);
     _gl.attachShader(glProgram, glFragmentShader);
 
+    // make sure we are using slot '0', otherwise performance will suffer
+    _gl.bindAttribLocation(glProgram, 0, _state.program.attributes.POSITION.symbol);
+
     _gl.linkProgram(glProgram);
 
-
     if (!_gl.getProgramParameter(glProgram, State.LINK_STATUS) && !_gl.isContextLost()) {
-        RENDERER.logError(_gl.getProgramInfoLog(glProgram));
+        utils.logError(_gl.getProgramInfoLog(glProgram));
     }
 
     // TODO -> do not allocate a new object, use _state.program instead
@@ -443,8 +470,7 @@ THE SOFTWARE.*/
     //program.uniforms = _state.program.uniforms;
     //program.attributes = _state.program.attributes;
 
-    // make sure we are using slot '0', otherwise performance will suffer
-    _gl.bindAttribLocation(glProgram, "POSITION", 0);
+
     for (var semantic in _state.program.attributes)
     {
       var attribute = _state.program.attributes[semantic];
@@ -470,6 +496,7 @@ for (var i = _gl.getProgramParameter(glProgram, _gl.ACTIVE_UNIFORMS) - 1; i >= 0
       }
     }
 
+    
     // for context loss
     _state.program.ID = State.programs.length; 
     State.programs.push(_state.program);
@@ -479,94 +506,99 @@ for (var i = _gl.getProgramParameter(glProgram, _gl.ACTIVE_UNIFORMS) - 1; i >= 0
     return _state.program;
   };
 
-  // compare velue by address, and apply values if different
-  // should be compare by value ?
-  // or why copy values?
+  // compare velue and apply values if different
+
     State.setUniform=function(_gl, _state, _uniformID) {
       var uniform = _state.program.uniforms[_uniformID];
       var type = uniform.type;
       var value = _state.values[_uniformID];
       var apply = false;
 
-      switch (type){
-        case WebGLRenderingContext.FLOAT_VEC2:
-          if (vec2.squaredDistance(uniform.value,value)>1e-12){
-            vec2.copy(uniform.value, value);    
-            apply=true; 
-          }
-          break;
-        case WebGLRenderingContext.FLOAT_VEC3:
-          if (vec3.squaredDistance(uniform.value,value)>1e-12){
-            vec3.copy(uniform.value, value);
+      var size = uniform.size;
+
+      if (size !== 1) {
+        apply=true;
+      } else {
+        switch (type){
+          case WebGLRenderingContext.FLOAT_VEC2:
+            if (vec2.squaredDistance(uniform.value,value)>1e-12){
+              vec2.copy(uniform.value, value);    
+              apply=true; 
+            }
+            break;
+          case WebGLRenderingContext.FLOAT_VEC3:
+            if (vec3.squaredDistance(uniform.value,value)>1e-12){
+              vec3.copy(uniform.value, value);
+              apply=true;
+            }
+            break;
+          case WebGLRenderingContext.FLOAT_VEC4:
+            if (vec4.squaredDistance(uniform.value,value)>1e-12){
+              vec4.copy(uniform.value, value);
+              apply=true;
+            }
+            break;
+          case WebGLRenderingContext.INT_VEC4:
+            if (uniform.value[0]!=value[0] || uniform.value[1]!=value[1] || uniform.value[2]!=value[2] || uniform.value[3]!=value[3]) {
+              uniform.value[0]=value[0]; uniform.value[1]=value[1]; uniform.value[2]=value[2]; uniform.value[3]=value[3];
+              apply=true;
+            }
+          case WebGLRenderingContext.FLOAT_MAT4:
+          if (mat4.squaredDistance(uniform.value,value)>1e-12){
+              mat4.copy(uniform.value, value);
+              apply=true;
+            }
+            break;
+          case WebGLRenderingContext.FLOAT_MAT3:
+           if (mat3.squaredDistance(uniform.value,value)>1e-12){
+              mat3.copy(uniform.value, value);
+              apply=true;
+            }
+            break;
+            // TODO -> should this be a pointer instead?
+          case WebGLRenderingContext.FLOAT:
+            if ((uniform.value - value) * (uniform.value-value)>1e-12) {
+              uniform.value = value;
+              apply=true;
+            }
+            break;
+          case WebGLRenderingContext.SAMPLER_2D:
+          /*  value is this object:
+              "image": document.images[parameter.image],
+              "magFilter": parameter.magFilter,
+              "minFilter": parameter.minFilter,
+              "wrapS": parameter.wrapS,
+              "wrapT": parameter.wrapT};
+              "glTexture" : texture created from image
+              "textureUnit" : which texture unit to use
+              "flipY": do we need to flip Y 
+
+              need to check if the active texture _uniform.value.textureUnit
+              is pointing to the same glTexture
+
+          */        
+
+
+          // keep trying until image is ready
+          if (value && value.glTexture === undefined) 
+                createTextureBuffer(_gl,value);
+
+          for (var key in value) 
+            if (uniform.value[key] !== value[key]) {
+              uniform.value[key] = value[key];
+              apply = true; // same shader, but different texture
+            }
+
+          // also check if gl has same texture selected
+          if (State.glTexture[uniform.value.textureUnit] != uniform.value.glTexture)
             apply=true;
-          }
+
           break;
-        case WebGLRenderingContext.FLOAT_VEC4:
-          if (vec4.squaredDistance(uniform.value,value)>1e-12){
-            vec4.copy(uniform.value, value);
-            apply=true;
-          }
+        default:
+          utils.logError('unknown type='+type+' in State.setUniform');
+          return this;
           break;
-        case WebGLRenderingContext.INT_VEC4:
-          if (uniform.value[0]!=value[0] || uniform.value[1]!=value[1] || uniform.value[2]!=value[2] || uniform.value[3]!=value[3]) {
-            uniform.value[0]=value[0]; uniform.value[1]=value[1]; uniform.value[2]=value[2]; uniform.value[3]=value[3];
-            apply=true;
-          }
-        case WebGLRenderingContext.FLOAT_MAT4:
-        if (mat4.squaredDistance(uniform.value,value)>1e-12){
-            mat4.copy(uniform.value, value);
-            apply=true;
-          }
-          break;
-        case WebGLRenderingContext.FLOAT_MAT3:
-         if (mat3.squaredDistance(uniform.value,value)>1e-12){
-            mat3.copy(uniform.value, value);
-            apply=true;
-          }
-          break;
-          // TODO -> should this be a pointer instead?
-        case WebGLRenderingContext.FLOAT:
-          if ((uniform.value - value) * (uniform.value-value)>1e-12) {
-            uniform.value = value;
-            apply=true;
-          }
-          break;
-        case WebGLRenderingContext.SAMPLER_2D:
-        /*  value is this object:
-            "image": document.images[parameter.image],
-            "magFilter": parameter.magFilter,
-            "minFilter": parameter.minFilter,
-            "wrapS": parameter.wrapS,
-            "wrapT": parameter.wrapT};
-            "glTexture" : texture created from image
-            "textureUnit" : which texture unit to use
-            "flipY": do we need to flip Y 
-
-            need to check if the active texture _uniform.value.textureUnit
-            is pointing to the same glTexture
-
-        */        
-
-
-        // keep trying until image is ready
-        if (value && value.glTexture === undefined) 
-              createTextureBuffer(_gl,value);
-
-        for (var key in value) 
-          if (uniform.value[key] !== value[key]) {
-            uniform.value[key] = value[key];
-            apply = true; // same shader, but different texture
-          }
-
-        // also check if gl has same texture selected
-        if (State.glTexture[uniform.value.textureUnit] != uniform.value.glTexture)
-          apply=true;
-
-        break;
-      default:
-        RENDERER.logError('unknown type='+type+' in State.setUniform');
-        return this;
-        break;
+        }
       }
       if (apply)
         applyUniform(_gl,uniform,value);
@@ -625,7 +657,7 @@ for (var i = _gl.getProgramParameter(glProgram, _gl.ACTIVE_UNIFORMS) - 1; i >= 0
 
         break;
       default:
-        RENDERER.logError('unknown type='+type+' in State.applyUniform');
+        utils.logError('unknown type='+type+' in State.applyUniform');
         break;
       }
       
@@ -697,12 +729,6 @@ for (var i = _gl.getProgramParameter(glProgram, _gl.ACTIVE_UNIFORMS) - 1; i >= 0
 
     State.setViewProj= function (_mat) { 
       mat4.copy(State.Uniforms.PROJECTION, _mat); 
-    };
-
-    State.setJointMat = function(_bone,_mat) {
-      // we need a pointer to the JOINT_MATRIX uniform values
-      //mat4.copy(State.Uniforms.MODEL, _mat);
-       var toto = 'titi';
     };
     
     State.setViewport = function(_state,_x1, _y1, _x2, _y2) {
@@ -815,7 +841,7 @@ for (var i = _gl.getProgramParameter(glProgram, _gl.ACTIVE_UNIFORMS) - 1; i >= 0
         if (_bool)
           _state.gl.enable(State.CULL_FACE);
         else
-         _state.gl.disable(Stata.CULL_FACE);
+         _state.gl.disable(State.CULL_FACE);
      } else
         _state.cullFaceEnableDirty = true;
       return _state;
@@ -1028,7 +1054,7 @@ for (var i = _gl.getProgramParameter(glProgram, _gl.ACTIVE_UNIFORMS) - 1; i >= 0
     State.apply = function(_old, _new) {
       var gl = _old.gl;
 
-      if (!gl) {RENDERER.logError("no gl context in applyProgram"); return false};
+      if (!gl) {utils.logError("no gl context in applyProgram"); return false};
 
       if (_new.program.compileMe) 
         compileProgram(gl,_new);
@@ -1380,7 +1406,5 @@ for (var i = _gl.getProgramParameter(glProgram, _gl.ACTIVE_UNIFORMS) - 1; i >= 0
                                      'PROJECTION' : { symbol: 'uPMatrix' , type: WebGLRenderingContext.FLOAT_MAT4 },
                                      'color' :{ symbol: 'uColor', type: WebGLRenderingContext.FLOAT_VEC4 }};
     // TODO  - disable blend
-return function () {
-        return global.State;
-    };
-}(this)));
+    return State;
+});
