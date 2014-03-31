@@ -1113,6 +1113,11 @@
         },
 
         _onDrop: function (e) {
+            if(e.target.id==""){
+                e.idToDrop = e.target.parentElement.id;
+            }
+            else{
+                e.idToDrop = e.target.id;}
             e.dataTransfer = e.originalEvent && e.originalEvent.dataTransfer;
             var that = this,
                 dataTransfer = e.dataTransfer,

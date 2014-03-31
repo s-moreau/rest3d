@@ -378,8 +378,9 @@ define("console", (function (global) {
 
         function decodeJson(entry) {
             if (entry == '[object Object]') {
-                // var tmp = JSON.stringify(entry);
-                return entry;
+                try{var tmp = JSON.stringify(entry);}
+                catch(e){var tmp = entry;}
+                return tmp;
             } else {
                 return entry
             }

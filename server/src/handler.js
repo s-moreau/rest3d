@@ -6,10 +6,18 @@ var Handler = function (req, res, next) {
       this.req = req;
       this.res = res;
       this.next = next;
+      if(req.headers.hasOwnProperty("x-iduser")){
+        console.log("iduser detected : "+req.headers["x-iduser"]);
+        this.iduser = req.headers["x-iduser"];
+      }
+      if(req.headers.hasOwnProperty("x-folder")){
+        console.log("iduser detected : "+req.headers["x-folder"]);
+        this.folder = req.headers["x-folder"];
+      }
 };
 
 Handler.prototype.handleError = function (error) {
-
+      console.log("handler error : "+error)
       if (typeof error === 'string') 
         error = {success:false, errorCode:'N/A', message:error};
 
@@ -61,5 +69,19 @@ Handler.prototype.handleResult = function(result, redirect) {
         }
         if (this.next) this.next();
       };
+
+  Handler.prototype.search =  function(path,value){
+        var fs = require('fs');
+        var flag = false;
+        var files = fs.readdirSync(path);
+        console.log(files);
+        if(files.length==0){flag=false;}
+          files.forEach(function (name) {
+            if(name == value){
+              flag = true;
+            }
+      });
+        return flag;
+          }
 
 module.exports = Handler;

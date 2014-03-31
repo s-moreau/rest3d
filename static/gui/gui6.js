@@ -172,6 +172,9 @@ define(['channel','codemirror','webglUtils', 'WebGLDebugUtils','pnotify','colorp
             this.id = _json.id;
             this.parent = _json.parent;
             this.url = _json.url;
+            if(_json.hasOwnProperty("idUser")){
+                this.idUser = _json.idUser;
+            }
             this.generateHTML = function(){
                 this.html = "<div id='"+this.id+"' class='container'>";
                 this.html+="<input id='fileupload_"+this.id+"' style='display:none;' type='file' name='files[]' multiple>"
@@ -180,17 +183,99 @@ define(['channel','codemirror','webglUtils', 'WebGLDebugUtils','pnotify','colorp
                 this.parent.append(this.html);
                 this.createJqueryObject();
                 var stock=this;
-                this.button = GUI.button("Add files...",this[this.id],function(){
+                this.button = function(node){
+                    stock.callback(node);
                     $('#fileupload_'+stock.id).click();
-                }).width("100%");
-                this[this.id].append("<hr>");
+                };
+                // this[this.id].append("<hr>");
 
-                this.dropzone = GUI.image(this[this.id],"image_"+this.id,"../gui/images/upload_d.png","100%","100px");
-                GUI.addTooltip({
-                        parent: this.dropzone,
-                        content: "Drag&drop area",
-                    });
-                this[this.id].css("text-align","center");
+                // this.dropzone = GUI.image(this[this.id],"image_"+this.id,"../gui/images/upload_d.png","100%","100px");
+                // GUI.addTooltip({
+                //         parent: this.dropzone,
+                //         content: "Drag&drop area",
+                //     });
+                // this[this.id].css("text-align","center");
+                var tmp = GUI.treeBis({
+                    id:'uploadTree',
+                    parent: this[this.id],
+                    json:  {
+                        "data":{
+                            "data":stock.idUser,"attr":{"id":stock.idUser,"rel":"child"},},
+                        },
+                        "dnd" : {
+                                "drop_finish" : function (data) { 
+                                  console.log('drop finish'+data);
+                        //this is where the actual call to the sever is made for rearranging the triples for drag n drop.
+                        //console.log(data);
+                        //console.log('target '+ data.r);
+                        
+                    },},
+                "plugin": ["themes", "json_data", "ui", "types","sort","search","contextmenu"],
+                      "contextmenu" : {
+                "items" : function (node) {
+                    var result = {};
+                    if(node.attr("rel")=="child"){
+                        result.icon = {'label':'Add files','action':stock.button,};}
+                    return result;
+                }
+            },
+                 type:  { "types": {
+                    "main": {
+                        "icon" : {
+                            "image" : "../favicon.ico",
+                        },
+                        },
+                    "camera": {
+                        "icon" : {
+                            "image" : "../gui/images/camera-anim.gif",
+                        },
+                        },
+                    "children": {
+                        "icon" : {
+                            "image" : "../gui/images/folder.png",
+                        },
+                        },
+                    "local": {
+                        "icon" : {
+                            "image" : "../gui/images/Photoshop3DAxis.png",
+                        },
+                        },
+                    "geometry": {
+                        "icon" : {
+                            "image" : "../gui/images/geometry.png",
+                        },
+                        },
+                     "sub": {
+                        "icon" : {
+                            "image" : "../gui/images/folder.png",
+                        },
+                        },
+                    "child": {
+                        "icon" : {
+                            "image" : "../gui/images/folder.png",
+                        },
+                        },
+                    "empty": {
+                        "icon" : {
+                            "image" : "../gui/images/cross.jpg",
+                        },
+                        },
+                    "image": {
+                        "icon" : {
+                            "image" : "../gui/images/media-image.png",
+                        },
+                        },
+                    "camera_child": {
+                        "icon" : {
+                            "image" : "../gui/images/camera.png",
+                        },
+                        },
+                }},
+                    themes:{
+                        "theme":"apple",
+                    },
+                });
+                this.tree = tmp.uploadTree;
                 this[this.id].append("<hr>");//
 
                 this.progress = GUI.progress({
@@ -202,13 +287,18 @@ define(['channel','codemirror','webglUtils', 'WebGLDebugUtils','pnotify','colorp
                // $('#fileArea_'+this.id).append('<div style="border: 1px solid grey; border-top: none; width:100%;" ><span style="float:left !important;">Fildsdsdsdsde</span></div>');
             }
             this.callOnClick = function(cb){
-                this.button.on('click',function(){
+                if(this.button){
+                    this.button.on('click',function(){
                     cb.call();
                 })
+                }
             }
             this.jqueryUpload = function(){
-                var stock = this;                                                                                                                                                                        
-                this.object = this.upload1.fileupload({
+                var stock = this;  
+                setTimeout(function(){
+                stock.dropzone = $("#uploadTree"/*+stock.idUser +"> a"*/);
+                },500);
+                var json = {
                     url: stock.url,
                     dataType: 'json',
                     autoUpload: false,
@@ -219,8 +309,16 @@ define(['channel','codemirror','webglUtils', 'WebGLDebugUtils','pnotify','colorp
                     previewMaxWidth: 100,
                     previewMaxHeight: 100,
                     previewCrop: true,
-                    dropZone: stock.dropzone,      
-            });
+                };  
+                // if(this.idUser){
+                //     var idtmp = this.idUser;
+                //     json["beforeSend"]=function(xhr, data) {
+                //         xhr.setRequestHeader('X-idUser', idtmp);
+                //     }
+                // }                                                                                                                                                                   
+                stock.object = stock.upload1.fileupload(json);
+                // },50);
+
             }
             this.createJqueryObject = function(){
                 this[this.id]=$('#'+this.id);
@@ -250,20 +348,26 @@ define(['channel','codemirror','webglUtils', 'WebGLDebugUtils','pnotify','colorp
                 var $frame = $('<div class="upload_header"></div>');
                 this.filesArea.append($frame);
                 var $head = htmlDiv($frame,true);
-                if(flag){
+                if(flag&&typeof(flag)!="function"){
                     var $span = htmlSpan($head,90,GUI.time(true)+" convert "+flag);
                 }
                 else{var $span = htmlSpan($head,90,GUI.time(true)+" Upload");}
                 $span.css("font-weight","bold");
                 var $spanButton = htmlSpan($head,10);
+                var flag1 = flag;
                 var $j = $("<button>X</button>").on('click', function (){
-                    $frame.hide();
-                    stock.filesArea.children("br").last().remove();
+                        $frame.hide();
+                        stock.filesArea.children("br").last().remove();
+                        if(typeof(flag1) == "function"){
+                            flag1();
+                        }
                 });
                 $spanButton.append($j);
+                $frame.hide();
                 return $frame;
             };
             this.upload = function(parent,link,button,button1,button2){
+                parent.show();
                 var $newLine = htmlDiv(parent,false);
                 if(!button&&!button1&&!button2){
                     var $span = htmlSpan($newLine,100,link);
@@ -335,6 +439,7 @@ define(['channel','codemirror','webglUtils', 'WebGLDebugUtils','pnotify','colorp
                 }
             }
             this.download = function(parent,link,button){
+                  parent.show();
                 var $newLine = htmlDiv(parent,false);
                 var $span = htmlSpan($newLine,90,link);
                 $span.css("text-align","left");
@@ -350,6 +455,7 @@ define(['channel','codemirror','webglUtils', 'WebGLDebugUtils','pnotify','colorp
                     });
             }
             this.convert = function(parent,link,launch,download,preview){
+                  parent.show();
                 var $newLine = htmlDiv(parent,false);
                 var $span = htmlSpan($newLine,70,link);
                 $span.css("text-align","left");
@@ -434,6 +540,12 @@ define(['channel','codemirror','webglUtils', 'WebGLDebugUtils','pnotify','colorp
             }   
             this.generateJSON = function(){
                 this.jsonInput={};
+                     if(this.json.hasOwnProperty("plugin")){
+                    this.jsonInput["plugins"]=this.json.plugin;
+                }
+                else{
+                    this.jsonInput["plugins"]=["themes", "json_data", "ui", "types", "sort","contextmenu","search"];
+                }
                 if(this.json.hasOwnProperty("themes")){
                     this.jsonInput["themes"]=this.json.themes;}
                 if(this.json.hasOwnProperty("type")){
@@ -448,12 +560,10 @@ define(['channel','codemirror','webglUtils', 'WebGLDebugUtils','pnotify','colorp
                 if(this.json.hasOwnProperty("core")){
                     this.jsonInput["core"]=this.json.core;
                 }
-                if(this.json.hasOwnProperty("plugin")){
-                    this.jsonInput["plugins"]=this.json.plugin;
+                if(this.json.hasOwnProperty("dnd")){
+                    this.jsonInput["dnd"]=this.json.dnd;
                 }
-                else{
-                    this.jsonInput["plugins"]=["themes", "json_data", "ui", "types", "sort","contextmenu","search"];
-                }
+                console.debug(this.json)
             }
             this.createJqueryObject = function(){
                 this[this.id] =$("#"+this.id);

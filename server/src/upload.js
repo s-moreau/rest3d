@@ -29,7 +29,6 @@ module.exports = function (server) {
   };
 
   UploadHandler.prototype.post = function () {
-    console.log ("upload requested");
     var handler = this;
     var form = new formidable.IncomingForm();
     var tmpFiles = [];
@@ -146,13 +145,37 @@ module.exports = function (server) {
     }).on('file', function (name, file) {
       var fileInfo = map[file.path];
       fileInfo.size = file.size;
+      fileInfo.type = file.type;
       if (!fileInfo.validate()) {
         fs.unlinkSync(file.path);
         return;
       }
-      fs.renameSync(file.path, FileInfo.options.uploadDir + '/' + fileInfo.name);
-      console.log("uploaded "+FileInfo.options.uploadDir + '/' + fileInfo.name);
-      fileInfo.path = FileInfo.options.uploadDir + '/' + fileInfo.name;
+      if(handler.hasOwnProperty("iduser")){ 
+
+        var flagIduser = handler.search(FileInfo.options.uploadDir,handler.iduser);
+        if(!flagIduser){
+          fs.mkdirSync(FileInfo.options.uploadDir + '/' + handler.iduser);
+        }
+        if(handler.hasOwnProperty("folder")){ 
+          var flagFolder = handler.search(FileInfo.options.uploadDir + '/' + handler.iduser ,handler.folder);
+          if(!flagFolder){
+            fs.mkdirSync(FileInfo.options.uploadDir + '/' + handler.iduser + '/'+ handler.folder);
+          }
+          fs.renameSync(file.path, FileInfo.options.uploadDir + '/' + handler.iduser + '/'+ handler.folder +'/'+ fileInfo.name);
+          console.log("uploaded "+FileInfo.options.uploadDir + '/' + handler.iduser + '/'+ handler.folder +'/'+ fileInfo.name);
+          fileInfo.path = FileInfo.options.uploadDir + '/' + handler.iduser + '/'+ handler.folder +'/'+ fileInfo.name;
+        }
+        else{
+          fs.renameSync(file.path, FileInfo.options.uploadDir + '/' + handler.iduser + '/' + fileInfo.name);
+          console.log("uploaded "+FileInfo.options.uploadDir + '/' + handler.iduser + '/' + fileInfo.name);
+          fileInfo.path = FileInfo.options.uploadDir + '/' + handler.iduser + '/' + fileInfo.name;
+      }
+      }
+      else{
+        fs.renameSync(file.path, FileInfo.options.uploadDir + '/' + fileInfo.name);
+        console.log("uploaded "+FileInfo.options.uploadDir + '/' + fileInfo.name);
+        fileInfo.path = FileInfo.options.uploadDir + '/' + fileInfo.name;
+      }
       /* Image resize 
 
       if (FileInfo.options.imageTypes.test(fileInfo.name)) {
@@ -231,7 +254,6 @@ module.exports = function (server) {
 
     //if (req.headers.content-type === "multipart/form-data")
 
-    console.log(req.headers['content-type']);
     res.setHeader(
       'Access-Control-Allow-Origin',
       FileInfo.options.accessControl.allowOrigin
@@ -245,6 +267,7 @@ module.exports = function (server) {
       FileInfo.options.accessControl.allowHeaders
     );
     var handler = new UploadHandler(req, res, next);
+
     setNoCacheHeaders(res);
     var result = handler.post();
 

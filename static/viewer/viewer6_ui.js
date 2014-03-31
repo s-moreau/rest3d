@@ -1,5 +1,6 @@
 define(['viewer','gui','uploadViewer','rest3d','q','collada','gltf','renderer'], function (viewer,gui,setViewer6Upload,rest3d,Q,COLLADA,glTF,RENDERER) {
 
+viewer.idUser =  "User_"+Math.floor(Math.random() * 100000000000000) + 1;
 viewer.INIT =  function (){
     
         "use strict";//
@@ -492,7 +493,6 @@ if (!window.performance || !window.performance.now) {
                         return url;
                     },
                     "success": function (new_data) {
-                            console.debug(new_data)
                         var result = [];
                         if(nodeBuffer==-1){
                             window.main(viewer.scenes,result)
@@ -515,7 +515,7 @@ if (!window.performance || !window.performance.now) {
                     },
                 },
             },
-            "plugins": ["themes", "json_data", "ui", "types", "sort","search"],
+            "plugin": ["themes", "json_data", "ui", "types", "sort","search"],
              type:  { "types": {
                 "main": {
                     "icon" : {
@@ -1287,8 +1287,14 @@ if (!window.performance || !window.performance.now) {
             }]
         })
 
-        var upload = GUI.upload({parent:accordionUp.upload, id:"upModel", url:'/rest3d/upload'});
-        upload.button.width("80%");
+        var upload = GUI.upload({parent:accordionUp.upload, id:"upModel", url:'/rest3d/upload', idUser: viewer.idUser});
+    //     setTimeout(function(){
+    //     upload.upModel.fileupload('option','beforeSend',function(xhr, data) {
+    //                     console.debug("in");
+    //                     xhr.setRequestHeader('X-folder', "tefa");
+    //                 })
+    // },3000);
+        // upload.button.width("80%");
         upload.progress.progress_upModel.width("100%");
         // $.getScript("viewer6-upload.js").done(function( script, textStatus ) {
         setViewer6Upload($,upload,rest3d,viewer);

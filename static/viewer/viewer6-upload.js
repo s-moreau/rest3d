@@ -26,14 +26,57 @@ THE SOFTWARE.*/
 define(['jquerymin','rest3d','gltf','collada','viewer'], function ($,rest3d,glTF,COLLADA,viewer) {
 
   function setViewer6Upload($,upload,rest3d,viewer){
-            var header=false;
+            // window.header=false;
             var index;
             var id;
+            var flag;
+            // window.bufferNode=[];
+            // window.buffer = []; 
+            // window.bufferDae = false; 
+         //"#uploadTree").bind('before.jstree', function(event, data){ 
+        //          console.log(data.plugin + ' fired:' + data.func); 
+        // if(data.plugin == 'dnd'){ 
+        //         switch(data.func){ 
+        //                 case('start_drag'): 
+        //                         console.log(data.plugin + ' fired:' + data.func); 
+        //                         break; 
+        //                 case('dnd_finish'): 
+        //                         console.log(data.plugin + ' fired:' + data.func); 
+        //                         break; 
+        //         } 
+        // } 
+        function Buffer(){
+            this.bufferDae = false;
+            this.bufferNode = []
+            this.array = [];
+            this.flag = true;
+            this.flagNode = true;
+            this.nodeFolder = false;
+            var stock = this;
+            this.removeNodes = function(){
+                if(stock.flag){
+                    for(var j=0;j<stock.bufferNode.length;j++){
+                        $("#uploadTree").jstree("delete_node",$(stock.bufferNode[j]));
+                    }
+                }
+            }
+            this.header = upload.header(this.removeNodes);
+        } 
+    
+
             var buttonToReplace;
-            upload.callOnClick(function(){
-                header = upload.header();
-                id = "User_"+Math.floor(Math.random() * 1000000) + 1;
-            });
+            // upload.callOnClick(function(){
+            //        function removeNodes(){
+            //     for(var j=0;j<window.bufferNode.length;j++){
+            //         $("#uploadTree").jstree("delete_node",$(window.bufferNode[j]));
+            //     }
+            // }
+            //     window.header = upload.header(removeNodes);
+            //     window.buffer = []; 
+            //     window.bufferNode=[];
+            //     window.bufferDae = false; 
+            // });
+
             var url = '/rest3d/upload';
             var uploadButton = $('<button/>')
                     .addClass('btn')
@@ -121,28 +164,155 @@ define(['jquerymin','rest3d','gltf','collada','viewer'], function ($,rest3d,glTF
                         }
                         rest3d.convert(data,callback);
                     });
-            
-            upload.object.on('fileuploadadd', function (e, data) {               
-                upload.object=$(this);
-                if(!header){
-                    header = upload.header();
-                }
-                data.context = header;
-                $.each(data.files, function (index, file) {
-                    // file.id = id;
-                    var ext = file.name.match(/\.[^.]+$/);//
+            var sortAsset = function(e,data,node){
+                data.tmp = new Buffer();
+                var sort = [];
+                var stock = [];
+                 $.each(data.files, function (index, file) {
+                    var ext = file.name.match(/\.[^.]+$/);
                     if(ext[0]==".dae"||ext[0]==".DAE"){
-                        var url =  '/rest3d/upload/'+decodeURIComponent(file.name);//
+                        sort.unshift(file);    
+                    }
+                    else{
+                        sort.push(file);
+                    }
+                });
+                data.files = sort;
+                var ext = sort[0].name.match(/\.[^.]+$/)[0];
+                var filename = sort[0].name.split('.');
+                var tmp = {};
+                tmp.name = 'X-iduser';
+                tmp.value = viewer.idUser;
+                stock.push(tmp);
+                if( ext ==".dae" || ext == ".DAE"){
+                    var tmp = {};
+                    tmp.name = 'X-folder';
+                    tmp.value = filename[0];
+                    stock.push(tmp);
+                    }
+                    else{
+                if(node.attr("id")!=viewer.idUser){
+                    var tmp = node.attr("id").split("_folder_");
+                    var obj = {};
+                    obj.name = 'X-folder';
+                    obj.value = tmp[1];
+                    console.debug(obj);
+                    stock.push(obj);
+                    data.tmp.nodeFolder = tmp[1];
+                    data.tmp.flagNode = false;
+                }
+            }
+                data.tmp.array= stock; 
+                setTimeout(function(){
+                upload.object.fileupload("option","beforeSend",function(xhr, data) {
+                    for(var i =0;i< data.tmp.array.length;i++){
+                        xhr.setRequestHeader( data.tmp.array[i].name,  data.tmp.array[i].value);
+                    }
+                });
+            },500);
+            }
+                
+            var sortAssetDrop = function(e,data){
+                     console.debug(e.idToDrop);
+                if(e.idToDrop==undefined){
+                    console.debug("!!!!!!undefined");
+                    e.preventDefault();
+                }
+                else{
+                data.tmp = new Buffer();
+                var sort = [];
+                var stock = [];
+                 $.each(data.files, function (index, file) {
+                    var ext = file.name.match(/\.[^.]+$/);
+                    if(ext[0]==".dae"||ext[0]==".DAE"){
+                        sort.unshift(file);    
+                    }
+                    else{
+                        sort.push(file);
+                    }
+                });
+                data.files = sort;
+                var ext = sort[0].name.match(/\.[^.]+$/)[0];
+                var filename = sort[0].name.split('.');
+                var tmp = {};
+                tmp.name = 'X-iduser';
+                tmp.value = viewer.idUser;
+                stock.push(tmp);
+                if(e.idToDrop==viewer.idUser||e.idToDrop.split("____")[0]==viewer.idUser){
+                    if( ext ==".dae" || ext == ".DAE"){
+                            var tmp = {};
+                            tmp.name = 'X-folder';
+                            tmp.value = filename[0];
+                            stock.push(tmp);
+                    }
+                }
+                else{
+                    var tmp = e.idToDrop.replace(viewer.idUser,'');
+                    tmp = tmp.split("_folder_");
+                    console.debug(tmp[1]);
+                    tmp = tmp[1].split("____");
+                    console.debug(tmp[0]);
+                    var obj = {};
+                    obj.name = 'X-folder';
+                    obj.value = tmp[0];
+                    stock.push(obj);
+                    data.tmp.nodeFolder = tmp[0];
+                    data.tmp.flagNode = false;
+                }
+                data.tmp.array= stock; 
+                upload.object.fileupload("option","beforeSend",function(xhr, data) {
+                    for(var i =0;i< data.tmp.array.length;i++){
+                        xhr.setRequestHeader( data.tmp.array[i].name,  data.tmp.array[i].value);
+                    }
+                });
+            }
+            }
+
+
+
+            setTimeout(function(){
+            // console.debug("INNN "+$("#"+viewer.idUser).length)
+            upload.object.fileupload('option','dropZone', $("#"+viewer.idUser));   
+            upload.object.bind('fileuploaddrop',function(e,data){sortAssetDrop(e,data)});
+        },1000);
+    
+        upload.callback = function(node){
+             // this.object.on('fileuploadchange', false);
+            this.object.on('fileuploadchange',function (e, data) { 
+                sortAsset(e,data,node);
+            })
+        }
+
+            upload.object.on('fileuploadadd', function (e, data) { 
+                var buffer = data.tmp;  
+                upload.object=$(this);
+                data.context = buffer.header;
+                $.each(data.files, function (index, file) {   
+                    var ext = file.name.match(/\.[^.]+$/);
+                    var filename = file.name.split('.');
+                   if(ext[0]==".dae"||ext[0]==".DAE"){
+                        if(buffer.flagNode){
+                            $("#uploadTree").jstree("create_node",$("#"+viewer.idUser) , "inside",  { "data" : filename[0], "attr" : { "id" : viewer.idUser+"_folder_"+filename[0],"rel":"child"}},false,true);
+                            buffer.bufferDae = $("#"+viewer.idUser+"_folder_"+filename[0]);
+                            buffer.bufferNode.push(buffer.bufferDae);
+                            $("#uploadTree").jstree("create_node",buffer.bufferDae , "inside",  { "data" : file.name, "attr" : { "id" : viewer.idUser+"_folder_"+filename[0]+"____model","rel":"main" }},false,true);
+                            var url =  '/rest3d/upload/'+viewer.idUser+'/'+filename[0]+'/'+file.name;//
+                        }
+                        else{
+                            $("#uploadTree").jstree("create_node",$("#"+viewer.idUser+"_folder_"+buffer.nodeFolder), "inside",  { "data" : file.name, "attr" : { "id" : viewer.idUser+"_folder_"+buffer.nodeFolder+"____"+filename[0]+"____model","rel":"main" }},false,true);
+                              buffer.bufferNode.push($("#"+viewer.idUser+"_folder_"+buffer.nodeFolder+"____"+filename[0]+"____model"));
+                              var url =  '/rest3d/upload/'+viewer.idUser+'/'+file.name;
+                        }
                         var $dialog = $("<button>Launch</button>").on("click",function(){
                             window.pleaseWait(true);
                             COLLADA.load(url, viewer.parse_dae).then(
                             function(flag){
                                   window.pleaseWait(false);
-                                  window.notif(url);
+                                  buffer.notif(url);
                             })
                         })
                         .prop("id","dialog"+index);
-                         var $preview = $("<button>Peview</button>").on("click",function(){
+                        var $preview = $("<button>Peview</button>").on("click",function(){
                             $("#dialog").dialog("close");
                             var gitHtml = '<div id="dialog"><iframe id="myIframe" src="" style="height:99% !important; width:99% !important; border:0px;"></iframe></div>';
                             gitPanel = $('body').append(gitHtml);
@@ -159,16 +329,32 @@ define(['jquerymin','rest3d','gltf','collada','viewer'], function ($,rest3d,glTF
                         })
                          .prop("id","preview"+index);
                         var array = [];
-                        upload.upload(header,file.name,$preview,$dialog,uploadButton.clone(true).data(data).prop("disabled",false));
+                        upload.upload(buffer.header,file.name,$preview,$dialog,uploadButton.clone(true).data(data).prop("disabled",false));
                         $('#dialog'+index).hide();
                         $('#preview'+index).hide();
                                     // rest3d.testUpload(file);
                     }
                     else if(ext[0]==".png"||ext[0]==".jpg"||ext[0]==".tga"||ext[0]==".png"||ext[0]==".jpeg"||ext[0]==".glsl"){
-                        upload.upload(header,file.name,uploadButton.clone(true).data(data).prop("disabled",false));
+                        upload.upload(buffer.header,file.name,uploadButton.clone(true).data(data).prop("disabled",false));
+                        if(buffer.flagNode){
+                        if(buffer.bufferDae!=false){
+                            $("#uploadTree").jstree("create_node", buffer.bufferDae, "inside",  { "data" : file.name, "attr" : { "id" : viewer.idUser+"_folder_"+buffer.bufferDae.prop("id").split("_folder_")[1]+"____"+filename[0],"rel":"image"}},false,true);
+                            buffer.bufferNode.push($("#"+viewer.idUser+"_folder_"+buffer.bufferDae.prop("id")+"____"+filename[0]));
+                        }
+                        else{
+                            $("#uploadTree").jstree("create_node", $("#"+viewer.idUser), "inside",  { "data" : file.name, "attr" : { "id" : viewer.idUser+"____"+filename[0],"rel":"image"}},false,true);
+                            buffer.bufferNode.push($("#"+viewer.idUser+"____"+filename[0]));
+                        }
+                        }
+                        else{
+                            $("#uploadTree").jstree("create_node",$("#"+viewer.idUser+"_folder_"+buffer.nodeFolder), "inside",  { "data" : file.name, "attr" : { "id" : viewer.idUser+"_folder_"+buffer.nodeFolder+"____"+filename[0],"rel":"image" }},false,true);
+                            buffer.bufferNode.push($("#"+viewer.idUser+"_folder_"+buffer.nodeFolder+"____"+filename[0]));
+                        }
                     }
-                    else{upload.upload(header,file.name);}//
+                    else{upload.upload(buffer.header,file.name);}//
+                 
                 });
+                data.tmp = buffer;
             }).on('fileuploadprocessalways', function (e, data) {
                     var indexI = data.index,
                     file = data.files[indexI],
@@ -193,6 +379,7 @@ define(['jquerymin','rest3d','gltf','collada','viewer'], function ($,rest3d,glTF
                 var progress = parseInt(data.loaded / data.total * 100, 10);
                 upload.progress.setValue(progress);
             }).on('fileuploaddone', function (e, data) {
+                data.tmp.flag = false;
                 $.each(data.result.files, function (index, file) {
                     file.assetName = data.result.files[index].name;
                     var $node = convertButton.clone(true).data({file: file, context: data.context})
