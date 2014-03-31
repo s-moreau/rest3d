@@ -90,6 +90,8 @@ module.exports = function(config) {
   var Random  = require('secure-rnd');
   var rnd     = new Random();
   var Cookies = require('cookies');
+  var fs      = require('fs');
+  var toJSON  = require('./tojson');
 
   // where we store active sessions
   session.sessions = {};
@@ -138,7 +140,7 @@ module.exports = function(config) {
     /**
      * @cfg {String} sidHeader='Session-Id' The Header section name to store the session identifier
      */
-    sidHeader: 'X-Session-ID',
+    sidHeader: 'x-session-id',
 
     /**
      * @cfg {Boolean} cookies=true Store the session in a cookie
@@ -225,7 +227,9 @@ module.exports = function(config) {
     session.sessions[sid]=data;
 
     if (!cfg.persist)
-      session.timeouts[sid] = timeout(function(){session.destroy(sid)}, ttl*1000);
+      session.timeouts[sid] = setTimeout(function(){session.destroy(sid)}, ttl*1000);
+
+    callback.call(session, undefined, data);
 
   };
 
@@ -278,7 +282,7 @@ module.exports = function(config) {
     var err=null;
     if (session.timeouts[sid] != undefined){
       clearTimeout(session.timeouts[sid] )
-      session.timeouts[sid] = timeout(function(){session.destroy(sid)}, session.config.ttl*1000);
+      session.timeouts[sid] = setTimeout(function(){session.destroy(sid)}, session.config.ttl*1000);
     } else {
       err = 'session.js refresg canot find timeout sessionID='+sid;
     }
@@ -414,6 +418,7 @@ module.exports = function(config) {
     data.sid  = sid;
     session.sessions[sid] = data;
     req.session = data;
+    console.log('session.js stored data='+toJSON(data)+' in req.session');
     res.setHeader(cfg.sidHeader, sid);
 
     if (cfg.cookies) {

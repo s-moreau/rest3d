@@ -88,12 +88,13 @@ module.exports = function (server) {
 
   };
 
-  zipFile.getAssetInfo = function (uid,url,cb){
+  zipFile.getAssetInfo = function (uid,url,jar,cb){
 
     var params={};
     params.uid = uid;
     params.cb = cb;
     params.url=url;
+    params.jar=jar;
 
     server.diskcache.hit(params.url,function(err,entry){
       if (entry) 
@@ -116,8 +117,10 @@ module.exports = function (server) {
         // but pipe() provides the right body
         // but I need the response headers, so I split this in half
         // and I can get to the header in 'close'
-        params.req=request.get(url); 
-        params.req.pipe(buffer);
+        var options={url: params.url};
+        if (params.jar) options.jar=params.jar;
+        params.req = request.get(options);
+        params.req.pipe(buffer); 
       }
     });
   };

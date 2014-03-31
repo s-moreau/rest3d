@@ -226,7 +226,6 @@ module.exports = function (server) {
 
     var handler = new UploadHandler(req, res, next);
     handler.allowOrigin();
-    handler.setNoCacheHeaders();
 
     handler.post();
 
@@ -245,7 +244,7 @@ module.exports = function (server) {
       console.log('in GET upload/ for asset='+asset)
 
       if (asset === undefined || asset === '') {
-          handler.setNoCacheHeaders();
+          //handler.setNoCacheHeaders();
           if (req.method === 'GET') {
               handler.get();
           } else {

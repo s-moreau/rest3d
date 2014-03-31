@@ -112,6 +112,7 @@ server.use(restify.gzipResponse());
 restify.defaultResponseHeaders = false;
 
 var session=require('./src/session')();
+server.sessionManager = session;
 server.use(session.sessionManager);
 
 // include routes

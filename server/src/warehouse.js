@@ -30,13 +30,11 @@ module.exports = function (server) {
   var request = require('request');
   var cheerio = require('cheerio');
   var toJSON = require('./tojson');
-  var sendFile = require('./sendfile');
 
   var handler = require('./handler');
   var zipFile = require('./zipfile')(server);
 
-  // return list of collections from 'root'
-
+  
   server.get(/^\/rest3d\/warehouse.*/,function(req, res, next) {
     
     var warehouseHandler = new handler(req,res,next);
@@ -93,18 +91,21 @@ module.exports = function (server) {
           var url = "https://3dwarehouse.sketchup.com/3dw/getbinary?subjectId="+id[1]+"&subjectClass=entity&name="+id[2];
 
           // proxie
-          req.pipe(request(url)).pipe(res);
+          //req.pipe(request(url)).pipe(res);
+          // redirect
+          res.writeHead(302, {'Location': url});
+          res.end();
           return next();
 
         } else if (id && id[0] === 'c' && id.length===2){
-          // TODO call handleError
+
           var error = { "code": "API call error", "message": "invalid id="+ids+" in /rest3d/warehouse/data/ "};
           warehouseHandler.handleError(error);
         } else {
           error={code:"API call error",message:"transfering a collection is not supported"};
           warehouseHandler.handleError(error);
         }
-        // return the asset 
+       
     } else if (uid.startsWith('search/'))
     {
       var search = uid.split('search/')[1];
@@ -163,10 +164,9 @@ module.exports = function (server) {
         console.log ('get warehouse model ID =['+id[1]+']')
         var url = "https://3dwarehouse.sketchup.com/3dw/getbinary?subjectId="+id[1]+"&subjectClass=entity&name="+id[2];
 
-        // TODO - do we really need to use file for this?
-        // can't we do this in memory instead?
-
-        var asset = zipFile.getAssetInfo(uid,url, function(error, result){
+        // note: this is using diskcache
+        // no jar defined -> user=guest
+        var asset = zipFile.getAssetInfo(uid,url, undefined, function(error, result){
           if (error)
             warehouseHandler.handleError(error);
           else
@@ -241,43 +241,7 @@ module.exports = function (server) {
     }
   });
 
-// not used, this is the old code that had to parse the web page
-// warehouse web site has changed, and json objects are now available
-  var parsecollection = function(body) {
-      var result={};
-      var $ = cheerio.load(body);
-      var search = $('span[class="itemtitle"]'); //use your CSS selector here
-      result.name = $(search).text();
-      result.uri = uid;
-      result.assets = [];
-      search = $('div[class="resulttitle"] a');
-      //result.loaded = true;
-      result.type = 'collection'
-      $(search).each(function(i, link){
-        if ($(link).attr('href').startsWith('/3dwarehouse/details'))
-        {
-          var item={};
-          item.name = $(link).attr('title')
-          item.uri = $(link).attr('href').split("mid=")[1];
-          item.type="model"
-          item.assets=null; // this element has no assets
-          item.source = 'http://sketchup.google.com/3dwarehouse/download?mid='+item.uri+'&rtyp=zs';
-          //item.loaded = true;
-          result.assets.push(item);
 
-        } else if ($(link).attr('href').startsWith('/3dwarehouse/cldetails'))
-        {      
-          var item={};
-          item.name = $(link).attr('title')
-          item.uri = $(link).attr('href').split("mid=")[1];
-          item.type="collection"
-          item.assets=[]; // indicates there are assets, to be discovered...
-          //item.loaded = false;
-          result.assets.push(item);
-        }
-      });
-      return result;
-    };
     var parsesearch =function(body) {
       var result={};
       var json = JSON.parse(body);

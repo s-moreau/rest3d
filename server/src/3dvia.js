@@ -35,13 +35,18 @@ module.exports = function (server) {
   var handler = require('./handler');
   var zipFile = require('./zipfile')(server);
   var formidable = require('formidable');
+  var Cookies = require('cookies');
+
+  var cookies = {};
 
   handler.prototype.login = function(){
     console.log ("3dvia login requested");
     var handler = this;
 
-
     var form = new formidable.IncomingForm();
+    var sid = null;
+    if (this.req.session)
+      sid = this.req.session.sid;
 
     form.parse(this.req, function(err, args) {
       if (err) return handler.handleError(err);
@@ -55,7 +60,8 @@ module.exports = function (server) {
           url: "https://www.3dvia.com/login",
           jar:j,
           form: { 'signin[user_id]':args.user,
-                  'signin[user_pwd]':args.passwd }
+                  'signin[user_pwd]':args.passwd },
+          followAllRedirects: true
         },function(err, resp, body){
           console.log('got response from https://www.3dvia.com/login');
           if (err)
@@ -64,6 +70,13 @@ module.exports = function (server) {
           // Check that we have a PHPSESSION
 
           var cookies = j._jar.store.idx;
+
+          // add redirect cookies - is this a request bug ??
+          if (resp.headers && resp.headers['set-cookie'])
+            for (var i=0; i<resp.headers['set-cookie'].length;i++){
+              var cookie = resp.headers['set-cookie'][i];
+              j.setCookie(cookie, resp.headers.location, {ignoreError: true});
+            }
           var PHPSESSID = null;
           if (cookies['www.3dvia.com'] && cookies['www.3dvia.com']['/'])
             PHPSESSID = cookies['www.3dvia.com']['/'].PHPSESSID;
@@ -74,28 +87,296 @@ module.exports = function (server) {
           console.log('3DVIA session='+toJSON(TDVIA_SESSION));
 
           if (TDVIA_SESSION) {
-            return handler.handleResult('connected to 3dvia as user '+args.user);
+            // need to store session for this user
+            server.sessionManager.load(sid,function(err,data){
+              if (err) return handler.handleError(err);
+              data['3dvia']=j;
+              server.sessionManager.save(sid,data, function(err,data) {
+                if (err) return handler.handleError(err);
+                console.log('stored 3DVIA cookies for session='+sid);
+                return handler.handleResult('connected to 3dvia as user '+args.user);
+              })
+            })
           }
           else
             return handler.handleError('failed to authenticate as user '+args.user);
-          }
+        }
       );
           
     });
 
-  }
+  };
+
+  
+  var parseall = function(body) {
+      var result={};
+      
+      result.assets = [];
+      result.success = true;
+      result.count = body.count;
+      result.total = body.total;
+
+      var $ = cheerio.load(body.content);
+
+      result.start = 0;
+      result.end = 0;
+      result.total = 0;
+
+      var search = $('a');
+      //result.loaded = true;
+      result.type = 'collection'
+      $(search).each(function(i, link){
+        if (link.attribs.href.startsWith('models'))
+        {
+
+          var url = link.attribs.href;
+          var uid=url.split('/')[1];
+
+
+          var file_size = link.parent.parent.children[9].children[0].data;
+          var format = link.parent.parent.children[7].children[0].data;
+          var name = $(link).text().replace(/^\s+|\s+$/g, "");
+          //e.g Format: obj
+          //var price = $(data.children[23]).text();
+          //e.g "Price: 50 credits"
+          var creator = link.parent.parent.children[11].children[0].data;
+          var date =link.parent.parent.children[13].children[0].data;
+
+
+          //http://www.3dvia.com/3dsearch/Content/8A066E8092A4B688.3dxml/ zip
+          // 'http://www.3dvia.com/download.php?media_id='+item.uid+'&file=/3dsearch/Content/'+item.uid+'.zip';
+
+          var item={};
+          /*
+        
+        <a href="models/4FC6B34557697B4D/modern-dining-set-with-red-chairs">
+        <img src="http://wwc.3dvia.com/3dsearch/Content/4FC6B34557697B4D_C2.jpg?ts=1386616421909" alt="Modern Dining Set with Red Chairs uploaded by mgbaron" class="result-thumbnail" />
+        Modern Dining Set with Red Chairs
+        </a>
+    
+        </td>
+        <td>Model</td>
+        <td>kmz</td>
+        <td class="nowrapping">998 KB</td>
+        <td>mgbaron</td>
+        <td class="nowrapping">Aug 12, 2008</td>
+        </tr>
+              
+        */
+          item.name = name;
+          //item.description = "";
+          item.format = format;
+          //item.price = price;
+          item.iconUri = "http://wwc.3dvia.com/3dsearch/Content/"+uid+"_C3.jpg"
+          item.largeIconUri = "http://wwc.3dvia.com/3dsearch/Content/"+uid+"L2.jpg";
+          item.uri = 'http://www.3dvia.com/'+url;
+          item.type="model"
+          item.assets=null; // this element has no assets
+          item.id=uid;
+          item.assets=null;
+          //http://www.3dvia.com/download.php?media_id=B3C79CA9BB8D9FB1&ext=zip&file=/3dsearch/Content/B3C79CA9BB8D9FB1.zip
+
+          item.assetUri = "http://www.3dvia.com/download.php?media_id="+uid+"&ext=zip&file=/3dsearch/Content/"+uid+".zip";
+          item.creator = "";
+          item.license = "N/A";;
+          item.size = file_size;
+
+          result.assets.push(item);
+          item.created = date;
+          //item.modified = "";
+          //item.parents = "";
+          //item.rating =  "";
+          //item.previewUri =
+
+
+//http://www.3dvia.com/download.php?media_id=8A066E8092A4B688&file=/3dsearch/Content/8A066E8092A4B688.zip
+        } 
+      });
+      return result;
+    };
 
   server.post(/^\/rest3d\/3dvia\/login/, function(req,res, next){
     var tdvia = new handler(req, res, next);
 
-    tdvia.allowOrigin();
-    tdvia.setNoCacheHeaders();
-
     tdvia.login();
 
-    return next();
-
   });
+ 
+  server.get(/^\/rest3d\/3dvia.*/,function(req, res, next) {
+    
+    var tdvia = new handler(req,res,next);
 
+    var uid = req.url.split("/3dvia/")[1];
+    console.log('[3dvia]' + uid);
+
+    var jar = null;
+
+    if (req.session && req.session['3dvia']) {
+      jar = req.session['3dvia'];
+      if (!jar || !jar._jar.store.idx || !jar._jar.store.idx['3dvia.com']['/']['3DVIA_SESSION'])
+        return tdvia.handleError("need to login first");
+
+      // just browsing
+      if (!uid || uid==='') {
+        // this returns a json with all collections
+        var start = 1;
+        var end = 50;
+        request.post({ // All collections 
+            //url: "http://www.3dvia.com/warehouse/all",
+            url: "http://www.3dvia.com/search/ContentPicker.php",
+            jar: jar,
+            form: {
+              action:'files',
+              query:null,
+              start:start,
+              count:end,
+              page:'file',
+              'types[]':null,
+              groupPrivacy:null
+            }
+          },function(err, resp, body){
+            if (err)
+              return tdvia.handleError(err);
+            var o = JSON.parse(body);
+            if (!o || o.status === undefined)
+              return tdvia.handleError("got no response from 3dvia")
+            if (o.status === undefined || o.status !== 0)
+              return tdvia.handleError({message: body.message, name:body.status});
+            var result=parseall(o.result);
+            result.start = start;
+            result.end = end;
+            return tdvia.handleResult(result);
+        });
+
+      } else if (uid.startsWith('data/')) {
+        var id = uid.split('data/')[1];
+ 
+        if (id) {
+          
+          var url = "http://www.3dvia.com/download.php?media_id="+id+"&ext=zip&file=/3dsearch/Content/"+id+".zip";
+
+          console.log ('get 3dvis url ="'+url+'"');
+
+          var cookies = new Cookies(tdvia.req, tdvia.res);
+          var phpsession = tdvia.req.session['3dvia']._jar.store.idx['www.3dvia.com']['/']['PHPSESSID'];
+          var tdviasession = tdvia.req.session['3dvia']._jar.store.idx['3dvia.com']['/']['3DVIA_SESSION']
+          cookies.set('PHPSESSID',phpsession.value,{domain:phpsession.value});
+          cookies.set('3DVIA_SESSION',tdviasession.value,{domain:tdviasession.value.domain});
+
+          tdvia.res.writeHead(302, {'Location': url});
+          tdvia.res.end();
+          return tdvia.next();
+
+
+        } else {
+          error={code:"API call error",message:"transfering a collection is not supported"};
+          tdvia.handleError(error);
+        }
+        // return the asset 
+      } else if (uid.startsWith('search/')) {
+        var search = uid.split('search/')[1];
+        console.log ('search tdvia for ['+search+']')
+        if (search === '')
+        {
+          console.log('search string cannot be empty')
+          res.writeHead(400);
+          res.write('search string cannot be empty');
+          res.end();
+          return next();
+        } else {
+          // this returns a json
+          var start = 1;
+          var end = 100;
+          var req = "https://3dwarehouse.sketchup.com/3dw/Search"+
+                     "?startRow="+start+
+                     "&endRow="+end+
+                     "&calculateTotal=true"+
+                     "&q="+search+
+                     "&type=SKETCHUP_MODEL"+
+                     "&source"+
+                     "&title"+
+                     "&description&sortBy=title%20ASC"+
+                     "&createUserDisplayName"+
+                     "&createUserId"+
+                     "&modifyUserDisplayName"+
+                     "&class=entity"+
+                     "&Lk=true";
+
+          request({ 
+            url: req,
+            jar: jar
+          }, function(err, resp, body){
+            if (err)
+              return tdvia.handleError(err);
+            
+            // TODO: reformat this
+            return tdvia.handleResult(body);
+          });
+        }
+      } else if (uid.startsWith('info/')) {
+
+        var id = uid.split('info/')[1];
+ 
+        if (id) {
+
+          console.log ('get 3dvia model info ID =['+id+']')
+          var url = "http://www.3dvia.com/3dsearch/FileInfo?FileId="+id+"&_format=json";
+
+          request({ 
+            url: url,
+            jar: jar
+            }, function(err, resp, body){
+              if (err) return tdvia.handleError(err);
+              var data =JSON.parse(body);
+              if (!data.returnresponse || !data.returnresponse.item || data.returnresponse.count<1 )
+                return tdvia.handleError('no response from 3dvia FileInfo '+id);
+              if (data.returnresponse.code !== 200 )
+                return tdvia.handleError({name:data.returnresponse.code,message:'error code from 3dvia FileInfo '+uid});
+
+              return tdvia.handleResult(data.returnresponse.item[0]);
+          });
+        } else
+          return tdcia.handleError("/3dvia/info invalid id="+id);
+        
+     
+      } else if (uid.startsWith('upload/')) {
+        // need a upload api, since we use cookies
+
+      } else { // request information about asset 
+        console.log ('get 3dvia asset  ID =['+uid+']');
+        
+        var url = "http://www.3dvia.com/3dsearch/FileInfo?FileId="+uid+"&_format=json";
+
+        request({ 
+          url: url,
+          jar: jar
+          }, function(err, resp, body){
+            if (err) return tdvia.handleError(err);
+            var data =JSON.parse(body);
+            if (!data.returnresponse || !data.returnresponse.item || data.returnresponse.count<1 )
+              return tdvia.handleError('no response from 3dvia FileInfo '+id);
+            if (data.returnresponse.code !== 200 )
+              return tdvia.handleError({name:data.returnresponse.code,message:'error code from 3dvia FileInfo '+uid});
+
+            var info = data.returnresponse.item[0];
+            var format = info.Format;
+
+            var url = "http://www.3dvia.com/download.php?media_id="+uid+"&file=/3dsearch/Content/"+uid+"."+format;
+            //var url= "http://www.3dvia.com/3dsearch/Content/"+uid+".zip";
+
+
+            // note: this is using diskcache
+            var asset = zipFile.getAssetInfo(uid,url,jar, function(error, result){
+              if (error)
+                tdvia.handleError(error);
+              else
+                tdvia.handleResult(result);
+            });
+        });
+       
+      }
+    } else
+    return tdvia.handleError("need to login first");
+  });
 };
 

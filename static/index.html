@@ -50,7 +50,17 @@ THE SOFTWARE.
     return false;
   };
 
+  function getit(url, _a) {
 
+    var goto=url;
+    if (_a && document.getElementById(_a)) {
+      var a = document.getElementById(_a).value;
+      if (a && a !== '') 
+       goto += a;
+    }
+    window.location.href = goto;
+    return false;
+  };
 
   function post(url, _a, _b) {
 
@@ -156,18 +166,19 @@ THE SOFTWARE.
 
       <h3> rest3d api warehouse proxy samples </h3>
       <ul>
-        <li><a href="/rest3d/warehouse"> /rest3d/warehouse </a> List all collections from root</li>
-        <li> <a href="javascript:get('/rest3d/warehouse/search/','q1');"> /rest3d/warehouse/search/</a>
-          <input type="text" size="51" value="duck" id="q1" onkeydown="if (event.keyCode == 13) get('/rest3d/warehouse/search/','q1');" />Search for models with string in name</li>
+        <li><a href="/rest3d/warehouse"> /rest3d/warehouse </a> Get top level collections </li>
 
-        <li> <a href="javascript:get('/rest3d/warehouse/','qc');"> /rest3d/warehouse/</a>
-          <input type="text" size="51" value="c_f8fc62afb9653d03cbe9bc85eececab4" id="qc" onkeydown="if (event.keyCode == 13) get('/rest3d/warehouse/','qc');" />Get info abaout a model or collection</li>
+        <li> <a href="javascript:getit('/rest3d/warehouse/search/','q1');"> /rest3d/warehouse/search/</a>
+          <input type="text" size="51" value="duck" id="q1" onkeydown="if (event.keyCode == 13) getit('/rest3d/warehouse/search/','q1');" />Search for models with string in name</li>
 
-        <li> <a href="javascript:get('/rest3d/warehouse/','qm');"> /rest3d/warehouse/</a>
-          <input type="text" size="51" value="m_ac9c3413d59e8e4a7f7fbfb94ac070c5_k2" id="qm" onkeydown="if (event.keyCode == 13) get('/rest3d/warehouse/','qm');" />Get info abaout a model or collection</li>
+        <li> <a href="javascript:getit('/rest3d/warehouse/','qc');"> /rest3d/warehouse/</a>
+          <input type="text" size="51" value="c_f8fc62afb9653d03cbe9bc85eececab4" id="qc" onkeydown="if (event.keyCode == 13) getit('/rest3d/warehouse/','qc');" />Get collection composition</li>
 
-        <li> <a href="javascript:get('/rest3d/warehouse/data/','qr');"> /rest3d/warehouse/data/</a>
-          <input type="text" size="51" value="m_ac9c3413d59e8e4a7f7fbfb94ac070c5_k2" id="qr" onkeydown="if (event.keyCode == 13) get('/rest3d/warehouse/data/','qr');" />Get a model (kmz or zip)</li>
+        <li> <a href="javascript:getit('/rest3d/warehouse/','qm');"> /rest3d/warehouse/</a>
+          <input type="text" size="51" value="m_ac9c3413d59e8e4a7f7fbfb94ac070c5_k2" id="qm" onkeydown="if (event.keyCode == 13) getit('/rest3d/warehouse/','qm');" />Get  model composition</li>
+
+        <li> <a href="javascript:getit('/rest3d/warehouse/data/','qr');"> /rest3d/warehouse/data/</a>
+          <input type="text" size="51" value="m_ac9c3413d59e8e4a7f7fbfb94ac070c5_k2" id="qr" onkeydown="if (event.keyCode == 13) getit('/rest3d/warehouse/data/','qr');" />Get a model (kmz or zip)</li>
       </ul>
 
       <h3> rest3d api 3dvia proxy samples </h3>
@@ -179,7 +190,22 @@ THE SOFTWARE.
             <input name='passwd' type='password' size='51' value='' onkeydown="if (event.keyCode ==13) submit()" />
           </form>
         </li>
+
+        <li> <a href="/rest3d/3dvia/"> /rest3d/3dvia/</a>
+           Get top level collections (50 models. 3dvia server is slow...)
+        </li>
+
+        <li> <a href="javascript:getit('/rest3d/3dvia/data/','tr');"> /rest3d/3dvia/data/</a>
+          <input type="text" size="51" value="8A066E8092A4B688" id="tr" onkeydown="if (event.keyCode == 13) getit('/rest3d/3dvia/data/','tr');" />Get a model (kmz or zip)</li>
+
+        <li> <a href="javascript:getit('/rest3d/3dvia/info/','tr');"> /rest3d/3dvia/info/</a>
+          <input type="text" size="51" value="8A066E8092A4B688" id="tr" onkeydown="if (event.keyCode == 13) getit('/rest3d/3dvia/info/','tr');" />request info about a model</li>
+
+
+        <li> <a href="javascript:getit('/rest3d/3dvia/','tr');"> /rest3d/3dvia/</a>
+          <input type="text" size="51" value="8A066E8092A4B688" id="tr" onkeydown="if (event.keyCode == 13) getit('/rest3d/3dvia/','tr');" />request asset composition</li>
       </ul>
+
 
       <h3> upload test </h3>
       <ul>
@@ -205,11 +231,7 @@ THE SOFTWARE.
             <input type="submit" value="Upload" />send files to upload
           </form>
         </li>
-        <li>
-          <a href="javascript:put('/rest3d/assets/','qz','mm');"> [PUT] /rest3d/assets/</a>
-          <input type="text" size="51" value="test" id="qz" onkeydown="if (event.keyCode == 13) put('/rest3d/assets/','qz','mm');">
-          <input type="text" size="81" value="https://3dwarehouse.sketchup.com/3dw/getbinary?subjectId=ac9c3413d59e8e4a7f7fbfb94ac070c5&subjectClass=entity&name=k2" id="mm" onkeydown="if (event.keyCode == 13) rest('/rest3d/assets/','qz','mm');">store a zip into database</li>
-        </li>
+        
       </ul>
     </div>
 
