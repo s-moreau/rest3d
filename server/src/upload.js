@@ -147,26 +147,24 @@ module.exports = function (server) {
       }
       if(handler.hasOwnProperty("iduser")){ 
 
-        var flagIduser = handler.search(FileInfo.options.uploadDir,handler.iduser);
+        var flagIduser = fs.readdirSync(FileInfo.options.uploadDir).indexOf(handler.iduser) !== -1;
         if(!flagIduser){
           fs.mkdirSync(FileInfo.options.uploadDir + '/' + handler.iduser);
         }
         if(handler.hasOwnProperty("folder")){ 
-          var flagFolder = handler.search(FileInfo.options.uploadDir + '/' + handler.iduser ,handler.folder);
+          var flagFolder = fs.readdirSync(FileInfo.options.uploadDir + '/' + handler.iduser).indexOf(handler.folder) !== -1
           if(!flagFolder){
             fs.mkdirSync(FileInfo.options.uploadDir + '/' + handler.iduser + '/'+ handler.folder);
           }
           fs.renameSync(file.path, FileInfo.options.uploadDir + '/' + handler.iduser + '/'+ handler.folder +'/'+ fileInfo.name);
           console.log("uploaded "+FileInfo.options.uploadDir + '/' + handler.iduser + '/'+ handler.folder +'/'+ fileInfo.name);
           fileInfo.path = FileInfo.options.uploadDir + '/' + handler.iduser + '/'+ handler.folder +'/'+ fileInfo.name;
-        }
-        else{
+        } else {
           fs.renameSync(file.path, FileInfo.options.uploadDir + '/' + handler.iduser + '/' + fileInfo.name);
           console.log("uploaded "+FileInfo.options.uploadDir + '/' + handler.iduser + '/' + fileInfo.name);
           fileInfo.path = FileInfo.options.uploadDir + '/' + handler.iduser + '/' + fileInfo.name;
-      }
-      }
-      else{
+        }
+      } else{
         fs.renameSync(file.path, FileInfo.options.uploadDir + '/' + fileInfo.name);
         console.log("uploaded "+FileInfo.options.uploadDir + '/' + fileInfo.name);
         fileInfo.path = FileInfo.options.uploadDir + '/' + fileInfo.name;
