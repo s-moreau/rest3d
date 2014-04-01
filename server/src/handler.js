@@ -94,19 +94,5 @@ Handler.prototype.handleResult = function (result, redirect) {
   if (this.next) this.next();
 };
 
-  Handler.prototype.search =  function(path,value){
-        var fs = require('fs');
-        var flag = false;
-        var files = fs.readdirSync(path);
-        console.log(files);
-        if(files.length==0){flag=false;}
-          files.forEach(function (name) {
-            if(name == value){
-              flag = true;
-            }
-      });
-        return flag;
-          }
-
 module.exports = Handler;
 
