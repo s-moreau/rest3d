@@ -342,7 +342,7 @@ define(['channel','codemirror','webglUtils', 'WebGLDebugUtils','pnotify','colorp
                     return $result;
                 }
 
-            this.header = function(flag){
+            this.header = function(flag,button){
                 var stock = this;
                 var $follow = this.filesArea.append($('<br>'));
                 var $frame = $('<div class="upload_header"></div>');
@@ -351,7 +351,14 @@ define(['channel','codemirror','webglUtils', 'WebGLDebugUtils','pnotify','colorp
                 if(flag&&typeof(flag)!="function"){
                     var $span = htmlSpan($head,90,GUI.time(true)+" convert "+flag);
                 }
+                else if(typeof(flag)=="function"&&button){
+                    var $span = htmlSpan($head,80,GUI.time(true)+" Upload");
+                }
                 else{var $span = htmlSpan($head,90,GUI.time(true)+" Upload");}
+                if(typeof(flag)=="function"&&button){
+                    var $spanButton1 = htmlSpan($head,10);
+                    $spanButton1.append(button);
+                }
                 $span.css("font-weight","bold");
                 var $spanButton = htmlSpan($head,10);
                 var flag1 = flag;

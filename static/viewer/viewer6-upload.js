@@ -22,7 +22,7 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.*/
 //
-define(['jquerymin', 'rest3d', 'gltf', 'collada', 'viewer'], function ($, rest3d, glTF, COLLADA, viewer) {
+define(['jquerymin', 'rest3d', 'gltf', 'collada', 'viewer','q'], function ($, rest3d, glTF, COLLADA, viewer,Q) {
 
     function setViewer6Upload($, upload, rest3d, viewer) {
         // window.header=false;
@@ -51,6 +51,7 @@ define(['jquerymin', 'rest3d', 'gltf', 'collada', 'viewer'], function ($, rest3d
             this.flag = true;
             this.flagNode = true;
             this.nodeFolder = false;
+            this.buttonToReplace = {};
             var stock = this;
             this.removeNodes = function () {
                 if (stock.flag) {
@@ -59,61 +60,16 @@ define(['jquerymin', 'rest3d', 'gltf', 'collada', 'viewer'], function ($, rest3d
                     }
                 }
             }
-            this.header = upload.header(this.removeNodes);
+            this.button = $("<button>Upload</button>");
+            this.header = upload.header(this.removeNodes,this.button);
+            this.upload = [];
+            var stock = this;
+            // this.link = upload.upload(this.header, "Upload selection",this.button);
         }
-
-        var cleanup = function(){
-            // console.debug("cleanup!")
-            // var counterBlock = 0;
-            // var counterBr = 0;
-            // $('#fileArea_upModel').children().each(function () {
-            //     if(this.style == "display: block;"){
-            //         counter++;
-            //     }
-            //     else if(this.style == "display: block;"){
-            //          $(this).remove();
-            //     }
-            //     else{
-            //         counterBr++;
-            //     }
-            // });
-            // if(counterBr!==counterBlock){
-            //     for(c)        
-            //     }
-        }
-
-        var buttonToReplace;
-        // upload.callOnClick(function(){
-        //        function removeNodes(){
-        //     for(var j=0;j<window.bufferNode.length;j++){
-        //         $("#uploadTree").jstree("delete_node",$(window.bufferNode[j]));
-        //     }
-        // }
-        //     window.header = upload.header(removeNodes);
-        //     window.buffer = []; 
-        //     window.bufferNode=[];
-        //     window.bufferDae = false; 
-        // });
 
         var url = '/rest3d/upload';
-        var uploadButton = $('<button/>')
-            .addClass('btn')
-            .prop('disabled', true)
-            .on('click', function () {
-                var $this = $(this),
-                    data = $this.data();
-                $this
-                    .off('click')
-                    .on('click', function () {
-                        $this.remove();
-                        data.abort();
-                    });
-                data.submit();
-                buttonToReplace = $(this);
-                //.always(function () {
-                //     $this.remove();
-                // });
-            }),
+        var uploadButton = $('<input type="checkbox">')
+            .addClass('btn'),
             // show the name of the file nicely
             formatName = function (data, file) {
                 var i = file.name.lastIndexOf('/');
@@ -188,7 +144,6 @@ define(['jquerymin', 'rest3d', 'gltf', 'collada', 'viewer'], function ($, rest3d
                     rest3d.convert(data, callback);
                 });
         var sortAsset = function (e, data, node) {
-            cleanup();
             $("#uploadTree").jstree('open_all');
             data.tmp = new Buffer();
             var sort = [];
@@ -237,7 +192,7 @@ define(['jquerymin', 'rest3d', 'gltf', 'collada', 'viewer'], function ($, rest3d
         }
 
         var sortAssetDrop = function (e, data) {
-            $("#uploadTree").jstree('open_all');
+            var defer = Q.defer();
             if (e.idToDrop == undefined) {
                 e.preventDefault();
             }
@@ -245,6 +200,7 @@ define(['jquerymin', 'rest3d', 'gltf', 'collada', 'viewer'], function ($, rest3d
                 data.tmp = new Buffer();
                 var sort = [];
                 var stock = [];
+                console.debug(data.files);
                 $.each(data.files, function (index, file) {
                     var ext = file.name.match(/\.[^.]+$/);
                     if (ext[0] == ".dae" || ext[0] == ".DAE") {
@@ -255,6 +211,7 @@ define(['jquerymin', 'rest3d', 'gltf', 'collada', 'viewer'], function ($, rest3d
                     }
                 });
                 data.files = sort;
+                data.deferred = defer;
                 var ext = sort[0].name.match(/\.[^.]+$/)[0];
                 var filename = sort[0].name.split('.');
                 var tmp = {};
@@ -287,6 +244,7 @@ define(['jquerymin', 'rest3d', 'gltf', 'collada', 'viewer'], function ($, rest3d
                     }
                 });
             }
+            return defer.promise;
         }
 
 
@@ -294,7 +252,10 @@ define(['jquerymin', 'rest3d', 'gltf', 'collada', 'viewer'], function ($, rest3d
         setTimeout(function () {
             upload.object.fileupload('option', 'dropZone', $("#" + viewer.idUser));
             upload.object.bind('fileuploaddrop', function (e, data) {
-                sortAssetDrop(e, data)
+
+                sortAssetDrop(e, data).then(function(){
+                    window.pleaseWait(false);
+                })
             });
         }, 1000);
 
@@ -370,13 +331,53 @@ define(['jquerymin', 'rest3d', 'gltf', 'collada', 'viewer'], function ($, rest3d
                     })
                         .prop("id", "preview" + index);
                     var array = [];
-                    upload.upload(buffer.header, file.name, $preview, $dialog, uploadButton.clone(true).data(data).prop("disabled", false));
+                   var button = uploadButton.clone(true).data(data);
+                    var stock = function(object){
+                            data = button.data();
+                            console.debug(filename[0]);
+                            data.submit();
+                            object.buttonToReplace[filename[0]] = button;
+                            buffer.button.unbind('click',main);
+                        }
+                    function main(){
+                        stock(data.tmp);
+                    }
+                    button.on('change', function () {
+                        if($(this).is(':checked')){
+                        buffer.button.bind('click',main);
+                     }
+                     else{
+                        buffer.button.unbind('click',main);
+                     }
+                    });
+                    setTimeout(function(){button.click()},500);
+                    upload.upload(buffer.header, file.name, $preview, $dialog, button);
                     $('#dialog' + index).hide();
                     $('#preview' + index).hide();
                     // rest3d.testUpload(file);
                 }
                 else if (ext[0] == ".png" || ext[0] == ".jpg" || ext[0] == ".tga" || ext[0] == ".png" || ext[0] == ".jpeg" || ext[0] == ".glsl") {
-                    upload.upload(buffer.header, file.name, uploadButton.clone(true).data(data).prop("disabled", false));
+                     var button = uploadButton.clone(true).data(data);
+                    var stock = function(object){
+                            data = button.data();
+                            console.debug(filename[0]);
+                            data.submit();
+                            object.buttonToReplace[filename[0]] = button;
+                            buffer.button.unbind('click',main);
+                        }
+                    function main(){
+                        stock(data.tmp);
+                    }
+                    button.on('change', function () {
+                        if($(this).is(':checked')){
+                        buffer.button.bind('click',main);
+                     }
+                     else{
+                        buffer.button.unbind('click',main);
+                     }
+                    });
+                    setTimeout(function(){button.click()},500);
+                    upload.upload(buffer.header, file.name, button);
                     if (buffer.flagNode) {
                         if (buffer.bufferDae != false) {
                             $("#uploadTree").jstree("create_node", buffer.bufferDae, "inside", {
@@ -412,7 +413,7 @@ define(['jquerymin', 'rest3d', 'gltf', 'collada', 'viewer'], function ($, rest3d
                 }
                 else {
                     upload.upload(buffer.header, file.name);
-                } //
+                }
                 $("#uploadTree").jstree('open_all');
             });
             data.tmp = buffer;
@@ -441,14 +442,16 @@ define(['jquerymin', 'rest3d', 'gltf', 'collada', 'viewer'], function ($, rest3d
             upload.progress.setValue(progress);
         }).on('fileuploaddone', function (e, data) {
             data.tmp.flag = false;
+            var buffer1 = data.tmp;
             $.each(data.result.files, function (index, file) {
+                 var filename = file.name.split('.');
                 file.assetName = data.result.files[index].name;
                 var $node = convertButton.clone(true).data({
                     file: file,
                     context: data.context
                 })
                 // .prop('disabled', !/dae$/i.test(file.url))
-                buttonToReplace
+                data.tmp.buttonToReplace[filename[0]]
                     .replaceWith($node)
                     .prop("id", "nodeClose");
                 GUI.addIcon($node, "ui-icon-check", "", "before");
@@ -458,6 +461,7 @@ define(['jquerymin', 'rest3d', 'gltf', 'collada', 'viewer'], function ($, rest3d
                     $node.prop('disabled', false);
                 }
             });
+            data.deferred.resolve(true);
         }).on('fileuploadfail', function (e, data) {
             if (!data.result) {
                 $(data.context.children()[0])
