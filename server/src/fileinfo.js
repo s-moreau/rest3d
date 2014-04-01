@@ -99,6 +99,50 @@
         });
     });
   };
+  // move a file to upload area
+  FileInfo.prototype.upload = function (handler, filePath) {
+
+    if(handler.hasOwnProperty("iduser")){ 
+
+      var flagIduser = fs.readdirSync(FileInfo.options.uploadDir).indexOf(handler.iduser) !== -1;
+      if(!flagIduser){
+        fs.mkdirSync(FileInfo.options.uploadDir + '/' + handler.iduser);
+      }
+      if(handler.hasOwnProperty("folder")){ 
+        var flagFolder = fs.readdirSync(FileInfo.options.uploadDir + '/' + handler.iduser).indexOf(handler.folder) !== -1
+        if(!flagFolder){
+          fs.mkdirSync(FileInfo.options.uploadDir + '/' + handler.iduser + '/'+ handler.folder);
+        }
+        fs.renameSync(filePath, FileInfo.options.uploadDir + '/' + handler.iduser + '/'+ handler.folder +'/'+ this.name);
+        console.log("uploaded "+FileInfo.options.uploadDir + '/' + handler.iduser + '/'+ handler.folder +'/'+ this.name);
+        this.path = FileInfo.options.uploadDir + '/' + handler.iduser + '/'+ handler.folder +'/'+ this.name;
+      } else {
+        fs.renameSync(filePath, FileInfo.options.uploadDir + '/' + handler.iduser + '/' + this.name);
+        console.log("uploaded "+FileInfo.options.uploadDir + '/' + handler.iduser + '/' + this.name);
+        this.path = FileInfo.options.uploadDir + '/' + handler.iduser + '/' + this.name;
+      }
+    } else{
+      fs.renameSync(filePath, FileInfo.options.uploadDir + '/' + this.name);
+      console.log("uploaded "+FileInfo.options.uploadDir + '/' + this.name);
+      this.path = FileInfo.options.uploadDir + '/' + this.name;
+    }
+    /* Image resize 
+
+    if (FileInfo.options.imageTypes.test(fileInfo.name)) {
+      Object.keys(FileInfo.options.imageVersions).forEach(function (version) {
+        counter += 1;
+        var opts = FileInfo.ptions.imageVersions[version];
+        imageMagick.resize({
+          width: opts.width,
+          height: opts.height,
+          srcPath: FileInfo.options.uploadDir + '/' + fileInfo.name,
+          dstPath: FileInfo.options.uploadDir + '/' + version + '/' +
+            fileInfo.name
+        }, finish);
+      });
+    }
+    */
+  };
 
    module.exports = FileInfo;
 
