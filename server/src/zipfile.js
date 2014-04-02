@@ -42,6 +42,19 @@ module.exports = function (server) {
     uploadAndUnzip(params);
   };
 
+  zipFile.upload = function(uid,url,jar,where,cb){
+
+    var params={};
+    params.uid = uid;
+    params.cb = cb;
+    params.url=url;
+    params.jar=jar;
+    params.where=where;
+    params.uploadOnly = true;
+
+    uploadAndUnzip(params);
+  };
+
   var uploadAndUnzip = function(params){
 
     server.diskcache.hit(params.url,function(err,entry){
@@ -57,6 +70,8 @@ module.exports = function (server) {
         buffer.on('end', function () {
           params.req.response.body = this.toBuffer();
           server.diskcache.store(params.url,params.req.response,function(err,entry){
+            if (err)
+              return params.cb(err);
             unzip(entry,params);
           });
         });
@@ -108,6 +123,9 @@ module.exports = function (server) {
 
     }
 
+    if (params.uploadOnly)
+      return params.cb(null,{filename:resp.filename, name:name});
+    
     var asset = {type:'asset', name:name, id:params.uid, url:params.url}; 
 
     try {
