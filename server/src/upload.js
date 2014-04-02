@@ -22,6 +22,7 @@ module.exports = function (server) {
    return unescape(encodeURIComponent(str));
   };
 
+  // upload one or more files
   UploadHandler.prototype.post = function () {
     console.log ("upload requested");
     var handler = this;
@@ -109,6 +110,8 @@ module.exports = function (server) {
         params.where = FileInfo.options.uploadDir;
 
         counter ++;
+        zipFile.unzip(params.uid,params.url,null,params.where, params.cb); //jar?
+        /*
         server.diskcache.hit(params.url,function(err,entry){
           if (entry) 
           {
@@ -136,9 +139,10 @@ module.exports = function (server) {
 
           }
         });
+*/
       }
     }).on('file', function (name, file) {
-        var fileInfo = map[file.path];
+      var fileInfo = map[file.path];
       fileInfo.size = file.size;
       fileInfo.type = file.type;
       if (!fileInfo.validate()) {
@@ -164,62 +168,9 @@ module.exports = function (server) {
             console.log("uploaded "+tmp[i-1]+"/"+tmp[i]);
             fileInfo.path = tmp[i-1]+"/"+tmp[i];
           }
-          // if(tmp[i].split(".").length==1){
-          //   // if(i==2){tmp[1]="/"+tmp[1]}
-          //   var flag = fs.readdirSync(tmp[i-1]).indexOf(tmp[i]) !== -1;
-          //   console.log("flag "+flag);
-          //   tmp[i]=tmp[i-1]+"/"+tmp[i];
-          //   if(!flag){
-          //     console.log("createfoler "+tmp[i])
-          //     fs.mkdirSync(tmp[i]);
-          //   }
-          // }
-          // else{
-          //   fs.renameSync(file.path,tmp[i-1]+"/"+tmp[i]);
-          //   console.log("uploaded "+tmp[i-1]+"/"+tmp[i]);
-          //   fileInfo.path = tmp[i-1]+"/"+tmp[i];
-          // }
         }
       }
 
-      //   var flagIduser = fs.readdirSync(FileInfo.options.uploadDir).indexOf(handler.iduser) !== -1;
-      //   if(!flagIduser){
-      //     fs.mkdirSync(FileInfo.options.uploadDir + '/' + handler.iduser);
-      //   }
-      //   if(handler.hasOwnProperty("folder")){ 
-      //     var flagFolder = fs.readdirSync(FileInfo.options.uploadDir + '/' + handler.iduser).indexOf(handler.folder) !== -1
-      //     if(!flagFolder){
-      //       fs.mkdirSync(FileInfo.options.uploadDir + '/' + handler.iduser + '/'+ handler.folder);
-      //     }
-      //     fs.renameSync(file.path, FileInfo.options.uploadDir + '/' + handler.iduser + '/'+ handler.folder +'/'+ fileInfo.name);
-      //     console.log("uploaded "+FileInfo.options.uploadDir + '/' + handler.iduser + '/'+ handler.folder +'/'+ fileInfo.name);
-      //     fileInfo.path = FileInfo.options.uploadDir + '/' + handler.iduser + '/'+ handler.folder +'/'+ fileInfo.name;
-      //   } else {
-      //     fs.renameSync(file.path, FileInfo.options.uploadDir + '/' + handler.iduser + '/' + fileInfo.name);
-      //     console.log("uploaded "+FileInfo.options.uploadDir + '/' + handler.iduser + '/' + fileInfo.name);
-      //     fileInfo.path = FileInfo.options.uploadDir + '/' + handler.iduser + '/' + fileInfo.name;
-      //   }
-      // } else{
-      //   fs.renameSync(file.path, FileInfo.options.uploadDir + '/' + fileInfo.name);
-      //   console.log("uploaded "+FileInfo.options.uploadDir + '/' + fileInfo.name);
-      //   fileInfo.path = FileInfo.options.uploadDir + '/' + fileInfo.name;
-      // }
-      /* Image resize 
-
-      if (FileInfo.options.imageTypes.test(fileInfo.name)) {
-        Object.keys(FileInfo.options.imageVersions).forEach(function (version) {
-          counter += 1;
-          var opts = FileInfo.ptions.imageVersions[version];
-          imageMagick.resize({
-            width: opts.width,
-            height: opts.height,
-            srcPath: FileInfo.options.uploadDir + '/' + fileInfo.name,
-            dstPath: FileInfo.options.uploadDir + '/' + version + '/' +
-              fileInfo.name
-          }, finish);
-        });
-      }
-      */
       finish();
     }).on('aborted', function () {
       tmpFiles.forEach(function (file) {
@@ -236,6 +187,7 @@ module.exports = function (server) {
     form.parse(handler.req);
   };
 
+  // get a file 
   UploadHandler.prototype.get = function () {
     var handler = this,
       files = [];
@@ -258,6 +210,7 @@ module.exports = function (server) {
     });
   };
 
+  // delete a file
   UploadHandler.prototype.destroy = function () {
     var handler = this,
       fileName;

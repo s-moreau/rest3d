@@ -197,7 +197,7 @@ module.exports = function(config) {
     if (session.sessions[sid] != undefined) {
         session.createSid(callback);
     } else {
-      console.log("Created sessionID="+sid);
+      //console.log("Created sessionID="+sid);
       session.sessions[sid]={};
       callback.call(session, err, sid);
     }
@@ -301,19 +301,15 @@ module.exports = function(config) {
    */
   session.exists = function(sid, callback) {
     if (isNull(sid)) {
-      console.log('session.js exists called with NULL sid!!');
+      //console.log('session.js exists called with NULL sid!!');
       callback.call(session, undefined, false);
       return;
     }
     var ret=false;
     var err=false;
-    if (session.sessions[sid] != undefined) {
+    if (session.sessions[sid] != undefined)
       ret=true;
-      console.log('session.js sessionID='+sid+' exists')
-    } else {
-      console.log('session.js sessionID='+sid+' does NOT exsts')
-    }
-
+     
     callback.call(session, err, ret );
 
   };
@@ -418,7 +414,7 @@ module.exports = function(config) {
     data.sid  = sid;
     session.sessions[sid] = data;
     req.session = data;
-    console.log('session.js stored data='+toJSON(data)+' in req.session');
+    //console.log('session.js stored data='+toJSON(data)+' in req.session');
     res.setHeader(cfg.sidHeader, sid);
 
     if (cfg.cookies) {

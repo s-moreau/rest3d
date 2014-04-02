@@ -192,18 +192,31 @@ THE SOFTWARE.
         </li>
 
         <li> <a href="/rest3d/3dvia/"> /rest3d/3dvia/</a>
-           Get top level collections (50 models. 3dvia server is slow...)
+           Get top level collections (25 models. 3dvia server is slow...)
         </li>
+        
+        <li> <a href="javascript:getit('/rest3d/3dvia/search/','te');"> /rest3d/3dvia/search/</a>
+          <input type="text" size="51" value="sofa" id="te" onkeydown="if (event.keyCode == 13) getit('/rest3d/3dvia/copy/','te');" /> search for assets</li>
 
-        <li> <a href="javascript:getit('/rest3d/3dvia/data/','tr');"> /rest3d/3dvia/data/</a>
-          <input type="text" size="51" value="8A066E8092A4B688" id="tr" onkeydown="if (event.keyCode == 13) getit('/rest3d/3dvia/data/','tr');" />Get a model (kmz or zip)</li>
+        <li> <a href="javascript:getit('/rest3d/3dvia/data/','ta');"> /rest3d/3dvia/data/</a>
+          <input type="text" size="51" value="8A066E8092A4B688" id="ta" onkeydown="if (event.keyCode == 13) getit('/rest3d/3dvia/data/','ta');" /> Get a model (kmz example)</li>
 
-        <li> <a href="javascript:getit('/rest3d/3dvia/info/','tr');"> /rest3d/3dvia/info/</a>
-          <input type="text" size="51" value="8A066E8092A4B688" id="tr" onkeydown="if (event.keyCode == 13) getit('/rest3d/3dvia/info/','tr');" />request info about a model</li>
+        <li> <a href="javascript:getit('/rest3d/3dvia/data/','tf');"> /rest3d/3dvia/data/</a>
+          <input type="text" size="51" value="B3C79CA9BB8D9FB1" id="tf" onkeydown="if (event.keyCode == 13) getit('/rest3d/3dvia/data/','tf');" /> Get a model (dae example)</li>
+
+        <li> <a href="javascript:getit('/rest3d/3dvia/data/','tg');"> /rest3d/3dvia/data/</a>
+          <input type="text" size="51" value="363D162C3E102234" id="tg" onkeydown="if (event.keyCode == 13) getit('/rest3d/3dvia/data/','tg');" /> Get a model (3ds example)</li>
+
+        <li> <a href="javascript:getit('/rest3d/3dvia/info/','tb');"> /rest3d/3dvia/info/</a>
+          <input type="text" size="51" value="8A066E8092A4B688" id="tb" onkeydown="if (event.keyCode == 13) getit('/rest3d/3dvia/info/','tb');" /> Request info about a model</li>
 
 
-        <li> <a href="javascript:getit('/rest3d/3dvia/','tr');"> /rest3d/3dvia/</a>
-          <input type="text" size="51" value="8A066E8092A4B688" id="tr" onkeydown="if (event.keyCode == 13) getit('/rest3d/3dvia/','tr');" />request asset composition</li>
+        <li> <a href="javascript:getit('/rest3d/3dvia/','tc');"> /rest3d/3dvia/</a>
+          <input type="text" size="51" value="8A066E8092A4B688" id="tc" onkeydown="if (event.keyCode == 13) getit('/rest3d/3dvia/','tc');" /> Request asset composition</li>
+
+        <li> <a href="javascript:getit('/rest3d/3dvia/copy/','td');"> /rest3d/3dvia/copy/</a>
+          <input type="text" size="51" value="8A066E8092A4B688" id="td" onkeydown="if (event.keyCode == 13) getit('/rest3d/3dvia/copy/','td');" /> Copy asset to upload area</li>
+
       </ul>
 
 
