@@ -104,12 +104,14 @@
 
     if(handler.hasOwnProperty("iduser")){ 
 
-      var flagIduser = fs.readdirSync(FileInfo.options.uploadDir).indexOf(handler.iduser) !== -1;
+      
+      var flagIduser = fs.existsSync(FileInfo.options.uploadDir+'/'+handler.iduser);
       if(!flagIduser){
         fs.mkdirSync(FileInfo.options.uploadDir + '/' + handler.iduser);
       }
       if(handler.hasOwnProperty("folder")){ 
-        var flagFolder = fs.readdirSync(FileInfo.options.uploadDir + '/' + handler.iduser).indexOf(handler.folder) !== -1
+        
+        var flagFolder = fs.existsSync(FileInfo.options.uploadDir+ '/' + handler.iduser+'/'+handler.iduser);
         if(!flagFolder){
           fs.mkdirSync(FileInfo.options.uploadDir + '/' + handler.iduser + '/'+ handler.folder);
         }
