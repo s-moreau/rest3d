@@ -72,10 +72,12 @@ var staticPath = path.join(__dirname , '../static');
 
 console.log('static folder=',staticPath);
 
-var listenToPort = process.env.OPENSHIFT_NODEJS_PORT || 
-                   process.env.PORT || 
+var httpPort = process.env.OPENSHIFT_NODEJS_PORT || 
+                   process.env.HTTP || 
                    8000;
+var httpsPort = process.env.HTTPS || 443;
 var ip_address = process.env.OPENSHIFT_NODEJS_IP || null;
+var listenToPort = httpPort;
 
 
 // see where collada2gltf is located
@@ -86,8 +88,33 @@ if (openshift)
 if (process.env.GLTF_BIN_PATH)
     collada2gltf = process.env.GLTF_BIN_PATH+'/collada2gltf';
 
-var server = module.exports.server = restify.createServer();
+// find out if we are running http or https
+// if https, create two servers, the http server only does redirect to https
 
+var params = {name: 'rest3d'};
+
+if (fs.existsSync('./server.pem') && fs.existsSync('./server.key')){
+	console.log('found https certficates');
+	params.key = fs.readFileSync('./server.key');
+	params.certificate = fs.readFileSync('./server.pem');
+	listenToPort = httpsPort;
+};
+
+var server = module.exports.server = restify.createServer(params);
+
+if (params.key) {
+  var http_server = restify.createServer();
+  http_server.get(/.*/,function(req,res,next) {
+    // Assume https port is on the default port
+    var redirect = "https://" + req.headers.host.replace (/(.*):.*/, '$1') +  req.url;
+  	res.writeHead(302, {'Location': redirect});
+
+    //console.log('**** https redirect to '+redirect)
+    res.end();
+    next();
+	});
+	http_server.listen( httpPort, ip_address);
+}
 
 rmdirSync('tmp');
 rmdirSync('cache');
