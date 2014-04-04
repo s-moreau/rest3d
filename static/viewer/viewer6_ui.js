@@ -751,7 +751,7 @@ viewer.INIT =  function (){
                 for(var i = 0; i<data.result.files.length;i++){
                     var tmp = data.result.files[i];
                     var ext = tmp.name.match(/\.[^.]+$/);
-                    var url = 'http://'+location.hostname+'/rest3d/upload/'+tmp.name;
+                    var url = location.protocol+'//'+location.hostname+'/rest3d/upload/'+tmp.name;
                     if(ext[0]=='.DAE'||ext[0]=='.dae'||ext[0]=='.json'){
                         var id = 'model_'+tmp.size+'_'+Math.floor(Math.random() * 1000000) + 1;
                         html += '<li><a>name: '+tmp.name+' </a>'+'<a>size: '+tmp.size+' </a>'+'<a href="'+url+'">download</a>'+'<button id="'+id+'">Display</button>'+'</li>';
@@ -800,7 +800,7 @@ viewer.INIT =  function (){
                     var name = data.files[i].name;
                     var size = data.files[i].size;
                     var path = data.files[i].path;
-                    var url = 'http://'+location.host+'/rest3d/'+path;
+                    var url = location.protocol+'//'+location.host+'/rest3d/'+path;
                     var ext = name.match(/\.[^.]+$/);
                     if(ext[0]=='.DAE'||ext[0]=='.dae'){
                         node.attr("path",url);
