@@ -461,6 +461,7 @@ define(['jquerymin', 'rest3d', 'gltf', 'collada', 'viewer','q'], function ($, re
                 nickname = nickname.replace(".","-");
                 nickname = nickname.replace(".","-");
                 var rmp = data.files[0].relativePath.split('/') 
+                console.debug(rmp);
                 if($("#a_"+nickname+"_"+rmp[rmp.length-2]+"_"+numberUser).attr("uploadstatus")=="true"){
                     var node =$("#a_"+nickname+"Bis_"+rmp[rmp.length-2]+"_"+numberUser);
                 }
