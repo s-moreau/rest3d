@@ -283,9 +283,27 @@ define(['channel','codemirror','webglUtils', 'WebGLDebugUtils','pnotify','colorp
                     parent:this[this.id],
                 });
                 this[this.id].append('<div id="fileArea_'+this.id+'"></div>');
+
+                this.optionLog= GUI.addCheckBox("uploadSetting", "Use log interface", this[this.id]);
+                this.lunch1 = GUI.button("Upload", this.optionLog);
+                var ex = this.lunch1;
+                this.lunch1.css({"float":"right!important;"})
+                this.optionLog.find('input').on("change",function(){
+                    if($(this).is(':checked')){
+                        ex.hide();
+                 }
+                 else{
+                    ex.show();
+                 }
+                });
+            }
                 
                // $('#fileArea_'+this.id).append('<div style="border: 1px solid grey; border-top: none; width:100%;" ><span style="float:left !important;">Fildsdsdsdsde</span></div>');
+            
+            this.getOptionLog = function(){
+                return this.optionLog.find('input').is(':checked');
             }
+
             this.callOnClick = function(cb){
                 if(this.button){
                     this.button.on('click',function(){

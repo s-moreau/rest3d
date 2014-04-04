@@ -25,25 +25,11 @@ THE SOFTWARE.*/
 define(['jquerymin', 'rest3d', 'gltf', 'collada', 'viewer','q'], function ($, rest3d, glTF, COLLADA, viewer,Q) {
 
     function setViewer6Upload($, upload, rest3d, viewer) {
-        // window.header=false;
+
         var index;
         var id;
         var flag;
-        // window.bufferNode=[];
-        // window.buffer = []; 
-        // window.bufferDae = false; 
-        //"#uploadTree").bind('before.jstree', function(event, data){ 
-        //          console.log(data.plugin + ' fired:' + data.func); 
-        // if(data.plugin == 'dnd'){ 
-        //         switch(data.func){ 
-        //                 case('start_drag'): 
-        //                         console.log(data.plugin + ' fired:' + data.func); 
-        //                         break; 
-        //                 case('dnd_finish'): 
-        //                         console.log(data.plugin + ' fired:' + data.func); 
-        //                         break; 
-        //         } 
-        // } 
+
         function Buffer() {
             this.bufferDae = false;
             this.bufferNode = []
@@ -66,11 +52,10 @@ define(['jquerymin', 'rest3d', 'gltf', 'collada', 'viewer','q'], function ($, re
             this.header = upload.header(this.removeNodes,this.button);
             this.upload = [];
             var stock = this;
-            // this.link = upload.upload(this.header, "Upload selection",this.button);
         }
 
         var url = '/rest3d/upload';
-        var uploadButton = $('<input type="checkbox">')
+        var uploadButton = $('<input type="checkbox" style="float:right;">')
             .addClass('btn'),
             // show the name of the file nicely
             formatName = function (data, file) {
@@ -145,53 +130,7 @@ define(['jquerymin', 'rest3d', 'gltf', 'collada', 'viewer','q'], function ($, re
                     }
                     rest3d.convert(data, callback);
                 });
-        // var sortAsset = function (e, data, node) {
-        //     $("#uploadTree").jstree('open_all');
-        //     data.tmp = new Buffer();
-        //     var sort = [];
-        //     var stock = [];
-        //     $.each(data.files, function (index, file) {
-        //         var ext = file.name.match(/\.[^.]+$/);
-        //         if (ext[0] == ".dae" || ext[0] == ".DAE") {
-        //             sort.unshift(file);
-        //         }
-        //         else {
-        //             sort.push(file);
-        //         }
-        //     });
-        //     data.files = sort;
-        //     var ext = sort[0].name.match(/\.[^.]+$/)[0];
-        //     var filename = sort[0].name.split('.');
-        //     var tmp = {};
-        //     tmp.name = 'X-iduser';
-        //     tmp.value = viewer.idUser;
-        //     stock.push(tmp);
-        //     if (ext == ".dae" || ext == ".DAE") {
-        //         var tmp = {};
-        //         tmp.name = 'X-folder';
-        //         tmp.value = filename[0];
-        //         stock.push(tmp);
-        //     }
-        //     else {
-        //         if (node.attr("id") != viewer.idUser) {
-        //             var tmp = node.attr("id").split("_folder_");
-        //             var obj = {};
-        //             obj.name = 'X-folder';
-        //             obj.value = tmp[1];
-        //             stock.push(obj);
-        //             data.tmp.nodeFolder = tmp[1];
-        //             data.tmp.flagNode = false;
-        //         }
-        //     }
-        //     data.tmp.array = stock;
-        //     setTimeout(function () {
-        //         upload.object.fileupload("option", "beforeSend", function (xhr, data) {
-        //             for (var i = 0; i < data.tmp.array.length; i++) {
-        //                 xhr.setRequestHeader(data.tmp.array[i].name, data.tmp.array[i].value);
-        //             }
-        //         });
-        //     }, 500);
-        // }
+        
         var numberUser = viewer.idUser.split("_")[1]
         var sortAssetDrop = function (e, data,mode) {
             var defer = Q.defer();
@@ -222,7 +161,7 @@ define(['jquerymin', 'rest3d', 'gltf', 'collada', 'viewer','q'], function ($, re
                 }
                 return result;       
             }
-            function createNode(parent,name){
+            function createNode(parent,name,file){
                 var attr = parent.attr("rel");
                 var children = parent.children("ul").children("li");
                 var flag = 0;
@@ -237,6 +176,8 @@ define(['jquerymin', 'rest3d', 'gltf', 'collada', 'viewer','q'], function ($, re
                         parent.attr("rel","model");
                     }
                     nickname = nickname.replace(".","-");
+                    nickname = nickname.replace(".","-");
+
                 }
                 else if(attr=="model"||attr=="child"){
                     var index = "a";
@@ -252,11 +193,17 @@ define(['jquerymin', 'rest3d', 'gltf', 'collada', 'viewer','q'], function ($, re
                     }
                 }
                 var rel;
+                var parentId = parent.attr("id").split("_")[1];
                 if(ext){rel = ext;}
                 else if(attr=="model"||attr=="child"){rel = "child";}
                 else{rel="collection"}
                 if(flag==0){
-                    var id = index+"_"+nickname+"_"+numberUser;
+                    if(mode){var rmp = mode.attr("id").split("_")[1];file.relativePath = rmp +"/";}
+                    else{
+                        var rmp = file.relativePath.split('/');
+                        rmp = rmp[rmp.length-2];
+                    }
+                    var id = index+"_"+nickname+"_"+rmp+"_"+numberUser;
                     $("#uploadTree").jstree("create_node", parent, "inside", {
                                 "data": name,
                                 "attr": {
@@ -271,7 +218,12 @@ define(['jquerymin', 'rest3d', 'gltf', 'collada', 'viewer','q'], function ($, re
                 }
                 else{
                     if(index=="a"&&!flag1){
-                        flag = index+"_"+nickname+"Bis"+"_"+numberUser;
+                        if(mode){var rmp = mode.attr("id").split("_")[1];file.relativePath = rmp +"/";}
+                        else{
+                            var rmp = file.relativePath.split('/');
+                            rmp = rmp[rmp.length-2];
+                        }
+                        flag = index+"_"+nickname+"Bis_"+rmp+"_"+numberUser;
                         var splitName = name.split('.');
                         $("#uploadTree").jstree("create_node", parent, "inside", {
                                 "data": splitName[0]+"Bis."+splitName[1],
@@ -288,22 +240,6 @@ define(['jquerymin', 'rest3d', 'gltf', 'collada', 'viewer','q'], function ($, re
                 }
             }
 
-
-            // function parseLevel (parent,children,file){
-            //     var id = safeName(file,children,"collection");
-
-            //     for(var j=0;j<children.length;j++){
-            //         var nameSplitFolder = children[i].id.split("_");
-            //         console.debug(nameSplitFolder);
-            //         if(nameSplitFolder[0]=="c"){
-            //             if(nameSplitFolder[1]==file){
-            //                 return children[i].id;
-            //             }
-                   
-            //         }
-            //     }
-            // }
-
             function parsePath (file,parent){
                 if(mode){
                     var result = [""];
@@ -312,10 +248,10 @@ define(['jquerymin', 'rest3d', 'gltf', 'collada', 'viewer','q'], function ($, re
                     var result = file.relativePath.split("/");}
                 for(var i=0;i<result.length;i++){
                     if(result[i]!=""){
-                        var id = createNode(parent,result[i]);
+                        var id = createNode(parent,result[i],file);
                         parent = $("#"+id);}
                     else{
-                        createNode(parent,file.name);
+                        createNode(parent,file.name,file);
                         if(mode){
                              parent = $("#"+mode.attr("id"));
                         }
@@ -341,77 +277,8 @@ define(['jquerymin', 'rest3d', 'gltf', 'collada', 'viewer','q'], function ($, re
                 e.preventDefault();
             }
             defer.resolve();
-            // if (e.idToDrop == viewer.idUser || e.idToDrop.split("____")[0] == viewer.idUser) {
-            //     parent = 
-            // }
-            // else {
-            //     var tmp = e.idToDrop.replace(viewer.idUser, '');
-            //     tmp = tmp.split("_folder_");
-            //     tmp = tmp[1].split("____");
-            //     var obj = {};
-            //     obj.name = 'X-folder';
-            //     obj.value = tmp[0];
-            //     stock.push(obj);
-            //     data.tmp.nodeFolder = tmp[0];
-            //     data.tmp.flagNode = false;
-            // }
-            //console.debug(data);
-            // var defer = Q.defer();
-            // if (e.idToDrop == undefined) {
-            //     e.preventDefault();
-            // }
-            // else {
-            //     data.tmp = new Buffer();
-            //     var sort = [];
-            //     var stock = [];
-            //     console.debug(data.files);
-            //     $.each(data.files, function (index, file) {
-            //         var ext = file.name.match(/\.[^.]+$/);
-            //         if (ext[0] == ".dae" || ext[0] == ".DAE") {
-            //             sort.unshift(file);
-            //         }
-            //         else {
-            //             sort.push(file);
-            //         }
-            //     });
-            //     data.files = sort;
-            //     data.deferred = defer;
-            //     var ext = sort[0].name.match(/\.[^.]+$/)[0];
-            //     var filename = sort[0].name.split('.');
-            //     var tmp = {};
-            //     tmp.name = 'X-iduser';
-            //     tmp.value = viewer.idUser;
-            //     stock.push(tmp);
-            //     if (e.idToDrop == viewer.idUser || e.idToDrop.split("____")[0] == viewer.idUser) {
-            //         if (ext == ".dae" || ext == ".DAE") {
-            //             var tmp = {};
-            //             tmp.name = 'X-folder';
-            //             tmp.value = filename[0];
-            //             stock.push(tmp);
-            //         }
-            //     }
-            //     else {
-            //         var tmp = e.idToDrop.replace(viewer.idUser, '');
-            //         tmp = tmp.split("_folder_");
-            //         tmp = tmp[1].split("____");
-            //         var obj = {};
-            //         obj.name = 'X-folder';
-            //         obj.value = tmp[0];
-            //         stock.push(obj);
-            //         data.tmp.nodeFolder = tmp[0];
-            //         data.tmp.flagNode = false;
-            //     }
-            //     data.tmp.array = stock;
-            //     upload.object.fileupload("option", "beforeSend", function (xhr, data) {
-            //         for (var i = 0; i < data.tmp.array.length; i++) {
-            //             xhr.setRequestHeader(data.tmp.array[i].name, data.tmp.array[i].value);
-            //         }
-            //     });
-            // }
             return defer.promise;
         }
-
-
 
         setTimeout(function () {
             upload.object.fileupload('option', 'dropZone', $("#c_" + viewer.idUser));
@@ -445,11 +312,11 @@ define(['jquerymin', 'rest3d', 'gltf', 'collada', 'viewer','q'], function ($, re
                 var nickname = file.name.replace("__","");
                 nickname = nickname.replace("_","");
                 nickname = nickname.replace(".","-");
+                nickname = nickname.replace(".","-");
                 var url="default";
                 button = uploadButton.clone(true).data(data);
                 var stock = function(object){
                         data = button.data();
-                        console.debug(filename[0]);
                         data.submit();
                         buffer.button.unbind('click',main);
                     }
@@ -466,36 +333,6 @@ define(['jquerymin', 'rest3d', 'gltf', 'collada', 'viewer','q'], function ($, re
                 });
                 setTimeout(function(){button.click()},1000);
                 if (ext[0] == ".dae" || ext[0] == ".DAE") {
-                    // if (buffer.flagNode) {
-                        // $("#uploadTree").jstree("create_node", $("#" + viewer.idUser), "inside", {
-                        //     "data": filename[0],
-                        //     "attr": {
-                        //         "id": viewer.idUser + "_folder_" + filename[0],
-                        //         "rel": "child"
-                        //     }
-                        // }, false, true);
-                        // buffer.bufferDae = $("#" + viewer.idUser + "_folder_" + filename[0]);
-                        // buffer.bufferNode.push(buffer.bufferDae);
-                        // $("#uploadTree").jstree("create_node", buffer.bufferDae, "inside", {
-                        //     "data": file.name,
-                        //     "attr": {
-                        //         "id": viewer.idUser + "_folder_" + filename[0] + "____model",
-                        //         "rel": "main"
-                        //     }
-                        // }, false, true);
-                        // var url = '/rest3d/upload/' + viewer.idUser + '/' + filename[0] + '/' + file.name; //
-                    // }
-                    // else {
-                    //     $("#uploadTree").jstree("create_node", $("#" + viewer.idUser + "_folder_" + buffer.nodeFolder), "inside", {
-                    //         "data": file.name,
-                    //         "attr": {
-                    //             "id": viewer.idUser + "_folder_" + buffer.nodeFolder + "____" + filename[0] + "____model",
-                    //             "rel": "main"
-                    //         }
-                    //     }, false, true);
-                    //     buffer.bufferNode.push($("#" + viewer.idUser + "_folder_" + buffer.nodeFolder + "____" + filename[0] + "____model"));
-                    //     var url = '/rest3d/upload/' + viewer.idUser + '/' + file.name;
-                    // }
 
                     var $dialog = $("<button>Launch</button>").on("click", function () {
                         window.pleaseWait(true);
@@ -516,64 +353,37 @@ define(['jquerymin', 'rest3d', 'gltf', 'collada', 'viewer','q'], function ($, re
                             open: function (ev, ui) {
                                 $('#myIframe').attr('src', '/viewer/easy-viewer.html?file=' + url);
                             },
-                            //              close: function(){
-                            // gitHtml.remove();
-                            //},//
                         });
                     })
                         .prop("id", "preview" + index);
                     var array = [];
-                     var newLine =upload.upload(buffer.header, file.name, $preview, $dialog, button);
+                    var newLine =upload.upload(buffer.header, file.name, $preview, $dialog, button);
+                    if(!upload.getOptionLog()){buffer.header.hide()}
                     $('#dialog' + index).hide();
                     $('#preview' + index).hide();
                     // rest3d.testUpload(file);
                 }
-                else /*if (ext[0] == ".png" || ext[0] == ".jpg" || ext[0] == ".tga" || ext[0] == ".png" || ext[0] == ".jpeg" || ext[0] == ".glsl")*/ {
-                    var newLine = upload.upload(buffer.header, file.name, button);
-                    // if (buffer.flagNode) {
-                    //     if (buffer.bufferDae != false) {
-                    //         $("#uploadTree").jstree("create_node", buffer.bufferDae, "inside", {
-                    //             "data": file.name,
-                    //             "attr": {
-                    //                 "id": viewer.idUser + "_folder_" + buffer.bufferDae.prop("id").split("_folder_")[1] + "____" + filename[0],
-                    //                 "rel": "image"
-                    //             }
-                    //         }, false, true);
-                    //         buffer.bufferNode.push($("#" + viewer.idUser + "_folder_" + buffer.bufferDae.prop("id") + "____" + filename[0]));
-                    //     }
-                    //     else {
-                    //         $("#uploadTree").jstree("create_node", $("#" + viewer.idUser), "inside", {
-                    //             "data": file.name,
-                    //             "attr": {
-                    //                 "id": viewer.idUser + "____" + filename[0],
-                    //                 "rel": "image"
-                    //             }
-                    //         }, false, true);
-                    //         buffer.bufferNode.push($("#" + viewer.idUser + "____" + filename[0]));
-                    //     }
-                    // }
-                    // else {
-                    //     $("#uploadTree").jstree("create_node", $("#" + viewer.idUser + "_folder_" + buffer.nodeFolder), "inside", {
-                    //         "data": file.name,
-                    //         "attr": {
-                    //             "id": viewer.idUser + "_folder_" + buffer.nodeFolder + "____" + filename[0],
-                    //             "rel": "image"
-                    //         }
-                    //     }, false, true);
-                    //     buffer.bufferNode.push($("#" + viewer.idUser + "_folder_" + buffer.nodeFolder + "____" + filename[0]));
-                    // }
+                else {
+                   var newLine = upload.upload(buffer.header, file.name, button);
+                    if(!upload.getOptionLog()){buffer.header.hide()}
                 }
-                setTimeout(function(){ 
-                    url = $("#a_"+nickname+"_"+numberUser)
+                setTimeout(function(){
+                    var rmp = file.relativePath.split('/') 
+                    if($("#a_"+nickname+"Bis_"+rmp[rmp.length-2]+"_"+numberUser).length == 1){url =$("#a_"+nickname+"Bis_"+rmp[rmp.length-2]+"_"+numberUser);}
+                    else{url = $("#a_"+nickname+"_"+rmp[rmp.length-2]+"_"+numberUser);}
+                    if(!upload.getOptionLog()){
+                    url.append(button);};
                     url = url.attr("path");
                     newLine.append("<a>"+url+"</a>");
+                    upload.lunch1.on("click",function(){
+                        buffer.button.click();
+                    })
                 },1000);
               
                 $("#uploadTree").jstree('open_all');
             });
             data.tmp = buffer;
             data.buttonToReplace.push(button);
-
         }).on('fileuploadprocessalways', function (e, data) {
             var indexI = data.index,
                 file = data.files[indexI],
@@ -604,28 +414,29 @@ define(['jquerymin', 'rest3d', 'gltf', 'collada', 'viewer','q'], function ($, re
                 var nickname = file.name.replace("__","");
                 nickname = nickname.replace("_","");
                 nickname = nickname.replace(".","-");
-                var node = $("#a_"+nickname+"_"+numberUser);
-                node.attr("uploadstatus",true);
-
-                file.assetName = data.result.files[index].name;
-                var $node = convertButton.clone(true).data({
-                    file: file,
-                    context: data.context
-                })
-                // .prop('disabled', !/dae$/i.test(file.url))
-                data.buttonToReplace[index]
-                    .replaceWith($node)
-                    .prop("id", "nodeClose");
-                GUI.addIcon($node, "ui-icon-check", "", "before");
-                $node.parent().parent().show().find("button").show();
-                var ext = file.name.match(/\.[^.]+$/);
-                if(ext!=null){
-                    if (ext[0] == ".dae" || ext[0] == ".DAE") {
-                        $node.prop('disabled', false);
+                if(upload.getOptionLog()){
+                    file.assetName = data.result.files[index].name;
+                    var $node = convertButton.clone(true).data({
+                        file: file,
+                        context: data.context,
+                    })
+                    data.buttonToReplace[index]
+                        .replaceWith($node)
+                        .prop("id", "nodeClose");
+                    GUI.addIcon($node, "ui-icon-check", "", "before");
+                    $node.parent().parent().show().find("button").show();
+                    var ext = file.name.match(/\.[^.]+$/);
+                    if(ext!=null){
+                        if (ext[0] == ".dae" || ext[0] == ".DAE") {
+                            $node.prop('disabled', false);
+                        }
                     }
                 }
+                else{
+                   data.buttonToReplace[index].remove(); 
+                }
             });
-            // data.deferred.resolve(true);
+
         }).on('fileuploadfail', function (e, data) {
             if (!data.result) {
                 $(data.context.children()[0])
@@ -633,7 +444,7 @@ define(['jquerymin', 'rest3d', 'gltf', 'collada', 'viewer','q'], function ($, re
                     .append('error communicating with server')
                     .find('button').remove();
             }
-            else
+            else {
                 $.each(data.result.files, function (index, file) {
                     var error = $('<span/>').text(file.error);
                     $(data.context.children()[index])
@@ -641,23 +452,24 @@ define(['jquerymin', 'rest3d', 'gltf', 'collada', 'viewer','q'], function ($, re
                         .append(error)
                         .find('button').remove();
                 });
+            }
         });
     
-
         upload.object.fileupload("option", "beforeSend", function (xhr, data) {
-                console.debug(data.files[0].name);
                 var nickname = data.files[0].name.replace("__","");
                 nickname = nickname.replace("_","");
                 nickname = nickname.replace(".","-");
-                var node = $("#a_"+nickname+"_"+numberUser);
-                    // // for (var i = 0; i < data.tmp.array.length; i++) {
-                    
-                    // // }
+                nickname = nickname.replace(".","-");
+                var rmp = data.files[0].relativePath.split('/') 
+                if($("#a_"+nickname+"_"+rmp[rmp.length-2]+"_"+numberUser).attr("uploadstatus")=="true"){
+                    var node =$("#a_"+nickname+"Bis_"+rmp[rmp.length-2]+"_"+numberUser);
+                }
+                else{var node = $("#a_"+nickname+"_"+rmp[rmp.length-2]+"_"+numberUser);}
+                node.attr("uploadstatus",true);
                 xhr.setRequestHeader("X-iduser", viewer.idUser);
                 xhr.setRequestHeader("X-folder", node.attr("path"));
-
                 });
-}
+    }
     return setViewer6Upload;
 
 });
