@@ -705,7 +705,7 @@ viewer.INIT =  function (){
                 var assets = param_in.assets;
             }
             if(assets&&(assets.length==0||assets==null)){
-                if(nodeBuffer){nodeBuffer.attr("rel","empty");}
+                if(nodeBuffer){try{nodeBuffer.attr("rel","empty");}catch(e){}};
             }
             else if(param_in.type == "folder"||param_in.type == "asset"){
                 var result = {};
@@ -811,7 +811,7 @@ viewer.INIT =  function (){
             }
             html += '</ul>';
             GUI.notification({
-                title: "Upload "+node.attr("name"),
+                title: "Upload "+node.attr("path"),
                 text: html,
                 type: "notice"
             });
@@ -827,7 +827,7 @@ viewer.INIT =  function (){
                     COLLADA.load(uri, viewer.parse_dae).then(
                     function(flag){
                           window.pleaseWait(false);
-                          window.notif(url);
+                          window.notif(uri);
                     }).fail(function(){
                         window.pleaseWait(false);
                         console.error("loading failed!!");
@@ -1821,16 +1821,6 @@ viewer.INIT =  function (){
             item: [
             {id:"contextLoss",text:'Context Loss',callback:function(){button1.click();}},
             {type:"separator"},
-        {
-            id:"pickerEnable", type:"checkbox", text:"Enable colorpicker", isChecked:function(){
-                $('#colorSelector').show();
-            }
-            ,
-            noChecked:function(){
-                $('#colorSelector').hide();
-            },
-            checked: true,
-        },
         {
             id:"animationFrame", type:"checkbox", text:"Request Animation Frame", isChecked:function(){
                 $("#fpsCounterSetting").removeClass("disable");

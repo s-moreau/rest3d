@@ -200,7 +200,7 @@ define(['channel','codemirror','webglUtils', 'WebGLDebugUtils','pnotify','colorp
                     parent: this[this.id],
                     json:  {
                         "data":{
-                            "data":stock.idUser,"attr":{"id":stock.idUser,"rel":"child"},},
+                            "data":stock.idUser,"attr":{"id":"c_"+stock.idUser,"rel":"collection","path":"/rest3d/upload/"+stock.idUser}},
                         },
                         "dnd" : {
                                 "drop_finish" : function (data) { 
@@ -214,63 +214,63 @@ define(['channel','codemirror','webglUtils', 'WebGLDebugUtils','pnotify','colorp
                       "contextmenu" : {
                 "items" : function (node) {
                     var result = {};
-                    if(node.attr("rel")=="child"){
+                    if(node.attr("rel")=="collection"||node.attr("rel")=="model"||node.attr("rel")=="child"){
                         result.icon = {'label':'Add files','action':stock.button,};}
                     return result;
                 }
             },
-                 type:  { "types": {
-                    "main": {
-                        "icon" : {
-                            "image" : "../favicon.ico",
-                        },
-                        },
-                    "camera": {
-                        "icon" : {
-                            "image" : "../gui/images/camera-anim.gif",
-                        },
-                        },
-                    "children": {
-                        "icon" : {
-                            "image" : "../gui/images/folder.png",
-                        },
-                        },
-                    "local": {
-                        "icon" : {
-                            "image" : "../gui/images/Photoshop3DAxis.png",
-                        },
-                        },
-                    "geometry": {
-                        "icon" : {
-                            "image" : "../gui/images/geometry.png",
-                        },
-                        },
-                     "sub": {
-                        "icon" : {
-                            "image" : "../gui/images/folder.png",
-                        },
-                        },
-                    "child": {
-                        "icon" : {
-                            "image" : "../gui/images/folder.png",
-                        },
-                        },
-                    "empty": {
-                        "icon" : {
-                            "image" : "../gui/images/cross.jpg",
-                        },
-                        },
-                    "image": {
-                        "icon" : {
-                            "image" : "../gui/images/media-image.png",
-                        },
-                        },
-                    "camera_child": {
-                        "icon" : {
-                            "image" : "../gui/images/camera.png",
-                        },
-                        },
-                }},
+            type:{ "types": {
+                "child": {
+                    "icon" : {
+                        "image" : "../gui/images/folder.png",
+                    },
+                    },
+                "collection": {
+                    "icon" : {
+                        "image" : "../gui/images/menu-scenes.png",
+                    },
+                    },
+                "collada": {
+                    "icon" : {
+                        "image" : "../favicon.ico",
+                    },
+                    },
+                "gltf": {
+                    "icon" : {
+                        "image" : "../favicon.ico",
+                    },
+                    },
+                'shader': {
+                    "icon" : {
+                        "image" : "../gui/images/geometry.png",
+                    },
+                    },
+                "file": {
+                    "icon" : {
+                        "image" : "../gui/images/file.png",
+                    },
+                    },
+                "kml": {
+                    "icon" : {
+                        "image" : "../gui/images/kml.png",
+                    },
+                    },
+                 "texture": {
+                    "icon" : {
+                        "image" : "../gui/images/media-image.png",
+                    },
+                    },
+                "model": {
+                    "icon" : {
+                        "image" : "../gui/images/bunny.png",
+                    },
+                    },
+                "empty": {
+                    "icon" : {
+                        "image" : "../gui/images/cross.jpg",
+                    },
+                    },
+            }},
                     themes:{
                         "theme":"apple",
                     },
@@ -342,7 +342,7 @@ define(['channel','codemirror','webglUtils', 'WebGLDebugUtils','pnotify','colorp
                     return $result;
                 }
 
-            this.header = function(flag){
+            this.header = function(flag,button){
                 var stock = this;
                 var $follow = this.filesArea.append($('<br>'));
                 var $frame = $('<div class="upload_header"></div>');
@@ -351,7 +351,14 @@ define(['channel','codemirror','webglUtils', 'WebGLDebugUtils','pnotify','colorp
                 if(flag&&typeof(flag)!="function"){
                     var $span = htmlSpan($head,90,GUI.time(true)+" convert "+flag);
                 }
+                else if(typeof(flag)=="function"&&button){
+                    var $span = htmlSpan($head,80,GUI.time(true)+" Upload");
+                }
                 else{var $span = htmlSpan($head,90,GUI.time(true)+" Upload");}
+                if(typeof(flag)=="function"&&button){
+                    var $spanButton1 = htmlSpan($head,10);
+                    $spanButton1.append(button);
+                }
                 $span.css("font-weight","bold");
                 var $spanButton = htmlSpan($head,10);
                 var flag1 = flag;
@@ -440,6 +447,7 @@ define(['channel','codemirror','webglUtils', 'WebGLDebugUtils','pnotify','colorp
                         },500)
                     });
                 }
+                return $newLine;
             }
             this.download = function(parent,link,button){
                   parent.show();

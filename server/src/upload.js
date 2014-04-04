@@ -145,8 +145,31 @@ module.exports = function (server) {
       var fileInfo = map[file.path];
       fileInfo.size = file.size;
       fileInfo.type = file.type;
+      if (!fileInfo.validate()) {
+        fs.unlinkSync(file.path);
+        return;
+      }
 
-      fileInfo.upload(handler, file.path);
+      if(handler.hasOwnProperty("iduser")){ 
+        var tmp = handler.folder.split("/");
+        var index = tmp.length;
+        for(var i=3;i<index;i++){
+          if(tmp[i].split(".").length==1){
+            console.log(tmp[i-1]);
+            var flag = fs.readdirSync(tmp[i-1]).indexOf(tmp[i]) !== -1;
+            tmp[i]=tmp[i-1]+"/"+tmp[i];
+            if(!flag){
+              console.log("createfoler "+tmp[i])
+              fs.mkdirSync(tmp[i]);
+            }
+          }
+          else{
+            fs.renameSync(file.path,tmp[i-1]+"/"+tmp[i]);
+            console.log("uploaded "+tmp[i-1]+"/"+tmp[i]);
+            fileInfo.path = tmp[i-1]+"/"+tmp[i];
+          }
+        }
+      }
 
       finish();
     }).on('aborted', function () {

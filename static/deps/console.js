@@ -242,6 +242,7 @@ define("console", (function (global) {
         //catch log from console firebug API
         var oldLog = console.log;
         console.log = function (message) {
+             window.pleaseWait(false);
             message = decodeJson(message);
             var checkVisible = false;
             if (consoleObject.is(':hidden')) {
