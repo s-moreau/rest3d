@@ -893,12 +893,12 @@ viewer.INIT =  function (){
                         var url = "";
                         if (node == -1)
                         {
-                            url = "/rest3d/warehouse/";
+                            url = location.protocol+"//"+location.host+"/rest3d/warehouse/";
                         }
                         else if(node.attr('rel')=="collection"||"model")
                         {
                             nodeId = node.attr('id');
-                            url = "/rest3d/warehouse/" + nodeId;
+                            url = location.protocol+"//"+location.host+"/rest3d/warehouse/" + nodeId;
                         }
                         return url;
                     },
@@ -1000,12 +1000,12 @@ viewer.INIT =  function (){
                         // var type = node.attr('type'); 
                         if (node == -1)
                         {
-                            url = "/rest3d/warehouse/search/"+searchInput.val();
+                            url = location.protocol+"//"+location.host+"/rest3d/warehouse/search/"+searchInput.val();
                         }
                         else if(node.attr('rel')=="collection"||"model")
                         {
                             nodeId = node.attr('id');
-                            url = "/rest3d/warehouse/" + nodeId;
+                            url = location.protocol+"//"+location.host+"/rest3d/warehouse/" + nodeId;
                         }
                         return url;
                     },
@@ -1289,7 +1289,7 @@ viewer.INIT =  function (){
             }]
         })
 
-        var upload = GUI.upload({parent:accordionUp.upload, id:"upModel", url:'/rest3d/upload', idUser: viewer.idUser});
+        var upload = GUI.upload({parent:accordionUp.upload, id:"upModel", url:location.protocol+"//"+location.host+'/rest3d/upload', idUser: viewer.idUser});
     //     setTimeout(function(){
     //     upload.upModel.fileupload('option','beforeSend',function(xhr, data) {
     //                     console.debug("in");
