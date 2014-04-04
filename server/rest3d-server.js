@@ -105,11 +105,11 @@ var server = module.exports.server = restify.createServer(params);
 if (params.key) {
   var http_server = restify.createServer();
   http_server.get(/.*/,function(req,res,next) {
-console.log('+++++['+req.headers.host+'+++++')
-    var redirect = "https://" + req.headers.host.replace (/(.*):.*/, '$1') + ':' + httpsPort + req.url;
+    // Assume https port is on the default port
+    var redirect = "https://" + req.headers.host.replace (/(.*):.*/, '$1') +  req.url;
   	res.writeHead(302, {'Location': redirect});
 
-    console.log('**** https redirect to '+redirect)
+    //console.log('**** https redirect to '+redirect)
     res.end();
     next();
 	});
