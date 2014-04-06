@@ -1058,11 +1058,27 @@ define(['q','glmatrixExt'], function (Q) {
         xhr.onreadystatechange = function (aEvt){
             
             if (xhr.readyState == 4) {
-               
-                   
-                            COLLADA.log("Error loading "+document.url+" [most likely not a collada/xml document]")
-                            deferred.reject(new Error("Error loading "+document.url+" [most likely not a collada/xml document]"));
-                   
+            
+               if (xhr.status == 200 || xhr.status == 0) {
+                    if (xhr.responseXML == null) {
+                        if (xhr.responseText == null) {
+                            COLLADA.log("Error loading "+document.url+" [most likely a cross origin issue]")
+                            deferred.reject(new Error("Error loading "+document.url+" [most likely a cross origin issue]"));
+                        } else
+                        {                   
+                              COLLADA.log("Error loading "+document.url+" [most likely not a collada/xml document]")
+                              deferred.reject(new Error("Error loading "+document.url+" [most likely not a collada/xml document]"));
+                         }
+                     }
+                     document.xml=xhr.responseXML;
+                     document.parseCOLLADA(cb);
+                     deferred.resolve(true);
+                 }
+                 else {
+                     COLLADA.log("Error Loading "+document.url+" [http request status="+xhr.status+"]");
+                     deferred.reject(new Error("Error Loading "+document.url+" [http request status="+xhr.status+"]"));
+                 }
+                 
             }
         };
 
