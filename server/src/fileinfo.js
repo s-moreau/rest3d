@@ -9,10 +9,12 @@
       };
 
   var FileInfo = function (file) {
+      this.file = file;
       this.name = file.name;
       this.size = file.size;
       this.type = file.type;
       this.path = file.path;
+      this.assetId = "";
       //this.delete_type = 'DELETE';
   };
 
@@ -100,34 +102,39 @@
     });
   };
   // move a file to upload area
-  FileInfo.prototype.upload = function (handler, filePath) {
+  FileInfo.prototype.upload = function (handler) {
+      console.log(handler.hasOwnProperty("iduser"))
 
-    if(handler.hasOwnProperty("iduser")){ 
+      if(handler.hasOwnProperty("iduser")){ 
+            console.log("1");
 
-      
-      var flagIduser = fs.existsSync(FileInfo.options.uploadDir+'/'+handler.iduser);
-      if(!flagIduser){
-        fs.mkdirSync(FileInfo.options.uploadDir + '/' + handler.iduser);
-      }
-      if(handler.hasOwnProperty("folder")){ 
-        
-        var flagFolder = fs.existsSync(FileInfo.options.uploadDir+ '/' + handler.iduser+'/'+handler.iduser);
-        if(!flagFolder){
-          fs.mkdirSync(FileInfo.options.uploadDir + '/' + handler.iduser + '/'+ handler.folder);
+        var tmp = handler.folder.split("/");
+            console.log(tmp);
+
+        var index = tmp.length;
+            console.log(index);
+
+        for(var i=3;i<index;i++){
+          console.debug(tmp[i-1]+"/"+tmp[i]);
+          if(tmp[i].split(".").length==1){
+            
+            var flag = fs.existsSync(tmp[i-1]+"/"+tmp[i]);
+            tmp[i]=tmp[i-1]+"/"+tmp[i];
+            console.log("flag",flag)
+            if(!flag){
+              console.log("createfoler "+tmp[i])
+              fs.mkdirSync(tmp[i]);
+            }
+          }
+          else{
+           
+            fs.renameSync(this.file.path, tmp[i-1]+"/"+tmp[i]);
+               console.log("uploaded "+tmp[i-1]+"/"+tmp[i]);
+            this.path = tmp[i-1]+"/"+tmp[i];
+          }
         }
-        fs.renameSync(filePath, FileInfo.options.uploadDir + '/' + handler.iduser + '/'+ handler.folder +'/'+ this.name);
-        console.log("uploaded "+FileInfo.options.uploadDir + '/' + handler.iduser + '/'+ handler.folder +'/'+ this.name);
-        this.path = FileInfo.options.uploadDir + '/' + handler.iduser + '/'+ handler.folder +'/'+ this.name;
-      } else {
-        fs.renameSync(filePath, FileInfo.options.uploadDir + '/' + handler.iduser + '/' + this.name);
-        console.log("uploaded "+FileInfo.options.uploadDir + '/' + handler.iduser + '/' + this.name);
-        this.path = FileInfo.options.uploadDir + '/' + handler.iduser + '/' + this.name;
       }
-    } else{
-      fs.renameSync(filePath, FileInfo.options.uploadDir + '/' + this.name);
-      console.log("uploaded "+FileInfo.options.uploadDir + '/' + this.name);
-      this.path = FileInfo.options.uploadDir + '/' + this.name;
-    }
+    
     /* Image resize 
 
     if (FileInfo.options.imageTypes.test(fileInfo.name)) {

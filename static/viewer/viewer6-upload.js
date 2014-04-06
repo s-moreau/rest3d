@@ -193,7 +193,6 @@ define(['jquerymin', 'rest3d', 'gltf', 'collada', 'viewer','q'], function ($, re
                     }
                 }
                 var rel;
-                var parentId = parent.attr("id").split("_")[1];
                 if(ext){rel = ext;}
                 else if(attr=="model"||attr=="child"){rel = "child";}
                 else{rel="collection"}
@@ -433,7 +432,7 @@ define(['jquerymin', 'rest3d', 'gltf', 'collada', 'viewer','q'], function ($, re
                     }
                 }
                 else{
-                   data.buttonToReplace[index].remove(); 
+                   data.buttonToReplace[index].replaceWith("<img style='float:right;' src='../gui/images/accept.png' >"); 
                 }
             });
 
@@ -470,6 +469,11 @@ define(['jquerymin', 'rest3d', 'gltf', 'collada', 'viewer','q'], function ($, re
                 xhr.setRequestHeader("X-iduser", viewer.idUser);
                 xhr.setRequestHeader("X-folder", node.attr("path"));
                 });
+
+        upload.object.fileupload("option","done",function (e, data) {
+        console.log("done", data);
+
+    });
     }
     return setViewer6Upload;
 

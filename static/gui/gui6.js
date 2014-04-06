@@ -287,13 +287,13 @@ define(['channel','codemirror','webglUtils', 'WebGLDebugUtils','pnotify','colorp
                 this.optionLog= GUI.addCheckBox("uploadSetting", "Use log interface", this[this.id]);
                 this.lunch1 = GUI.button("Upload", this.optionLog);
                 var ex = this.lunch1;
-                this.lunch1.css({"float":"right!important;"})
+                this.lunch1.css({"float":"right"})
                 this.optionLog.find('input').on("change",function(){
                     if($(this).is(':checked')){
-                        ex.hide();
+                        $("#fileArea_"+this.id).hide();
                  }
                  else{
-                    ex.show();
+                        $("#fileArea_"+this.id).show();
                  }
                 });
             }

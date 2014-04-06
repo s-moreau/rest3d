@@ -24,7 +24,6 @@ module.exports = function (server) {
 
   // upload one or more files
   UploadHandler.prototype.post = function () {
-    console.log ("upload requested");
     var handler = this;
     var form = new formidable.IncomingForm();
     var tmpFiles = [];
@@ -37,8 +36,6 @@ module.exports = function (server) {
         if (!counter) {
           try {
             files.forEach(function (fileInfo) {
-
-            console.log ('file '+fileInfo.name+' was uploaded succesfully');
 
               //fileInfo.initUrls(handler.req);
 
@@ -142,35 +139,16 @@ module.exports = function (server) {
 */
       }
     }).on('file', function (name, file) {
-      var fileInfo = map[file.path];
+        var fileInfo = map[file.path];
       fileInfo.size = file.size;
       fileInfo.type = file.type;
+      fileInfo.file = file;
+      fileInfo.assetId = uuid.v1();
       if (!fileInfo.validate()) {
         fs.unlinkSync(file.path);
         return;
       }
-
-      if(handler.hasOwnProperty("iduser")){ 
-        var tmp = handler.folder.split("/");
-        var index = tmp.length;
-        for(var i=3;i<index;i++){
-          if(tmp[i].split(".").length==1){
-            console.log(tmp[i-1]);
-            var flag = fs.readdirSync(tmp[i-1]).indexOf(tmp[i]) !== -1;
-            tmp[i]=tmp[i-1]+"/"+tmp[i];
-            if(!flag){
-              console.log("createfoler "+tmp[i])
-              fs.mkdirSync(tmp[i]);
-            }
-          }
-          else{
-            fs.renameSync(file.path,tmp[i-1]+"/"+tmp[i]);
-            console.log("uploaded "+tmp[i-1]+"/"+tmp[i]);
-            fileInfo.path = tmp[i-1]+"/"+tmp[i];
-          }
-        }
-      }
-
+      fileInfo.upload(handler);
       finish();
     }).on('aborted', function () {
       tmpFiles.forEach(function (file) {
