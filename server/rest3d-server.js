@@ -208,43 +208,39 @@ server.post(/^\/rest3d\/convert.*/,function(req,res,next){
      	h.handleError(e);
      }).on('end', function(){//
      	console.log('now converting collada');
-     	console.log(params);
-     	// if (!params.name && !params.uri || !params.name.toLowerCase().endsWith('dae')) { 
-     	// 	h.handleError({error: 'invalid file '+params.name+' in convert'});
-     	// 	return;
-     	// }
+     	if (!params.name && !params.path || !params.name.toLowerCase().endsWith('dae')) { 
+     		h.handleError({error: 'invalid file '+params.name+' in convert'});
+     		return;
+     	}
      	if(params.hasOwnProperty("path")){
+     		// new API, path specified in the params of the request in order to convert the right file.
      		var output_dir = params.path.split('/');
-     		console.log(output_dir)
      		output_dir[output_dir.length-2] = output_dir[output_dir.length-2] + '_gltf';
-     		console.log(output_dir)
-
      		output_dir[output_dir.length-1] = output_dir[output_dir.length-1].replace('.dae','.json').replace('.DAE','.json');
-     		console.log(output_dir)
-
-	     	// console.log(output_file);;
-     		var result=output_dir[0];
+     		var output_path=output_dir[0];
      		for(var i =1;i<output_dir.length;i++){
-     			console.log(result);
-     			result = result + "/" +output_dir[i];
-     			if(!fs.existsSync(result)&&i!==output_dir.length-1){
-     				console.log("create folder ")
-     				fs.mkdirSync(result);
+     			output_path = output_path + "/" +output_dir[i];
+     			if(!fs.existsSync(output_path)&&i!==output_dir.length-1){
+     				console.log("create folder "+output_path)
+     				fs.mkdirSync(output_path);
      			}
      		}
-     		// console.log(output_dir);
-	     	// var output_file = params.path.split('/').pop().replace('.dae','.json').replace('.DAE','.json');
-	     	// console.log(output_file);
-	     	
-	     	console.log(collada2gltf+" -p -f \"" + params.path+"\" -o \""+result+"\"");
-	     	var cmd = collada2gltf+" -p -f \"" + params.path+"\" -o \""+result+"\"";
+	     	console.log(collada2gltf+" -p -f \"" + params.path+"\" -o \""+output_path+"\"");
+	     	var cmd = collada2gltf+" -p -f \"" + params.path+"\" -o \""+output_path+"\"";
+	     	var input_dir = params.path.replace(/[^\/]*$/,'');
+	     	output_dir = output_path.replace(/[^\/]*$/,'');
      	}
      	else{
+     		// let's considered the model is stocked under rest3d/upload/ repository in case any path isn't specified
+     		// the conversion will create a folder for stocking the gltf file
+     		// CODE NOT TESTED, maybe get some conflicts for copying all textures to the gltf folder.
 	     	var output_dir = params.name.split('\.')[0]+'_gltf';
 	     	var output_file = params.name.replace('.dae','.json');
-	     	fs.mkdirSync('upload/'+output_dir);
-
-	     	var cmd = collada2gltf+" -p -f \"upload/" + params.name+"\" -o \""+'upload/'+output_dir+'/'+output_file+"\"";
+	     	fs.mkdirSync('upload/'+output_dir);	
+	     	var output_path = 'upload/'+output_dir+'/'+output_file;
+	     	var cmd = collada2gltf+" -p -f \"upload/" + params.name+"\" -o \""+output_path+"\"";
+	     	 var input_dir = "upload/";
+	     	output_dir = output_path.replace(/[^\/]*$/,'');
      }
      	console.log('exec '+cmd);
      	// todo -> manage progress !!!
@@ -263,56 +259,54 @@ server.post(/^\/rest3d\/convert.*/,function(req,res,next){
 		   console.log('Child Process STDOUT: '+stdout);
 		   console.log('Child Process STDERR: '+stderr);
 		 });
+		 ls.on('exit', function (code, output) {
+		  console.log('Child process exited with exit code '+code);
+		  if (code !== 0) {
+				h.handleError({errorCode:code, message:'Child process exited with exit code '});
+				return;
+			}
+			codeC2J= code;
+			outputC2J = output;
+			console.log('Exit code:', code);
+	  		console.log('Program output:', output);
+			
 
-		 // ls.on('exit', function (code, output) {
-		 //  console.log('Child process exited with exit code '+code);
-		 //  if (code !== 0) {
-			// 	h.handleError({errorCode:code, message:'Child process exited with exit code '});
-			// 	return;
-			// }
-			// codeC2J= code;
-			// outputC2J = output;
-			// console.log('Exit code:', code);
-	  // 		console.log('Program output:', output);
-					
 			// // hack, copy all images in the output_dir, so the viewer will work
-		 //    fs.readdir('upload/', function (err, list) {
-   //              list.forEach(function (name) {
-   //              	if (name.endsWith('.png'))
-   //              	{
-   //              		copyFileSync('upload/'+name,'upload/'+output_dir+'/'+name);
-   //              		console.log('upload/'+name+'  TO  upload/'+output_dir+'/'+name);
-   //              	}
-		 //        });
-		 //    });
-		 //    // end hack
+		    fs.readdir(input_dir, function (err, list) {
+                list.forEach(function (name) {
+                	if (!name.endsWith('.json')||!name.endsWith('.dae'))
+                	{
+                		copyFileSync(input_dir+name, output_dir+'/'+name);
+                		console.log(input_dir+name+'  TO  '+output_dir+'/'+name);
+                	}
+		        });
+		    });
+		    // end hack
 
-			// var files = [];
-			// fs.readdir('upload/'+output_dir, function (err, list) {
-   //              list.forEach(function (name) {
-		 //            var stats = fs.statSync('upload/'+output_dir + '/' + name),
-		 //                fileInfo;
-		 //            if (stats.isFile() && name[0] !== '.') {
-		 //                fileInfo = new FileInfo({
-		 //                    name: output_dir+'/'+name,
-		 //                    size: stats.size
-		 //                });
-		 //                //fileInfo.initUrls(req);
-		 //                files.push(fileInfo);
-		 //            }
-		 //        });
-		 //        var timeout = function() {
-   //                  	rmdirSync('upload/'+output_dir);
-   //                  	console.log('timeout !! upload/'+output_dir+'/ was deleted');
-   //                  }
-   //                  setTimeout(function() { timeout()},5 * 60 * 1000);
-		 //        h.handleResult({files: files, code:codeC2J, output:outputC2J});
-		 //    });		
-	  //    });
+			var files = [];
+			fs.readdir(output_dir, function (err, list) {
+                list.forEach(function (name) {
+		            var stats = fs.statSync(output_dir + name),
+		                fileInfo;
+		            if (stats.isFile() && name[0] !== '.') {
+		                fileInfo = new FileInfo({
+		                    name: output_dir+name,
+		                    size: stats.size
+		                });
+		                //fileInfo.initUrls(req);
+		                files.push(fileInfo);
+		            }
+		        });
+		        var timeout = function() {
+                    	rmdirSync(output_dir);
+                    	console.log('timeout !! '+output_dir+' was deleted');
+                    }
+                    setTimeout(function() { timeout()},5 * 60 * 1000);
+		        h.handleResult({files: files, code:codeC2J, output:outputC2J});
+		    });		
 	     });
-
+	     });
     form.parse(req);
-
 });
 
 // static server
