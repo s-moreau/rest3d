@@ -30,6 +30,64 @@ define(['jquerymin', 'rest3d', 'gltf', 'collada', 'viewer','q'], function ($, re
         var id;
         var flag;
 
+      function preview(node){
+                $("#dialog").dialog("close");
+                var gitHtml = '<div id="dialog"><iframe id="myIframe" src="" style="height:99% !important; width:99% !important; border:0px;"></iframe></div>';
+                gitPanel = $('body').append(gitHtml);
+                $("#dialog").dialog({
+                    width: '600',
+                    height: '500',
+                    open: function (ev, ui) {
+                        $('#myIframe').attr('src', '/viewer/easy-viewer.html?file=' + node.attr("path"));
+                    },
+                });
+        }
+        upload.preview = preview;
+
+        function displayCollada(node){
+                window.pleaseWait(true);
+                COLLADA.load(node.attr("path"), viewer.parse_dae).then(
+                    function (flag) {
+                        window.pleaseWait(false);
+                        buffer.notif(node.attr("path"));
+                    })
+        }
+        upload.displayCollada = displayCollada;
+
+        function displayGltf(node){
+            window.pleaseWait(true);
+            glTF.load(node.attr("path"), viewer.parse_gltf).then(
+                function (flag) {
+                    window.pleaseWait(false);
+                    window.notif(node.attr("path"));
+                })
+        }
+        upload.displayGltf = displayGltf;
+
+        function convert(node){
+
+        }   
+        upload.convert = convert
+
+        function encodePathToId(path){
+            path = path.replace("/rest3d/upload/"+viewer.idUser+"/","");
+            path = encodeURIComponent(path).split('%').join('').split('.').join('');
+            return path;
+        }
+
+        function uniqueName(name,parent){
+                var splitName = name.split('.');
+                var rmp = parent.attr('path') +"/"+splitName[0]+"Bis."+splitName[1];
+                rmp = encodePathToId(rmp);
+                if($("#a_"+rmp).length==1){
+                    name = uniqueName(splitName[0]+"Bis."+splitName[1],parent);
+                    return name;
+                }
+                else{
+                    return splitName[0]+"Bis."+splitName[1];
+                }
+        }
+
         function Buffer() {
             this.bufferDae = false;
             this.bufferNode = []
@@ -41,8 +99,10 @@ define(['jquerymin', 'rest3d', 'gltf', 'collada', 'viewer','q'], function ($, re
             var stock = this;
             this.removeNodes = function () {
                 if (stock.flag) {
-                    for (var j = 0; j < stock.bufferNode.length; j++) {
-                        if($(stock.bufferNode[j]).attr("uploadstatus")!=true){
+                    for (var j = 0; j < stock.bufferNode.length; j++) { 
+                       
+                        if($(stock.bufferNode[j]).attr("uploadstatus")!=="true"){
+                             console.debug($(stock.bufferNode[j]).attr("uploadstatus"));
                             $("#uploadTree").jstree("delete_node", $(stock.bufferNode[j]));
                         }
                     }
@@ -165,18 +225,14 @@ define(['jquerymin', 'rest3d', 'gltf', 'collada', 'viewer','q'], function ($, re
                 var attr = parent.attr("rel");
                 var children = parent.children("ul").children("li");
                 var flag = 0;
-                var nickname = name.replace("__","");
-                nickname = nickname.replace("_","");
                 if(name.split('.').length>1){ //if fichier
                     var index = "a";
                     ext =  name.match(/\.[^.]+$/)[0];
                     var ext = extensionToType(ext);
                     if (ext == "collada" || ext == "gltf"){
-                        parent.attr("id","m_"+parent.attr('id').split("_")[1]+"_"+parent.attr('id').split("_")[2]);
+                        parent.attr("id","m_"+encodePathToId(parent.attr('path')));
                         parent.attr("rel","model");
                     }
-                    nickname = nickname.replace(".","-");
-                    nickname = nickname.replace(".","-");
 
                 }
                 else if(attr=="model"||attr=="child"){
@@ -187,8 +243,8 @@ define(['jquerymin', 'rest3d', 'gltf', 'collada', 'viewer','q'], function ($, re
                     var index = "c";
                 }
                 for(var z=0;z<children.length;z++){
-                    var nameSplitFolder = children[z].id.split("_");
-                    if(nameSplitFolder[1]==nickname){
+                    var nameSplitFolder = $(children[z]).attr("file");
+                    if(nameSplitFolder==name){
                         flag=children[z].id;
                     }
                 }
@@ -197,43 +253,41 @@ define(['jquerymin', 'rest3d', 'gltf', 'collada', 'viewer','q'], function ($, re
                 else if(attr=="model"||attr=="child"){rel = "child";}
                 else{rel="collection"}
                 if(flag==0){
-                    if(mode){var rmp = mode.attr("id").split("_")[1];file.relativePath = rmp +"/";}
-                    else{
-                        var rmp = file.relativePath.split('/');
-                        rmp = rmp[rmp.length-2];
-                    }
-                    var id = index+"_"+nickname+"_"+rmp+"_"+numberUser;
-                    $("#uploadTree").jstree("create_node", parent, "inside", {
+                    var rmp = parent.attr('path') +"/"+name;
+                    rmp = encodePathToId(rmp);
+                    var id = index+"_"+rmp;
+                    rmp = $("#uploadTree").jstree("create_node", parent, "inside", {
                                 "data": name,
                                 "attr": {
                                     "id": id,
+                                    "file":name,
                                     "path": parent.attr('path') +"/"+name,
                                     "rel": rel,
                                     "uploadstatus":false,
                                 }
                             }, false, true);
-                    data.tmp.bufferNode.push($("#"+id));
+                    data.tmp.bufferNode.push(rmp);
+                    file.relativePath = rmp;
                     return id;
                 }
                 else{
                     if(index=="a"&&!flag1){
-                        if(mode){var rmp = mode.attr("id").split("_")[1];file.relativePath = rmp +"/";}
-                        else{
-                            var rmp = file.relativePath.split('/');
-                            rmp = rmp[rmp.length-2];
-                        }
-                        flag = index+"_"+nickname+"Bis_"+rmp+"_"+numberUser;
-                        var splitName = name.split('.');
-                        $("#uploadTree").jstree("create_node", parent, "inside", {
-                                "data": splitName[0]+"Bis."+splitName[1],
+                        name = uniqueName(name,parent);
+                        var rmp = parent.attr('path') +"/"+name;
+                        rmp = encodePathToId(rmp);
+                        flag = index+"_"+rmp;
+                        rmp = $("#uploadTree").jstree("create_node", parent, "inside", {
+                                "data": name,
                                 "attr": {
                                     "id": flag,
-                                    "path": parent.attr('path') +"/"+splitName[0]+"Bis."+splitName[1],
+                                    "file":name,
+                                    "path": parent.attr('path') +"/"+name,
                                     "rel": rel,
                                     "uploadstatus":false,
                                 }
                             }, false, true);
-                        data.tmp.bufferNode.push($("#"+flag));
+                        data.tmp.bufferNode.push(rmp);
+                        file.relativePath = rmp;
                     }
                     return flag;
                 }
@@ -245,6 +299,7 @@ define(['jquerymin', 'rest3d', 'gltf', 'collada', 'viewer','q'], function ($, re
                 }
                 else{
                     var result = file.relativePath.split("/");}
+
                 for(var i=0;i<result.length;i++){
                     if(result[i]!=""){
                         var id = createNode(parent,result[i],file);
@@ -252,7 +307,7 @@ define(['jquerymin', 'rest3d', 'gltf', 'collada', 'viewer','q'], function ($, re
                     else{
                         createNode(parent,file.name,file);
                         if(mode){
-                             parent = $("#"+mode.attr("id"));
+                            parent = $("#"+mode.attr("id"));
                         }
                         else{
                             parent = $("#"+e.idToDrop);
@@ -261,6 +316,7 @@ define(['jquerymin', 'rest3d', 'gltf', 'collada', 'viewer','q'], function ($, re
                 }
                 return parent;
             }
+
             if(mode){
                 var parent = $("#"+mode.attr("id"));
             }
@@ -307,11 +363,6 @@ define(['jquerymin', 'rest3d', 'gltf', 'collada', 'viewer','q'], function ($, re
             var button;
             $.each(data.files, function (index, file) {
                 var ext = file.name.match(/\.[^.]+$/);
-                var filename = file.name.split('.');
-                var nickname = file.name.replace("__","");
-                nickname = nickname.replace("_","");
-                nickname = nickname.replace(".","-");
-                nickname = nickname.replace(".","-");
                 var url="default";
                 button = uploadButton.clone(true).data(data);
                 var stock = function(object){
@@ -342,7 +393,7 @@ define(['jquerymin', 'rest3d', 'gltf', 'collada', 'viewer','q'], function ($, re
                             })
                     })
                         .prop("id", "dialog" + index);
-                    var $preview = $("<button>Peview</button>").on("click", function () {
+                    var $preview = $("<button>Preview</button>").on("click", function () {
                         $("#dialog").dialog("close");
                         var gitHtml = '<div id="dialog"><iframe id="myIframe" src="" style="height:99% !important; width:99% !important; border:0px;"></iframe></div>';
                         gitPanel = $('body').append(gitHtml);
@@ -367,11 +418,9 @@ define(['jquerymin', 'rest3d', 'gltf', 'collada', 'viewer','q'], function ($, re
                     if(!upload.getOptionLog()){buffer.header.hide()}
                 }
                 setTimeout(function(){
-                    var rmp = file.relativePath.split('/') 
-                    if($("#a_"+nickname+"Bis_"+rmp[rmp.length-2]+"_"+numberUser).length == 1){url =$("#a_"+nickname+"Bis_"+rmp[rmp.length-2]+"_"+numberUser);}
-                    else{url = $("#a_"+nickname+"_"+rmp[rmp.length-2]+"_"+numberUser);}
+                    url = file.relativePath;
                     if(!upload.getOptionLog()){
-                    url.append(button);};
+                        url.append(button);};
                     url = url.attr("path");
                     newLine.append("<a>"+url+"</a>");
                     upload.lunch1.on("click",function(){
@@ -407,12 +456,8 @@ define(['jquerymin', 'rest3d', 'gltf', 'collada', 'viewer','q'], function ($, re
             var progress = parseInt(data.loaded / data.total * 100, 10);
             upload.progress.setValue(progress);
         }).on('fileuploaddone', function (e, data) {
-            data.tmp.flag = false;
             var buffer1 = data.tmp;
             $.each(data.result.files, function (index, file) {
-                var nickname = file.name.replace("__","");
-                nickname = nickname.replace("_","");
-                nickname = nickname.replace(".","-");
                 if(upload.getOptionLog()){
                     file.assetName = data.result.files[index].name;
                     var $node = convertButton.clone(true).data({
@@ -455,24 +500,16 @@ define(['jquerymin', 'rest3d', 'gltf', 'collada', 'viewer','q'], function ($, re
         });
     
         upload.object.fileupload("option", "beforeSend", function (xhr, data) {
-                var nickname = data.files[0].name.replace("__","");
-                nickname = nickname.replace("_","");
-                nickname = nickname.replace(".","-");
-                nickname = nickname.replace(".","-");
-                var rmp = data.files[0].relativePath.split('/') 
-                console.debug(rmp);
-                if($("#a_"+nickname+"_"+rmp[rmp.length-2]+"_"+numberUser).attr("uploadstatus")=="true"){
-                    var node =$("#a_"+nickname+"Bis_"+rmp[rmp.length-2]+"_"+numberUser);
-                }
-                else{var node = $("#a_"+nickname+"_"+rmp[rmp.length-2]+"_"+numberUser);}
+                var node = data.files[0].relativePath;
                 node.attr("uploadstatus",true);
+                node.parent().parent().attr("uploadstatus",true);
                 xhr.setRequestHeader("X-iduser", viewer.idUser);
                 xhr.setRequestHeader("X-folder", node.attr("path"));
                 });
 
         upload.object.fileupload("option","done",function (e, data) {
-        console.log("done", data);
-
+            console.debug(data.files[0].relativePath);
+            data.files[0].relativePath.attr("id",data.result.files[0].assetId);
     });
     }
     return setViewer6Upload;
