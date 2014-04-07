@@ -282,7 +282,6 @@ server.post(/^\/rest3d\/convert.*/,function(req,res,next){
 		        });
 		    });
 		    // end hack
-
 			var files = [];
 			fs.readdir(output_dir, function (err, list) {
                 list.forEach(function (name) {
