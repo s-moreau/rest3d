@@ -227,11 +227,14 @@ server.post(/^\/rest3d\/convert.*/,function(req,res,next){
      		for(var i =1;i<output_dir.length;i++){
      			console.log(result);
      			result = result + "/" +output_dir[i];
+     			if(!fs.existsSync(result)&&i!=output_dir.length-1){
+     				fs.mkdirSync(result);
+     			}
      		}
      		// console.log(output_dir);
 	     	// var output_file = params.path.split('/').pop().replace('.dae','.json').replace('.DAE','.json');
 	     	// console.log(output_file);
-	     	fs.mkdirSync(output_dir);
+	     	
 	     	console.log(collada2gltf+" -p -f \"" + params.path+"\" -o \""+result+"\"");
 	     	var cmd = collada2gltf+" -p -f \"" + params.path+"\" -o \""+result+"\"";
      	}
