@@ -384,13 +384,7 @@ define(['jquerymin', 'rest3d', 'gltf', 'collada', 'viewer','q'], function ($, re
                 setTimeout(function(){button.click()},1000);
                 if (ext[0] == ".dae" || ext[0] == ".DAE") {
 
-                    var $dialog = $("<button>Launch</button>").on("click", function () {
-                        window.pleaseWait(true);
-                        COLLADA.load(url, viewer.parse_dae).then(
-                            function (flag) {
-                                window.pleaseWait(false);
-                                buffer.notif(url);
-                            })
+                    var $dialog = $("<button>Launch</button>").on("click", 
                     })
                         .prop("id", "dialog" + index);
                     var $preview = $("<button>Preview</button>").on("click", function () {
