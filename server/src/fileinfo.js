@@ -103,8 +103,6 @@
   };
   // move a file to upload area
   FileInfo.prototype.upload = function (handler) {
-      console.log(handler.hasOwnProperty("iduser"))
-
       if(handler.hasOwnProperty("iduser")){ 
         var tmp = handler.folder.split("/");
         var index = tmp.length;
