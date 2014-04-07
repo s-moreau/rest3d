@@ -227,7 +227,8 @@ server.post(/^\/rest3d\/convert.*/,function(req,res,next){
      		for(var i =1;i<output_dir.length;i++){
      			console.log(result);
      			result = result + "/" +output_dir[i];
-     			if(!fs.existsSync(result)&&i!=output_dir.length-1){
+     			if(!fs.existsSync(result)&&i!==output_dir.length-1){
+     				console.log("create folder "+result)
      				fs.mkdirSync(result);
      			}
      		}
@@ -275,40 +276,40 @@ server.post(/^\/rest3d\/convert.*/,function(req,res,next){
 	  		console.log('Program output:', output);
 					
 			// hack, copy all images in the output_dir, so the viewer will work
-		    fs.readdir('upload/', function (err, list) {
-                list.forEach(function (name) {
-                	if (name.endsWith('.png'))
-                	{
-                		copyFileSync('upload/'+name,'upload/'+output_dir+'/'+name);
-                		console.log('upload/'+name+'  TO  upload/'+output_dir+'/'+name);
-                	}
-		        });
-		    });
+		    // fs.readdir('upload/', function (err, list) {
+      //           list.forEach(function (name) {
+      //           	if (name.endsWith('.png'))
+      //           	{
+      //           		copyFileSync('upload/'+name,'upload/'+output_dir+'/'+name);
+      //           		console.log('upload/'+name+'  TO  upload/'+output_dir+'/'+name);
+      //           	}
+		    //     });
+		    // });
 		    // end hack
 
-			var files = [];
-			fs.readdir('upload/'+output_dir, function (err, list) {
-                list.forEach(function (name) {
-		            var stats = fs.statSync('upload/'+output_dir + '/' + name),
-		                fileInfo;
-		            if (stats.isFile() && name[0] !== '.') {
-		                fileInfo = new FileInfo({
-		                    name: output_dir+'/'+name,
-		                    size: stats.size
-		                });
-		                //fileInfo.initUrls(req);
-		                files.push(fileInfo);
-		            }
-		        });
-		        var timeout = function() {
-                    	rmdirSync('upload/'+output_dir);
-                    	console.log('timeout !! upload/'+output_dir+'/ was deleted');
-                    }
-                    setTimeout(function() { timeout()},5 * 60 * 1000);
-		        h.handleResult({files: files, code:codeC2J, output:outputC2J});
-		    });		
-	     });
-	     });
+			// var files = [];
+			// fs.readdir('upload/'+output_dir, function (err, list) {
+   //              list.forEach(function (name) {
+		 //            var stats = fs.statSync('upload/'+output_dir + '/' + name),
+		 //                fileInfo;
+		 //            if (stats.isFile() && name[0] !== '.') {
+		 //                fileInfo = new FileInfo({
+		 //                    name: output_dir+'/'+name,
+		 //                    size: stats.size
+		 //                });
+		 //                //fileInfo.initUrls(req);
+		 //                files.push(fileInfo);
+		 //            }
+		 //        });
+		 //        var timeout = function() {
+   //                  	rmdirSync('upload/'+output_dir);
+   //                  	console.log('timeout !! upload/'+output_dir+'/ was deleted');
+   //                  }
+   //                  setTimeout(function() { timeout()},5 * 60 * 1000);
+		 //        h.handleResult({files: files, code:codeC2J, output:outputC2J});
+		 //    });		
+	  //    });
+	  //    });
 
     form.parse(req);
 
