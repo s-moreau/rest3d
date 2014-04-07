@@ -209,19 +209,18 @@ server.post(/^\/rest3d\/convert.*/,function(req,res,next){
      }).on('end', function(){//
      	console.log('now converting collada');
      	console.log(params);
-     	 	console.log(params.uri);
      	// if (!params.name && !params.uri || !params.name.toLowerCase().endsWith('dae')) { 
      	// 	h.handleError({error: 'invalid file '+params.name+' in convert'});
      	// 	return;
      	// }
-     	if(params.hasOwnProperty("uri")){
-     		var output_dir = params.uri.path.split('/')[1]+'_gltf';
+     	if(params.hasOwnProperty("path")){
+     		var output_dir = params.path.split('/')[1]+'_gltf';
      		console.log(output_dir);
-	     	var output_file = params.uri.path.split('/').pop().replace('.dae','.json');
+	     	var output_file = params.path.split('/').pop().replace('.dae','.json');
 	     	console.log(output_file);
 	     	fs.mkdirSync('upload/'+output_dir);
-	     	var cmd = collada2gltf+" -p -f \"upload" + params.uri.path+"\" -o \""+'upload/'+output_dir+'/'+output_file+"\"";
-	     	console.log(collada2gltf+" -p -f \"upload" + params.uri.path+"\" -o \""+'upload/'+output_dir+'/'+output_file+"\"");
+	     	var cmd = collada2gltf+" -p -f \"upload" + params.path+"\" -o \""+'upload/'+output_dir+'/'+output_file+"\"";
+	     	console.log(collada2gltf+" -p -f \"upload" + params.path+"\" -o \""+'upload/'+output_dir+'/'+output_file+"\"");
      	}
      	else{
 	     	var output_dir = params.name.split('\.')[0]+'_gltf';
