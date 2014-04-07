@@ -751,7 +751,7 @@ viewer.INIT =  function (){
                 for(var i = 0; i<data.result.files.length;i++){
                     var tmp = data.result.files[i];
                     var ext = tmp.name.match(/\.[^.]+$/);
-                    var url = 'http://'+location.hostname+'/rest3d/upload/'+tmp.name;
+                    var url = location.protocol+'//'+location.hostname+'/rest3d/upload/'+tmp.name;
                     if(ext[0]=='.DAE'||ext[0]=='.dae'||ext[0]=='.json'){
                         var id = 'model_'+tmp.size+'_'+Math.floor(Math.random() * 1000000) + 1;
                         html += '<li><a>name: '+tmp.name+' </a>'+'<a>size: '+tmp.size+' </a>'+'<a href="'+url+'">download</a>'+'<button id="'+id+'">Display</button>'+'</li>';
@@ -800,7 +800,7 @@ viewer.INIT =  function (){
                     var name = data.files[i].name;
                     var size = data.files[i].size;
                     var path = data.files[i].path;
-                    var url = 'http://'+location.host+'/rest3d/'+path;
+                    var url = location.protocol+'//'+location.host+'/rest3d/'+path;
                     var ext = name.match(/\.[^.]+$/);
                     if(ext[0]=='.DAE'||ext[0]=='.dae'){
                         node.attr("path",url);
@@ -893,12 +893,12 @@ viewer.INIT =  function (){
                         var url = "";
                         if (node == -1)
                         {
-                            url = "/rest3d/warehouse/";
+                            url = location.protocol+"//"+location.host+"/rest3d/warehouse/";
                         }
                         else if(node.attr('rel')=="collection"||"model")
                         {
                             nodeId = node.attr('id');
-                            url = "/rest3d/warehouse/" + nodeId;
+                            url = location.protocol+"//"+location.host+"/rest3d/warehouse/" + nodeId;
                         }
                         return url;
                     },
@@ -1000,12 +1000,12 @@ viewer.INIT =  function (){
                         // var type = node.attr('type'); 
                         if (node == -1)
                         {
-                            url = "/rest3d/warehouse/search/"+searchInput.val();
+                            url = location.protocol+"//"+location.host+"/rest3d/warehouse/search/"+searchInput.val();
                         }
                         else if(node.attr('rel')=="collection"||"model")
                         {
                             nodeId = node.attr('id');
-                            url = "/rest3d/warehouse/" + nodeId;
+                            url = location.protocol+"//"+location.host+"/rest3d/warehouse/" + nodeId;
                         }
                         return url;
                     },
@@ -1289,7 +1289,7 @@ viewer.INIT =  function (){
             }]
         })
 
-        var upload = GUI.upload({parent:accordionUp.upload, id:"upModel", url:'/rest3d/upload', idUser: viewer.idUser});
+        var upload = GUI.upload({parent:accordionUp.upload, id:"upModel", url:location.protocol+"//"+location.host+'/rest3d/upload', idUser: viewer.idUser});
     //     setTimeout(function(){
     //     upload.upModel.fileupload('option','beforeSend',function(xhr, data) {
     //                     console.debug("in");

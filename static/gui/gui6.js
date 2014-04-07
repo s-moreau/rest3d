@@ -195,12 +195,13 @@ define(['channel','codemirror','webglUtils', 'WebGLDebugUtils','pnotify','colorp
                 //         content: "Drag&drop area",
                 //     });
                 // this[this.id].css("text-align","center");
+    
                 var tmp = GUI.treeBis({
                     id:'uploadTree',
                     parent: this[this.id],
                     json:  {
                         "data":{
-                            "data":stock.idUser,"attr":{"id":"c_"+stock.idUser,"rel":"collection","path":"/rest3d/upload/"+stock.idUser}},
+                            "data":stock.idUser,"attr":{"id":"c_"+stock.idUser,"rel":"collection","path":"/rest3d/upload/"+stock.idUser,"file":stock.idUser,}},
                         },
                         "dnd" : {
                                 "drop_finish" : function (data) { 
@@ -214,8 +215,20 @@ define(['channel','codemirror','webglUtils', 'WebGLDebugUtils','pnotify','colorp
                       "contextmenu" : {
                 "items" : function (node) {
                     var result = {};
-                    if(node.attr("rel")=="collection"||node.attr("rel")=="model"||node.attr("rel")=="child"){
+                    var rel =node.attr("rel");
+                    var up = node.attr("uploadstatus");
+                    if(rel=="collection"||rel=="model"||rel=="child"){
                         result.icon = {'label':'Add files','action':stock.button,};}
+                    if((rel=="collada"||rel=="gltf")&&up=="true"){
+                        result.preview = {'label':'Preview','action':stock.preview,};
+                        result.convert = {'label':'Convert','action':stock.convert,};
+                    }
+                    if(rel=="gltf"&&up=="true"){
+                        result.display = {'label':'Display','action':stock.displayGltf,};
+                    }
+                    if(rel=="collada"&&up=="true"){
+                        result.display = {'label':'Display','action':stock.displayCollada,};
+                    }
                     return result;
                 }
             },
@@ -283,9 +296,29 @@ define(['channel','codemirror','webglUtils', 'WebGLDebugUtils','pnotify','colorp
                     parent:this[this.id],
                 });
                 this[this.id].append('<div id="fileArea_'+this.id+'"></div>');
+
+                this.optionLog= GUI.addCheckBox("uploadSetting", "Use log interface", this[this.id]);
+                this.lunch1 = GUI.button("Upload", this.optionLog);
+                var ex = this.lunch1;
+                this.lunch1.css({"float":"right"})
+                this.optionLog.find('input').on("change",function(){
+                    if($(this).is(':checked')){
+                        $("#fileArea_"+this.id).hide();
+                        ex.hide();
+                 }
+                 else{
+                        $("#fileArea_"+this.id).show();
+                        ex.show();
+                 }      
+                });
+            }
                 
                // $('#fileArea_'+this.id).append('<div style="border: 1px solid grey; border-top: none; width:100%;" ><span style="float:left !important;">Fildsdsdsdsde</span></div>');
+            
+            this.getOptionLog = function(){
+                return this.optionLog.find('input').is(':checked');
             }
+
             this.callOnClick = function(cb){
                 if(this.button){
                     this.button.on('click',function(){
