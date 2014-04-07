@@ -111,35 +111,6 @@ module.exports = function (server) {
 
         counter ++;
         zipFile.unzip(params.uid,params.url,null,params.where, params.cb); //jar?
-        /*
-        server.diskcache.hit(params.url,function(err,entry){
-          if (entry) 
-          {
-            console.log('zip disk cache HIT!='+entry.filename);
-            zipFile.unzip(entry,params);
-          } else {
-            var buffer = new memoryStream(null, {readable : false});
-            buffer.on('error', function(error) {
-               params.cb(error);
-            });
-            buffer.on('end', function () {
-              params.req.response.body = this.toBuffer();
-              server.diskcache.store(params.url,params.req.response,function(err,entry){
-                zipFile.unzip(entry,params);
-             });
-            });
-
-           
-            // for some reason, request(url, cb) returns an incmplete body
-            // but pipe() provides the right body
-            // but I need the response headers, so I split this in half
-            // and I can get to the header in 'close'
-            params.req=request.get(params.url); 
-            params.req.pipe(buffer);
-
-          }
-        });
-*/
       }
     }).on('file', function (name, file) {
       var fileInfo = map[file.path];
