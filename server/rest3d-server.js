@@ -218,9 +218,9 @@ server.post(/^\/rest3d\/convert.*/,function(req,res,next){
      		console.log(output_dir);
 	     	var output_file = params.path.split('/').pop().replace('.dae','.json');
 	     	console.log(output_file);
-	     	fs.mkdirSync('upload/'+output_dir);
-	     	var cmd = collada2gltf+" -p -f \"upload" + params.path+"\" -o \""+'upload/'+output_dir+'/'+output_file+"\"";
-	     	console.log(collada2gltf+" -p -f \"upload" + params.path+"\" -o \""+'upload/'+output_dir+'/'+output_file+"\"");
+	     	fs.mkdirSync(output_dir);
+	     	var cmd = collada2gltf+" -p -f \"" + params.path+"\" -o \""+'upload/'+output_dir+'/'+output_file+"\"";
+	     	console.log(collada2gltf+" -p -f \"" + params.path+"\" -o \""+'upload/'+output_dir+'/'+output_file+"\"");
      	}
      	else{
 	     	var output_dir = params.name.split('\.')[0]+'_gltf';
