@@ -221,12 +221,12 @@ server.post(/^\/rest3d\/convert.*/,function(req,res,next){
 
      		output_dir[output_dir.length-1] = output_dir[output_dir.length-1].replace('.dae','.json').replace('.DAE','.json');
      		console.log(output_dir)
-     		
+
 	     	// console.log(output_file);;
-     		var result="";
-     		for(var i =0;i<output_dir.length;i++){
+     		var result=output_dir[0];
+     		for(var i =1;i<output_dir.length;i++){
      			console.log(result);
-     			result = result + "/" +result[i];
+     			result = result + "/" +output_dir[i];
      		}
      		// console.log(output_dir);
 	     	// var output_file = params.path.split('/').pop().replace('.dae','.json').replace('.DAE','.json');
