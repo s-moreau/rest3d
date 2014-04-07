@@ -214,13 +214,20 @@ server.post(/^\/rest3d\/convert.*/,function(req,res,next){
      	// 	return;
      	// }
      	if(params.hasOwnProperty("path")){
-     		var output_dir = params.path.split('/')[1]+'_gltf';
-     		console.log(output_dir);
-	     	var output_file = params.path.split('/').pop().replace('.dae','.json').replace('.DAE','.json');
-	     	console.log(output_file);
+     		var output_dir = params.path.split('/');
+     		output_dir[output_dir.length-2] = output_dir[output_dir.length-2] + '_gltf';
+     		output_dir[output_dir.length-1] = output_dir[output_dir.length-1].replace('.dae','.json').replace('.DAE','.json');
+	     	// console.log(output_file);;
+     		var result;
+     		for(var i =0;i<output_dir.length;i++){
+     			result = result + "/" +result[i];
+     		}
+     		// console.log(output_dir);
+	     	// var output_file = params.path.split('/').pop().replace('.dae','.json').replace('.DAE','.json');
+	     	// console.log(output_file);
 	     	fs.mkdirSync(output_dir);
-	     	console.log(collada2gltf+" -p -f \"" + params.path+"\" -o \""+'upload/'+output_dir+'/'+output_file+"\"");
-	     	var cmd = collada2gltf+" -p -f \"" + params.path+"\" -o \""+'upload/'+output_dir+'/'+output_file+"\"";
+	     	console.log(collada2gltf+" -p -f \"" + params.path+"\" -o \""+result+"\"");
+	     	var cmd = collada2gltf+" -p -f \"" + params.path+"\" -o \""+result+"\"";
      	}
      	else{
 	     	var output_dir = params.name.split('\.')[0]+'_gltf';
