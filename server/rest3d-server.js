@@ -220,6 +220,7 @@ server.post(/^\/rest3d\/convert.*/,function(req,res,next){
 	     	// console.log(output_file);;
      		var result;
      		for(var i =0;i<output_dir.length;i++){
+     			console.log(result);
      			result = result + "/" +result[i];
      		}
      		// console.log(output_dir);
