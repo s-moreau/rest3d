@@ -112,7 +112,6 @@
           if(tmp[i].split(".").length==1){
             var flag = fs.existsSync(tmp[i-1]+"/"+tmp[i]);
             tmp[i]=tmp[i-1]+"/"+tmp[i];
-            console.log("flag",flag)
             if(!flag){
               console.log("createfoler "+tmp[i])
               fs.mkdirSync(tmp[i]);
