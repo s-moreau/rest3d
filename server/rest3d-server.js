@@ -215,10 +215,15 @@ server.post(/^\/rest3d\/convert.*/,function(req,res,next){
      	// }
      	if(params.hasOwnProperty("path")){
      		var output_dir = params.path.split('/');
+     		console.log(output_dir)
      		output_dir[output_dir.length-2] = output_dir[output_dir.length-2] + '_gltf';
+     		console.log(output_dir)
+
      		output_dir[output_dir.length-1] = output_dir[output_dir.length-1].replace('.dae','.json').replace('.DAE','.json');
+     		console.log(output_dir)
+     		
 	     	// console.log(output_file);;
-     		var result;
+     		var result="";
      		for(var i =0;i<output_dir.length;i++){
      			console.log(result);
      			result = result + "/" +result[i];
