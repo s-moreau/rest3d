@@ -219,7 +219,7 @@ server.post(/^\/rest3d\/convert.*/,function(req,res,next){
      		output_dir[output_dir.length-1] = output_dir[output_dir.length-1].replace('.dae','.json').replace('.DAE','.json');
      		var output_path=output_dir[0];
      		for(var i =1;i<output_dir.length;i++){
-     			output_path = output_path + "/" +output_dir[i];
+     			output_path = output_path +output_dir[i];
      			if(!fs.existsSync(output_path)&&i!==output_dir.length-1){
      				console.log("create folder "+output_path)
      				fs.mkdirSync(output_path);
