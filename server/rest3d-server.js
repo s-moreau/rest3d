@@ -228,7 +228,7 @@ server.post(/^\/rest3d\/convert.*/,function(req,res,next){
      			console.log(result);
      			result = result + "/" +output_dir[i];
      			if(!fs.existsSync(result)&&i!==output_dir.length-1){
-     				console.log("create folder "+result)
+     				console.log("create folder ")
      				fs.mkdirSync(result);
      			}
      		}
@@ -264,28 +264,28 @@ server.post(/^\/rest3d\/convert.*/,function(req,res,next){
 		   console.log('Child Process STDERR: '+stderr);
 		 });
 
-		 ls.on('exit', function (code, output) {
-		  console.log('Child process exited with exit code '+code);
-		  if (code !== 0) {
-				h.handleError({errorCode:code, message:'Child process exited with exit code '});
-				return;
-			}
-			codeC2J= code;
-			outputC2J = output;
-			console.log('Exit code:', code);
-	  		console.log('Program output:', output);
+		 // ls.on('exit', function (code, output) {
+		 //  console.log('Child process exited with exit code '+code);
+		 //  if (code !== 0) {
+			// 	h.handleError({errorCode:code, message:'Child process exited with exit code '});
+			// 	return;
+			// }
+			// codeC2J= code;
+			// outputC2J = output;
+			// console.log('Exit code:', code);
+	  // 		console.log('Program output:', output);
 					
-			// hack, copy all images in the output_dir, so the viewer will work
-		    // fs.readdir('upload/', function (err, list) {
-      //           list.forEach(function (name) {
-      //           	if (name.endsWith('.png'))
-      //           	{
-      //           		copyFileSync('upload/'+name,'upload/'+output_dir+'/'+name);
-      //           		console.log('upload/'+name+'  TO  upload/'+output_dir+'/'+name);
-      //           	}
-		    //     });
-		    // });
-		    // end hack
+			// // hack, copy all images in the output_dir, so the viewer will work
+		 //    fs.readdir('upload/', function (err, list) {
+   //              list.forEach(function (name) {
+   //              	if (name.endsWith('.png'))
+   //              	{
+   //              		copyFileSync('upload/'+name,'upload/'+output_dir+'/'+name);
+   //              		console.log('upload/'+name+'  TO  upload/'+output_dir+'/'+name);
+   //              	}
+		 //        });
+		 //    });
+		 //    // end hack
 
 			// var files = [];
 			// fs.readdir('upload/'+output_dir, function (err, list) {
@@ -309,7 +309,7 @@ server.post(/^\/rest3d\/convert.*/,function(req,res,next){
 		 //        h.handleResult({files: files, code:codeC2J, output:outputC2J});
 		 //    });		
 	  //    });
-	  //    });
+	     });
 
     form.parse(req);
 
