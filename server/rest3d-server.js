@@ -269,14 +269,14 @@ server.post(/^\/rest3d\/convert.*/,function(req,res,next){
 		 ls.on('exit', function (code, output) {
 		  console.log('Child process exited with exit code '+code);
 		  if (code !== 0) {
-				h.handleError({errorCode:code, message:'Child process exited with exit code '});
+				h.handleError({errorCode:code, message:'ERROR, child process exited with exit code '});
 				return;
 			}
 			codeC2J= code;
 			outputC2J = output;
 
 	  		console.log(input_dir)
-			console.log('Exit code1:', code);
+			// console.log('Exit code1:', code);
 	  		// console.log('Program output:', output);
 			
 	  		console.log(input_dir)
