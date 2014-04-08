@@ -125,10 +125,6 @@ define(['jquerymin', 'rest3d', 'gltf', 'collada', 'viewer','q'], function ($, re
             console.debug( $("#"+node.attr("id")))
             result = $("#"+node.attr("id")).data();
             console.debug(result);
-            result = result.node;
-            console.debug(result);
-            result = result.data()
-            console.debug(result);
             rest3d.convert(result,callbackConvert);
         }   
         upload.convertMenu = convertMenu;
