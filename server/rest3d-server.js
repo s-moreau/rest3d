@@ -274,8 +274,10 @@ server.post(/^\/rest3d\/convert.*/,function(req,res,next){
 			}
 			codeC2J= code;
 			outputC2J = output;
-			console.log('Exit code:', code);
-	  		console.log('Program output:', output);
+
+	  		console.log(input_dir)
+			console.log('Exit code1:', code);
+	  		// console.log('Program output:', output);
 			
 	  		console.log(input_dir)
 			// // hack, copy all images in the output_dir, so the viewer will work
