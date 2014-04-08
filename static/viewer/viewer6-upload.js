@@ -472,7 +472,7 @@ define(['jquerymin', 'rest3d', 'gltf', 'collada', 'viewer','q'], function ($, re
                         file: file,
                         context: data.context,
                     })
-                    file.relativePath.data({
+                    data.buttonToReplace[index].parent().data({
                         file: file,
                         context: data.context,
                     })
