@@ -207,6 +207,7 @@ server.post(/^\/rest3d\/convert.*/,function(req,res,next){
      }).on('error', function (e) {
      	h.handleError(e);
      }).on('end', function(){//
+     	console.log(params);
      	console.log('now converting collada');
      	if (!params.name && !params.path || !params.name.toLowerCase().endsWith('dae')) { 
      		h.handleError({error: 'invalid file '+params.name+' in convert'});
@@ -220,7 +221,7 @@ server.post(/^\/rest3d\/convert.*/,function(req,res,next){
      		var output_path=output_dir[0];
      		for(var i =1;i<output_dir.length;i++){
      			output_path = output_path + "/" +output_dir[i];
-     			console.log(fs.existsSync(output_path+"/"));
+     			console.log(output_path,fs.existsSync(output_path+"/"));
      			if(!fs.existsSync(output_path)&&i!==output_dir.length-1){
      				console.log("create folder "+output_path)
      				fs.mkdirSync(output_path);
