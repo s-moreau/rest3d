@@ -231,15 +231,16 @@ server.post(/^\/rest3d\/convert.*/,function(req,res,next){
      			if(i!==output_dir.length-1){
      				console.log(output_dir[i]);
      				console.log(output_path);
-     				fs.exists(output_path,function(res){
+     				var output_tmp = output_path;
+     				fs.exists(output_tmp,function(res){
      					if(!res){
-     							console.log("create folder "+output_path)
-     				fs.mkdirSync(output_path);
+     							console.log("create folder "+output_tmp)
+     				fs.mkdirSync(output_tmp);
      					}
-     					console.log(collada2gltf+" -p -f \"" + params.path+"\" -o \""+output_path+"\"");
-     						     	var cmd = collada2gltf+" -p -f \"" + params.path+"\" -o \""+output_path+"\"";
+     					console.log(collada2gltf+" -p -f \"" + params.path+"\" -o \""+output_tmp+"\"");
+     						     	var cmd = collada2gltf+" -p -f \"" + params.path+"\" -o \""+output_tmp+"\"";
 	     	var input_dir = params.path.replace(/[^\/]*$/,'');
-	     	output_dir = output_path.replace(/[^\/]*$/,'');
+	     	output_dir = output_tmp.replace(/[^\/]*$/,'');
      				})
      			
      			}
