@@ -243,7 +243,6 @@ server.post(/^\/rest3d\/convert.*/,function(req,res,next){
      		console.log("PART NOT TESTED YET")
 	     	var output_dir = params.name.split('\.')[0]+'_gltf';
 	     	var output_file = params.name.replace('.dae','.json');
-	     	fs.mkdirSync('upload/'+output_dir);	
 	     	var output_path = 'upload/'+output_dir+'/'+output_file;
 	     	var cmd = collada2gltf+" -p -f \"upload/" + params.name+"\" -o \""+output_path+"\"";
 	     	 var input_dir = "upload/";
@@ -276,22 +275,22 @@ server.post(/^\/rest3d\/convert.*/,function(req,res,next){
 			outputC2J = output;
 
 	  		console.log(input_dir)
-			console.log('Exit code1:', code);
+			console.log('Exit code:', code);
 	  		console.log('Program output:', output);
 			
 	  		console.log(input_dir)
 			// // hack, copy all images in the output_dir, so the viewer will work
-		    // fs.readdir(input_dir, function (err, list) {
-		    // 	console.log(list);
-      //           list.forEach(function (name) {
-      //           	console.log(name);
-      //           	if (!name.endsWith('.json')||!name.endsWith('.dae'))
-      //           	{
-      //           		copyFileSync(input_dir+name, output_dir+name);
-      //           		console.log(input_dir+name+'  TO  '+output_dir+name);
-      //           	}
-		    //     });
-		    // });
+		    fs.readdir(input_dir, function (err, list) {
+		    	console.log(list);
+                list.forEach(function (name) {
+                	console.log(name);
+                	if (!name.endsWith('.json')||!name.endsWith('.dae'))
+                	{
+                		copyFileSync(input_dir+name, output_dir+name);
+                		console.log(input_dir+name+'  TO  '+output_dir+name);
+                	}
+		        });
+		    });
 		    // end hack
 			var files = [];
 			fs.readdir(output_dir, function (err, list) {
