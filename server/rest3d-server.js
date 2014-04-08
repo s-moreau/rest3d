@@ -277,9 +277,10 @@ server.post(/^\/rest3d\/convert.*/,function(req,res,next){
 			console.log('Exit code:', code);
 	  		console.log('Program output:', output);
 			
-
+	  		console.log(input_dir)
 			// // hack, copy all images in the output_dir, so the viewer will work
 		    fs.readdir(input_dir, function (err, list) {
+		    	console.log(list);
                 list.forEach(function (name) {
                 	console.log(name);
                 	if (!name.endsWith('.json')||!name.endsWith('.dae'))
