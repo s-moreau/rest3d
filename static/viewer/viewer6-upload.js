@@ -122,7 +122,7 @@ define(['jquerymin', 'rest3d', 'gltf', 'collada', 'viewer','q'], function ($, re
         upload.displayGltf = displayGltf;
 
         function convertMenu(node){
-            result = $("#"+node).data();
+            result = $("#"+node.attr("id")).data();
             console.debug(result);
             result = result.node;
             console.debug(result);
@@ -466,11 +466,12 @@ define(['jquerymin', 'rest3d', 'gltf', 'collada', 'viewer','q'], function ($, re
             $.each(data.result.files, function (index, file) {
                 if(upload.getOptionLog()){
                     file.assetName = data.result.files[index].name;
+
                     var $node = convertButton.clone(true).data({
                         file: file,
                         context: data.context,
                     })
-                    file.relativePath.data({node:$node,})
+                    file.relativePath.data({"node":$node,})
                     data.buttonToReplace[index]
                         .replaceWith($node)
                         .prop("id", "nodeClose");
