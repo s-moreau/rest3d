@@ -119,7 +119,7 @@ exports.get = function(url, callback) {
 		if (err){
 			console.log('BASEX REST GET ERROR')
 			console.log(err)
-			if (cb) cb(err,req2,null);
+			if (cb) cb(err,null);
 			else return err;
 		}
 
@@ -127,7 +127,7 @@ exports.get = function(url, callback) {
 	  	if (err){
 			console.log('BASEX REST GET RESULT ERROR')
 			console.log(err)
-			if (cb) cb(err,req2,null);
+			if (cb) cb(err,null);
 			else return err;
 		}
 		res2.body=''
@@ -137,7 +137,7 @@ exports.get = function(url, callback) {
 	    });
 
 	    res2.on('end', function() {
-	      if (cb) cb(null, req2, res2);
+	      if (cb) cb(null, res2);
 	      else return res2;
 	    });
 	  });
@@ -156,7 +156,7 @@ exports.post = function(url, body, callback) {
 		if (err){
 			console.log('BASEX REST GET ERROR')
 			console.log(err)
-			if (cb) cb(err,req2,null);
+			if (cb) cb(err,null);
 			else return err;
 		}
 	  req2.write(body);
@@ -166,7 +166,7 @@ exports.post = function(url, body, callback) {
 	  	if (err){
 			console.log('BASEX REST GET RESULT ERROR')
 			console.log(err)
-			if (cb) cb(err,req2,null);
+			if (cb) cb(err,null);
 			else return err;
 		}
 		res2.body=''
@@ -176,7 +176,7 @@ exports.post = function(url, body, callback) {
 	    });
 
 	    res2.on('end', function() {
-	      if (cb) cb(null, req2, res2);
+	      if (cb) cb(null, res2);
 	      else return res2;
 	    });
 	  });

@@ -147,7 +147,17 @@ require('./src/warehouse')(server);
 require('./src/3dvia')(server);
 require('./src/upload')(server);
 
-require('./src/basex')(server);
+
+var database =  process.env.DATABASE || 
+                process.argv[2] ||
+                   'existdb';
+
+console.log("loading database module ["+database+"]");
+
+require('./src/'+database)(server);
+
+
+
 
 // create diskcache (no mem caching, no gzip)
 server.diskcache = new cache('cache',true,false,false); 
@@ -322,7 +332,7 @@ process.on('SIGTERM', sigterm_handler);
 
 // run server
 server.listen( listenToPort, ip_address);
-console.log ('rest3d server running on port '+listenToPort);
+console.log ('rest3d server listening on port '+listenToPort);
 
 
 
