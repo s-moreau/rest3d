@@ -1,0 +1,35 @@
+<?xml version='1.0'?>
+<project name="install-rest3d" default="install" xmlns:xdb="http://exist-db.org/ant">
+<description>install rest3d package</description>
+
+    <import file="common.xml"/>
+
+<target name="install" >
+
+  <!-- create new folder !-->
+  <xdb:create xmlns:xdb="http://exist-db.org/ant"
+    uri="${exist.apps}"
+    user="${exist.user}"
+    password="${exist.password}"
+    collection="cookies"  
+  />
+  <!-- chown rest3d !-->
+  <xdb:chown xmlns:xdb="http://exist-db.org/ant"
+    uri="${exist.uri}/db/cookies"
+    user="${exist.user}"
+    password="${exist.password}"
+    name="rest3d"
+    group="rest3d"
+  />
+  <!-- chmod rest3d !-->
+  <xdb:chmod xmlns:xdb="http://exist-db.org/ant"
+    uri="${exist.uri}/db/cookies"
+    user="${rest3d.user}"
+    password="${rest3d.password}"
+    permissions='rwxr-xr-x'
+  />
+  <!-- documents will be created by node server !-->
+</target>
+
+</project>
+        
