@@ -219,6 +219,7 @@ server.post(/^\/rest3d\/convert.*/,function(req,res,next){
      		output_dir[output_dir.length-2] = output_dir[output_dir.length-2] + '_gltf';
      		output_dir[output_dir.length-1] = output_dir[output_dir.length-1].replace('.dae','.json').replace('.DAE','.json');
      		var output_path=output_dir[0];
+     		console.log(output_dir);
      		for(var i =1;i<output_dir.length;i++){
      			output_path = output_path + "/" +output_dir[i];
      	// 		 fs.readdirSync("upload", function (err, list) {
@@ -228,19 +229,21 @@ server.post(/^\/rest3d\/convert.*/,function(req,res,next){
 		    // });
      			// console.log(output_path,fs.existsSync(output_path+"/"));
      			if(i!==output_dir.length-1){
+     				console.log(output_dir[i]);
      				fs.exists(output_path,function(res){
      					if(!res){
      							console.log("create folder "+output_path)
      				fs.mkdirSync(output_path);
      					}
+     						     	var cmd = collada2gltf+" -p -f \"" + params.path+"\" -o \""+output_path+"\"";
+	     	var input_dir = params.path.replace(/[^\/]*$/,'');
+	     	output_dir = output_path.replace(/[^\/]*$/,'');
      				})
      			
      			}
      		}
 	     	console.log(collada2gltf+" -p -f \"" + params.path+"\" -o \""+output_path+"\"");
-	     	var cmd = collada2gltf+" -p -f \"" + params.path+"\" -o \""+output_path+"\"";
-	     	var input_dir = params.path.replace(/[^\/]*$/,'');
-	     	output_dir = output_path.replace(/[^\/]*$/,'');
+
      	}
      	else{
      		// let's considered the model is stocked under rest3d/upload/ repository in case any path isn't specified
