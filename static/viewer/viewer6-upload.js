@@ -470,7 +470,6 @@ define(['jquerymin', 'rest3d', 'gltf', 'collada', 'viewer','q'], function ($, re
                         file: file,
                         context: data.context,
                 })
-                data.buttonToReplace[index].parent().append("<img style='float:right;' src='../gui/images/accept.png' >")
                 if(upload.getOptionLog()){
                     file.assetName = data.result.files[index].name;
 
