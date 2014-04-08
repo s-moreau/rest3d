@@ -122,7 +122,7 @@ define(['jquerymin', 'rest3d', 'gltf', 'collada', 'viewer','q'], function ($, re
         upload.displayGltf = displayGltf;
 
         function convertMenu(node){
-            result = node.data();
+            result = $("#"+node).data();
             console.debug(result);
             result = result.node;
             console.debug(result);
@@ -515,8 +515,7 @@ define(['jquerymin', 'rest3d', 'gltf', 'collada', 'viewer','q'], function ($, re
                 });
 
         upload.object.fileupload("option","done",function (e, data) {
-            console.debug(data.files[0].relativePath);
-            data.files[0].relativePath.attr("id",data.result.files[0].assetId);
+            // data.files[0].relativePath.attr("id",data.result.files[0].assetId);
     });
     }
     return setViewer6Upload;
