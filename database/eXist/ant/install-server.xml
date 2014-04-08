@@ -5,7 +5,7 @@
     <import file="common.xml"/>
 
 <target name="install" >
-
+<echo>exist-uri = ${exist.uri} </echo>
   <!-- create new folder !-->
   <xdb:create xmlns:xdb="http://exist-db.org/ant"
     uri="${exist.uri}/db"

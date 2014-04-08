@@ -27,12 +27,12 @@ THE SOFTWARE.
 
 module.exports = function (server) {
 
-  var existdb = require('./existdbdriver');
+  var existdb = server.db = require('./existdbdriver');
   var restify = require('restify')
   var sendFile = require('./sendfile');
   var dbHandler = require('./handler');
 
-  server.get(/^\/rest3d\/info/,function(req, res, next) {
+  server.get(/^\/rest3d\/fl4re\/info/,function(req, res, next) {
     var handler = new dbHandler(req,res,next);
   
     existdb.info(function(err,res){
@@ -43,7 +43,7 @@ module.exports = function (server) {
     })
   });
 
-  server.get(/^\/rest3d\/assets.*/,function(req, res, next) {
+  server.get(/^\/rest3d\/fl4re\/.*/,function(req, res, next) {
 
     var asset = req.url.split("/assets/")[1];
     //if (asset !== undefined) asset = asset.toLowerCase()

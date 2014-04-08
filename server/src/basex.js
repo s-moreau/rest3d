@@ -27,56 +27,56 @@ THE SOFTWARE.
 
 module.exports = function (server) {
 
-var basex = require('./basexdriver');
-var sendFile = require('./sendfile');
-var restify = require('restify')
+  var basex = server.db = require('./basexdriver');
+  var sendFile = require('./sendfile');
+  var restify = require('restify')
 
-  server.get(/^\/rest3d\/info/,function(req, res, next) {
+  server.get(/^\/rest3d\/fl4re\/info/,function(req, res, next) {
   
-  console.log('[rest3d]'+req.url);
-      res.writeHead(200, {"Content-Type": "text/ascii"});  
+    console.log('[rest3d]'+req.url);
+        res.writeHead(200, {"Content-Type": "text/ascii"});  
 
-      if (basex.session) {
-        basex.session.execute("info", function(err, r) {
-        if (err)
+        if (basex.session) {
+          basex.session.execute("info", function(err, r) {
+          if (err)
+          {
+            console.log('basex INFO error'+err);
+          } else {    
+            res.write(r.result);
+            res.end();
+          } 
+        })
+        } else // basex is not running
         {
-          console.log('basex INFO error'+err);
-        } else {    
-          res.write(r.result);
+          res.write("Database NOT running \nusing read only file system instead");
           res.end();
-        } 
-      })
-      } else // basex is not running
-      {
-        res.write("Database NOT running \nusing read only file system instead");
-        res.end();
-      }
-    
-  return next();
-});
-
-
-server.put(/^\/rest3d\/assets.*/,function(req, res, next) {
-  var asset = req.url.split('assets/')[1];
-  var h = new handler(req, res, next)
-  // need asset uri !
-  if (asset === undefined || asset == null || asset === '')
-  {
-      res.writeHead(400);
-      res.write('put need asset uri');
-      res.end();
-      return next();
-  }
-
-  // read body using formidable
- 
-  var form = new formidable.IncomingForm();
-  form.on('error', function(error) { // I thought this would handle the upload error
-      h.handleError(error);
+        }
+      
+    return next();
   });
 
+
+  server.put(/^\/rest3d\/fl4re\/assets.*/,function(req, res, next) {
+    var asset = req.url.split('assets/')[1];
+    var h = new handler(req, res, next)
+    // need asset uri !
+    if (asset === undefined || asset == null || asset === '')
+    {
+        res.writeHead(400);
+        res.write('put need asset uri');
+        res.end();
+        return next();
+    }
+
+    // read body using formidable
+   
+    var form = new formidable.IncomingForm();
+    form.on('error', function(error) { // I thought this would handle the upload error
+        h.handleError(error);
+    });
+
  
-  form.parse(req, function(err, fields, files) {
+    form.parse(req, function(err, fields, files) {
     if (err) {
       h.handleError(error);
     }
@@ -309,7 +309,7 @@ server.put(/^\/rest3d\/assets.*/,function(req, res, next) {
   });
 });
 
-server.get(/^\/rest3d\/assets.*/,function(req, res, next) {
+server.get(/^\/rest3d\/fl4re\/assets.*/,function(req, res, next) {
   
 
   var asset = req.url.split("/assets/")[1];

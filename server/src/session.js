@@ -145,7 +145,12 @@ module.exports = function(config) {
     /**
      * @cfg {Boolean} cookies=true Store the session in a cookie
      */
-    cookies: true
+    cookies: true,
+
+    /**
+     * @cfg {Boolean} db = database driver oject, or null if no database is connected
+     */
+    db: null
   };
 
   // merge new config with default config
@@ -174,7 +179,7 @@ module.exports = function(config) {
    * @param {String} callback.sid session identifier
    * @private
    */
-  session.createSid = function(callback) {
+  var createSid = function(callback) {
     var chars  = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXTZabcdefghiklmnopqrstuvwxyz',
         codes  = [],
         cLen   = chars.length,
@@ -195,10 +200,15 @@ module.exports = function(config) {
 
     var err=null;
     if (session.sessions[sid] != undefined) {
-        session.createSid(callback);
+        createSid(callback);
     } else {
       //console.log("Created sessionID="+sid);
       session.sessions[sid]={};
+      if (session.config.db) {
+        session.config.db.insert('cookies',sid,{}, function(err){
+          callback.call(session, err, sid);
+        });
+      } else
       callback.call(session, err, sid);
     }
 
@@ -456,7 +466,7 @@ module.exports = function(config) {
           }
         });
       } else {
-        session.createSid(function(createErr, sid) {
+        createSid(function(createErr, sid) {
           if (!createErr) {
             session.setSessionData(sid, {}, req, res, next);
           } else {

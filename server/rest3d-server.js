@@ -62,7 +62,7 @@ var toJSON = require('./src/tojson');
 
 var FileInfo = require('./src/fileinfo');
 var sendFile = require('./src/sendfile');
-var handler= require('./src/handler');
+var Handler= require('./src/handler');
 
 var platform = os.type().match(/^Win/) ? 'win' : 
 				(os.type().match(/^Dar/) ? 'mac' : 'unix');
@@ -138,25 +138,10 @@ server.use(restify.queryParser());
 server.use(restify.gzipResponse());
 restify.defaultResponseHeaders = false;
 
-var session=require('./src/session')();
-server.sessionManager = session;
-server.use(session.sessionManager);
-
 // include routes
 require('./src/warehouse')(server);
 require('./src/3dvia')(server);
 require('./src/upload')(server);
-
-
-var database =  process.env.DATABASE || 
-                process.argv[2] ||
-                   'existdb';
-
-console.log("loading database module ["+database+"]");
-
-require('./src/'+database)(server);
-
-
 
 
 // create diskcache (no mem caching, no gzip)
@@ -196,8 +181,38 @@ server.use(restify.throttle({
 */
 //server.use(restify.conditionalRequest());
 
+// start database
+
+var database =  process.env.DATABASE || 
+                process.argv[2] ||
+                   'existdb';
+
+console.log("loading database module ["+database+"]");
+
+require('./src/'+database)(server);
+
+// session mnager -> requires database
+
+var session=require('./src/session')({db: server.database});
+server.sessionManager = session;
+server.use(session.sessionManager);
+
 
 // rest3d API
+
+server.get(/^\/rest3d\/info/,function(req, res, next) {
+	var handler = new Handler(req,res,next);
+	if (server.db) {
+		server.db.info(function(err, res){
+			if (err)
+				handler.handleError(err);
+			else
+				handler.handleResult(res);
+		})
+	} else {
+		handler.handleResult("database not connected")
+	}
+});
 
 
 // convert
@@ -209,13 +224,13 @@ server.post(/^\/rest3d\/convert.*/,function(req,res,next){
          url = '',
          params = {};
 
-   var h = new handler(req,res, next);
+   var handler = new Handler(req,res, next);
          
 
      form.on('field', function (name, data) {
      	params[name] = data;
      }).on('error', function (e) {
-     	h.handleError(e);
+     	handler.handleError(e);
      }).on('end', function(){//
      	console.log('now converting collada');
      	console.log(params);
@@ -251,7 +266,7 @@ server.post(/^\/rest3d\/convert.*/,function(req,res,next){
 		     //console.log('Error code: '+error.code);
 		     //console.log('Signal received: '+error.signal);
 
-			 h.handleError({"code":error.code, "message": stderr});
+			 handler.handleError({"code":error.code, "message": stderr});
 
 		   }
 		   console.log('Child Process STDOUT: '+stdout);
@@ -261,7 +276,7 @@ server.post(/^\/rest3d\/convert.*/,function(req,res,next){
 		 ls.on('exit', function (code, output) {
 		  console.log('Child process exited with exit code '+code);
 		  if (code !== 0) {
-				h.handleError({errorCode:code, message:'Child process exited with exit code '});
+				handler.handleError({errorCode:code, message:'Child process exited with exit code '});
 				return;
 			}
 			codeC2J= code;
@@ -300,7 +315,7 @@ server.post(/^\/rest3d\/convert.*/,function(req,res,next){
                     	console.log('timeout !! upload/'+output_dir+'/ was deleted');
                     }
                     setTimeout(function() { timeout()},5 * 60 * 1000);
-		        h.handleResult({files: files, code:codeC2J, output:outputC2J});
+		        handler.handleResult({files: files, code:codeC2J, output:outputC2J});
 		    });		
 	     });
 	     });
