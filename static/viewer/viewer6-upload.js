@@ -122,6 +122,7 @@ define(['jquerymin', 'rest3d', 'gltf', 'collada', 'viewer','q'], function ($, re
         upload.displayGltf = displayGltf;
 
         function convertMenu(node){
+            console.debug( $("#"+node.attr("id")))
             result = $("#"+node.attr("id")).data();
             console.debug(result);
             result = result.node;
@@ -471,7 +472,10 @@ define(['jquerymin', 'rest3d', 'gltf', 'collada', 'viewer','q'], function ($, re
                         file: file,
                         context: data.context,
                     })
-                    file.relativePath.data({"node":$node,})
+                    file.relativePath.data({
+                        file: file,
+                        context: data.context,
+                    })
                     data.buttonToReplace[index]
                         .replaceWith($node)
                         .prop("id", "nodeClose");
