@@ -8,7 +8,7 @@
 
   <!-- create new folder !-->
   <xdb:create xmlns:xdb="http://exist-db.org/ant"
-    uri="${cookies.uri}"
+    uri="${exist.uri}/db"
     user="${exist.user}"
     password="${exist.password}"
     collection="cookies"  
