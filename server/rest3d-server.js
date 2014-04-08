@@ -282,7 +282,8 @@ server.post(/^\/rest3d\/convert.*/,function(req,res,next){
 			// // hack, copy all images in the output_dir, so the viewer will work
 		    fs.readdir(input_dir, function (err, list) {
                 list.forEach(function (name) {
-                	if (name.match(/\.[^.]+$/)[0]!=='.json'||name.match(/\.[^.]+$/)[0]!=='.dae')
+                	var ext = name.match(/\.[^.]+$/);
+                	if (ext[0]!=='.json'&&ext[0]!=='.dae')
                 	{
                 		copyFileSync(input_dir+name, output_dir+name);
                 		console.log(input_dir+name+'  TO  '+output_dir+name);
