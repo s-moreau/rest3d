@@ -241,7 +241,7 @@ server.post(/^\/rest3d\/convert.*/,function(req,res,next){
      				})
      			
      			}
-     		setTimeout(function(){
+     	setTimeout(function(){
 			console.log(collada2gltf+" -p -f \"" + params.path+"\" -o \""+output_tmp+"\"");
 	     	var cmd = collada2gltf+" -p -f \"" + params.path+"\" -o \""+output_tmp+"\"";
 	     	var input_dir = params.path.replace(/[^\/]*$/,'');
