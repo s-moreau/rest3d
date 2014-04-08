@@ -188,10 +188,10 @@ define(['jquerymin', 'rest3d', 'gltf', 'collada', 'viewer','q'], function ($, re
                             });
                         }
                     }
+                    console.debug(data);
                     rest3d.convert(data, callback);
                 });
         
-        var numberUser = viewer.idUser.split("_")[1]
         var sortAssetDrop = function (e, data,mode) {
             var defer = Q.defer();
             data.tmp = new Buffer();//buffer.bufferNode.push
