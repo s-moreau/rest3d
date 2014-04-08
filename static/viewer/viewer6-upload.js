@@ -30,7 +30,64 @@ define(['jquerymin', 'rest3d', 'gltf', 'collada', 'viewer','q'], function ($, re
         var id;
         var flag;
 
-      function preview(node){
+        function callbackConvert(data){
+            // $this.prop('disabled',true);
+            if (data.result.output) {
+                console.debug(data.result.output);
+            }
+            if (data.result.code) {
+                ("Exit code: " + data.result.code);
+            }
+            if (data.error) {
+                var span = $('<p><span><b>Error code=' + data.error.code + ' :: ' + data.error.message + '</b></span></p>');
+                data.context.append(span);
+            }
+            else {
+                // ennumerate all resulting files
+                var $conve = upload.header(data.file.name);
+                $.each(data.result.files, function (index, file) {
+                    var href = $('<a style="display:none" href="/rest3d/' + decodeURIComponent(file.name) + '" target="_blank"></a>');
+                    upload.filesArea.append(href);
+                    var $download = $("<button>Download</button>").on("click", function () {
+                        href[0].click();
+                        href[0].remove();
+                    });
+
+                    var url = '/rest3d/' + decodeURIComponent(file.name);
+                    var ext = url.match(/\.[^.]+$/);
+                    if (ext == ".json") {
+                        var $dialog = $("<button>Launch</button>").on("click", function () {
+                            window.pleaseWait(true);
+                            glTF.load(url, viewer.parse_gltf).then(
+                                function (flag) {
+                                    window.pleaseWait(false);
+                                    window.notif(url);
+                                })
+                        });
+                        var $preview = $("<button>Peview</button>").on("click", function () {
+                            $("#dialog").dialog("close");
+                            var gitHtml = '<div id="dialog"><iframe id="myIframe" src="" style="height:99% !important; width:99% !important; border:0px;"></iframe></div>';
+                            gitPanel = $('body').append(gitHtml);
+                            $("#dialog").dialog({
+                                width: '600',
+                                height: '500',
+                                open: function (ev, ui) {
+                                    $('#myIframe').attr('src', '/viewer/easy-viewer.html?file=/rest3d/' + decodeURIComponent(file.name));
+                                },
+                                // close: function(){
+                                //     gitHtml.remove();},
+                            });
+                        });
+                        upload.convert($conve, formatName(data, file), $dialog, $download, $preview);
+                    }
+                    else {
+                        upload.download($conve, formatName(data, file), $download); //
+                    }
+                });
+            }
+        }
+
+        function preview(node){
                 $("#dialog").dialog("close");
                 var gitHtml = '<div id="dialog"><iframe id="myIframe" src="" style="height:99% !important; width:99% !important; border:0px;"></iframe></div>';
                 gitPanel = $('body').append(gitHtml);
@@ -65,7 +122,10 @@ define(['jquerymin', 'rest3d', 'gltf', 'collada', 'viewer','q'], function ($, re
         upload.displayGltf = displayGltf;
 
         function convertMenu(node){
-
+            result = node.data().node.data();
+            console.debug(node.data());
+            console.debug(node.data());
+            rest3d.convert(result,callbackConvert);
         }   
         upload.convertMenu = convertMenu;
 
@@ -132,64 +192,7 @@ define(['jquerymin', 'rest3d', 'gltf', 'collada', 'viewer','q'], function ($, re
                         .off('click')
                         .prop('disabled', true)
                     // user rest to convert dae into glTF
-                    var callback = function (data) {
-                        // $this.prop('disabled',true);
-                        if (data.result.output) {
-                            console.debug(data.result.output);
-                        }
-                        if (data.result.code) {
-                            ("Exit code: " + data.result.code);
-                        }
-                        if (data.error) {
-                            var span = $('<p><span><b>Error code=' + data.error.code + ' :: ' + data.error.message + '</b></span></p>');
-                            data.context.append(span);
-                        }
-                        else {
-                            // ennumerate all resulting files
-                            var $conve = upload.header(data.file.name);
-                            $.each(data.result.files, function (index, file) {
-                                var href = $('<a style="display:none" href="/rest3d/' + decodeURIComponent(file.name) + '" target="_blank"></a>');
-                                upload.filesArea.append(href);
-                                var $download = $("<button>Download</button>").on("click", function () {
-                                    href[0].click();
-                                    href[0].remove();
-                                });
-
-                                var url = '/rest3d/' + decodeURIComponent(file.name);
-                                var ext = url.match(/\.[^.]+$/);
-                                if (ext == ".json") {
-                                    var $dialog = $("<button>Launch</button>").on("click", function () {
-                                        window.pleaseWait(true);
-                                        glTF.load(url, viewer.parse_gltf).then(
-                                            function (flag) {
-                                                window.pleaseWait(false);
-                                                window.notif(url);
-                                            })
-                                    });
-                                    var $preview = $("<button>Peview</button>").on("click", function () {
-                                        $("#dialog").dialog("close");
-                                        var gitHtml = '<div id="dialog"><iframe id="myIframe" src="" style="height:99% !important; width:99% !important; border:0px;"></iframe></div>';
-                                        gitPanel = $('body').append(gitHtml);
-                                        $("#dialog").dialog({
-                                            width: '600',
-                                            height: '500',
-                                            open: function (ev, ui) {
-                                                $('#myIframe').attr('src', '/viewer/easy-viewer.html?file=/rest3d/upload/' + decodeURIComponent(file.name));
-                                            },
-                                            // close: function(){
-                                            //     gitHtml.remove();},
-                                        });
-                                    });
-                                    upload.convert($conve, formatName(data, file), $dialog, $download, $preview);
-                                }
-                                else {
-                                    upload.download($conve, formatName(data, file), $download); //
-                                }
-                            });
-                        }
-                    }
-                    console.debug(data);
-                    rest3d.convert(data, callback);
+                    rest3d.convert(data,callbackConvert);
                 });
         
         var sortAssetDrop = function (e, data,mode) {
@@ -464,6 +467,7 @@ define(['jquerymin', 'rest3d', 'gltf', 'collada', 'viewer','q'], function ($, re
                         file: file,
                         context: data.context,
                     })
+                    file.relativePath.data({node:$node,})
                     data.buttonToReplace[index]
                         .replaceWith($node)
                         .prop("id", "nodeClose");
