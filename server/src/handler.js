@@ -32,9 +32,9 @@ Handler.prototype.allowOrigin = function () {
 };
 
 Handler.prototype.setNoCacheHeaders = function () {
-  this.res.setHeader('Pragma', 'no-cache');
+  //this.res.setHeader('Pragma', 'no-cache');
   this.res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate');
-  this.res.setHeader('Content-Disposition', 'inline; filename="files.json"');
+  //this.res.setHeader('Content-Disposition', 'inline; filename="files.json"');
 };
 
 Handler.prototype.handleError = function (error) {

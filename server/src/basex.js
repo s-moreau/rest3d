@@ -29,6 +29,7 @@ module.exports = function (server) {
 
 var basex = require('./basexdriver');
 var sendFile = require('./sendfile');
+var restify = require('restify')
 
   server.get(/^\/rest3d\/info/,function(req, res, next) {
   
@@ -324,7 +325,7 @@ server.get(/^\/rest3d\/assets.*/,function(req, res, next) {
               'doc("assets/assets.xml")'+
               ']]></text></query>';
 
-      basex.post('/assets',query,function(err,req2,res2){
+      basex.post('/assets',query,function(err,res2){
         if (err)
         {
           console.log('got ERROR from REST QUERY')
@@ -403,7 +404,7 @@ server.get(/^\/rest3d\/assets.*/,function(req, res, next) {
                 // node_basex soket i/o does not work for binary files
                 // this may have been fixed now
                 // but for the time being - use the rest http API
-                basex.get(redirect,function(err,req2,res2){
+                basex.get(redirect,function(err,res2){
                   if (err)
                   {
                   res.end(err);

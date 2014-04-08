@@ -21,7 +21,8 @@
     "object_utils":"",
     "secure-rnd":"",
     "basex":"",
-    "cookies":""
+    "cookies":"",
+    "existdb-node":"https://github.com/amd/existdb-node/raw/master/package/existdb-node-0.0.1.tgz"
   },
   "devDependencies": {
     "mocha": "1.7.4",

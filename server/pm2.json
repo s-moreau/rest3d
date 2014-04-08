@@ -1,7 +1,7 @@
 [{
   "name"      : "rest3d_server",
   "script"    : "rest3d-server.js",
-  "args"      : "['-toto','3']",
+  "args"      : "['existdb']",
   "instances":1,
   "env": {
       "HTTP": "9000",

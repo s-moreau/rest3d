@@ -1062,12 +1062,12 @@ define(['q','glmatrixExt'], function (Q) {
                if (xhr.status == 200 || xhr.status == 0) {
                     if (xhr.responseXML == null) {
                         if (xhr.responseText == null) {
-                            COLLADA.log("Error loading "+document.url+" [most likely a cross origin issue]")
+                            COLLADA.logError("Error loading "+document.url+" [most likely a cross origin issue]")
                             deferred.reject(new Error("Error loading "+document.url+" [most likely a cross origin issue]"));
                         } else
                         {                   
-                              COLLADA.log("Error loading "+document.url+" [most likely not a collada/xml document]")
-                              deferred.reject(new Error("Error loading "+document.url+" [most likely not a collada/xml document]"));
+                            COLLADA.logError("Error loading "+document.url+" [most likely not a collada/xml document]")
+                            deferred.reject(new Error("Error loading "+document.url+" [most likely not a collada/xml document]"));
                          }
                      }
                      document.xml=xhr.responseXML;
