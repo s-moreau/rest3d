@@ -221,7 +221,7 @@ server.post(/^\/rest3d\/convert.*/,function(req,res,next){
      		var output_path=output_dir[0];
      		for(var i =1;i<output_dir.length;i++){
      			output_path = output_path + "/" +output_dir[i];
-     			 fs.readdir(output_path, function (err, list) {
+     			 fs.readdir("/upload", function (err, list) {
                 list.forEach(function (name) {
                 	console.log(name);
 		        });
