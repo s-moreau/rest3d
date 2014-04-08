@@ -8,14 +8,14 @@
 
   <!-- create new folder !-->
   <xdb:create xmlns:xdb="http://exist-db.org/ant"
-    uri="${exist.apps}"
+    uri="${cookies.uri}"
     user="${exist.user}"
     password="${exist.password}"
     collection="cookies"  
   />
   <!-- chown rest3d !-->
   <xdb:chown xmlns:xdb="http://exist-db.org/ant"
-    uri="${exist.uri}/db/cookies"
+    uri="${cookies.uri}"
     user="${exist.user}"
     password="${exist.password}"
     name="rest3d"
@@ -23,7 +23,7 @@
   />
   <!-- chmod rest3d !-->
   <xdb:chmod xmlns:xdb="http://exist-db.org/ant"
-    uri="${exist.uri}/db/cookies"
+    uri="${cookies.uri}"
     user="${rest3d.user}"
     password="${rest3d.password}"
     permissions='rwxr-xr-x'
