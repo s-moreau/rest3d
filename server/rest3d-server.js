@@ -261,51 +261,51 @@ server.post(/^\/rest3d\/convert.*/,function(req,res,next){
 		   console.log('Child Process STDOUT: '+stdout);
 		   console.log('Child Process STDERR: '+stderr);
 		 });
-		 ls.on('exit', function (code, output) {
-		  console.log('Child process exited with exit code '+code);
-		  if (code !== 0) {
-				h.handleError({errorCode:code, message:'Child process exited with exit code '});
-				return;
-			}
-			codeC2J= code;
-			outputC2J = output;
-			console.log('Exit code:', code);
-	  		console.log('Program output:', output);
+		 // ls.on('exit', function (code, output) {
+		 //  console.log('Child process exited with exit code '+code);
+		 //  if (code !== 0) {
+			// 	h.handleError({errorCode:code, message:'Child process exited with exit code '});
+			// 	return;
+			// }
+			// codeC2J= code;
+			// outputC2J = output;
+			// console.log('Exit code:', code);
+	  // 		console.log('Program output:', output);
 			
 
-			// // hack, copy all images in the output_dir, so the viewer will work
-		    fs.readdir(input_dir, function (err, list) {
-                list.forEach(function (name) {
-                	if (!name.endsWith('.json')||!name.endsWith('.dae'))
-                	{
-                		copyFileSync(input_dir+name, output_dir+name);
-                		console.log(input_dir+name+'  TO  '+output_dir+name);
-                	}
-		        });
-		    });
-		    // end hack
-			var files = [];
-			fs.readdir(output_dir, function (err, list) {
-                list.forEach(function (name) {
-		            var stats = fs.statSync(output_dir+name),
-		                fileInfo;
-		            if (stats.isFile() && name[0] !== '.') {
-		                fileInfo = new FileInfo({
-		                    name: output_dir+name,
-		                    size: stats.size
-		                });
-		                //fileInfo.initUrls(req);
-		                files.push(fileInfo);
-		            }
-		        });
-		        var timeout = function() {
-                    	rmdirSync(output_dir);
-                    	console.log('timeout !! '+output_dir+' was deleted');
-                    }
-                    setTimeout(function() { timeout()},5 * 60 * 1000);
-		        h.handleResult({files: files, code:codeC2J, output:outputC2J});
-		    });		
-	     });
+			// // // hack, copy all images in the output_dir, so the viewer will work
+		 //    fs.readdir(input_dir, function (err, list) {
+   //              list.forEach(function (name) {
+   //              	if (!name.endsWith('.json')||!name.endsWith('.dae'))
+   //              	{
+   //              		copyFileSync(input_dir+name, output_dir+name);
+   //              		console.log(input_dir+name+'  TO  '+output_dir+name);
+   //              	}
+		 //        });
+		 //    });
+		 //    // end hack
+			// var files = [];
+			// fs.readdir(output_dir, function (err, list) {
+   //              list.forEach(function (name) {
+		 //            var stats = fs.statSync(output_dir+name),
+		 //                fileInfo;
+		 //            if (stats.isFile() && name[0] !== '.') {
+		 //                fileInfo = new FileInfo({
+		 //                    name: output_dir+name,
+		 //                    size: stats.size
+		 //                });
+		 //                //fileInfo.initUrls(req);
+		 //                files.push(fileInfo);
+		 //            }
+		 //        });
+		 //        var timeout = function() {
+   //                  	rmdirSync(output_dir);
+   //                  	console.log('timeout !! '+output_dir+' was deleted');
+   //                  }
+   //                  setTimeout(function() { timeout()},5 * 60 * 1000);
+		 //        h.handleResult({files: files, code:codeC2J, output:outputC2J});
+		 //    });		
+	  //    });
 	     });
     form.parse(req);
 });
