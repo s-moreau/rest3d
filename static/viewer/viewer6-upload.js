@@ -466,12 +466,13 @@ define(['jquerymin', 'rest3d', 'gltf', 'collada', 'viewer','q'], function ($, re
         }).on('fileuploaddone', function (e, data) {
             var buffer1 = data.tmp;
             $.each(data.result.files, function (index, file) {
-                if(upload.getOptionLog()){
-                    file.assetName = data.result.files[index].name;
-                    data.files[index].relativePath.data({
+                data.buttonToReplace[index].parent().data({
                         file: file,
                         context: data.context,
                 })
+                if(upload.getOptionLog()){
+                    file.assetName = data.result.files[index].name;
+
                     var $node = convertButton.clone(true).data({
                         file: file,
                         context: data.context,
