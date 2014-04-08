@@ -293,7 +293,7 @@ server.post(/^\/rest3d\/convert.*/,function(req,res,next){
 		    fs.readdir(input_dir, function (err, list) {
                 list.forEach(function (name) {
                 	var ext = name.match(/\.[^.]+$/);
-                	if (ext[0]!=='.json'&&ext[0]!=='.dae'&&ext[0]!=='.glsl')
+                	if (ext[0]!=='.json'&&ext[0]!=='.dae'&&ext[0]!=='.glsl'&&ext[0]!=='.bin')
                 	{
                 		copyFileSync(input_dir+name, output_dir+name);
                 		console.log(input_dir+name+'  TO  '+output_dir+name);
