@@ -222,6 +222,7 @@ server.post(/^\/rest3d\/convert.*/,function(req,res,next){
      		console.log(output_dir);
      		for(var i =1;i<output_dir.length;i++){
      			output_path = output_path + "/" +output_dir[i];
+     				var output_tmp = output_path;
      	// 		 fs.readdirSync("upload", function (err, list) {
       //           list.forEach(function (name) {
       //           	console.log(name);
@@ -231,20 +232,22 @@ server.post(/^\/rest3d\/convert.*/,function(req,res,next){
      			if(i!==output_dir.length-1){
      				console.log(output_dir[i]);
      				console.log(output_path);
-     				var output_tmp = output_path;
+
      				fs.exists(output_tmp,function(res){
      					if(!res){
      							console.log("create folder "+output_tmp)
      				fs.mkdirSync(output_tmp);
      					}
-     					console.log(collada2gltf+" -p -f \"" + params.path+"\" -o \""+output_tmp+"\"");
-     						     	var cmd = collada2gltf+" -p -f \"" + params.path+"\" -o \""+output_tmp+"\"";
-	     	var input_dir = params.path.replace(/[^\/]*$/,'');
-	     	output_dir = output_tmp.replace(/[^\/]*$/,'');
      				})
      			
      			}
-     		}
+     		setTimeout(function(){
+			console.log(collada2gltf+" -p -f \"" + params.path+"\" -o \""+output_tmp+"\"");
+	     	var cmd = collada2gltf+" -p -f \"" + params.path+"\" -o \""+output_tmp+"\"";
+	     	var input_dir = params.path.replace(/[^\/]*$/,'');
+	     	output_dir = output_tmp.replace(/[^\/]*$/,'');
+	     },500)
+     	}
 	     	
 
      	}
