@@ -219,8 +219,8 @@ server.post(/^\/rest3d\/convert.*/,function(req,res,next){
      		output_dir[output_dir.length-2] = output_dir[output_dir.length-2] + '_gltf';
      		output_dir[output_dir.length-1] = output_dir[output_dir.length-1].replace('.dae','.json').replace('.DAE','.json');
      		var output_path=output_dir[0];
-     	// 	for(var i =1;i<output_dir.length;i++){
-     	// 		output_path = output_path + "/" +output_dir[i];
+     		for(var i =1;i<output_dir.length;i++){
+     			output_path = output_path + "/" +output_dir[i];
      	// 		 fs.readdirSync("upload", function (err, list) {
       //           list.forEach(function (name) {
       //           	console.log(name);
@@ -230,10 +230,11 @@ server.post(/^\/rest3d\/convert.*/,function(req,res,next){
      			if(i!==output_dir.length-1){
      				fs.exists(output_path,function(res){
      					if(!res){
-     						console.log("create folder "+output_path)
-     					fs.mkdirSync(output_path);
+     							console.log("create folder "+output_path)
+     				fs.mkdirSync(output_path);
      					}
      				})
+     			
      			}
      		}
 	     	console.log(collada2gltf+" -p -f \"" + params.path+"\" -o \""+output_path+"\"");
