@@ -64,10 +64,10 @@ define(['jquerymin', 'rest3d', 'gltf', 'collada', 'viewer','q'], function ($, re
         }
         upload.displayGltf = displayGltf;
 
-        function convert(node){
+        function convertMenu(node){
 
         }   
-        upload.convert = convert
+        upload.convertMenu = convertMenu;
 
         function encodePathToId(path){
             path = path.replace("/rest3d/upload/"+viewer.idUser+"/","");

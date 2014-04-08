@@ -221,7 +221,7 @@ define(['channel','codemirror','webglUtils', 'WebGLDebugUtils','pnotify','colorp
                         result.icon = {'label':'Add files','action':stock.button,};}
                     if((rel=="collada"||rel=="gltf")&&up=="true"){
                         result.preview = {'label':'Preview','action':stock.preview,};
-                        result.convert = {'label':'Convert','action':stock.convert,};
+                        result.convert = {'label':'Convert','action':stock.convertMenu,};
                     }
                     if(rel=="gltf"&&up=="true"){
                         result.display = {'label':'Display','action':stock.displayGltf,};
