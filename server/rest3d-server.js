@@ -48,8 +48,7 @@ require('shelljs/global');
 var fs = require('fs');
 var path = require('path');
 var cache = require('./src/diskcache').Cache;
-// fast html scrapping
-var request = require('request');
+
 // get content from zip files
 var zip = require("zip");
 
@@ -138,6 +137,11 @@ server.use(restify.queryParser());
 server.use(restify.gzipResponse());
 restify.defaultResponseHeaders = false;
 
+
+var session=require('./src/session')();
+server.sessionManager = session;
+server.use(session.sessionManager);
+
 // include routes
 require('./src/warehouse')(server);
 require('./src/3dvia')(server);
@@ -189,14 +193,21 @@ var database =  process.env.DATABASE ||
 
 console.log("loading database module ["+database+"]");
 
+// this initializes server.db
 require('./src/'+database)(server);
 
-// session mnager -> requires database
+server.db.init(function(b){
+	if (b)
+		console.log("rest3d will be using database ["+database+"]");
+	else {
+		console.log("rest3d will not be using database ["+database+"]");
+		server.db=null;
+	}
 
-var session=require('./src/session')({db: server.database});
-server.sessionManager = session;
-server.use(session.sessionManager);
+	// session mnager -> requires database
+	session.config.db=server.db;
 
+});
 
 // rest3d API
 

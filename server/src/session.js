@@ -198,18 +198,26 @@ module.exports = function(config) {
       sid += chars.substring(rNum, rNum + 1);
     }
 
-    var err=null;
-    if (session.sessions[sid] != undefined) {
-        createSid(callback);
+    if (cfg.db) {
+      cfg.db.getKey('cookies',sid, function (err,res){
+        if (err) {
+          console.log('Error getKey ');
+          console.log(err);
+          return callback.call(session, undefined, sid);
+        } else {
+          console.log('getKey returned ')
+          console.log(res)
+          createSid(callback);
+        }
+      })
     } else {
-      //console.log("Created sessionID="+sid);
-      session.sessions[sid]={};
-      if (session.config.db) {
-        session.config.db.insert('cookies',sid,{}, function(err){
-          callback.call(session, err, sid);
-        });
-      } else
-      callback.call(session, err, sid);
+      if (session.sessions[sid] != undefined) {
+          createSid(callback);
+      } else {
+        //console.log("Created sessionID="+sid);
+        session.sessions[sid]={};
+        callback.call(session, undefined, sid);
+      }
     }
 
   };
@@ -232,14 +240,30 @@ module.exports = function(config) {
       return;
     }
 
-    var ttl  = session.config.ttl;
+    if (cfg.db) {
+      cfg.db.insertKeyPair('cookies',sid, data, function (err,res){
+        if (err) {
+          console.log('Error insertKeyPair ');
+          console.log(err);
+          return callback.call(session, err, null);
+        } else {
+          console.log('getKey returned ')
+          console.log(res)
+          if (!cfg.persist)
+            session.timeouts[sid] = setTimeout(function(){session.destroy(sid)}, cfg.ttl*1000);
 
-    session.sessions[sid]=data;
+          callback.call(session, undefined, data);
+        }
+      })
+    } else {
+      session.sessions[sid]=data;
+   
 
-    if (!cfg.persist)
-      session.timeouts[sid] = setTimeout(function(){session.destroy(sid)}, ttl*1000);
+      if (!cfg.persist)
+        session.timeouts[sid] = setTimeout(function(){session.destroy(sid)}, cfg.ttl*1000);
 
-    callback.call(session, undefined, data);
+      callback.call(session, undefined, data);
+    }
 
   };
 
@@ -259,13 +283,30 @@ module.exports = function(config) {
       }
       return;
     }
-    var data = session.sessions[sid];
-    var err=null;
 
-    if (data === undefined) err='session.js cannot load sessionID='+sid;
-    
-    if (callback) 
-        callback.call(session, err, data);
+    if (cfg.db) {
+      cfg.db.getKey('cookies',sid, function (err,res){
+        if (err) {
+          console.log('Error insertKeyPair ');
+          console.log(err);
+          return callback.call(session, err, null);
+        } else {
+          console.log('getKey returned ')
+          console.log(res)
+          if (!cfg.persist)
+            session.timeouts[sid] = setTimeout(function(){session.destroy(sid)}, cfg.ttl*1000);
+
+          callback.call(session, undefined, data);
+        }
+      })
+    } else {
+      var data = session.sessions[sid];
+      var err=undefined;
+
+      if (data === undefined) err='session.js cannot load sessionID='+sid;
+      
+      callback.call(session, err, data);
+    }
   };
 
   /**
@@ -292,9 +333,9 @@ module.exports = function(config) {
     var err=null;
     if (session.timeouts[sid] != undefined){
       clearTimeout(session.timeouts[sid] )
-      session.timeouts[sid] = setTimeout(function(){session.destroy(sid)}, session.config.ttl*1000);
+      session.timeouts[sid] = setTimeout(function(){session.destroy(sid)}, cfg.ttl*1000);
     } else {
-      err = 'session.js refresg canot find timeout sessionID='+sid;
+      err = 'session.js refresh canot find timeout sessionID='+sid;
     }
     if (callback) 
       callback.call(session, err, true);
@@ -315,13 +356,26 @@ module.exports = function(config) {
       callback.call(session, undefined, false);
       return;
     }
-    var ret=false;
-    var err=false;
-    if (session.sessions[sid] != undefined)
-      ret=true;
-     
-    callback.call(session, err, ret );
 
+    if (cfg.db) {
+      cfg.db.getKey('cookies',sid, function (err,res){
+        if (err) {
+          console.log('Error getKey ');
+          console.log(err);
+          return callback.call(session, undefined, false );
+        } else {
+          console.log('getKey returned ')
+          console.log(res)
+          callback.call(session, undefined, true );
+        }
+      })
+    } else {
+      if (session.sessions[sid] != undefined) {
+        session.refresh(sid,callback);
+        callback.call(session, undefined, true );
+      } else
+      callback.call(session, undefined, false );
+    }
   };
 
   /**
@@ -360,20 +414,41 @@ module.exports = function(config) {
   session.destroy = function(sid, callback) {
     if (isNull(sid)) {
       if (callback) {
-        callback.call(session, 'no sid given', 0);
+        callback.call(session, 'no sid given', null);
       }
       return;
     }
-    var err=null;
-    if (session.sessions[sid] !== undefined){
-      delete session.sessions[sid];
-      if (session.timeouts[sid] !== undefined){
-        clearTimeout(session.timeouts[sid]);
-        delete session.timeouts[sid];
+    if (session.timeouts[sid] !== undefined){
+      clearTimeout(session.timeouts[sid]);
+      delete session.timeouts[sid];
+    }
+
+    if (cfg.db) {
+      cfg.db.removeKey('cookies',sid, function (err,res){
+        if (err) {
+          console.log('Error remove key ');
+          console.log(err);
+          if (callback) callback.call(session, err, null);
+        } else {
+          console.log('key removed ')
+          console.log(res)
+          if (!cfg.persist)
+            session.timeouts[sid] = setTimeout(function(){session.destroy(sid)}, cfg.ttl*1000);
+          if (callback)
+             callback.call(session, undefined, null);
+        }
+      })
+    } else {
+      if (session.sessions[sid] !== undefined){
+        delete session.sessions[sid];
+        if (callback)
+          callback.call(session, undefined, null);
+      } else
+      {
+        var err = 'session.js destroy canoot find sessionID='+sid;
+        if (callback)
+          callback.call(session, err, null);
       }
-    } else
-    {
-      err = 'session.js destroy canoot find sessionID='+sid;
     }
   };
 
@@ -422,7 +497,7 @@ module.exports = function(config) {
       data = {};
     }
     data.sid  = sid;
-    session.sessions[sid] = data;
+
     req.session = data;
     //console.log('session.js stored data='+toJSON(data)+' in req.session');
     res.setHeader(cfg.sidHeader, sid);
@@ -431,7 +506,23 @@ module.exports = function(config) {
       var jar = new Cookies(req, res);
       jar.set(session.name,sid);
     }
-    next();
+
+    if (cfg.db) {
+      cfg.db.insertKeyPair('cookies',sid, data, function (err,res){
+        if (err) {
+          console.log('Error update key data');
+          console.log(err);
+          next();
+        } else {
+          console.log('key data updated ')
+          console.log(res)
+          next();
+        }
+      })
+    } else {
+      session.sessions[sid] = data;
+      next();
+    }
   };
 
   /**
@@ -445,7 +536,8 @@ module.exports = function(config) {
     if (cfg.debug) {
       cfg.logger.log(session.name + ': request url: ' + req.url);
     }
-    var reqSid = req.headers[session.config.sidHeader.toLowerCase()];
+
+    var reqSid = req.headers[cfg.sidHeader.toLowerCase()];
     var rest3dCookie=null;
     if (cfg.cookies) {
       var jar = new Cookies(req,res);
