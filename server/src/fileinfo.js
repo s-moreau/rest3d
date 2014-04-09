@@ -103,24 +103,13 @@
   };
   // move a file to upload area
   FileInfo.prototype.upload = function (handler) {
-      console.log(handler.hasOwnProperty("iduser"))
-
       if(handler.hasOwnProperty("iduser")){ 
-            console.log("1");
-
         var tmp = handler.folder.split("/");
-            console.log(tmp);
-
         var index = tmp.length;
-            console.log(index);
-
         for(var i=3;i<index;i++){
-          console.debug(tmp[i-1]+"/"+tmp[i]);
           if(tmp[i].split(".").length==1){
-            
             var flag = fs.existsSync(tmp[i-1]+"/"+tmp[i]);
             tmp[i]=tmp[i-1]+"/"+tmp[i];
-            console.log("flag",flag)
             if(!flag){
               console.log("createfoler "+tmp[i])
               fs.mkdirSync(tmp[i]);

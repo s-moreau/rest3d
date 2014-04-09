@@ -30,7 +30,64 @@ define(['jquerymin', 'rest3d', 'gltf', 'collada', 'viewer','q'], function ($, re
         var id;
         var flag;
 
-      function preview(node){
+        function callbackConvert(data){
+            // $this.prop('disabled',true);
+            if (data.result.output) {
+                console.debug(data.result.output);
+            }
+            if (data.result.code) {
+                ("Exit code: " + data.result.code);
+            }
+            if (data.error) {
+                var span = $('<p><span><b>Error code=' + data.error.code + ' :: ' + data.error.message + '</b></span></p>');
+                data.context.append(span);
+            }
+            else {
+                // ennumerate all resulting files
+                var $conve = upload.header(data.file.name);
+                $.each(data.result.files, function (index, file) {
+                    var href = $('<a style="display:none" href="/rest3d/' + decodeURIComponent(file.name) + '" target="_blank"></a>');
+                    upload.filesArea.append(href);
+                    var $download = $("<button>Download</button>").on("click", function () {
+                        href[0].click();
+                        href[0].remove();
+                    });
+
+                    var url = '/rest3d/' + decodeURIComponent(file.name);
+                    var ext = url.match(/\.[^.]+$/);
+                    if (ext == ".json") {
+                        var $dialog = $("<button>Launch</button>").on("click", function () {
+                            window.pleaseWait(true);
+                            glTF.load(url, viewer.parse_gltf).then(
+                                function (flag) {
+                                    window.pleaseWait(false);
+                                    window.notif(url);
+                                })
+                        });
+                        var $preview = $("<button>Peview</button>").on("click", function () {
+                            $("#dialog").dialog("close");
+                            var gitHtml = '<div id="dialog"><iframe id="myIframe" src="" style="height:99% !important; width:99% !important; border:0px;"></iframe></div>';
+                            gitPanel = $('body').append(gitHtml);
+                            $("#dialog").dialog({
+                                width: '600',
+                                height: '500',
+                                open: function (ev, ui) {
+                                    $('#myIframe').attr('src', '/viewer/easy-viewer.html?file=/rest3d/' + decodeURIComponent(file.name));
+                                },
+                                // close: function(){
+                                //     gitHtml.remove();},
+                            });
+                        });
+                        upload.convert($conve, formatName(data, file), $dialog, $download, $preview);
+                    }
+                    else {
+                        upload.download($conve, formatName(data, file), $download); //
+                    }
+                });
+            }
+        }
+
+        function preview(node){
                 $("#dialog").dialog("close");
                 var gitHtml = '<div id="dialog"><iframe id="myIframe" src="" style="height:99% !important; width:99% !important; border:0px;"></iframe></div>';
                 gitPanel = $('body').append(gitHtml);
@@ -64,10 +121,13 @@ define(['jquerymin', 'rest3d', 'gltf', 'collada', 'viewer','q'], function ($, re
         }
         upload.displayGltf = displayGltf;
 
-        function convert(node){
-
+        function convertMenu(node){
+            console.debug( $("#"+node.attr("id")))
+            result = $("#"+node.attr("id")).data();
+            console.debug(result);
+            rest3d.convert(result,callbackConvert);
         }   
-        upload.convert = convert
+        upload.convertMenu = convertMenu;
 
         function encodePathToId(path){
             path = path.replace("/rest3d/upload/"+viewer.idUser+"/","");
@@ -132,68 +192,16 @@ define(['jquerymin', 'rest3d', 'gltf', 'collada', 'viewer','q'], function ($, re
                         .off('click')
                         .prop('disabled', true)
                     // user rest to convert dae into glTF
-                    var callback = function (data) {
-                        // $this.prop('disabled',true);
-                        if (data.result.output) {
-                            console.debug(data.result.output);
-                        }
-                        if (data.result.code) {
-                            ("Exit code: " + data.result.code);
-                        }
-                        if (data.error) {
-                            var span = $('<p><span><b>Error code=' + data.error.code + ' :: ' + data.error.message + '</b></span></p>');
-                            data.context.append(span);
-                        }
-                        else {
-                            // ennumerate all resulting files
-                            var $conve = upload.header(data.file.name);
-                            $.each(data.result.files, function (index, file) {
-                                var href = $('<a style="display:none" href="/rest3d/upload/' + decodeURIComponent(file.name) + '" target="_blank"></a>');
-                                upload.filesArea.append(href);
-                                var $download = $("<button>Download</button>").on("click", function () {
-                                    href[0].click();
-                                    href[0].remove();
-                                });
-
-                                var url = '/rest3d/upload/' + decodeURIComponent(file.name);
-                                var ext = url.match(/\.[^.]+$/);
-                                if (ext == ".json") {
-                                    var $dialog = $("<button>Launch</button>").on("click", function () {
-                                        window.pleaseWait(true);
-                                        glTF.load(url, viewer.parse_gltf).then(
-                                            function (flag) {
-                                                window.pleaseWait(false);
-                                                window.notif(url);
-                                            })
-                                    });
-                                    var $preview = $("<button>Peview</button>").on("click", function () {
-                                        $("#dialog").dialog("close");
-                                        var gitHtml = '<div id="dialog"><iframe id="myIframe" src="" style="height:99% !important; width:99% !important; border:0px;"></iframe></div>';
-                                        gitPanel = $('body').append(gitHtml);
-                                        $("#dialog").dialog({
-                                            width: '600',
-                                            height: '500',
-                                            open: function (ev, ui) {
-                                                $('#myIframe').attr('src', '/viewer/easy-viewer.html?file=/rest3d/upload/' + decodeURIComponent(file.name));
-                                            },
-                                            // close: function(){
-                                            //     gitHtml.remove();},
-                                        });
-                                    });
-                                    upload.convert($conve, formatName(data, file), $dialog, $download, $preview);
-                                }
-                                else {
-                                    upload.download($conve, formatName(data, file), $download); //
-                                }
-                            });
-                        }
-                    }
-                    rest3d.convert(data, callback);
+                    rest3d.convert(data,callbackConvert);
                 });
         
-        var numberUser = viewer.idUser.split("_")[1]
         var sortAssetDrop = function (e, data,mode) {
             var defer = Q.defer();
+            if(!upload.getOptionLog()){
+                  upload.filesArea.children("br").last().remove();
+            }
+            upload.setting.show();
+            upload.optionLog.show();
             data.tmp = new Buffer();//buffer.bufferNode.push
             function extensionToType (ext){
                 var result;
@@ -384,7 +392,7 @@ define(['jquerymin', 'rest3d', 'gltf', 'collada', 'viewer','q'], function ($, re
                 setTimeout(function(){button.click()},1000);
                 if (ext[0] == ".dae" || ext[0] == ".DAE") {
 
-                    var $dialog = $("<button>Launch</button>").on("click", function () {
+                    var $dialog = $("<button>Launch</button>").on("click",function(){
                         window.pleaseWait(true);
                         COLLADA.load(url, viewer.parse_dae).then(
                             function (flag) {
@@ -423,7 +431,7 @@ define(['jquerymin', 'rest3d', 'gltf', 'collada', 'viewer','q'], function ($, re
                         url.append(button);};
                     url = url.attr("path");
                     newLine.append("<a>"+url+"</a>");
-                    upload.lunch1.on("click",function(){
+                    upload.setting.on("click",function(){
                         buffer.button.click();
                     })
                 },1000);
@@ -458,8 +466,13 @@ define(['jquerymin', 'rest3d', 'gltf', 'collada', 'viewer','q'], function ($, re
         }).on('fileuploaddone', function (e, data) {
             var buffer1 = data.tmp;
             $.each(data.result.files, function (index, file) {
+                data.buttonToReplace[index].parent().data({
+                        file: file,
+                        context: data.context,
+                })
                 if(upload.getOptionLog()){
                     file.assetName = data.result.files[index].name;
+
                     var $node = convertButton.clone(true).data({
                         file: file,
                         context: data.context,
@@ -508,7 +521,6 @@ define(['jquerymin', 'rest3d', 'gltf', 'collada', 'viewer','q'], function ($, re
                 });
 
         upload.object.fileupload("option","done",function (e, data) {
-            console.debug(data.files[0].relativePath);
             data.files[0].relativePath.attr("id",data.result.files[0].assetId);
     });
     }
