@@ -31,6 +31,8 @@ module.exports = function (server) {
   var sendFile = require('./sendfile');
   var restify = require('restify')
 
+  exports.name = "baseX"; 
+
   server.get(/^\/rest3d\/fl4re\/info/,function(req, res, next) {
   
     console.log('[rest3d]'+req.url);

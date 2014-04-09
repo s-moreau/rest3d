@@ -59,7 +59,6 @@ var copyFileSync = require('./src/cp');
 
 var toJSON = require('./src/tojson');
 
-var FileInfo = require('./src/fileinfo');
 var sendFile = require('./src/sendfile');
 var Handler= require('./src/handler');
 
@@ -214,12 +213,7 @@ server.db.init(function(b){
 server.get(/^\/rest3d\/info/,function(req, res, next) {
 	var handler = new Handler(req,res,next);
 	if (server.db) {
-		server.db.info(function(err, res){
-			if (err)
-				handler.handleError(err);
-			else
-				handler.handleResult(res);
-		})
+		handler.handleResult("database "+server.db.name+" connected");
 	} else {
 		handler.handleResult("database not connected")
 	}
@@ -329,24 +323,16 @@ server.post(/^\/rest3d\/convert.*/,function(req,res,next){
 		    // end hack
 			var files = [];
 			fs.readdir(output_dir, function (err, list) {
-                list.forEach(function (name) {
-		            var stats = fs.statSync(output_dir+name),
-		                fileInfo;
-		            if (stats.isFile() && name[0] !== '.') {
-		                fileInfo = new FileInfo({
-		                    name: output_dir+name,
-		                    size: stats.size
-		                });
-		                //fileInfo.initUrls(req);
-		                files.push(fileInfo);
-		            }
-		        });
-		        var timeout = function() {
-                    	rmdirSync(output_dir);
-                    	console.log('timeout !! '+output_dir+' was deleted');
-                    }
-                    setTimeout(function() { timeout()},5 * 60 * 1000);
-		        handler.handleResult({files: files, code:codeC2J, output:outputC2J});
+          list.forEach(function (name) {
+              var stats = fs.statSync(output_dir+name);
+              files.push({name: output_dir+name, size: stats.size});
+	        });
+	        var timeout = function() {
+              	rmdirSync(output_dir);
+              	console.log('timeout !! '+output_dir+' was deleted');
+              }
+          setTimeout(function() { timeout()},5 * 60 * 1000);
+	        handler.handleResult({files: files, code:codeC2J, output:outputC2J});
 		    });		
 	     });
 	     });
