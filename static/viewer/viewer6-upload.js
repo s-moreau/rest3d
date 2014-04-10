@@ -30,6 +30,17 @@ define(['jquerymin', 'rest3d', 'gltf', 'collada', 'viewer','q'], function ($, re
         var id;
         var flag;
 
+         // rmp = $("#uploadTree").jstree("create_node", parent, "inside", {
+         //                        "data": name,
+         //                        "attr": {
+         //                            "id": flag,
+         //                            "file":name,
+         //                            "path": parent.attr('path') +"/"+name,
+         //                            "rel": rel,
+         //                            "uploadstatus":false,
+         //                        }
+         //                    }, false, true);
+
         function callbackConvert(data){
             // $this.prop('disabled',true);
             if (data.result.output) {
@@ -195,7 +206,7 @@ define(['jquerymin', 'rest3d', 'gltf', 'collada', 'viewer','q'], function ($, re
                     rest3d.convert(data,callbackConvert);
                 });
         
-        var sortAssetDrop = function (e, data,mode) {
+        window.sortAssetDrop = function (e, data,mode) {
             var defer = Q.defer();
             if(!upload.getOptionLog()){
                   upload.filesArea.children("br").last().remove();
@@ -306,10 +317,12 @@ define(['jquerymin', 'rest3d', 'gltf', 'collada', 'viewer','q'], function ($, re
                     var result = [""];
                 }
                 else{
-                    var result = file.relativePath.split("/");}
+                    try{var result = file.relativePath.split("/");}
+                    catch(err){var result = file.path.replace("upload/","").split("/");}
+                }
 
                 for(var i=0;i<result.length;i++){
-                    if(result[i]!=""){
+                    if(result[i]!=""&&result[i].indexOf('.')==-1){
                         var id = createNode(parent,result[i],file);
                         parent = $("#"+id);}
                     else{
@@ -347,7 +360,7 @@ define(['jquerymin', 'rest3d', 'gltf', 'collada', 'viewer','q'], function ($, re
             upload.object.fileupload('option', 'dropZone', $("#c_" + viewer.idUser));
             upload.object.bind('fileuploaddrop', function (e, data) {
                 window.pleaseWait(true);
-                sortAssetDrop(e, data).then(function(){
+                window.sortAssetDrop(e, data).then(function(){
                     window.pleaseWait(false);
                 })
             });
@@ -357,7 +370,7 @@ define(['jquerymin', 'rest3d', 'gltf', 'collada', 'viewer','q'], function ($, re
             this.object.off('fileuploadchange');
             this.object.on('fileuploadchange', function (e, data) {
                   window.pleaseWait(true);
-                sortAssetDrop(e, data, node).then(function(){
+                window.sortAssetDrop(e, data, node).then(function(){
                     window.pleaseWait(false);
                 })
             })

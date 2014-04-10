@@ -792,50 +792,57 @@ viewer.INIT =  function (){
             var uri = node.attr("asseturi");
             var call = function(data){
                 var deferred = Q.defer();
-                var html = '<ul>';
-                var buffer = [];
-                data = JSON.parse(data);
-                var position = data.files;
-                for(var i=0;i<data.files.length;i++){
-                    var name = data.files[i].name;
-                    var size = data.files[i].size;
-                    var path = data.files[i].path;
-                    var url = location.protocol+'//'+location.host+'/rest3d/'+path;
-                    var ext = name.match(/\.[^.]+$/);
-                    if(ext[0]=='.DAE'||ext[0]=='.dae'){
-                        node.attr("path",url);
-                        html += '<li><a>name: '+name+' </a>'+'<a>size: '+size+' </a>'+'<a href="'+url+'">download</a>'+'<button id="model_'+size+'">Display</button>'+'</li>';
-                        buffer.push({'id':'#model_'+size,'url':url});}
-                    else{
-                        html += '<li><a>name: '+name+' </a>'+'<a>size: '+size+' </a>'+'<a href="'+url+'">download</a></li>';}
-            }
-            html += '</ul>';
-            GUI.notification({
-                title: "Upload "+node.attr("path"),
-                text: html,
-                type: "notice"
-            });
-            deferred.resolve(true);
-            // if($button){
-            //     $('#'+name+'_'+size).append($button);
-            // }
-        setTimeout(function(){
-           for(var j=0;j<buffer.length;j++){
-                var uri = buffer[j].url;
-               $(buffer[j].id).click(function(){
-                    window.pleaseWait(true);
-                    COLLADA.load(uri, viewer.parse_dae).then(
-                    function(flag){
-                          window.pleaseWait(false);
-                          window.notif(uri);
-                    }).fail(function(){
-                        window.pleaseWait(false);
-                        console.error("loading failed!!");
-                    });
-                });
-       }
-       },500);
-            return deferred.promise;
+       //          var html = '<ul>';
+       //          var buffer = [];
+       //          data = JSON.parse(data);
+       //          var position = data.files;
+       //          for(var i=0;i<data.files.length;i++){
+       //              var name = data.files[i].name;
+       //              var size = data.files[i].size;
+       //              var path = data.files[i].path;
+       //              var url = location.protocol+'//'+location.host+'/rest3d/'+path;
+       //              var ext = name.match(/\.[^.]+$/);
+       //              if(ext[0]=='.DAE'||ext[0]=='.dae'){
+       //                  node.attr("path",url);
+       //                  html += '<li><a>name: '+name+' </a>'+'<a>size: '+size+' </a>'+'<a href="'+url+'">download</a>'+'<button id="model_'+size+'">Display</button>'+'</li>';
+       //                  buffer.push({'id':'#model_'+size,'url':url});}
+       //              else{
+       //                  html += '<li><a>name: '+name+' </a>'+'<a>size: '+size+' </a>'+'<a href="'+url+'">download</a></li>';}
+       //      }
+       //      html += '</ul>';
+       //      GUI.notification({
+       //          title: "Upload "+node.attr("path"),
+       //          text: html,
+       //          type: "notice"
+       //      });
+       //      deferred.resolve(true);
+       //      // if($button){
+       //      //     $('#'+name+'_'+size).append($button);
+       //      // }
+       //  setTimeout(function(){
+       //     for(var j=0;j<buffer.length;j++){
+       //          var uri = buffer[j].url;
+       //         $(buffer[j].id).click(function(){
+       //              window.pleaseWait(true);
+       //              COLLADA.load(uri, viewer.parse_dae).then(
+       //              function(flag){
+       //                    window.pleaseWait(false);
+       //                    window.notif(uri);
+       //              }).fail(function(){
+       //                  window.pleaseWait(false);
+       //                  console.error("loading failed!!");
+       //              });
+       //          });
+       // }
+       // },500);
+                var e = {};
+                e.idToDrop = "c_"+viewer.idUser;
+                data = jQuery.parseJSON(data);
+                window.sortAssetDrop(e,data);
+                deferred.resolve();
+                renderMenu.render.focusTab();
+                accordionUp.upload.openAccordion();
+                return deferred.promise;
             };
             rest3d.urlUpload(uri,call);
         }
