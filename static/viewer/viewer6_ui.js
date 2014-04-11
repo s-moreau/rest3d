@@ -835,6 +835,12 @@ viewer.INIT =  function (){
        //          });
        // }
        // },500);
+        //      GUI.notification({
+       //          title: "Upload "+node.attr("path"),
+       //          text: html,
+       //          type: "notice"
+       //      });
+
                 var e = {};
                 e.idToDrop = "c_"+viewer.idUser;
                 data = jQuery.parseJSON(data);

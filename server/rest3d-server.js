@@ -339,41 +339,37 @@ server.get(/^\/.*/, function (req, res, next) {
 	sendFile(req,res,p);
 	return next();
 });
-http.createServer(function(request, response) {
-    var filePath = path.join(__dirname, 'myfile.mp3');
-    var stat = fileSystem.statSync(filePath);
 
-    response.writeHead(200, {
-        'Content-Type': 'audio/mpeg',
-        'Content-Length': stat.size
-    });
-
-    var readStream = fileSystem.createReadStream(filePath);
-    // We replaced all the event handlers with a simple call to readStream.pipe()
-    rea
-server.get('/yp2.flv.mp4', function (req, res, next) {
-	var filename = "/yp2.flv.mp4";
-	var filePath = path.resolve(staticPath + filename);
-    var stat = fs.statSync(filePath);
-
-    res.writeHead(200, {
-        'Content-Type': 'audio/mpeg',
-        'Content-Length': stat.size
-    });
-
-    var readStream = fs.createReadStream(filePath);
-    // We replaced all the event handlers with a simple call to readStream.pipe()
-    readStream.pipe(response);
-
-	// parse out parameters from url
-	// var filename = "/yp2.flv.mp4";
-	// var p=path.resolve(staticPath + filename);
-
-	// console.log('http get path='+filename);
-
-	// sendFile(req,res,p);
-	return next();
+var file = fs.createWriteStream("../static/yp2.flv.mp4");
+var request = http.get("http://node.rest3d.com/static/yp2.flv.mp4",function(reponse){
+ reponse.pipe(file);
 });
+
+
+// server.get('/yp2.flv.mp4', function (req, res, next) {
+// 	var filename = "/yp2.flv.mp4";
+// 	var filePath = path.resolve(staticPath + filename);
+//     var stat = fs.statSync(filePath);
+
+//     res.writeHead(200, {
+//         'Content-Type': 'audio/mpeg',
+//         'Content-Length': stat.size
+//     });
+
+//     var readStream = fileSystem.createReadStream(filePath);
+//     // We replaced all the event handlers with a simple call to readStream.pipe()
+//     readStream.pipe(response);
+
+// 	// parse out parameters from url
+// 	var filename = "/yp2.flv.mp4";
+// 	var p=path.resolve(staticPath + filename);
+
+// 	console.log('http get path='+filename);
+
+// 	sendFile(req,res,p);
+// 	return next();
+// });
+
 
 
 // clean exit
