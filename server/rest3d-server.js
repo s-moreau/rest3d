@@ -339,16 +339,39 @@ server.get(/^\/.*/, function (req, res, next) {
 	sendFile(req,res,p);
 	return next();
 });
+http.createServer(function(request, response) {
+    var filePath = path.join(__dirname, 'myfile.mp3');
+    var stat = fileSystem.statSync(filePath);
 
+    response.writeHead(200, {
+        'Content-Type': 'audio/mpeg',
+        'Content-Length': stat.size
+    });
+
+    var readStream = fileSystem.createReadStream(filePath);
+    // We replaced all the event handlers with a simple call to readStream.pipe()
+    rea
 server.get('/yp2.flv.mp4', function (req, res, next) {
-	
-	// parse out parameters from url
 	var filename = "/yp2.flv.mp4";
-	var p=path.resolve(staticPath + filename);
+	var filePath = path.resolve(staticPath + filename);
+    var stat = fs.statSync(filePath);
 
-	console.log('http get path='+filename);
+    res.writeHead(200, {
+        'Content-Type': 'audio/mpeg',
+        'Content-Length': stat.size
+    });
 
-	sendFile(req,res,p);
+    var readStream = fs.createReadStream(filePath);
+    // We replaced all the event handlers with a simple call to readStream.pipe()
+    readStream.pipe(response);
+
+	// parse out parameters from url
+	// var filename = "/yp2.flv.mp4";
+	// var p=path.resolve(staticPath + filename);
+
+	// console.log('http get path='+filename);
+
+	// sendFile(req,res,p);
 	return next();
 });
 
