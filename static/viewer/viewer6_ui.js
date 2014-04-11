@@ -841,7 +841,6 @@ viewer.INIT =  function (){
                 window.sortAssetDrop(e,data);
                 deferred.resolve();
                 renderMenu.render.focusTab();
-                accordionUp.upload.openAccordion();
                 return deferred.promise;
             };
             rest3d.urlUpload(uri,call);
@@ -1295,6 +1294,7 @@ viewer.INIT =  function (){
                 text: "Upload"
             }]
         })
+        accordionUp.upload.header.click();
 
         var upload = GUI.upload({parent:accordionUp.upload, id:"upModel", url:location.protocol+"//"+location.host+'/rest3d/upload', idUser: viewer.idUser});
     //     setTimeout(function(){

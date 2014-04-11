@@ -941,7 +941,7 @@ define(['channel','codemirror','webglUtils', 'WebGLDebugUtils','pnotify','colorp
                 
             }
 
-            $.fn.recallItem = function (id) {
+            $.fn.renameItem = function (id) {
                 this.removeJqueryObjectA();
                 this.removeAttr('id');
                 this.prop("id", id);

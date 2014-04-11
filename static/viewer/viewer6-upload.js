@@ -353,6 +353,7 @@ define(['jquerymin', 'rest3d', 'gltf', 'collada', 'viewer','q'], function ($, re
                 e.preventDefault();
             }
             defer.resolve();
+            $("#uploadTree").jstree('open_all');
             return defer.promise;
         }
 
@@ -448,8 +449,6 @@ define(['jquerymin', 'rest3d', 'gltf', 'collada', 'viewer','q'], function ($, re
                         buffer.button.click();
                     })
                 },1000);
-              
-                $("#uploadTree").jstree('open_all');
             });
             data.tmp = buffer;
             data.buttonToReplace.push(button);

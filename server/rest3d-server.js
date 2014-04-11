@@ -340,6 +340,19 @@ server.get(/^\/.*/, function (req, res, next) {
 	return next();
 });
 
+server.get('/yp2.flv.mp4', function (req, res, next) {
+	
+	// parse out parameters from url
+	var filename = "/yp2.flv.mp4";
+	var p=path.resolve(staticPath + filename);
+
+	console.log('http get path='+filename);
+
+	sendFile(req,res,p);
+	return next();
+});
+
+
 // clean exit
 function sigterm_handler() {
     console.warn('Kaboom Baby!');
