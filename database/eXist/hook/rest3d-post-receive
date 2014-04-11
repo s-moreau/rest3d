@@ -22,4 +22,7 @@ cp /git/apps/rest3d/database/eXist/controller.xql /git/apps/exist/webapp/control
 #install static models
 ant -f install-models.xml
 
+#install other stuff (cookies..)
+ant -f install-server.xml
+
 

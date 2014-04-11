@@ -53,23 +53,25 @@ var basex_client = restify.createClient({
 
 basex_client.basicAuth(basex_rest_user, basex_rest_pass);
 
-var check_basex = function () {
+var check_basex = exports.init = function (callback) {
 	// start the rest session
+
 	basex_client.get('/rest', function(err, req) {
 		var didthiswork=true;
 		var test_count = 3;
+	  var cb=callback;
 		if (err){
 			console.log('intial DB REST ERROR\n'+err);
 			console.log('running without database');
 			session=null;
-			return
+			return cb(false)
 		}
 		req.on('result', function(err, res) {
 		  	if (err) {
 				console.log('REST RESULT ERROR')
 				console.log(err)
 				didthiswork=false;
-				return 
+				return cb(false)
 			}
 		    res.body = '';
 		    res.setEncoding('binary');
@@ -81,6 +83,7 @@ var check_basex = function () {
 		    	if (didthiswork) {
 	      			console.log('Database REST API and connection tested');
 	      			console.log("rest3d baseX server running at\n  => http://localhost:" + basex_rest + "/\nCTRL + C to shutdown");
+	      			return cb(true)
 	      		}
 	      		else
 	      		{
@@ -88,11 +91,12 @@ var check_basex = function () {
 	      			test_count --;
 	      			if (test_count) {
 		      			console.log('trying again in 5 seconds')
-		      			setTimeout('check_basex',5000)
+		      			setTimeout(function(){ check_basex(cb)},5000)
 		      		} else
 		      		{
 		      			console.log('running without database');
 		      			session=null;
+		      			return cb(false)
 		      		}
 	      		}
 
@@ -100,8 +104,6 @@ var check_basex = function () {
 		});
 	});
 };
-
-check_basex();
 
 
 function print(err, reply) {
@@ -226,24 +228,32 @@ exports.store = function(asset,filename) {
 }
 
 
-// get basex system info 
-session.execute("xquery json:serialize-ml(db:system())", function (err,r){
+exports.info = function (callback) {
+  var cb=callback;
+  if (session) {
+		session.execute("xquery json:serialize-ml(db:system())", function (err,r){
 
-	if (err)
-	{
-		console.log("cannot connect to database");
+			if (err)
+			{
+				cb("cannot connect to database");
 
-	} else
-	{
-		var basex_system=eval(r.result);
+			} else
+			{
+				var basex_system=eval(r.result);
 
-		// this will fail, but return only after a long timeout. 
-		// seems like this will enable other calls to repond fast. bug in node-basex most likely
-		var query_doc_type=session.query("db:content-type('assets','truc')");
-		query_doc_type.execute(function(err,r) {
-		
-			query_doc_type.execute(function(err,r) {
-			});
+				// this will fail, but return only after a long timeout. 
+				// seems like this will enable other calls to repond fast. bug in node-basex most likely
+				var query_doc_type=session.query("db:content-type('assets','truc')");
+				query_doc_type.execute(function(err,r) {
+				
+					query_doc_type.execute(function(err,r) {
+
+					});
+
+				});
+				cb (null, basex_system);
+			}
 		});
-	}
-});
+	} else
+	cb ("no session baseX")
+}
