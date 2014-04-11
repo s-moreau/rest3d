@@ -1,4 +1,3 @@
-
 /*
 
 rest3d-server.js
@@ -48,8 +47,7 @@ require('shelljs/global');
 var fs = require('fs');
 var path = require('path');
 var cache = require('./src/diskcache').Cache;
-// fast html scrapping
-var request = require('request');
+
 // get content from zip files
 var zip = require("zip");
 
@@ -60,9 +58,8 @@ var copyFileSync = require('./src/cp');
 
 var toJSON = require('./src/tojson');
 
-var FileInfo = require('./src/fileinfo');
 var sendFile = require('./src/sendfile');
-var handler= require('./src/handler');
+var Handler= require('./src/handler');
 
 var platform = os.type().match(/^Win/) ? 'win' : 
 				(os.type().match(/^Dar/) ? 'mac' : 'unix');
@@ -138,6 +135,7 @@ server.use(restify.queryParser());
 server.use(restify.gzipResponse());
 restify.defaultResponseHeaders = false;
 
+
 var session=require('./src/session')();
 server.sessionManager = session;
 server.use(session.sessionManager);
@@ -146,17 +144,6 @@ server.use(session.sessionManager);
 require('./src/warehouse')(server);
 require('./src/3dvia')(server);
 require('./src/upload')(server);
-
-
-var database =  process.env.DATABASE || 
-                process.argv[2] ||
-                   'existdb';
-
-console.log("loading database module ["+database+"]");
-
-require('./src/'+database)(server);
-
-
 
 
 // create diskcache (no mem caching, no gzip)
@@ -196,8 +183,40 @@ server.use(restify.throttle({
 */
 //server.use(restify.conditionalRequest());
 
+// start database
+
+var database =  process.env.DATABASE || 
+                process.argv[2] ||
+                   'existdb';
+
+console.log("loading database module ["+database+"]");
+
+// this initializes server.db
+require('./src/'+database)(server);
+
+server.db.init(function(b){
+	if (b)
+		console.log("rest3d will be using database ["+database+"]");
+	else {
+		console.log("rest3d will not be using database ["+database+"]");
+		server.db=null;
+	}
+
+	// session mnager -> requires database
+	session.config.db=server.db;
+
+});
 
 // rest3d API
+
+server.get(/^\/rest3d\/info/,function(req, res, next) {
+	var handler = new Handler(req,res,next);
+	if (server.db) {
+		handler.handleResult("database "+server.db.name+" connected");
+	} else {
+		handler.handleResult("database not connected")
+	}
+});
 
 
 // convert
@@ -209,13 +228,13 @@ server.post(/^\/rest3d\/convert.*/,function(req,res,next){
          url = '',
          params = {};
 
-   var h = new handler(req,res, next);
+   var handler = new Handler(req,res, next);
          
 
      form.on('field', function (name, data) {
      	params[name] = data;
      }).on('error', function (e) {
-     	h.handleError(e);
+     	handler.handleError(e);
      }).on('end', function(){//
      	console.log(params);
      	console.log('now converting collada');
@@ -269,7 +288,7 @@ server.post(/^\/rest3d\/convert.*/,function(req,res,next){
 		     //console.log('Error code: '+error.code);
 		     //console.log('Signal received: '+error.signal);
 
-			 h.handleError({"code":error.code, "message": stderr});
+			 handler.handleError({"code":error.code, "message": stderr});
 
 		   }
 		   console.log('Child Process STDOUT: '+stdout);
@@ -278,7 +297,7 @@ server.post(/^\/rest3d\/convert.*/,function(req,res,next){
 		 ls.on('exit', function (code, output) {
 		  console.log('Child process exited with exit code '+code);
 		  if (code !== 0) {
-				h.handleError({errorCode:code, message:'ERROR, child process exited with exit code '});
+				handler.handleError({errorCode:code, message:'Child process exited with exit code '});
 				return;
 			}
 			codeC2J= code;
@@ -293,7 +312,7 @@ server.post(/^\/rest3d\/convert.*/,function(req,res,next){
 		    fs.readdir(input_dir, function (err, list) {
                 list.forEach(function (name) {
                 	var ext = name.match(/\.[^.]+$/);
-                	if (ext[0]!=='.json'&&ext[0]!=='.dae'&&ext[0]!=='.glsl'&&ext[0]!=='.bin')
+                	if (ext[0]!=='.json'&&ext[0]!=='.dae')
                 	{
                 		copyFileSync(input_dir+name, output_dir+name);
                 		console.log(input_dir+name+'  TO  '+output_dir+name);
@@ -303,24 +322,16 @@ server.post(/^\/rest3d\/convert.*/,function(req,res,next){
 		    // end hack
 			var files = [];
 			fs.readdir(output_dir, function (err, list) {
-                list.forEach(function (name) {
-		            var stats = fs.statSync(output_dir+name),
-		                fileInfo;
-		            if (stats.isFile() && name[0] !== '.') {
-		                fileInfo = new FileInfo({
-		                    name: output_dir+name,
-		                    size: stats.size
-		                });
-		                //fileInfo.initUrls(req);
-		                files.push(fileInfo);
-		            }
-		        });
-		        var timeout = function() {
-                    	rmdirSync(output_dir);
-                    	console.log('timeout !! '+output_dir+' was deleted');
-                    }
-                    setTimeout(function() { timeout()},5 * 60 * 1000);
-		        h.handleResult({files: files, code:codeC2J, output:outputC2J});
+          list.forEach(function (name) {
+              var stats = fs.statSync(output_dir+name);
+              files.push({name: output_dir+name, size: stats.size});
+	        });
+	        var timeout = function() {
+              	rmdirSync(output_dir);
+              	console.log('timeout !! '+output_dir+' was deleted');
+              }
+          setTimeout(function() { timeout()},5 * 60 * 1000);
+	        handler.handleResult({files: files, code:codeC2J, output:outputC2J});
 		    });		
 	     });
 	     });
@@ -339,38 +350,6 @@ server.get(/^\/.*/, function (req, res, next) {
 	sendFile(req,res,p);
 	return next();
 });
-
-var file = fs.createWriteStream("../static/yp2.flv.mp4");
-var request = http.get("http://node.rest3d.com/static/yp2.flv.mp4",function(reponse){
- reponse.pipe(file);
-});
-
-
-// server.get('/yp2.flv.mp4', function (req, res, next) {
-// 	var filename = "/yp2.flv.mp4";
-// 	var filePath = path.resolve(staticPath + filename);
-//     var stat = fs.statSync(filePath);
-
-//     res.writeHead(200, {
-//         'Content-Type': 'audio/mpeg',
-//         'Content-Length': stat.size
-//     });
-
-//     var readStream = fileSystem.createReadStream(filePath);
-//     // We replaced all the event handlers with a simple call to readStream.pipe()
-//     readStream.pipe(response);
-
-// 	// parse out parameters from url
-// 	var filename = "/yp2.flv.mp4";
-// 	var p=path.resolve(staticPath + filename);
-
-// 	console.log('http get path='+filename);
-
-// 	sendFile(req,res,p);
-// 	return next();
-// });
-
-
 
 // clean exit
 function sigterm_handler() {
