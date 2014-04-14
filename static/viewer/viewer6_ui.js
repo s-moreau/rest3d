@@ -495,6 +495,7 @@ viewer.INIT =  function (){
                 $(node).remove();
             }
 
+
             treeScene = GUI.treeBis({
                 id:'Tree',
                 parent: renderMenu.scenes,
@@ -944,7 +945,20 @@ viewer.INIT =  function (){
                     }
                 }
             },
-           
+           "contextmenu" : {
+                "items" : function (node) {
+                    var result = {};
+                    if(node.attr("iconuri")){
+                        result.icon = {'label':'Display icon','action':icon,};}
+                    if(node.attr("rel")=="model"){
+                        result.display = {'label':'Upload','action':display,};
+                        result.download = {'label':'Download','action':download,};
+                    }
+                    if(node.attr("previewuri")){
+                        result.preview = {'label':'Preview model','action':preview,};}
+                    return result;
+                }
+            },
             type:  { "types": {
                 "folder": {
                     "icon" : {

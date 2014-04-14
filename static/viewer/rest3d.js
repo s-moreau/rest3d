@@ -39,7 +39,7 @@ rest3d.convert = function(_params, _cb) {
       if (data) params.result = JSON.parse(data); 
       if (cb) cb(params);
     }).fail(function(data) {
-        console.log("Error Converting "+params.file.name);
+        console.log("Error Converting "+params.file);
         // console.log(JSON.parse(data.error().responseText));
     });
 };
