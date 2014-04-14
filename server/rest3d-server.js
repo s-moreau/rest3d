@@ -310,7 +310,7 @@ server.post(/^\/rest3d\/convert.*/,function(req,res,next){
                 	var ext = name.match(/\.[^.]+$/);
                 	if (ext[0]!=='.json'&&ext[0]!=='.dae')
                 	{
-                    fs.copyRecursive(input_dir+name, output_dir+name, function (err) {
+                    fsextra.copyRecursive(input_dir+name, output_dir+name, function (err) {
                     if (err) {
                       throw err;
                     }
