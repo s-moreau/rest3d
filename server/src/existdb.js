@@ -30,7 +30,12 @@ module.exports = function (server) {
   var existdb = server.db = require('./existdbdriver');
   var restify = require('restify')
   var sendFile = require('./sendfile');
-  var dbHandler = require('./handler');
+  // note: handler has post/get/destroy added by upload.js already
+  var Handler = require('./handler');
+  var FileInfo = require('./fileinfo');
+  var formidable = require('formidable');
+
+  var uuid = require('node-uuid');
 
   server.get(/^\/rest3d\/fl4re\/info/,function(req, res, next) {
     var handler = new dbHandler(req,res,next);
@@ -41,6 +46,119 @@ module.exports = function (server) {
       else
         handler.handleResult(res);
     })
+  });
+
+/*
+  // upload one or more files
+  dbHandler.prototype.post = function () {
+    var handler = this;
+    var form = new formidable.IncomingForm();
+    var tmpFiles = [];
+    var files = [];
+    var map = {}
+    var counter = 1;
+    var redirect=undefined;
+
+    var finish = function () {
+        counter -= 1;
+        if (!counter) 
+            return handler.handleResult({files: files}, redirect);
+       
+    };
+
+    form.uploadDir = FileInfo.options.tmpDir;
+    form.on('fileBegin', function (name, file) {
+      try {
+        tmpFiles.push(file.path);
+        var fileInfo = new FileInfo(file);
+        fileInfo.safeName();
+        map[file.path] = fileInfo;
+        files.push(fileInfo);
+
+      } catch(e) {
+        handler.handleError( e);
+        return 
+      };
+    }).on('field', function (name, value) {
+      if (name === 'redirect') {
+        redirect = value;
+      }
+      if (name === 'url')
+      {
+        // downloading file and uncompressing if needed
+        var params={};
+        params.uid = uuid.v1(); // time based uuid generation
+        params.cb = function(error,result){
+          if (error)
+            handler.handleError(error);
+          else {
+            // turn {asset} into fileInfos
+            var getFileInfos = function(results) {
+
+              if (results.type === 'file') {
+                var fileInfo = new FileInfo(results);
+                fileInfo.safeName();
+                files.push(fileInfo);
+                //fileInfo.size =
+                // if (!fileInfo.validate()) {
+                //  fs.unlink(file.path);
+                //  return;
+                //}
+              }
+              if (results.children) {
+                for (var i=0; i<results.children.length;i++){
+                  getFileInfos(results.children[i]);
+                }
+              }
+            };
+            getFileInfos(result);
+            finish();
+          }
+        };
+        params.url = value;
+        params.where = FileInfo.options.uploadDir;
+
+        counter ++;
+        zipFile.unzip(params.uid,params.url,null,params.where, params.cb); //jar?
+      }
+    }).on('file', function (name, file) {
+      var fileInfo = map[file.path];
+      fileInfo.size = file.size;
+      fileInfo.type = file.type;
+      fileInfo.file = file;
+      fileInfo.assetId = uuid.v1();
+      if (!fileInfo.validate()) {
+        fs.unlinkSync(file.path);
+        return;
+      }
+      handler.db = server.db;
+      fileInfo.upload(handler, finish);
+
+    }).on('aborted', function () {
+      tmpFiles.forEach(function (file) {
+        fs.unlinkSync(file);
+      });
+    }).on('error', function (e) {
+        handler.handleError( e);
+        return 
+    }).on('progress', function (bytesReceived, bytesExpected) {
+      if (bytesReceived > FileInfo.options.maxPostSize) {
+        handler.req.connection.destroy();
+      }
+    }).on('end', finish);
+    form.parse(handler.req);
+  };
+*/
+  // rest3d post upload API
+  server.post(/^\/rest3d\/fl4re\/upload.*/, function(req,res,next){
+
+    var handler = new Handler(req, res, next);
+    handler.db = server.db;
+    handler.allowOrigin();
+
+    handler.post();
+
+    return next();
   });
 
   server.get(/^\/rest3d\/fl4re\/.*/,function(req, res, next) {
