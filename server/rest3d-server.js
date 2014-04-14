@@ -293,6 +293,11 @@ server.post(/^\/rest3d\/convert.*/,function(req,res,next){
 		 });
 		 ls.on('exit', function (code, output) {
 		  console.log('Child process exited with exit code '+code);
+      if (code == null) {
+        console.log("SEGMENTATION FAULT");
+        handler.handleError({errorCode:code, message:'collada2gltf segmentation fault'});
+        return;
+      }
 		  if (code !== 0) {
 				handler.handleError({errorCode:code, message:'Child process exited with exit code '});
 				return;
