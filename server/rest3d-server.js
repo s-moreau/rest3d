@@ -342,17 +342,17 @@ server.post(/^\/rest3d\/convert.*/,function(req,res,next){
             files.push({name: path+name, size: stats.size});
           }
           else{
-            parseFolder(path+name,files);
+            files = parseFolder(path+name,files);
           }
        });
+        return files;
       }
-    parseFolder(output_dir,files);
      var timeout = function(output_dir) {
         rmdirSync(output_dir);
         console.log('timeout !! '+output_dir+' was deleted');
       }
-      setTimeout(function() { timeout()},5 * 60 * 1000);
-      handler.handleResult({files: files, code:codeC2J, output:outputC2J});
+      setTimeout(function() { timeout()},5 * 60 * 1000); 
+      handler.handleResult({files: parseFolder(output_dir,files), code:codeC2J, output:outputC2J});
       // fs.readdir(output_dir, function (err, list) {
       //     list.forEach(function (name) {
       //         var stats = fs.statSync(output_dir+name);
