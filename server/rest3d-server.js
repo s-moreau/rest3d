@@ -316,13 +316,8 @@ server.post(/^\/rest3d\/convert.*/,function(req,res,next){
                 		console.log(input_dir+name+'  TO  '+output_dir+name);
                 	}
                   else if(ext==null){
-                    ncp(input_dir+name, output_dir+name function (err) {
-                   if (err) {
-                     return console.error(err);
-                   }
-                   console.log('done!');
+                    ncp(input_dir+name, output_dir+name);
                    console.log(input_dir+name+'  TO  '+output_dir+name);
-                  });
                   }
 		        });
 		    });
