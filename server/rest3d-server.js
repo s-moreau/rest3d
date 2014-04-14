@@ -333,18 +333,34 @@ server.post(/^\/rest3d\/convert.*/,function(req,res,next){
           });
         // end hack
       var files = [];
-      fs.readdir(output_dir, function (err, list) {
-          list.forEach(function (name) {
-              var stats = fs.statSync(output_dir+name);
-              files.push({name: output_dir+name, size: stats.size});
-          });
-          var timeout = function() {
-                rmdirSync(output_dir);
-                console.log('timeout !! '+output_dir+' was deleted');
-              }
-          setTimeout(function() { timeout()},5 * 60 * 1000);
-          handler.handleResult({files: files, code:codeC2J, output:outputC2J});
-        });   
+      function parseFolder(path,files){
+         fs.readdir(path, function (err, list) {
+              list.forEach(function (name) {
+                var ext = name.match(/\.[^.]+$/);
+                if(ext!==null){
+                  var stats = fs.statSync(path+name);
+                  files.push({name: path+name, size: stats.size});
+                }
+                else{
+                  parseFolder(path+name,files);
+                }
+             });
+         })
+      }
+    parseFolder(output_dir,files);
+     var timeout = function(output_dir) {
+        rmdirSync(output_dir);
+        console.log('timeout !! '+output_dir+' was deleted');
+      }
+      setTimeout(function() { timeout()},5 * 60 * 1000);
+      handler.handleResult({files: files, code:codeC2J, output:outputC2J});
+      // fs.readdir(output_dir, function (err, list) {
+      //     list.forEach(function (name) {
+      //         var stats = fs.statSync(output_dir+name);
+      //         files.push({name: output_dir+name, size: stats.size});
+      //     });
+   
+      //   });   
        });
        });
     form.parse(req);
