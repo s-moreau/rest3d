@@ -329,7 +329,7 @@ define(['jquerymin', 'rest3d', 'gltf', 'collada', 'viewer','q'], function ($, re
                 var url = file.relativePath;
                 url.attr("uploadstatus",true);
                 url.append("<img style='float:right;' src='../gui/images/accept.png' >");
-                url.data({file:file});
+                $(url).data({file:file});
             });
 
         }
