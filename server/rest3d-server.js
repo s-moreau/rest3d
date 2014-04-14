@@ -314,8 +314,10 @@ server.post(/^\/rest3d\/convert.*/,function(req,res,next){
 	    var list = fs.readdirSync(input_dir);
         list.forEach(function (name) {
         	var ext = name.match(/\.[^.]+$/);
+           console.log(name);
         	if (ext[0]!=='.json'&&ext[0]!=='.dae')
         	{
+            console.log("copyyyy");
             fsextra.copyRecursive(input_dir+name, output_dir+name, function (err) {
               if (err) {
                 throw err;
