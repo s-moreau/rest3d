@@ -97,7 +97,7 @@ function Cache(cachePath, useDisk, useMem, useGzip) {
 		mkdirp.sync(cachePath);
 	}
 }
-exports.Cache = Cache;
+
 
 function subclass(cls, supercls, proto) {
     cls.super_ = supercls;
@@ -498,4 +498,4 @@ subclass(Cache, events.EventEmitter, {
 
 });
 
-exports.Cache = Cache;
+module.exports = Cache;
