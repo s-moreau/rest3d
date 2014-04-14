@@ -47,7 +47,7 @@ require('shelljs/global');
 var fs = require('fs');
 var ncp = require('ncp').ncp;
 var path = require('path');
-var cache = require('./src/diskcache');
+var cache = require('./src/diskcache').Cache;
 
 // get content from zip files
 var zip = require("zip");
@@ -240,7 +240,6 @@ server.post(/^\/rest3d\/convert.*/,function(req,res,next){
      	console.log(params);
      	console.log('now converting collada');
      	if (!params.name && !params.path || !params.name.toLowerCase().endsWith('dae')) { 
-        console.log("ERROR data not compatible for converting file");
      		h.handleError({error: 'invalid file '+params.name+' in convert'});
      		return;
      	}
@@ -252,6 +251,11 @@ server.post(/^\/rest3d\/convert.*/,function(req,res,next){
      		var output_path=output_dir[0];
      		for(var i =1;i<output_dir.length;i++){
      			output_path = output_path + "/" +output_dir[i];
+     			var list = fs.readdirSync("upload")
+                list.forEach(function (name) {
+                	console.log(name);
+		        });
+     			console.log(output_path,fs.existsSync(output_path+"/"));
      			if(!fs.existsSync(output_path)&&i!==output_dir.length-1){
      				console.log("create folder "+output_path)
      				fs.mkdirSync(output_path);
@@ -293,41 +297,36 @@ server.post(/^\/rest3d\/convert.*/,function(req,res,next){
 		 });
 		 ls.on('exit', function (code, output) {
 		  console.log('Child process exited with exit code '+code);
-      if (code == null) {
-        console.log("SEGMENTATION FAULT");
-        handler.handleError({errorCode:code, message:'collada2gltf segmentation fault'});
-        return;
-      }
 		  if (code !== 0) {
 				handler.handleError({errorCode:code, message:'Child process exited with exit code '});
 				return;
 			}
 			codeC2J= code;
 			outputC2J = output;
-
-	  		console.log(input_dir)
 			console.log('Exit code:', code);
-	  		console.log('Program output:', output);
+	  	console.log('Program output:', output);
 			
-	  		console.log(input_dir)
 			// // hack, copy all images in the output_dir, so the viewer will work
-	    var list = fs.readdirSync(input_dir);
-        list.forEach(function (name) {
-        	var ext = name.match(/\.[^.]+$/);
-           console.log(name);
-        	if (ext[0]!=='.json'&&ext[0]!=='.dae')
-        	{
-            console.log("copyyyy");
-            ncp(input_dir+name, output_dir+name, function (err) {
-             if (err) {
-               return console.error(err);
-             }
-             console.log(input_dir+name," TO ",output_dir+name," Done!");
-            });
-        	}
-        });
-
-		  // end hack
+		    fs.readdir(input_dir, function (err, list) {
+                list.forEach(function (name) {
+                	var ext = name.match(/\.[^.]+$/);
+                	if (ext[0]!=='.json'&&ext[0]!=='.dae'&&ext!==null)
+                	{
+                		copyFileSync(input_dir+name, output_dir+name);
+                		console.log(input_dir+name+'  TO  '+output_dir+name);
+                	}
+                  else if(ext==null){
+                    ncp(input_dir+name, output_dir+name function (err) {
+                   if (err) {
+                     return console.error(err);
+                   }
+                   console.log('done!');
+                   console.log(input_dir+name+'  TO  '+output_dir+name);
+                  });
+                  }
+		        });
+		    });
+		    // end hack
 			var files = [];
 			fs.readdir(output_dir, function (err, list) {
           list.forEach(function (name) {
