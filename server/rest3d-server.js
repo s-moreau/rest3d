@@ -315,6 +315,7 @@ server.post(/^\/rest3d\/convert.*/,function(req,res,next){
           console.log(name,ext);
           if (ext[0]!=='.json'&&ext[0]!=='.dae'&&ext!==null)
           {
+            console.log("in");
             copyFileSync(input_dir+name, output_dir+name);
             console.log(input_dir+name+'  TO  '+output_dir+name);
           }
