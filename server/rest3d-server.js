@@ -240,6 +240,7 @@ server.post(/^\/rest3d\/convert.*/,function(req,res,next){
      	console.log(params);
      	console.log('now converting collada');
      	if (!params.name && !params.path || !params.name.toLowerCase().endsWith('dae')) { 
+        console.log("ERROR data not compatible for converting file");
      		h.handleError({error: 'invalid file '+params.name+' in convert'});
      		return;
      	}
