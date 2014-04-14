@@ -36,6 +36,7 @@ rest3d.convert = function(_params, _cb) {
 
     $.post('/rest3d/convert', params.file)
     .done(function(data) {
+      console.log("convert done");
       if (data) params.result = JSON.parse(data); 
       if (cb) cb(params);
     }).fail(function(data) {
