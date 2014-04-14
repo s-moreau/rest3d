@@ -28,9 +28,9 @@ THE SOFTWARE.
 'use strict';
 
 if (process.env['NODETIME_KEY']) {
-	console.log("+=+=+= Starting http://nodetime.com");
-	console.log("Key = '"+process.env['NODETIME_KEY']+"'");
-	require('nodetime').profile({
+  console.log("+=+=+= Starting http://nodetime.com");
+  console.log("Key = '"+process.env['NODETIME_KEY']+"'");
+  require('nodetime').profile({
     accountKey: process.env['NODETIME_KEY'], 
     appName: 'rest3d.fl4re.com node server'
   });
@@ -45,9 +45,8 @@ var os= require('os');
 require('shelljs/global');
 
 var fs = require('fs');
-var ncp = require('ncp').ncp;
 var path = require('path');
-var cache = require('./src/diskcache').Cache;
+var cache = require('./src/diskcache');
 
 // get content from zip files
 var zip = require("zip");
@@ -63,7 +62,7 @@ var sendFile = require('./src/sendfile');
 var Handler= require('./src/handler');
 
 var platform = os.type().match(/^Win/) ? 'win' : 
-				(os.type().match(/^Dar/) ? 'mac' : 'unix');
+        (os.type().match(/^Dar/) ? 'mac' : 'unix');
 
 console.log('host platform=',platform);
 var staticPath = path.join(__dirname , '../static');
@@ -92,10 +91,10 @@ if (process.env.GLTF_BIN_PATH)
 var params = {name: 'rest3d'};
 
 if (fs.existsSync('./server.pem') && fs.existsSync('./server.key')){
-	console.log('found https certficates');
-	params.key = fs.readFileSync('./server.key');
-	params.certificate = fs.readFileSync('./server.pem');
-	listenToPort = httpsPort;
+  console.log('found https certficates');
+  params.key = fs.readFileSync('./server.key');
+  params.certificate = fs.readFileSync('./server.pem');
+  listenToPort = httpsPort;
 };
 
 var server = module.exports.server = restify.createServer(params);
@@ -105,13 +104,13 @@ if (params.key) {
   http_server.get(/.*/,function(req,res,next) {
     // Assume https port is on the default port
     var redirect = "https://" + req.headers.host.replace (/(.*):.*/, '$1') +  req.url;
-  	res.writeHead(302, {'Location': redirect});
+    res.writeHead(302, {'Location': redirect});
 
     //console.log('**** https redirect to '+redirect)
     res.end();
     next();
-	});
-	http_server.listen( httpPort, ip_address);
+  });
+  http_server.listen( httpPort, ip_address);
 }
 
 rmdirSync('tmp');
@@ -151,7 +150,7 @@ require('./src/upload')(server);
 server.diskcache = new cache('cache',true,false,false); 
 
 function unknownMethodHandler(req, res) {
-	console.log('unkownMethodHandler method='+req.method.toLowerCase());
+  console.log('unkownMethodHandler method='+req.method.toLowerCase());
   if (req.method.toLowerCase() === 'options') {
     var allowHeaders = ['Accept', 'Accept-Version', 'Content-Type', 'Api-Version'];
 
@@ -196,36 +195,36 @@ console.log("loading database module ["+database+"]");
 require('./src/'+database)(server);
 
 server.db.init(function(b){
-	if (b)
-		console.log("rest3d will be using database ["+database+"]");
-	else {
-		console.log("rest3d will not be using database ["+database+"]");
-		server.db=null;
-	}
+  if (b)
+    console.log("rest3d will be using database ["+database+"]");
+  else {
+    console.log("rest3d will not be using database ["+database+"]");
+    server.db=null;
+  }
 
-	// session mnager -> requires database
-	session.config.db=server.db;
+  // session mnager -> requires database
+  session.config.db=server.db;
 
 });
 
 // rest3d API
 
 server.get(/^\/rest3d\/info/,function(req, res, next) {
-	var handler = new Handler(req,res,next);
-	if (server.db) {
-		handler.handleResult("database "+server.db.name+" connected");
-	} else {
-		handler.handleResult("database not connected")
-	}
+  var handler = new Handler(req,res,next);
+  if (server.db) {
+    handler.handleResult("database "+server.db.name+" connected");
+  } else {
+    handler.handleResult("database not connected")
+  }
 });
 
 
 // convert
 
 server.post(/^\/rest3d\/convert.*/,function(req,res,next){
-	 console.log('post -> convert');
+   console.log('post -> convert');
 
-	 var form = new formidable.IncomingForm(),
+   var form = new formidable.IncomingForm(),
          url = '',
          params = {};
 
@@ -233,124 +232,124 @@ server.post(/^\/rest3d\/convert.*/,function(req,res,next){
          
 
      form.on('field', function (name, data) {
-     	params[name] = data;
+      params[name] = data;
      }).on('error', function (e) {
-     	handler.handleError(e);
+      handler.handleError(e);
      }).on('end', function(){//
-     	console.log(params);
-     	console.log('now converting collada');
-     	if (!params.name && !params.path || !params.name.toLowerCase().endsWith('dae')) { 
-     		h.handleError({error: 'invalid file '+params.name+' in convert'});
-     		return;
-     	}
-     	if(params.hasOwnProperty("path")){
-     		// new API, path specified in the params of the request in order to convert the right file.
-     		var output_dir = params.path.split('/');
-     		output_dir[output_dir.length-2] = output_dir[output_dir.length-2] + '_gltf';
-     		output_dir[output_dir.length-1] = output_dir[output_dir.length-1].replace('.dae','.json').replace('.DAE','.json');
-     		var output_path=output_dir[0];
-     		for(var i =1;i<output_dir.length;i++){
-     			output_path = output_path + "/" +output_dir[i];
-     			var list = fs.readdirSync("upload")
+      console.log(params);
+      console.log('now converting collada');
+      if (!params.name && !params.path || !params.name.toLowerCase().endsWith('dae')) { 
+        h.handleError({error: 'invalid file '+params.name+' in convert'});
+        return;
+      }
+      if(params.hasOwnProperty("path")){
+        // new API, path specified in the params of the request in order to convert the right file.
+        var output_dir = params.path.split('/');
+        output_dir[output_dir.length-2] = output_dir[output_dir.length-2] + '_gltf';
+        output_dir[output_dir.length-1] = output_dir[output_dir.length-1].replace('.dae','.json').replace('.DAE','.json');
+        var output_path=output_dir[0];
+        for(var i =1;i<output_dir.length;i++){
+          output_path = output_path + "/" +output_dir[i];
+          var list = fs.readdirSync("upload")
                 list.forEach(function (name) {
-                	console.log(name);
-		        });
-     			console.log(output_path,fs.existsSync(output_path+"/"));
-     			if(!fs.existsSync(output_path)&&i!==output_dir.length-1){
-     				console.log("create folder "+output_path)
-     				fs.mkdirSync(output_path);
-     			}
-     		}
-	     	console.log(collada2gltf+" -p -f \"" + params.path+"\" -o \""+output_path+"\"");
-	     	var cmd = collada2gltf+" -p -f \"" + params.path+"\" -o \""+output_path+"\"";
-	     	var input_dir = params.path.replace(/[^\/]*$/,'');
-	     	output_dir = output_path.replace(/[^\/]*$/,'');
-     	}
-     	else{
-     		// let's considered the model is stocked under rest3d/upload/ repository in case any path isn't specified
-     		// the conversion will create a folder for stocking the gltf file
-     		// CODE NOT TESTED, maybe get some conflicts for copying all textures to the gltf folder.
-     		console.log("PART NOT TESTED YET")
-	     	var output_dir = params.name.split('\.')[0]+'_gltf';
-	     	var output_file = params.name.replace('.dae','.json');
-	     	var output_path = 'upload/'+output_dir+'/'+output_file;
-	     	var cmd = collada2gltf+" -p -f \"upload/" + params.name+"\" -o \""+output_path+"\"";
-	     	 var input_dir = "upload/";
-	     	output_dir = output_path.replace(/[^\/]*$/,'');
+                  console.log(name);
+            });
+          console.log(output_path,fs.existsSync(output_path+"/"));
+          if(!fs.existsSync(output_path)&&i!==output_dir.length-1){
+            console.log("create folder "+output_path)
+            fs.mkdirSync(output_path);
+          }
+        }
+        console.log(collada2gltf+" -p -f \"" + params.path+"\" -o \""+output_path+"\"");
+        var cmd = collada2gltf+" -p -f \"" + params.path+"\" -o \""+output_path+"\"";
+        var input_dir = params.path.replace(/[^\/]*$/,'');
+        output_dir = output_path.replace(/[^\/]*$/,'');
+      }
+      else{
+        // let's considered the model is stocked under rest3d/upload/ repository in case any path isn't specified
+        // the conversion will create a folder for stocking the gltf file
+        // CODE NOT TESTED, maybe get some conflicts for copying all textures to the gltf folder.
+        console.log("PART NOT TESTED YET")
+        var output_dir = params.name.split('\.')[0]+'_gltf';
+        var output_file = params.name.replace('.dae','.json');
+        var output_path = 'upload/'+output_dir+'/'+output_file;
+        var cmd = collada2gltf+" -p -f \"upload/" + params.name+"\" -o \""+output_path+"\"";
+         var input_dir = "upload/";
+        output_dir = output_path.replace(/[^\/]*$/,'');
      }
-     	console.log('exec '+cmd);
-     	// todo -> manage progress !!!
-		var outputC2J;
-     	var codeC2J;
-     	// todo -> manage progress !!!
-		var ls = childProcess.exec(cmd, function (error, stdout, stderr) {
-		   if (error) {
-		     console.log(error.stack);
-		     //console.log('Error code: '+error.code);
-		     //console.log('Signal received: '+error.signal);
+      console.log('exec '+cmd);
+      // todo -> manage progress !!!
+    var outputC2J;
+      var codeC2J;
+      // todo -> manage progress !!!
+    var ls = childProcess.exec(cmd, function (error, stdout, stderr) {
+       if (error) {
+         console.log(error.stack);
+         //console.log('Error code: '+error.code);
+         //console.log('Signal received: '+error.signal);
 
-			 handler.handleError({"code":error.code, "message": stderr});
+       handler.handleError({"code":error.code, "message": stderr});
 
-		   }
-		   console.log('Child Process STDOUT: '+stdout);
-		   console.log('Child Process STDERR: '+stderr);
-		 });
-		 ls.on('exit', function (code, output) {
-		  console.log('Child process exited with exit code '+code);
-		  if (code !== 0) {
-				handler.handleError({errorCode:code, message:'Child process exited with exit code '});
-				return;
-			}
-			codeC2J= code;
-			outputC2J = output;
-			console.log('Exit code:', code);
-	  	console.log('Program output:', output);
-			
-			// // hack, copy all images in the output_dir, so the viewer will work
-		    fs.readdir(input_dir, function (err, list) {
+       }
+       console.log('Child Process STDOUT: '+stdout);
+       console.log('Child Process STDERR: '+stderr);
+     });
+     ls.on('exit', function (code, output) {
+      console.log('Child process exited with exit code '+code);
+      if (code !== 0) {
+        handler.handleError({errorCode:code, message:'Child process exited with exit code '});
+        return;
+      }
+      codeC2J= code;
+      outputC2J = output;
+
+        console.log(input_dir)
+      console.log('Exit code:', code);
+        console.log('Program output:', output);
+      
+        console.log(input_dir)
+      // // hack, copy all images in the output_dir, so the viewer will work
+          fs.readdir(input_dir, function (err, list) {
                 list.forEach(function (name) {
-                	var ext = name.match(/\.[^.]+$/);
-                	if (ext[0]!=='.json'&&ext[0]!=='.dae'&&ext!==null)
-                	{
-                		copyFileSync(input_dir+name, output_dir+name);
-                		console.log(input_dir+name+'  TO  '+output_dir+name);
-                	}
-                  else if(ext==null){
-                    ncp(input_dir+name, output_dir+name);
-                   console.log(input_dir+name+'  TO  '+output_dir+name);
+                  var ext = name.match(/\.[^.]+$/);
+                  if (ext[0]!=='.json'&&ext[0]!=='.dae'&&ext!==null)
+                  {
+                    copyFileSync(input_dir+name, output_dir+name);
+                    console.log(input_dir+name+'  TO  '+output_dir+name);
                   }
-		        });
-		    });
-		    // end hack
-			var files = [];
-			fs.readdir(output_dir, function (err, list) {
+                  else if(ext==null){}
+            });
+        });
+        // end hack
+      var files = [];
+      fs.readdir(output_dir, function (err, list) {
           list.forEach(function (name) {
               var stats = fs.statSync(output_dir+name);
               files.push({name: output_dir+name, size: stats.size});
-	        });
-	        var timeout = function() {
-              	rmdirSync(output_dir);
-              	console.log('timeout !! '+output_dir+' was deleted');
+          });
+          var timeout = function() {
+                rmdirSync(output_dir);
+                console.log('timeout !! '+output_dir+' was deleted');
               }
           setTimeout(function() { timeout()},5 * 60 * 1000);
-	        handler.handleResult({files: files, code:codeC2J, output:outputC2J});
-		    });		
-	     });
-	     });
+          handler.handleResult({files: files, code:codeC2J, output:outputC2J});
+        });   
+       });
+       });
     form.parse(req);
 });
 
 // static server
 server.get(/^\/.*/, function (req, res, next) {
-	
-	// parse out parameters from url
-	var filename = req.url.split('\?')[0];
-	var p=path.resolve(staticPath + filename);
+  
+  // parse out parameters from url
+  var filename = req.url.split('\?')[0];
+  var p=path.resolve(staticPath + filename);
 
-	console.log('http get path='+filename);
+  console.log('http get path='+filename);
 
-	sendFile(req,res,p);
-	return next();
+  sendFile(req,res,p);
+  return next();
 });
 
 // clean exit
