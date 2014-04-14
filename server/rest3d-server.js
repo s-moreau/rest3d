@@ -45,6 +45,7 @@ var os= require('os');
 require('shelljs/global');
 
 var fs = require('fs');
+var fsextra = require('fs.extra');
 var path = require('path');
 var cache = require('./src/diskcache').Cache;
 
@@ -250,11 +251,6 @@ server.post(/^\/rest3d\/convert.*/,function(req,res,next){
      		var output_path=output_dir[0];
      		for(var i =1;i<output_dir.length;i++){
      			output_path = output_path + "/" +output_dir[i];
-     			var list = fs.readdirSync("upload")
-                list.forEach(function (name) {
-                	console.log(name);
-		        });
-     			console.log(output_path,fs.existsSync(output_path+"/"));
      			if(!fs.existsSync(output_path)&&i!==output_dir.length-1){
      				console.log("create folder "+output_path)
      				fs.mkdirSync(output_path);
@@ -314,8 +310,11 @@ server.post(/^\/rest3d\/convert.*/,function(req,res,next){
                 	var ext = name.match(/\.[^.]+$/);
                 	if (ext[0]!=='.json'&&ext[0]!=='.dae')
                 	{
-                		copyFileSync(input_dir+name, output_dir+name);
-                		console.log(input_dir+name+'  TO  '+output_dir+name);
+                    fs.copyRecursive(input_dir+name, output_dir+name, function (err) {
+                    if (err) {
+                      throw err;
+                    }
+                    });
                 	}
 		        });
 		    });
