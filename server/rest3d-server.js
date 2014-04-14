@@ -313,13 +313,13 @@ server.post(/^\/rest3d\/convert.*/,function(req,res,next){
         list.forEach(function (name) {
           var ext = name.match(/\.[^.]+$/);
           console.log(name,ext);
-          if (ext[0]!=='.json'&&ext[0]!=='.dae'&&ext!==null)
+          if (ext[0]!=='.json'&&ext[0]!=='.dae'&&ext!=="null")
           {
             console.log("in");
             copyFileSync(input_dir+name, output_dir+name);
             console.log(input_dir+name+'  TO  '+output_dir+name);
           }
-          else if(ext==null){
+          else if(ext=="null"){
             console.log("Folder detected");
           }
           });
