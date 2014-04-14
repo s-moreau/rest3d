@@ -136,11 +136,11 @@
           fs.renameSync(this.file.path, path);
           console.log("uploaded "+path);
           this.path = path;
-          }
           cb && cb(undefined,this);
         }  else {
           cb && cb('cannot find folder',null);
         }
+      }
     
     /* Image resize -> need to enable this code at open point?
 
