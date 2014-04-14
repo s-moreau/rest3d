@@ -26,8 +26,7 @@
     "object_utils":"",
     "secure-rnd":"",
     "basex":"",
-    "cookies":"",
-    "existdb-node":"https://github.com/amd/existdb-node/raw/master/package/existdb-node-0.0.1.tgz"
+    "cookies":""
   },
   "devDependencies": {
     "mocha": "1.7.4",
@@ -42,6 +41,7 @@
   "license": "MIT",
   "scripts": {
     "start": "node rest3d-server.js",
-    "test": "mocha tests/*.tests.js"
+    "test": "mocha tests/*.tests.js",
+    "preinstall": "npm install https://github.com/amd/existdb-node/raw/master/package/existdb-node-0.0.1.tgz"
   }
 }
