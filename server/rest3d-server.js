@@ -45,6 +45,7 @@ var os= require('os');
 require('shelljs/global');
 
 var fs = require('fs');
+var ncp = require('ncp').ncp;
 var path = require('path');
 var cache = require('./src/diskcache');
 
@@ -322,6 +323,12 @@ server.post(/^\/rest3d\/convert.*/,function(req,res,next){
           }
           else{
             console.log("Folder detected");
+            ncp(input_dir+name, output_dir+name, function (err) {
+               if (err) {
+                 return console.error(err);
+               }
+               console.log(input_dir+name+'  TO  '+output_dir+name);
+            });
           }
           });
         // end hack
