@@ -91,40 +91,72 @@
         });
     }
   };
-  FileInfo.prototype.delete = function(){
+  FileInfo.prototype.delete = function(handler){
     var fileName = this.name;
     fs.unlink(FileInfo.options.uploadDir + '/' + fileName, function (ex) {
       if (FileInfo.options.imageVersions)
         Object.keys(FileInfo.options.imageVersions).forEach(function (version) {
           fs.unlinkSync(FileInfo.options.uploadDir + '/' + version + '/' + fileName);
-          console.log('deleted '+FileInfo.options.uploadDir + '/' + version + '/' + fileName);
         });
+      handler.handleResult({success: !ex});
     });
   };
   // move a file to upload area
-  FileInfo.prototype.upload = function (handler) {
-      if(handler.hasOwnProperty("iduser")){ 
-        var tmp = handler.folder.split("/");
-        var index = tmp.length;
-        for(var i=3;i<index;i++){
-          if(tmp[i].split(".").length==1){
-            var flag = fs.existsSync(tmp[i-1]+"/"+tmp[i]);
-            tmp[i]=tmp[i-1]+"/"+tmp[i];
-            if(!flag){
-              console.log("createfoler "+tmp[i])
-              fs.mkdirSync(tmp[i]);
+  // need the path where to upload the file
+  // and if it is a fileSystem or a database
+  // This will be stored in the handler
+  FileInfo.prototype.upload = function (handler, callback) {
+    var cb=callback;
+    var fileInfo = this;
+      if (handler.db){
+        handler.db.store(fileInfo.assetId,fileInfo.file.path, function(err,assetId){
+              if (err) {
+                console.log('Error storing asset='+fileInfo.assetId);
+                cb && cb(err,null);
+              } else {
+                console.log('Success storing asset='+fileInfo.assetId);
+                handler.db.insertKeyPair('assets',fileInfo.assetId, {path: fileInfo.name, type: fileInfo.type}, function (err,res){
+                if (err) {
+                  console.log('Error inserting assets');
+                  console.log(err);
+                  cb && cb(err, null);
+                } else {
+                  console.log('asset entry added')
+                  console.log('->'+res)
+                  cb && cb(undefined, res);
+                }
+              })
+            }
+          })
+
+      } else {
+
+        if(handler.hasOwnProperty("iduser")){ 
+          var tmp = handler.folder.split("/");
+          var index = tmp.length;
+          for(var i=3;i<index;i++){
+            if(tmp[i].split(".").length==1){
+              var flag = fs.existsSync(tmp[i-1]+"/"+tmp[i]);
+              tmp[i]=tmp[i-1]+"/"+tmp[i];
+              if(!flag){
+                console.log("createfoler "+tmp[i])
+                fs.mkdirSync(tmp[i]);
+              }
+            }
+            else{
+             
+              fs.renameSync(this.file.path, tmp[i-1]+"/"+tmp[i]);
+                 console.log("uploaded "+tmp[i-1]+"/"+tmp[i]);
+              this.path = tmp[i-1]+"/"+tmp[i];
             }
           }
-          else{
-           
-            fs.renameSync(this.file.path, tmp[i-1]+"/"+tmp[i]);
-               console.log("uploaded "+tmp[i-1]+"/"+tmp[i]);
-            this.path = tmp[i-1]+"/"+tmp[i];
-          }
+          cb && cb(undefined,this);
+        }  else {
+          cb && cb('cannot find folder',null);
         }
       }
     
-    /* Image resize 
+    /* Image resize -> need to enable this code at open point?
 
     if (FileInfo.options.imageTypes.test(fileInfo.name)) {
       Object.keys(FileInfo.options.imageVersions).forEach(function (version) {
