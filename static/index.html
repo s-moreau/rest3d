@@ -152,9 +152,12 @@ THE SOFTWARE.
       <ul>
         <li><a href="/rest3d/info"> /rest3d/info </a>
         </li>
-        <li><a href="/rest3d/assets"> /rest3d/assets </a>
-        </li>
-        <li><a href="/rest3d/assets/duck/duck.dae"> /rest3d/assets/duck/duck.dae </a>
+        <li>
+          <form id='fl4re-upload' action="/rest3d/fl4re/upload/" enctype="multipart/form-data" method="POST">
+            [POST files] /rest3d/fl4re/upload/
+            <input type="file" name="upload" multiple="multiple" />
+            <input type="submit" value="Upload" />send files to upload
+          </form>
         </li>
       </ul>
 

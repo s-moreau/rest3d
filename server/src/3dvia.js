@@ -46,13 +46,16 @@ module.exports = function (server) {
 
     var form = new formidable.IncomingForm();
     var sid = null;
-    if (this.req.session)
-      sid = this.req.session.sid;
+    if (!handler.req.session || !handler.req.session.sid)
+    {
+      return handler.handleError('3dvia login -> could not find sid !!!');
+    } else
+      sid = handler.req.session.sid;
 
     form.parse(this.req, function(err, args) {
       if (err) return handler.handleError(err);
       if (!args.user || args.user==='' ) {
-        return handler.handleError('need non empty user');
+        return handler.handleError('3dvia login -> need non empty user');
       };
       console.log('login to 3dvia with user='+args.user+" and passwd="+args.passwd);
       // get cookies
@@ -89,14 +92,12 @@ module.exports = function (server) {
 
           if (TDVIA_SESSION) {
             // need to store session for this user
-            server.sessionManager.load(sid,function(err,data){
+            var data = handler.req.session;
+            data['3dvia']=j;
+            server.sessionManager.save(sid,data, function(err,data) {
               if (err) return handler.handleError(err);
-              data['3dvia']=j;
-              server.sessionManager.save(sid,data, function(err,data) {
-                if (err) return handler.handleError(err);
-                console.log('stored 3DVIA cookies for session='+sid);
-                return handler.handleResult('connected to 3dvia as user '+args.user);
-              })
+              console.log('stored 3DVIA cookies for session='+sid);
+              return handler.handleResult('connected to 3dvia as user '+args.user);
             })
           }
           else
@@ -215,7 +216,7 @@ module.exports = function (server) {
     if (req.session && req.session['3dvia']) {
       jar = req.session['3dvia'];
       if (!jar || !jar._jar.store.idx || !jar._jar.store.idx['3dvia.com']['/']['3DVIA_SESSION'])
-        return tdvia.handleError("need to login first");
+        return tdvia.handleError("need to login first (no jar)");
 
       // just browsing
       if (!uid || uid==='') {
@@ -423,7 +424,7 @@ module.exports = function (server) {
        
       }
     } else
-    return tdvia.handleError("need to login first");
+    return tdvia.handleError("need to login first (no 3dvia session)");
   });
 };
 

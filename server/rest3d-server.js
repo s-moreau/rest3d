@@ -47,7 +47,7 @@ require('shelljs/global');
 var fs = require('fs');
 var fsextra = require('fs.extra');
 var path = require('path');
-var cache = require('./src/diskcache').Cache;
+var cache = require('./src/diskcache');
 
 // get content from zip files
 var zip = require("zip");

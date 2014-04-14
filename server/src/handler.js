@@ -8,12 +8,15 @@ var Handler = function (req, res, next) {
       this.req = req;
       this.res = res;
       this.next = next;
+
+      // Replace this. 
+      // use req.session instead
       if(req.headers.hasOwnProperty("x-iduser")){
         console.log("iduser detected : "+req.headers["x-iduser"]);
         this.iduser = req.headers["x-iduser"];
       }
       if(req.headers.hasOwnProperty("x-folder")){
-        console.log("iduser detected : "+req.headers["x-folder"]);
+        console.log("idfolder detected : "+req.headers["x-folder"]);
         this.folder = req.headers["x-folder"];
       }
 };
@@ -100,8 +103,8 @@ Handler.prototype.handleResult = function (result, redirect) {
       success: true,
       message: result
     };
-  if (error instanceof Error)
-    return this.handleError(error);
+  if (result instanceof Error)
+    return this.handleError(result);
 
   if (redirect) {
     this.res.writeHead(302, {

@@ -29,7 +29,12 @@ var restify = require('restify');
 var toJSON = require('./tojson');
 var request = require('request');
 
+//var xml2js = require('xml2js');
+//var xmlbuilder = new xml2js.Builder({'doctype':{'headless': true}});
+
 var Connection = require('existdb-node');
+// use this to local debug existd-node
+//var Connection = require('./index');
 
 var options = {
     host: process.env.XML_SERVER || "localhost",
@@ -65,47 +70,86 @@ exports.get = function(url, callback) {
 	});
 }
 
-// store a file
+// store an asset
 var store = exports.store = function(asset,filename, callback) {
 
   var cb = callback;
-  var path = '/rest/assets/'+asset+'/'+filename;
   // other optional arg: destination filename
-	connection.store(filename, path, function(err) {
+	connection.store(filename, '/apps/rest3d/data/', asset, function(err) {
     if (err) {
-        if (cb) cb(err,null);
-		    console.log("eXist.store(): An error occurred: " + err);
+        console.log("eXist.store(): An error occurred: " + err);
+        if (cb) cb(err,asset);
     } else {
-    	if (cb) cb(null,"eXist: "+path+" Upload completed!")
+      console.log("eXist: "+asset+" Upload completed!")
+    	if (cb) cb(undefined,asset)
     }
 	});
+}
+
+// delete an asset (note: delete is a reserved keyword)
+var del = exports.del = function(asset, callback) {
+
+  var cb = callback;
+  var path = '/apps/rest3d/data/'+asset;
+  // other optional arg: destination filename
+  connection.del(path, function(err,res) {
+    if (err) {
+        cb && cb(err,null);
+        console.log("eXist.store(): An error occurred: " + err);
+    } else {
+      cb && cb(undefined,"eXist: "+path+" Upload completed!")
+    }
+  });
 }
 // insert an object in a key/pair database
 var insertKeyPair = exports.insertKeyPair = function(collection, id, value, callback) {
 
+
   var text = value;
-  if (typeof text != String) text = toJSON(text);
-  text = encodeURIComponent(text);
-  var cb = callback;
+  if (!text) {
+    text= "";
+  } else
+  if (typeof text != String) {
+    text = toJSON(text);
+  }
+
+console.log('insertKeyPair['+id+','+text+']')
+// encode characters for xQuery 
+  text = text.replace(/&/g, '&amp;')
+         .replace(/</g,'&lt;').replace(/>/g,'&gt;')
+         .replace(/\r/g,'&#xA;').replace(/\n/g,'&#xD;').replace(/ /g,'&#160;').replace(/\t/g,'&#009;')
+         .replace(/'/g, '&apos;').replace(/"/g, '&quot;')
+         .replace(/{/g, '&#123;').replace(/}/g, '&#125;');
+
+  //var text = xmlbuilder.buildObject(value);
   var xquery = 'xquery version "3.0";\
-                let $db := doc("/db/'+collection+'/'+collection+'.xml")/'+collection+' \
+                let $db := doc("/db/apps/rest3d/data/'+collection+'.xml")/items \
                 let $item := $db/item[@id="'+id+'"]\
                 let $newitem := <item id= "'+id+'">'+text+'</item> \
 							  return\
-							  if ($item)\
-                then \
-                 update replace $item with $newitem\
-                else \
-                 update insert $newitem into $db';
-
-
+                if ($db)\
+                then\
+  							  if ($item)\
+                  then \
+                   update replace $item with $newitem\
+                  else \
+                   update insert $newitem into $db\
+                else\
+                  (response:set-status-code( 404 ), "cannot find '+collection+'.xml")';
+/*
+console.log('*************');
+console.log(xquery)
+console.log('*************');
+*/
   query(xquery, callback);
 }
 // delete an object in a key/pair database
 var removeKey = exports.removeKey = function(collection,id, value, callback) {
 
+  console.log('removeKey['+id+']')
+
   var xquery = 'xquery version "3.0";\
-                let $db := doc("/db/'+collection+'/'+collection+'.xml")/'+collection+' \
+                let $db := doc("/db/apps/rest3d/data/'+collection+'.xml")/items \
 							  for $item in $db/item[@id="'+id+'"]\
 							   return\
 							    update delete $item';
@@ -116,22 +160,49 @@ var removeKey = exports.removeKey = function(collection,id, value, callback) {
 
 // delete an object in a key/pair database
 var getKey = exports.getKey = function(collection,id, callback) {
-
+  var cb=callback;
+/*
   var xquery = 'xquery version "3.0";\
                 declare namespace json="http://www.json.org";\
                 declare option exist:serialize "method=json media-type=text/javascript";\
-                let $db := doc("/db/'+collection+'/'+collection+'.xml")/'+collection+' \
-							   return\
-							    $db/item[@id="'+id+'"]';
+                let $db := doc("/db/apps/rest3d/data/'+collection+'.xml")/items \
+                return\
+                 if ($db)\
+                then\
+							    $db/item[@id="'+id+'"]\
+                else\
+                  (response:set-status-code( 404 ), "cannot find '+collection+'.xml")';
+*/
+
+console.log('getKey['+id+']')
+
+  var xquery = 'xquery version "3.0";\
+                let $db := doc("/db/apps/rest3d/data/'+collection+'.xml")/items\
+                let $data := $db/item[@id="'+id+'"]/text() \
+                return\
+                  if ($db)\
+                  then\
+                    if ($data)\
+                    then\
+                      $data\
+                    else\
+                      (response:set-status-code( 404 ), "cannot find item[@id='+id+']")\
+                  else\
+                   (response:set-status-code( 404 ), "cannot find collection '+collection+'.xml")';
+
 
   query(xquery, function(err,res) {
   	var result = "";
-  	if (err) callback (err,null)
-  	else if (res && res[0] && res[0]["#text"]) {
-	    result=JSON.parse(decodeURIComponent(res[0]["#text"]));
-	    callback(undefined,result);
-	  } else
-      callback('key not found',null)
+
+  	if (err) {
+      cb && cb(err,null)
+  	} else if (res) {
+	    result=JSON.parse(res);
+	    cb && cb(undefined,result);
+	  } else {
+      console.log('key not found')
+      cb && cb(new Error('key not found'),null)
+    }
   })
 }
 
@@ -141,7 +212,7 @@ var query = exports.query = function(xquery, callback) {
   var data =[];
 
 	query.on("error", function(err) {
-	  console.log("eXist.query(): An error occurred: " + err);
+	  //console.log("eXist.query(): An error occurred: " + err);
 		if (cb) cb(err,null);
 	});
 	var results=[];
@@ -194,12 +265,12 @@ var init = exports.init = function (callback){
 			console.log('error initializing eXist');
 			return cb(false);
 		}
-		// create cookie.xml if it does not exists
-		var xquery = 'fn:doc-available("cookies/cookies.xml")';
+		// create assets.xml if it does not exists
+		var xquery = 'fn:doc-available("/apps/rest3d/data/assets.xml")';
 
 		query(xquery, function(err,res) {
 			if (err) {
-				console.log('Error xquery check for cookies.xml');
+				console.log('Error xquery check for asset.xml');
 			  console.log(err);
 			  return cb(false);
 			} else if (res[0]==="true") {
@@ -207,16 +278,16 @@ var init = exports.init = function (callback){
 			} else {
 				console.log('creating cookies.xml');
 				xquery = 'xquery version "3.0";\
-                  let $my-doc := <cookies/> \
+                  let $my-doc := <items/> \
                   return\
-                  xmldb:store("cookies", "cookies.xml", $my-doc)';
+                  xmldb:store("/apps/rest3d/data", "assets.xml", $my-doc)';
         query(xquery, function(err,res) {
         	if (err) {
         		console.log('Error creating cookies.xml');
         		console.log(err);
         		return cb(false);
         	} else {
-        		console.log('cookies.xml created')
+        		console.log('assets.xml created')
         		return check_existdb_1(cb);
         	}
         })
@@ -229,7 +300,32 @@ var init = exports.init = function (callback){
 
 // next step in check existdb - 
 var check_existdb_1 = function (callback) {
- return callback(true);
+  var cb = callback;
+  // empty cookie jar
+  connection.del('/apps/rest3d/data/cookies.xml', function(err) {
+    if (err) {
+        console.log("delete cookies - error ");
+        console.log(err);
+        return cb(false);
+    } else {
+      console.log('cookies deleted, creating new jar');
+        var xquery = 'xquery version "3.0";\
+                    let $my-doc := <items/> \
+                    return\
+                    xmldb:store("/apps/rest3d/data", "cookies.xml", $my-doc)';
+          query(xquery, function(err,res) {
+            if (err) {
+              console.log('Error creating cookies.xml');
+              console.log(err);
+              return cb(false)
+            } else {
+              console.log('cookies.xml created')
+              return cb(true);
+            }
+          })
+    }
+  });
+
 /* TEST FUNCTIONS -> do not remove
   insertKeyPair('cookies','tagada', 'a json string', function(err, res) {
 	  if (err) {
