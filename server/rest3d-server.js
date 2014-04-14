@@ -345,7 +345,6 @@ server.post(/^\/rest3d\/convert.*/,function(req,res,next){
             parseFolder(path+name,files);
           }
        });
-         })
       }
     parseFolder(output_dir,files);
      var timeout = function(output_dir) {
