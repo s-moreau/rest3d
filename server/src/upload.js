@@ -30,8 +30,13 @@ module.exports = function (server) {
     var files = [];
     var map = {}
     var counter = 1;
-    var redirect;
-    var finish = function () {
+    var redirect=undefined;
+    var finish = function (err,res) {
+      if (err) {
+        console.log('ERROR IN FINISH');
+        handler.handleError(err);
+        return;
+      }
         counter -= 1;
         if (!counter) {
           try {
@@ -115,12 +120,14 @@ module.exports = function (server) {
       fileInfo.type = file.type;
       fileInfo.file = file;
       fileInfo.assetId = uuid.v1();
+      /*
       if (!fileInfo.validate()) {
         fs.unlinkSync(file.path);
         return;
       }
-      fileInfo.upload(handler);
-      finish();
+      */
+      fileInfo.upload(handler, finish);
+
     }).on('aborted', function () {
       tmpFiles.forEach(function (file) {
         fs.unlinkSync(file);
