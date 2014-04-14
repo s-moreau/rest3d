@@ -8,14 +8,14 @@
 <echo>exist-uri = ${exist.uri} </echo>
   <!-- create new folder !-->
   <xdb:create xmlns:xdb="http://exist-db.org/ant"
-    uri="${exist.uri}/db"
+    uri="${rest3d.uri}"
     user="${exist.user}"
     password="${exist.password}"
-    collection="cookies"  
+    collection="data"  
   />
   <!-- chown rest3d !-->
   <xdb:chown xmlns:xdb="http://exist-db.org/ant"
-    uri="${cookies.uri}"
+    uri="${data.uri}"
     user="${exist.user}"
     password="${exist.password}"
     name="rest3d"
@@ -23,7 +23,7 @@
   />
   <!-- chmod rest3d !-->
   <xdb:chmod xmlns:xdb="http://exist-db.org/ant"
-    uri="${cookies.uri}"
+    uri="${data.uri}"
     user="${rest3d.user}"
     password="${rest3d.password}"
     permissions='rwxr-xr-x'

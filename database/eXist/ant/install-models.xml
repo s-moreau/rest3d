@@ -1,5 +1,5 @@
 <?xml version='1.0'?>
-<project name="install-rest3d" default="install" xmlns:xdb="http://exist-db.org/ant">
+<project name="install-models" default="install" xmlns:xdb="http://exist-db.org/ant">
 <description>install public (read-only) models</description>
 
     <import file="common.xml"/>
