@@ -314,7 +314,7 @@ server.post(/^\/rest3d\/convert.*/,function(req,res,next){
           var ext = name.match(/\.[^.]+$/);
           console.log(name,ext);
           if(ext!=="null"){
-            if (ext[0]!=='.json'&&ext[0]!=='.dae'&&)
+            if (ext[0]!=='.json'&&ext[0]!=='.dae')
             {
               copyFileSync(input_dir+name, output_dir+name);
               console.log(input_dir+name+'  TO  '+output_dir+name);
@@ -325,19 +325,19 @@ server.post(/^\/rest3d\/convert.*/,function(req,res,next){
           }
           });
         // end hack
-      // var files = [];
-      // fs.readdir(output_dir, function (err, list) {
-      //     list.forEach(function (name) {
-      //         var stats = fs.statSync(output_dir+name);
-      //         files.push({name: output_dir+name, size: stats.size});
-      //     });
-      //     var timeout = function() {
-      //           rmdirSync(output_dir);
-      //           console.log('timeout !! '+output_dir+' was deleted');
-      //         }
-      //     setTimeout(function() { timeout()},5 * 60 * 1000);
-      //     handler.handleResult({files: files, code:codeC2J, output:outputC2J});
-      //   });   
+      var files = [];
+      fs.readdir(output_dir, function (err, list) {
+          list.forEach(function (name) {
+              var stats = fs.statSync(output_dir+name);
+              files.push({name: output_dir+name, size: stats.size});
+          });
+          var timeout = function() {
+                rmdirSync(output_dir);
+                console.log('timeout !! '+output_dir+' was deleted');
+              }
+          setTimeout(function() { timeout()},5 * 60 * 1000);
+          handler.handleResult({files: files, code:codeC2J, output:outputC2J});
+        });   
        });
        });
     form.parse(req);
