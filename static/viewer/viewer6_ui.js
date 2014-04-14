@@ -481,6 +481,19 @@ viewer.INIT =  function (){
                 }
                 return param_out;
             }
+            function removeModel(node){
+                var id = node.attr("id").split("_")[0];
+                for(var i=0;i<viewer.scenes.length;i++){
+                    if(viewer.scenes[i].hasOwnProperty("url")){
+                        if(viewer.scenes[i].url.replace(/^.*[\\\/]/, '')==id){
+                            viewer.scenes[i] = [];
+                            viewer.draw();
+                            viewer.scenes.splice(i, 1);
+                        }
+                    }
+                }             
+                $(node).remove();
+            }
 
             treeScene = GUI.treeBis({
                 id:'Tree',
@@ -497,6 +510,7 @@ viewer.INIT =  function (){
                     "success": function (new_data) {
                         var result = [];
                         if(nodeBuffer==-1){
+                            console.debug(viewer.scenes);
                             window.main(viewer.scenes,result)
                         }
                         else{
@@ -517,7 +531,14 @@ viewer.INIT =  function (){
                     },
                 },
             },
-            "plugin": ["themes", "json_data", "ui", "types", "sort","search"],
+                 "contextmenu" : {
+                "items" : function (node) {
+                    var result = {};
+                    if(node.attr("rel")=="main"){
+                        result.icon = {'label':'Remove','action':removeModel,};}
+                    return result;
+                }
+            },
              type:  { "types": {
                 "main": {
                     "icon" : {
@@ -845,11 +866,12 @@ viewer.INIT =  function (){
                 e.idToDrop = "c_"+viewer.idUser;
                 data = jQuery.parseJSON(data);
                 window.sortAssetDrop(e,data);
+                window.visualize(data);
                 deferred.resolve();
                 renderMenu.render.focusTab();
                 return deferred.promise;
             };
-            rest3d.urlUpload(uri,call);
+            rest3d.urlUpload(uri,call,viewer.idUser);
         }
         function preview(node){
             $("#dialog").dialog("close");
@@ -922,24 +944,7 @@ viewer.INIT =  function (){
                     }
                 }
             },
-            "contextmenu" : {
-                "items" : function (node) {
-                    var result = {};
-                    if(node.attr("iconuri")){
-                        result.icon = {'label':'Display icon','action':icon,};}
-                    if(node.attr("asseturi")&&node.attr("type")!="uploaded"){
-                        result.display = {'label':'Upload','action':display,};}
-                    if(node.attr("rel")=="model"){
-                        result.download = {'label':'Download','action':download,};
-                    }
-                    if(node.attr("type")=="uploaded"){
-                        result.convert = {'label':'Convert','action':convert,};
-                    }
-                    if(node.attr("previewuri")){
-                        result.preview = {'label':'Preview model','action':preview,};}
-                    return result;
-                }
-            },
+           
             type:  { "types": {
                 "folder": {
                     "icon" : {

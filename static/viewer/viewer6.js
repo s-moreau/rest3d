@@ -255,6 +255,7 @@ define(   ['jquerymin','gltf','collada','renderer','camera','state','channel','q
     scenes.push(scene);
     $('#loadtimer').text('load time=' + (scene.endtime - scene.starttime));
     viewer.draw();
+    viewer.scenes = scenes;
     if (viewer.onload)
       viewer.onload.call();
   };

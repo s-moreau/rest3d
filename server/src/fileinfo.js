@@ -101,28 +101,22 @@
         });
     });
   };
+
   // move a file to upload area
   FileInfo.prototype.upload = function (handler) {
       if(handler.hasOwnProperty("iduser")){ 
-        var tmp = handler.folder.split("/");
-        var index = tmp.length;
-        for(var i=3;i<index;i++){
-          if(tmp[i].split(".").length==1){
-            var flag = fs.existsSync(tmp[i-1]+"/"+tmp[i]);
-            tmp[i]=tmp[i-1]+"/"+tmp[i];
-            if(!flag){
-              console.log("createfoler "+tmp[i])
-              fs.mkdirSync(tmp[i]);
-            }
-          }
-          else{
+        var path = handler.createSyncPath(handler.folder);
+        fs.renameSync(this.file.path, path);
+        console.log("uploaded "+path);
+        this.path = path;
+        
+          // else{
            
-            fs.renameSync(this.file.path, tmp[i-1]+"/"+tmp[i]);
-               console.log("uploaded "+tmp[i-1]+"/"+tmp[i]);
-            this.path = tmp[i-1]+"/"+tmp[i];
-          }
+          //   fs.renameSync(this.file.path, tmp[i-1]+"/"+tmp[i]);
+          //      console.log("uploaded "+tmp[i-1]+"/"+tmp[i]);
+          //   this.path = tmp[i-1]+"/"+tmp[i];
+          // }
         }
-      }
     
     /* Image resize 
 
