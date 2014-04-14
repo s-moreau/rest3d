@@ -318,7 +318,9 @@ server.post(/^\/rest3d\/convert.*/,function(req,res,next){
             copyFileSync(input_dir+name, output_dir+name);
             console.log(input_dir+name+'  TO  '+output_dir+name);
           }
-          else if(ext==null){}
+          else if(ext==null){
+            console.log("Folder detected");
+          }
           });
         // end hack
       var files = [];
