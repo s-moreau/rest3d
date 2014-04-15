@@ -43,6 +43,7 @@ define(['jquerymin', 'rest3d', 'gltf', 'collada', 'viewer','q'], function ($, re
             }
             else {
                 // ennumerate all resulting files
+                if(!upload.getOptionLog()){
                 var $conve = upload.header(data.file.name);
                 $.each(data.result.files, function (index, file) {
                     var href = $('<a style="display:none" href="/rest3d/' + decodeURIComponent(file.name) + '" target="_blank"></a>');
@@ -84,6 +85,13 @@ define(['jquerymin', 'rest3d', 'gltf', 'collada', 'viewer','q'], function ($, re
                     }
                 });
             }
+            else{
+                var e = {};
+                e.idToDrop = "c_"+viewer.idUser;
+                window.sortAssetDrop(e,data);
+                window.visualize(data);
+            }
+        }
         }
 
         function preview(node){
