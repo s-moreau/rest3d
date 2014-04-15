@@ -337,11 +337,13 @@ server.post(/^\/rest3d\/convert.*/,function(req,res,next){
         var list = fs.readdirSync(path);
         list.forEach(function (name) {
           var ext = name.match(/\.[^.]+$/);
+          console.log(ext);
           if(ext!==null){
             var stats = fs.statSync(path+name);
             files.push({name: path+name, size: stats.size});
           }
           else{
+            console.log("In");
             files = parseFolder(path+name,files);
           }
        });
