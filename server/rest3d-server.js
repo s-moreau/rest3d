@@ -342,7 +342,7 @@ server.post(/^\/rest3d\/convert.*/,function(req,res,next){
         walker.on('file', function(root, stat, next) {
           console.log("files")
             // Add this file to the list of files
-            files.push({name: root + '/' + stat.name, size: stat.size});
+            files.push({name: root + stat.name, size: stat.size});
             next();
         });
 
@@ -353,7 +353,7 @@ server.post(/^\/rest3d\/convert.*/,function(req,res,next){
                 console.log('timeout !! '+output_dir+' was deleted');
               }
               setTimeout(function() { timeout()},5 * 60 * 1000); 
-              handler.handleResult({files: parseFolder(output_dir,files), code:codeC2J, output:outputC2J});
+              handler.handleResult({files: files, code:codeC2J, output:outputC2J});
         });
       // var files = [];
       // function parseFolder(path,files){
