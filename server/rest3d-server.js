@@ -340,6 +340,7 @@ server.post(/^\/rest3d\/convert.*/,function(req,res,next){
         var walker  = walk.walk(output_dir, { followLinks: false });
 
         walker.on('file', function(root, stat, next) {
+          console.log("files")
             // Add this file to the list of files
             files.push({name: root + '/' + stat.name, size: stats.size});
             next();
@@ -373,7 +374,7 @@ server.post(/^\/rest3d\/convert.*/,function(req,res,next){
       //   return files;
       // }
    
-    },1000);
+    },2500);
       // fs.readdir(output_dir, function (err, list) {
       //     list.forEach(function (name) {
       //         var stats = fs.statSync(output_dir+name);
@@ -383,9 +384,7 @@ server.post(/^\/rest3d\/convert.*/,function(req,res,next){
       //   });   
        });
        });
- setTimeout(function(){
     form.parse(req);
-        },1500);
 });
 
 // static server
