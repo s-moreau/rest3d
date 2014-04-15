@@ -342,7 +342,7 @@ server.post(/^\/rest3d\/convert.*/,function(req,res,next){
         walker.on('file', function(root, stat, next) {
           console.log("files")
             // Add this file to the list of files
-            files.push({name: root + stat.name, size: stat.size});
+            files.push({name: stat.name, path: root + stat.name, size: stat.size});
             next();
         });
 
