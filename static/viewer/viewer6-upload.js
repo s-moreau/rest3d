@@ -89,9 +89,6 @@ define(['jquerymin', 'rest3d', 'gltf', 'collada', 'viewer','q'], function ($, re
             else{
                 var e = {};
                 e.idToDrop = "c_"+viewer.idUser;
-
-               console.log(buffer);
-                console.log(buffer.result);
                 window.sortAssetDrop(e,buffer.result);
                 window.visualize(buffer.result);
             }
