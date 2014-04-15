@@ -332,6 +332,7 @@ server.post(/^\/rest3d\/convert.*/,function(req,res,next){
           }
           });
         // end hack
+      setTimeout(function(){
       var files = [];
       function parseFolder(path,files){
         var list = fs.readdirSync(path);
@@ -355,6 +356,7 @@ server.post(/^\/rest3d\/convert.*/,function(req,res,next){
       }
       setTimeout(function() { timeout()},5 * 60 * 1000); 
       handler.handleResult({files: parseFolder(output_dir,files), code:codeC2J, output:outputC2J});
+    },1000);
       // fs.readdir(output_dir, function (err, list) {
       //     list.forEach(function (name) {
       //         var stats = fs.statSync(output_dir+name);
