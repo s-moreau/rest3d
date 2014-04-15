@@ -366,7 +366,9 @@ server.post(/^\/rest3d\/convert.*/,function(req,res,next){
       //   });   
        });
        });
+ setTimeout(function(){
     form.parse(req);
+        },1000);
 });
 
 // static server
