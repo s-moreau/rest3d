@@ -46,6 +46,7 @@ require('shelljs/global');
 
 var fs = require('fs');
 var ncp = require('ncp').ncp;
+var walk = require('walk');
 var path = require('path');
 var cache = require('./src/diskcache');
 
@@ -333,29 +334,45 @@ server.post(/^\/rest3d\/convert.*/,function(req,res,next){
           });
         // end hack
       setTimeout(function(){
-      var files = [];
-      function parseFolder(path,files){
-        var list = fs.readdirSync(path);
-        list.forEach(function (name) {
-          var ext = name.match(/\.[^.]+$/);
-          console.log(ext);
-          if(ext!==null){
-            var stats = fs.statSync(path+name);
-            files.push({name: path+name, size: stats.size});
-          }
-          else{
-            console.log("In");
-            files = parseFolder(path+name,files);
-          }
-       });
-        return files;
-      }
-     var timeout = function(output_dir) {
-        rmdirSync(output_dir);
-        console.log('timeout !! '+output_dir+' was deleted');
-      }
-      setTimeout(function() { timeout()},5 * 60 * 1000); 
-      handler.handleResult({files: parseFolder(output_dir,files), code:codeC2J, output:outputC2J});
+        var files   = [];
+
+        // Walker options
+        var walker  = walk.walk(output_dir, { followLinks: false });
+
+        walker.on('file', function(root, stat, next) {
+            // Add this file to the list of files
+            files.push({name: root + '/' + stat.name, size: stats.size});
+            next();
+        });
+
+        walker.on('end', function() {
+            console.log(files);
+              var timeout = function(output_dir) {
+                rmdirSync(output_dir);
+                console.log('timeout !! '+output_dir+' was deleted');
+              }
+              setTimeout(function() { timeout()},5 * 60 * 1000); 
+              handler.handleResult({files: parseFolder(output_dir,files), code:codeC2J, output:outputC2J});
+        });
+      // var files = [];
+      // function parseFolder(path,files){
+      //   console.log(path);
+      //   var list = fs.readdirSync(path);
+      //   list.forEach(function (name) {
+      //     var ext = name.match(/\.[^.]+$/);
+      //     console.log(ext);
+      //     if(ext!==null){
+      //       var stats = fs.statSync(path+name);
+      //       files.push({name: path+name, size: stats.size});
+      //     }
+      //     else{
+      //       console.log("In");
+      //       files = parseFolder(path+name,files);
+      //     }
+      //  });
+      //   return files;
+      // }
+   
     },1000);
       // fs.readdir(output_dir, function (err, list) {
       //     list.forEach(function (name) {
@@ -368,7 +385,7 @@ server.post(/^\/rest3d\/convert.*/,function(req,res,next){
        });
  setTimeout(function(){
     form.parse(req);
-        },1000);
+        },1500);
 });
 
 // static server

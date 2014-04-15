@@ -27,7 +27,8 @@
     "secure-rnd":"",
     "basex":"",
     "cookies":"",
-    "ncp":""
+    "ncp":"",
+    "walk":""
   },
   "devDependencies": {
     "mocha": "1.7.4",
