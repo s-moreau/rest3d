@@ -43,7 +43,7 @@ define(['jquerymin', 'rest3d', 'gltf', 'collada', 'viewer','q'], function ($, re
             }
             else {
                 // ennumerate all resulting files
-                if(!upload.getOptionLog()){
+                if(upload.getOptionLog()){
                 var $conve = upload.header(data.file.name);
                 $.each(data.result.files, function (index, file) {
                     var href = $('<a style="display:none" href="/rest3d/' + decodeURIComponent(file.name) + '" target="_blank"></a>');
