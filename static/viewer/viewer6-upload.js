@@ -30,6 +30,7 @@ define(['jquerymin', 'rest3d', 'gltf', 'collada', 'viewer','q'], function ($, re
         var flag;
         var url = '/rest3d/upload';
         function callbackConvert(data){
+            var buffer = data;
             // $this.prop('disabled',true);
             if (data.result.output) {
                 console.debug(data.result.output);
@@ -89,10 +90,10 @@ define(['jquerymin', 'rest3d', 'gltf', 'collada', 'viewer','q'], function ($, re
                 var e = {};
                 e.idToDrop = "c_"+viewer.idUser;
 
-               console.log(data);
-                console.log(data.files);
-                window.sortAssetDrop(e,data);
-                window.visualize(data);
+               console.log(buffer);
+                console.log(buffer.files);
+                window.sortAssetDrop(e,buffer);
+                window.visualize(buffer);
             }
         }
         }
