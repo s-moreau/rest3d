@@ -101,6 +101,7 @@
       handler.handleResult({success: !ex});
     });
   };
+
   // move a file to upload area
   // need the path where to upload the file
   // and if it is a fileSystem or a database
@@ -130,26 +131,11 @@
           })
 
       } else {
-
         if(handler.hasOwnProperty("iduser")){ 
-          var tmp = handler.folder.split("/");
-          var index = tmp.length;
-          for(var i=3;i<index;i++){
-            if(tmp[i].split(".").length==1){
-              var flag = fs.existsSync(tmp[i-1]+"/"+tmp[i]);
-              tmp[i]=tmp[i-1]+"/"+tmp[i];
-              if(!flag){
-                console.log("createfoler "+tmp[i])
-                fs.mkdirSync(tmp[i]);
-              }
-            }
-            else{
-             
-              fs.renameSync(this.file.path, tmp[i-1]+"/"+tmp[i]);
-                 console.log("uploaded "+tmp[i-1]+"/"+tmp[i]);
-              this.path = tmp[i-1]+"/"+tmp[i];
-            }
-          }
+          var path = handler.createSyncPath(handler.folder);
+          fs.renameSync(this.file.path, path);
+          console.log("uploaded "+path);
+          this.path = path;
           cb && cb(undefined,this);
         }  else {
           cb && cb('cannot find folder',null);

@@ -24,13 +24,13 @@ THE SOFTWARE.*/
 //
 define(['jquerymin', 'rest3d', 'gltf', 'collada', 'viewer','q'], function ($, rest3d, glTF, COLLADA, viewer,Q) {
 
-    function setViewer6Upload($, upload, rest3d, viewer) {
-
+    function setViewer6Upload($, upload, rest3d, viewer) { 
         var index;
         var id;
         var flag;
-
+        var url = '/rest3d/upload';
         function callbackConvert(data){
+            var buffer = data;
             // $this.prop('disabled',true);
             if (data.result.output) {
                 console.debug(data.result.output);
@@ -44,6 +44,7 @@ define(['jquerymin', 'rest3d', 'gltf', 'collada', 'viewer','q'], function ($, re
             }
             else {
                 // ennumerate all resulting files
+                if(upload.getOptionLog()){
                 var $conve = upload.header(data.file.name);
                 $.each(data.result.files, function (index, file) {
                     var href = $('<a style="display:none" href="/rest3d/' + decodeURIComponent(file.name) + '" target="_blank"></a>');
@@ -85,6 +86,13 @@ define(['jquerymin', 'rest3d', 'gltf', 'collada', 'viewer','q'], function ($, re
                     }
                 });
             }
+            else{
+                var e = {};
+                e.idToDrop = "c_"+viewer.idUser;
+                window.sortAssetDrop(e,buffer.result);
+                window.visualize(buffer.result);
+            }
+        }
         }
 
         function preview(node){
@@ -122,9 +130,9 @@ define(['jquerymin', 'rest3d', 'gltf', 'collada', 'viewer','q'], function ($, re
         upload.displayGltf = displayGltf;
 
         function convertMenu(node){
-            console.debug( $("#"+node.attr("id")))
             result = $("#"+node.attr("id")).data();
             console.debug(result);
+            result.file.relativePath = "";
             rest3d.convert(result,callbackConvert);
         }   
         upload.convertMenu = convertMenu;
@@ -173,29 +181,8 @@ define(['jquerymin', 'rest3d', 'gltf', 'collada', 'viewer','q'], function ($, re
             this.upload = [];
             var stock = this;
         }
-
-        var url = '/rest3d/upload';
-        var uploadButton = $('<input type="checkbox" style="float:right;">')
-            .addClass('btn'),
-            // show the name of the file nicely
-            formatName = function (data, file) {
-                var i = file.name.lastIndexOf('/');
-                return file.name.substring(i + 1);
-            },
-            convertButton = $('<button/>')
-                .addClass('btn')
-                .prop('disabled', true)
-                .on('click', function () {
-                    var $this = $(this),
-                        data = $this.data();
-                    $this
-                        .off('click')
-                        .prop('disabled', true)
-                    // user rest to convert dae into glTF
-                    rest3d.convert(data,callbackConvert);
-                });
         
-        var sortAssetDrop = function (e, data,mode) {
+        window.sortAssetDrop = function (e, data,mode) {
             var defer = Q.defer();
             if(!upload.getOptionLog()){
                   upload.filesArea.children("br").last().remove();
@@ -306,10 +293,12 @@ define(['jquerymin', 'rest3d', 'gltf', 'collada', 'viewer','q'], function ($, re
                     var result = [""];
                 }
                 else{
-                    var result = file.relativePath.split("/");}
+                    try{var result = file.relativePath.split("/");}
+                    catch(err){var result = file.path.replace("upload/","").split("/");}
+                }
 
                 for(var i=0;i<result.length;i++){
-                    if(result[i]!=""){
+                    if(result[i]!=""&&result[i].indexOf('.')==-1){
                         var id = createNode(parent,result[i],file);
                         parent = $("#"+id);}
                     else{
@@ -340,14 +329,25 @@ define(['jquerymin', 'rest3d', 'gltf', 'collada', 'viewer','q'], function ($, re
                 e.preventDefault();
             }
             defer.resolve();
+            $("#uploadTree").jstree('open_all');
             return defer.promise;
+        }
+
+        window.visualize = function(data){
+          $.each(data.files, function (index, file) {
+                var url = file.relativePath;
+                url.attr("uploadstatus",true);
+                url.append("<img style='float:right;' src='../gui/images/accept.png' >");
+                $(url).data({file:file});
+            });
+
         }
 
         setTimeout(function () {
             upload.object.fileupload('option', 'dropZone', $("#c_" + viewer.idUser));
             upload.object.bind('fileuploaddrop', function (e, data) {
                 window.pleaseWait(true);
-                sortAssetDrop(e, data).then(function(){
+                window.sortAssetDrop(e, data).then(function(){
                     window.pleaseWait(false);
                 })
             });
@@ -357,11 +357,30 @@ define(['jquerymin', 'rest3d', 'gltf', 'collada', 'viewer','q'], function ($, re
             this.object.off('fileuploadchange');
             this.object.on('fileuploadchange', function (e, data) {
                   window.pleaseWait(true);
-                sortAssetDrop(e, data, node).then(function(){
+                window.sortAssetDrop(e, data, node).then(function(){
                     window.pleaseWait(false);
                 })
             })
         }
+        var uploadButton = $('<input type="checkbox" style="float:right;">')
+            .addClass('btn'),
+            // show the name of the file nicely
+            formatName = function (data, file) {
+                var i = file.name.lastIndexOf('/');
+                return file.name.substring(i + 1);
+            },
+            convertButton = $('<button/>')
+                .addClass('btn')
+                .prop('disabled', true)
+                .on('click', function () {
+                    var $this = $(this),
+                        data = $this.data();
+                    $this
+                        .off('click')
+                        .prop('disabled', true)
+                    // user rest to convert dae into glTF
+                    rest3d.convert(data,callbackConvert);
+                });
 
         upload.object.on('fileuploadadd', function (e, data) {
             var buffer = data.tmp;
@@ -435,8 +454,6 @@ define(['jquerymin', 'rest3d', 'gltf', 'collada', 'viewer','q'], function ($, re
                         buffer.button.click();
                     })
                 },1000);
-              
-                $("#uploadTree").jstree('open_all');
             });
             data.tmp = buffer;
             data.buttonToReplace.push(button);

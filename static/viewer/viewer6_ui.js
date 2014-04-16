@@ -481,6 +481,20 @@ viewer.INIT =  function (){
                 }
                 return param_out;
             }
+            function removeModel(node){
+                var id = node.attr("id").split("_")[0];
+                for(var i=0;i<viewer.scenes.length;i++){
+                    if(viewer.scenes[i].hasOwnProperty("url")){
+                        if(viewer.scenes[i].url.replace(/^.*[\\\/]/, '')==id){
+                            viewer.scenes[i] = [];
+                            viewer.draw();
+                            viewer.scenes.splice(i, 1);
+                        }
+                    }
+                }             
+                $(node).remove();
+            }
+
 
             treeScene = GUI.treeBis({
                 id:'Tree',
@@ -497,6 +511,7 @@ viewer.INIT =  function (){
                     "success": function (new_data) {
                         var result = [];
                         if(nodeBuffer==-1){
+                            console.debug(viewer.scenes);
                             window.main(viewer.scenes,result)
                         }
                         else{
@@ -517,7 +532,14 @@ viewer.INIT =  function (){
                     },
                 },
             },
-            "plugin": ["themes", "json_data", "ui", "types", "sort","search"],
+                 "contextmenu" : {
+                "items" : function (node) {
+                    var result = {};
+                    if(node.attr("rel")=="main"){
+                        result.icon = {'label':'Remove','action':removeModel,};}
+                    return result;
+                }
+            },
              type:  { "types": {
                 "main": {
                     "icon" : {
@@ -792,52 +814,65 @@ viewer.INIT =  function (){
             var uri = node.attr("asseturi");
             var call = function(data){
                 var deferred = Q.defer();
-                var html = '<ul>';
-                var buffer = [];
-                data = JSON.parse(data);
-                var position = data.files;
-                for(var i=0;i<data.files.length;i++){
-                    var name = data.files[i].name;
-                    var size = data.files[i].size;
-                    var path = data.files[i].path;
-                    var url = location.protocol+'//'+location.host+'/rest3d/'+path;
-                    var ext = name.match(/\.[^.]+$/);
-                    if(ext[0]=='.DAE'||ext[0]=='.dae'){
-                        node.attr("path",url);
-                        html += '<li><a>name: '+name+' </a>'+'<a>size: '+size+' </a>'+'<a href="'+url+'">download</a>'+'<button id="model_'+size+'">Display</button>'+'</li>';
-                        buffer.push({'id':'#model_'+size,'url':url});}
-                    else{
-                        html += '<li><a>name: '+name+' </a>'+'<a>size: '+size+' </a>'+'<a href="'+url+'">download</a></li>';}
-            }
-            html += '</ul>';
-            GUI.notification({
-                title: "Upload "+node.attr("path"),
-                text: html,
-                type: "notice"
-            });
-            deferred.resolve(true);
-            // if($button){
-            //     $('#'+name+'_'+size).append($button);
-            // }
-        setTimeout(function(){
-           for(var j=0;j<buffer.length;j++){
-                var uri = buffer[j].url;
-               $(buffer[j].id).click(function(){
-                    window.pleaseWait(true);
-                    COLLADA.load(uri, viewer.parse_dae).then(
-                    function(flag){
-                          window.pleaseWait(false);
-                          window.notif(uri);
-                    }).fail(function(){
-                        window.pleaseWait(false);
-                        console.error("loading failed!!");
-                    });
-                });
-       }
-       },500);
-            return deferred.promise;
+       //          var html = '<ul>';
+       //          var buffer = [];
+       //          data = JSON.parse(data);
+       //          var position = data.files;
+       //          for(var i=0;i<data.files.length;i++){
+       //              var name = data.files[i].name;
+       //              var size = data.files[i].size;
+       //              var path = data.files[i].path;
+       //              var url = location.protocol+'//'+location.host+'/rest3d/'+path;
+       //              var ext = name.match(/\.[^.]+$/);
+       //              if(ext[0]=='.DAE'||ext[0]=='.dae'){
+       //                  node.attr("path",url);
+       //                  html += '<li><a>name: '+name+' </a>'+'<a>size: '+size+' </a>'+'<a href="'+url+'">download</a>'+'<button id="model_'+size+'">Display</button>'+'</li>';
+       //                  buffer.push({'id':'#model_'+size,'url':url});}
+       //              else{
+       //                  html += '<li><a>name: '+name+' </a>'+'<a>size: '+size+' </a>'+'<a href="'+url+'">download</a></li>';}
+       //      }
+       //      html += '</ul>';
+       //      GUI.notification({
+       //          title: "Upload "+node.attr("path"),
+       //          text: html,
+       //          type: "notice"
+       //      });
+       //      deferred.resolve(true);
+       //      // if($button){
+       //      //     $('#'+name+'_'+size).append($button);
+       //      // }
+       //  setTimeout(function(){
+       //     for(var j=0;j<buffer.length;j++){
+       //          var uri = buffer[j].url;
+       //         $(buffer[j].id).click(function(){
+       //              window.pleaseWait(true);
+       //              COLLADA.load(uri, viewer.parse_dae).then(
+       //              function(flag){
+       //                    window.pleaseWait(false);
+       //                    window.notif(uri);
+       //              }).fail(function(){
+       //                  window.pleaseWait(false);
+       //                  console.error("loading failed!!");
+       //              });
+       //          });
+       // }
+       // },500);
+        //      GUI.notification({
+       //          title: "Upload "+node.attr("path"),
+       //          text: html,
+       //          type: "notice"
+       //      });
+
+                var e = {};
+                e.idToDrop = "c_"+viewer.idUser;
+                data = jQuery.parseJSON(data);
+                window.sortAssetDrop(e,data);
+                window.visualize(data);
+                deferred.resolve();
+                renderMenu.render.focusTab();
+                return deferred.promise;
             };
-            rest3d.urlUpload(uri,call);
+            rest3d.urlUpload(uri,call,viewer.idUser);
         }
         function preview(node){
             $("#dialog").dialog("close");
@@ -910,18 +945,14 @@ viewer.INIT =  function (){
                     }
                 }
             },
-            "contextmenu" : {
+           "contextmenu" : {
                 "items" : function (node) {
                     var result = {};
                     if(node.attr("iconuri")){
                         result.icon = {'label':'Display icon','action':icon,};}
-                    if(node.attr("asseturi")&&node.attr("type")!="uploaded"){
-                        result.display = {'label':'Upload','action':display,};}
                     if(node.attr("rel")=="model"){
+                        result.display = {'label':'Upload','action':display,};
                         result.download = {'label':'Download','action':download,};
-                    }
-                    if(node.attr("type")=="uploaded"){
-                        result.convert = {'label':'Convert','action':convert,};
                     }
                     if(node.attr("previewuri")){
                         result.preview = {'label':'Preview model','action':preview,};}
@@ -1288,6 +1319,7 @@ viewer.INIT =  function (){
                 text: "Upload"
             }]
         })
+        accordionUp.upload.header.click();
 
         var upload = GUI.upload({parent:accordionUp.upload, id:"upModel", url:location.protocol+"//"+location.host+'/rest3d/upload', idUser: viewer.idUser});
     //     setTimeout(function(){

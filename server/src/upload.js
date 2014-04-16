@@ -42,9 +42,7 @@ module.exports = function (server) {
         if (counter===0) {
           try {
             files.forEach(function (fileInfo) {
-
               //fileInfo.initUrls(handler.req);
-
               var timeout = function() {
                 fileInfo.delete();
                 console.log('timeout !! '+fileInfo.name+' was deleted');
@@ -54,7 +52,7 @@ module.exports = function (server) {
             handler.handleResult({files: files}, redirect);
             return;
           } catch (e) {
-            handler.handleError( e);
+            handler.handleError(e);
             return 
           }
         }
@@ -110,12 +108,18 @@ module.exports = function (server) {
           }
         };
         params.url = value;
-        params.where = FileInfo.options.uploadDir;
-
+        if(handler.hasOwnProperty("iduser")){
+          params.where = handler.createSyncPath("/rest3d/upload/"+handler.iduser);
+          console.log(params.where);
+        }
+        else {
+         params.where = FileInfo.options.uploadDir;
+        }
         counter ++;
-        zipFile.unzip(params.uid,params.url,null,params.where, params.cb); //jar?
+        zipFile.unzip(params.uid,params.url,null,params.where,params.cb); //jar?
       }
     }).on('file', function (name, file) {
+          console.log("post ");
         var fileInfo = map[file.path];
       fileInfo.size = file.size;
       fileInfo.type = file.type;
@@ -201,7 +205,7 @@ module.exports = function (server) {
 
   // rest3d get upload API
   server.get(/^\/rest3d\/upload.*/, function(req,res,next){
-
+      console.debug(req);
       var handler = new UploadHandler(req, res, next);
       handler.allowOrigin();
 

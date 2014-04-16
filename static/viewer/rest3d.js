@@ -36,10 +36,11 @@ rest3d.convert = function(_params, _cb) {
 
     $.post('/rest3d/convert', params.file)
     .done(function(data) {
+      console.log("convert done");
       if (data) params.result = JSON.parse(data); 
       if (cb) cb(params);
     }).fail(function(data) {
-        console.log("Error Converting "+params.file.name);
+        console.log("Error Converting "+params.file);
         // console.log(JSON.parse(data.error().responseText));
     });
 };
@@ -93,15 +94,20 @@ rest3d.fileUpload = function(_params,_cb){
 })
 };
 
-rest3d.urlUpload = function(url,cb){
+rest3d.urlUpload = function(url,cb,idUser){
       window.pleaseWait(true);
       $.ajax({
            'type': "POST",
+            beforeSend: function (request)
+            {
+                request.setRequestHeader("X-iduser",idUser);
+            },
            'url': "/rest3d/upload/",
            'size': 150,
            'name':"url",
            'enctype': "application/x-www-form-urlencoded",
            "Content-type": "application/x-www-form-urlencoded",
+           // "X-folder", node.attr("path");
            'data':{'url':url},
            success: function(data)
            {

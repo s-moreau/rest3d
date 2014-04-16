@@ -929,7 +929,19 @@ define(['channel','codemirror','webglUtils', 'WebGLDebugUtils','pnotify','colorp
                 delete stock[this.prop("id")];
             }
 
-            $.fn.recallItem = function (id) {
+            $.fn.openAccordion = function(){
+                var tmp = $(this);
+                console.debug(tmp);
+                if($(this).hasClass("ui-state-active")){
+                    return;
+                }
+                else{
+                    $(this).click();
+                }
+                
+            }
+
+            $.fn.renameItem = function (id) {
                 this.removeJqueryObjectA();
                 this.removeAttr('id');
                 this.prop("id", id);
@@ -1167,6 +1179,10 @@ define(['channel','codemirror','webglUtils', 'WebGLDebugUtils','pnotify','colorp
                 if (_json.text.trim() != "Material" && this.optionManager) {
                     this.manager();
                 }
+            }
+
+            $.fn.focusTab=function(){
+                $('li[aria-controls="' + $(this).prop("id") + '"] a').click();
             }
 
             $.fn.removeTab = function (_idTabWindow, id) {
