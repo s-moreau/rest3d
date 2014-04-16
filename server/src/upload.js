@@ -35,10 +35,11 @@ module.exports = function (server) {
       if (err) {
         console.log('ERROR IN FINISH');
         handler.handleError(err);
+        counter=-1;
         return;
       }
         counter -= 1;
-        if (!counter) {
+        if (counter===0) {
           try {
             files.forEach(function (fileInfo) {
 
@@ -209,7 +210,6 @@ module.exports = function (server) {
       console.log('in GET upload/ for asset='+asset)
 
       if (asset === undefined || asset === '') {
-          //handler.setNoCacheHeaders();
           if (req.method === 'GET') {
               handler.get();
           } else {
