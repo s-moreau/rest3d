@@ -40,8 +40,13 @@ module.exports = function (server) {
 
   var cookies = {};
 
+  var tdviahandler = function(req,res,next){
+    handler.call(this,req,res,next);
+  }
+  tdviahandler.prototype = Object.create(handler.prototype);
+
   // do not use prototype, login is private to 3dvia
-  handler.login = function(){
+  tdviahandler.prototype.login = function(){
     console.log ("3dvia login requested");
     var handler = this;
 
@@ -199,7 +204,7 @@ module.exports = function (server) {
     };
 
   server.post(/^\/rest3d\/3dvia\/login/, function(req,res, next){
-    var tdvia = new handler(req, res, next);
+    var tdvia = new tdviahandler(req, res, next);
 
     tdvia.login();
 
@@ -207,7 +212,7 @@ module.exports = function (server) {
  
   server.get(/^\/rest3d\/3dvia.*/,function(req, res, next) {
     
-    var tdvia = new handler(req,res,next);
+    var tdvia = new tdviahandler(req,res,next);
 
     var uid = req.url.split("/3dvia/")[1];
     console.log('[3dvia]' + uid);
