@@ -379,11 +379,11 @@ module.exports = function(config) {
 
   req.session = data;
   //console.log('session.js stored data='+toJSON(data)+' in req.session');
-  res.setHeader(cfg.sidHeader.toLowerCase(), sid);
+  res.setHeader(cfg.sidHeader.toLowerCase(), sid);//add header
 
   if (cfg.cookies) {
     var jar = new Cookies(req, res);
-    jar.set(session.name,sid);
+    jar.set(session.name,sid);//add cookie
   }
 
   next && next(data);

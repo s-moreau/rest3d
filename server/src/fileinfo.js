@@ -132,7 +132,7 @@
 
       } else {
         if(handler.hasOwnProperty("iduser")){ 
-          var path = handler.createSyncPath(handler.folder);
+          var path = handler.createSyncPath(handler.folder); // mkdirp.sync(currentpath);
           fs.renameSync(this.file.path, path);
           console.log("uploaded "+path);
           this.path = path;
