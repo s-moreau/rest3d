@@ -297,6 +297,7 @@ viewer.INIT =  function (){
                     tmp.id = id;
                     tmp.type = attr;
                     tmp.value = parent[attr];
+                    tmp.parent = parent;
                     callbackArray.push(tmp);
                 };
                 return object;
@@ -597,58 +598,48 @@ viewer.INIT =  function (){
                 },
             });
         
-        treeScene.Tree.bind(
-        "select_node.jstree", function(evt, data){
-            var tmp = data.inst.get_json()[0];
-            if(tmp.attr.hasOwnProperty("id")){
-                var id = tmp.attr.id.split("__").pop();
-                if(viewer.pickName[id]!="undefined"&&viewer.pickName[id]!=null){
-                        if (!viewer.channel.selected) viewer.channel.selected = {};
-                        if (viewer.channel.selected[id]) {
-                            delete viewer.channel.selected[id];
-                            window.fl4reStatus("",$("#mainLayout-south"),"selected "+viewer.pickName[Object.keys(viewer.channel.selected)[0]]);
-                        } else {
-                            viewer.channel.selected[id] = true;
-                            window.fl4reStatus("",$("#mainLayout-south"),"selected "+viewer.pickName[id]);
-                        }  
-                    } else{ 
-                        window.fl4reStatus("READY",$("#mainLayout-south"));
-                        delete viewer.channel.selected;
-                    }
-                    viewer.draw();
-                }
-            //     if(viewer.pickId.hasOwnProperty(id)){
-            //         if (!viewer.channel.selected) viewer.channel.selected = {};
-            //         if (viewer.channel.selected[id]) {
-            //             console.debug(id+" "+"selected")
-            //             delete viewer.channel.selected[id];
-            //             window.fl4reStatus("",$("#mainLayout-south"),"selected "+viewer.pickId[Object.keys(viewer.channel.selected)[0]]);
-            //         } else {
-            //             viewer.channel.selected[id] = true;
-            //             window.fl4reStatus("",$("#mainLayout-south"),"selected "+viewer.pickId[id]);
-            //              console.debug(id+" "+"selected")
-            //         }  
-            //     } else{ 
-            //         window.fl4reStatus("READY",$("#mainLayout-south"));
-            //          console.debug("no selected")
-            //         delete viewer.channel.selected;
-            //     }
-            // }
-            // console.debug(tmp.attr.id+" "+tmp.attr.rel);
-            //selected node object: data.inst.get_json()[0];
-            //selected node text: data.inst.get_json()[0].data
-        });
+        // treeScene.Tree.bind(
+        // "select_node.jstree", function(evt, data){
+        //     var tmp = data.inst.get_json()[0];
+        //     if(tmp.attr.hasOwnProperty("id")){
+        //         var id = tmp.attr.id.split("__").pop();
+        //         if(viewer.pickName[id]!="undefined"&&viewer.pickName[id]!=null){
+        //                 if (!viewer.channel.selected) viewer.channel.selected = {};
+        //                 if (viewer.channel.selected[id]) {
+        //                     delete viewer.channel.selected[id];
+        //                     window.fl4reStatus("",$("#mainLayout-south"),"selected "+viewer.pickName[Object.keys(viewer.channel.selected)[0]]);
+        //                 } else {
+        //                     viewer.channel.selected[id] = true;
+        //                     window.fl4reStatus("",$("#mainLayout-south"),"selected "+viewer.pickName[id]);
+        //                 }  
+        //             } else{ 
+        //                 window.fl4reStatus("READY",$("#mainLayout-south"));
+        //                 delete viewer.channel.selected;
+        //             }
+        //             viewer.draw();
+        //         }
+        //     });
 
         window.callbacks = function(){
             setTimeout(function(){
-                function display(id,value){
-                    $("#"+id).click(function(){
+                function display(array,index){
+                    var id = array[index].id;
+                    var value = array[index].value;
+                    var elem = $("#"+id);
+                    elem.click(function(){
                         console.debug(id+" |")
                         console.debug(value)
                     });
+                    if(value!==undefined&&typeof(value) !== 'object')elem.append("<a style='float:right'>"+value+"</a>");
                 }
-                function local(id,value){
+                function local(array,index){
+
+                    //local(callbackArray[g].id,callbackArray[g].value,setValue)
+                    var id = array[index].id;
+                    var value = array[index].value;
+                    // console.debug("input",value);
                     $("#"+id).click(function(){
+                        // console.debug(viewer.scenes);
                         var tmp = trs.create();
                         trs.fromMat4(tmp, value);
                         var e = euler.create();
@@ -656,21 +647,110 @@ viewer.INIT =  function (){
                         console.debug("translation",tmp.translation);
                         console.debug("scale",tmp.scale);
                         console.debug("rotation",e);
-
-                        // var q = quat.create();
-                        // quat.fromEuler(q,e);
-                        // console.debug(q);
-                        // var trs1 = trs.fromValues(tmp.tanslation,q,tmp.scale);
-                        // var mat1 = mat4.create();
-                        // mat4.fromTrs(mat1,trs1);
-                        // console.debug("output "+mat1);
+                        var html = "<div id='infplay"+id+"'></div>";
+                        GUI.notification({
+                            title: id,
+                            text: html,
+                            type: "notice",
                         });
+                        html = $("#infplay"+id);
+                        function createSliders(parent,type,element){
+                            switch(type){
+                                case "Translation":
+                                    var min = -1000,max = 1000, step=1;break;
+                                case "Scale":
+                                    var min = -1,max = 1, step=0.1;break;
+                                case "Rotation":
+                                    var min = -5,max = 5, step=0.1;break;
+                            }
+                            var callback = function(element){
+                                switch(type){
+                                case "Translation":
+                                    decodeAndPush(element,e,tmp.scale);break;
+                                case "Scale":
+                                    decodeAndPush(tmp.translation,e,element);break;
+                                case "Rotation":
+                                    decodeAndPush(tmp.translation,element,tmp.scale);break;
+                                }
+                            }
+                            // console.debug(type,min,max,step)
+                            parent.append("<a>"+type+"</a><br>")
+                            var title = $("<a>X: "+element[0]+"</a>");
+                            parent.append(title);
+                            var tmp1 = GUI.addSlider(type+"X_"+id,html,min,max,step,element[0]);
+                            tmp1.on("slide", function () {
+                                var result = $(this).slider("value");
+                                title.text("X: "+result);
+                                element[0]=result;
+                                callback(element);
+                            })
+                            var title1 = $("<a>Y: "+element[1]+"</a>");
+                            parent.append(title1);
+                            var tmp2 = GUI.addSlider(type+"Y_"+id,html,min,max,step,element[1]);
+                            tmp2.on("slide", function () {
+                                var result = $(this).slider("value");
+                                title1.text("Y: "+result);
+                                element[1]=result;
+                                callback(element);
+                            })
+                            var title2 = $("<a>Z: "+element[2]+"</a>");
+                            parent.append(title2);
+                            var tmp3 = GUI.addSlider(type+"Z_"+id,html,min,max,step,element[2]);
+                            tmp3.on("slide", function () {
+                                var result = $(this).slider("value");
+                                title2.text("Z: "+result);
+                                element[2]=result;
+                                callback(element);
+                            })
+                        }
+                        createSliders($(html),"Translation",tmp.translation);
+                        createSliders($(html),"Rotation",e);
+                        createSliders($(html),"Scale",tmp.scale);
+                        function decodeAndPush(trans,rot,scale){
+                            // console.debug(trans,rot,scale);
+                           
+                            var q = quat.create();
+                            quat.fromEuler(q,rot);
+                        //     console.debug(q);
+                            var trs1 = trs.fromValues(trans,q,scale);
+                            var mat1 = mat4.create();
+                            mat4.fromTrs(mat1,trs1);
+                            // console.debug("output ",mat1);
+                            array[index].parent[array[index].type]=mat1;
+                            // console.debug(viewer.scenes);
+                            viewer.draw();
+                        }   
+                        });
+
+                           //TEST DECODE/ENCODE ALGO WORKS
+                        // $("#"+id).click(function(){
+                        //     console.debug("input",value);
+                        //     var tmp = trs.create();
+                        //     trs.fromMat4(tmp, value);
+                        //     var e = euler.create();
+                        //     euler.fromQuat(e,tmp.rotation);
+                        //     console.debug("translation",tmp.translation);
+                        //     console.debug("scale",tmp.scale);
+                        //     console.debug("rotation",e);
+
+                        //     var q = quat.create();
+                        //     quat.fromEuler(q,e);
+                        //     console.debug(q);
+
+                        //     var trs1 = trs.fromValues(tmp.translation,q,tmp.scale);
+                        //     var mat1 = mat4.create();
+                        //     mat4.fromTrs(mat1,trs1);
+                        //     console.debug("output",mat1);
+                        // });
                     }
             for(var g=0;g<callbackArray.length;g++){
+                var setValue =function(value){
+                    return callbackArray[g].parent[callbackArray[g].type]=value;
+                };
                 if(callbackArray[g].type=="local"){
-                    local(callbackArray[g].id,callbackArray[g].value);}
+                    local(callbackArray,g)}
                 else{
-                    display(callbackArray[g].id,callbackArray[g].value);}
+                    display(callbackArray,g);}
                 }
             },500);
 }
