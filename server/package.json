@@ -28,7 +28,8 @@
     "basex":"",
     "cookies":"",
     "ncp":"",
-    "walk":""
+    "walk":"",
+    "ncp":""
   },
   "devDependencies": {
     "mocha": "1.7.4",

@@ -40,7 +40,8 @@ module.exports = function (server) {
 
   var cookies = {};
 
-  handler.prototype.login = function(){
+  // do not use prototype, login is private to 3dvia
+  handler.login = function(){
     console.log ("3dvia login requested");
     var handler = this;
 
