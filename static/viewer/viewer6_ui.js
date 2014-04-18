@@ -123,13 +123,13 @@ viewer.INIT =  function (){
             id: "menu",
             parent: layout.jqueryObjectNorth,
             item: [{
-                text: "COLLADA",
-                id: "load"
-            },
-            {
-                text: "glTF",
-                id: "loadgl"
-            }, {
+                text: "Welcome guest!",
+                id: "welcomeMenu",
+                callback: function(){
+                    var x =  document.cookie;
+                    console.debug(x);
+                },
+            },{
                 text: "Settings",
                 id: "settings"
             }, {
@@ -220,12 +220,6 @@ viewer.INIT =  function (){
 
 
          //------------------------------ all menu icons ---------------------------------------------------------------------------------------------
-
-         // //add icons to the men
-        menu.load.text.text("");
-        GUI.image(menu.load.text, "img-settings", "../gui/images/collada.png", 70, 80, "before");
-        menu.loadgl.text.text("");
-        GUI.image(menu.loadgl.text, "img-settings1", "../gui/images/glTF.png", 40, 40, "before");
 
         GUI.image(menu.settings.text, "img-settings", "../gui/images/icon-cog.png", 16, 16, "before");
         GUI.image(menu.support.text, "img-help", "../gui/images/menu-help.png", 15, 15, "before");
@@ -959,8 +953,11 @@ viewer.INIT =  function (){
                 title: node.attr('name'),
                 width: '600',
                 height: '500',
-                open: function (ev, ui) {
+                open: function () {
                     $('#myIframe').attr('src',node.attr("previewuri"));
+                },
+                close: function(){
+                    gitHtml.remove();
                 },
             });
            $("#dialog").css({'min-height':'none !important;'});
@@ -973,7 +970,7 @@ viewer.INIT =  function (){
                 title: node.attr('name'),
                 width: '300',
                 height: '300',
-                open: function (ev, ui) {
+                open: function () {
                     $('#myIframe').attr('src',node.attr("iconuri"));
                 },
                 close: function(){
@@ -1399,19 +1396,8 @@ viewer.INIT =  function (){
         accordionUp.upload.header.click();
 
         var upload = GUI.upload({parent:accordionUp.upload, id:"upModel", url:location.protocol+"//"+location.host+'/rest3d/upload', idUser: viewer.idUser});
-    //     setTimeout(function(){
-    //     upload.upModel.fileupload('option','beforeSend',function(xhr, data) {
-    //                     console.debug("in");
-    //                     xhr.setRequestHeader('X-folder', "tefa");
-    //                 })
-    // },3000);
-        // upload.button.width("80%");
         upload.progress.progress_upModel.width("100%");
-        // $.getScript("viewer6-upload.js").done(function( script, textStatus ) {
         setViewer6Upload($,upload,rest3d,viewer);
-          // }).fail(function(err){
-          //   console.error("upload external script failed to load");
-          // });
 
         jumpLine();
         GUI.label('welcome', "Load some sample models among those accordions:", renderMenu.render);
@@ -1422,13 +1408,16 @@ viewer.INIT =  function (){
             parent: renderMenu.render,
             item: [{
                 id: "collada",
-                text: "COLLADA"
+                text: ""
             }, {
                 id: "gltf",
-                text: "glTF"
+                text: ""
             }, ]
         })
         accordion.autoScrollDown();
+        GUI.image(accordion.collada.header, "img-settings", "../gui/images/collada.png", 40, 80, "before");
+        GUI.image(accordion.gltf.header, "img-settissngs1", "../gui/images/glTF.png", 40, 35, "before");
+        // accordion.collada.header.append()
 
         jumpLine();
 
@@ -1688,38 +1677,6 @@ viewer.INIT =  function (){
             })
         }).width("90%");
 
-        var colladaMenu = [];
-        accordion.collada.find('button').each(function(i){
-            var stock = $(this);
-            colladaMenu[i]={};
-            colladaMenu[i].id="loadCollada_"+i;
-            colladaMenu[i].text=$(this).find('span').html();
-            colladaMenu[i].callback = function(){
-                stock.click();      };    
-        })
-
-        GUI.menu({
-            id: "load-menu",
-            parent: menu.load,
-            item: colladaMenu,
-        })
-
-        var gltfMenu = [];
-        accordion.gltf.find('button').each(function(i){
-            var stock = $(this);
-            gltfMenu[i]={};
-            gltfMenu[i].id="loadgltf_"+i;
-            gltfMenu[i].text=$(this).find('span').html();
-            gltfMenu[i].callback = function(){
-                stock.click();      };    
-        });
-        
-        GUI.menu({
-            id: "gltf-menu",
-            parent: menu.loadgl,
-            item: gltfMenu,
-        });
-
         var canvas = GUI.canvas(layout.jqueryObjectWest);
          // layout.resetOverflow('west');
 
@@ -1870,10 +1827,6 @@ viewer.INIT =  function (){
 
         button1.hide();
 
-        //$('#tabindex_2').find('input').click();
-        // $('#tabindex_1').find('input').click();
-
-       // layout.jqueryObject.sizePane("west", $(window).width() - 450);
         setTimeout(function () {
             layout.jqueryObject.sizePane("west", $(window).width() - 499);
         },1000);
@@ -1881,14 +1834,8 @@ viewer.INIT =  function (){
         layout.jqueryObject.resizeAll();
         layout.jqueryObject.initContent("center");
         layout.jqueryObject.initContent("west");
-
-         GUI.notification({
-                title: "Welcome to rest3d's viewer!",
-                text: "We are proposing a new version of our viewer elaborated with gui6. You are able to display some model samples in COLLADA/glTF format or explore 3D warehouse for displaying your favorite objects.",
-                type: "notice",
-                time:"10000",
-            })
-              window.loadCss("pepper-grinder");
+        
+        window.loadCss("pepper-grinder");
         
         // $("#mainLayout-west").append('<div id="colorSelector"  style="z-index:9999!important;"><div style="background-color: #0000ff"></div></div>');
         GUI.button("undefined",$("#mainLayout-west")).prop("id","colorSelector");
@@ -1994,6 +1941,85 @@ viewer.INIT =  function (){
         content: "Load an image as background",
     });
 
+    function welcomePanel(){
+        $("#dialog").dialog("close");
+        var gitHtml = $('<div id="dialog"><img src="../gui/images/loading.gif"/></div>');
+        gitPanel = $('body').append(gitHtml);
+        var draggableZone= $('<div class="draggableWelcome"></div>'); var guestZone;
+        var createButton = function(name,parent){
+            switch(name){
+                case "3dvia":
+                var link = "../gui/images/3dvia.png";
+                break;
+                case "warehouse":
+                var link = "../gui/images/warehouse.jpg";
+                break;
+                default:
+                var link = "../gui/images/upload_d.png";
+                break;
+            }
+            var button = GUI.button("", parent, function () {
+                    console.debug(link);
+                    });
+            GUI.image(button, "img-welcome", link, 77, 57, "before");
+            // button.height(85.781)
+            return button;
+        }
+        window.guest = function(){
+            console.debug("guestt")
+            $("#guestArea").append(guestZone);
+
+        }
+
+        var callback = function(data){
+            console.debug(data);
+            gitHtml.find("img").replaceWith("<h4>We are proposing a new version of our viewer elaborated with gui6. In addition of the basic functionnalites available in the last version, you are now able to display some model samples in COLLADA/glTF format, convert a COLLADA object and edit a scene. You can either explore some others databases listed below for editing your favorite models, upload your models to your own project stocked in our cloud or just working statically.</h4>")
+            gitHtml.append(draggableZone);
+            draggableZone.width(478).height(71);
+            guestZone = draggableZone.clone(true);
+            createButton("3dvia",draggableZone);
+            createButton("warehouse",draggableZone);
+            createButton("",draggableZone);
+            gitHtml.append("<hr>");
+            var guest = $("<div id='guestArea'></div><a style='float:right;' href='javascript:window.guest()'>+Guest account</a>");
+            gitHtml.append(guest)
+            gitHtml.append("<br><hr>");
+            var logIn = $("<a style='float:right;' href='javascript:window.login()'>+Log in</a>");
+            gitHtml.append(logIn);
+            gitHtml.append("<br><hr>");
+            var signUp = $("<a style='float:right;' href='javascript:window.signup()'>+Sign up</a>");
+            gitHtml.append(signUp)
+            gitHtml.append("<br><hr>");
+        }
+        $("#dialog").dialog({
+            width: '500',
+            height: 'auto',
+            title: 'Welcome to rest3d!',
+            modal: true,
+            create: function(){
+                $(this).css("maxHeight", 400);
+            },
+            open: function (ev, ui) {
+                rest3d.info(callback);
+            },
+            close: function(){
+                gitHtml.remove();
+            },
+        });
+        $("#dialog").parent().find(".ui-dialog-titlebar-close").remove();
+
+
+
+
+    } 
+
+ // GUI.notification({
+ //        title: "Welcome to rest3d's viewer!",
+ //        text: "We are proposing a new version of our viewer elaborated with gui6. You are able to display some model samples in COLLADA/glTF format or explore 3D warehouse for displaying your favorite objects.",
+ //        type: "notice",
+ //        time:"10000",
+ //    })
+
     viewer.fpsCounter = new viewer.FPSCounter();
     viewer.flagTick = false;
     viewer.fpsCounter.createElement( document.getElementById("fps"));
@@ -2005,6 +2031,9 @@ viewer.INIT =  function (){
     GUI.container.resizeAll();
     GUI.container.initContent("center");
     GUI.container.initContent("west");
+    // setTimeout(function(){
+    //     welcomePanel();
+    // },1500);
 }
 
   return viewer;
