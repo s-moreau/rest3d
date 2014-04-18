@@ -659,7 +659,7 @@ viewer.INIT =  function (){
                                 case "Translation":
                                     var min = -1000,max = 1000, step=1;break;
                                 case "Scale":
-                                    var min = -1,max = 1, step=0.1;break;
+                                    var min = 0.1,max = 1, step=0.05;break;
                                 case "Rotation":
                                     var min = -5,max = 5, step=0.1;break;
                             }
@@ -764,7 +764,6 @@ viewer.INIT =  function (){
                 for (var j=0; j<param_in.length;j++){
                     var result = {};
                     var tmp =param_in[j];
-
                         var ext = tmp.name.match(/\.[^.]+$/);
                         if(ext=='.dae'){
                             ext = "collada";
@@ -798,8 +797,6 @@ viewer.INIT =  function (){
                             result.children = children(tmp.children,result.children);
                             param_out.push(result);
                         }
-                        
-                       
                     }
                     return param_out;
                 }
