@@ -126,8 +126,7 @@ viewer.INIT =  function (){
                 text: "Welcome guest!",
                 id: "welcomeMenu",
                 callback: function(){
-                    var x =  document.cookie;
-                    console.debug(x);
+                
                 },
             },{
                 text: "Settings",

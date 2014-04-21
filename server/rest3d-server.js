@@ -216,12 +216,22 @@ server.db.init(function (b) {
 
 server.get(/^\/rest3d\/info/, function (req, res, next) {
     var handler = new Handler(req, res, next);
+    /// indexLogin : 0 -> no login needed, 1 -> optional, 2 -> required
+    function database(name,indexLogin,pictureTmp){
+        this.name = name;
+        this.login = indexLogin;
+        this.picture = pictureTmp;
+    }
+    var result = {};
     if (server.db) {
-        handler.handleResult("database " + server.db.name + " connected");
+        result[server.db.name] = new database(server.db.name,0,"../gui/images/upload_d.png")
     }
-    else {
-        handler.handleResult("database not connected")
+    else{
+        console.log("database not connected");
     }
+    console.log(require.resolve("./src/warehouse"))
+    // handler.handleResult("database not connected")
+    handler.handleResult(result);
 });
 
 
