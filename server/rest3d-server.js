@@ -229,7 +229,13 @@ server.get(/^\/rest3d\/info/, function (req, res, next) {
     else{
         console.log("database not connected");
     }
-    console.log(require.resolve("./src/warehouse"))
+    if(server.hasOwnProperty("dvia")){
+        result["dvia"] = new database("dvia",2,"../gui/images/3dvia.png");
+    }
+    if(server.hasOwnProperty("warehouse")){
+        result["warehouse"] = new database("warehouse",2,"../gui/images/warehouse.jpg");
+    }
+    // if(get.prototype)
     // handler.handleResult("database not connected")
     handler.handleResult(result);
 });
