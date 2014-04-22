@@ -1597,15 +1597,22 @@ viewer.INIT =  function (){
 
     rest3d.info(function(data){
         data = jQuery.parseJSON(data);
+        window.renderMenu = renderMenu;
         if(data.hasOwnProperty("warehouse")){
-            window.renderMenu = renderMenu;
-            require(["warehouse"]);
+            require(["warehouse"],function(databaseTab){
+                var tmp = new databaseTab(data.warehouse);
+            });
+
         }
         if(data.hasOwnProperty("dvia")){
-            window.renderMenu.addTab({
-                id: "dvia",
-                text: "  3dvia",
+            // window.renderMenu.addTab({
+            //     id: "_3dvia",
+            //     text: "  3dvia",
+            // });
+            require(["warehouse"],function(databaseTab){
+                var tmp = new databaseTab(data.dvia);
             });
+            
         }
     });
     // window.renderMenu = renderMenu;

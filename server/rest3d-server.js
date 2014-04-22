@@ -217,10 +217,11 @@ server.db.init(function (b) {
 server.get(/^\/rest3d\/info/, function (req, res, next) {
     var handler = new Handler(req, res, next);
     /// indexLogin : 0 -> no login needed, 1 -> optional, 2 -> required
-    function database(name,indexLogin,pictureTmp){
+    function database(name,indexLogin,pictureTmp,description){
         this.name = name;
         this.login = indexLogin;
         this.picture = pictureTmp;
+        this.description = description;
     }
     var result = {};
     if (server.db) {
@@ -230,10 +231,12 @@ server.get(/^\/rest3d\/info/, function (req, res, next) {
         console.log("database not connected");
     }
     if(server.hasOwnProperty("dvia")){
-        result["dvia"] = new database("dvia",2,"../gui/images/3dvia.png");
+        result["dvia"] = new database("3dvia",2,"../gui/images/3dvia.png");
+        result["dvia"].description = "'Whether you're building a scene and want the perfect elements to fill it or need models with intelligence for your next interactive game, save time and resources by downloading assets from 3DVIA's Content Warehouse with a combined 85,000 free user contributed and premium models available for download. You're bound to find what you're looking for.' ref http://www.3dvia.com/resources";
     }
     if(server.hasOwnProperty("warehouse")){
-        result["warehouse"] = new database("warehouse",2,"../gui/images/warehouse.jpg");
+        result["warehouse"] = new database("warehouse",1,"../gui/images/warehouse.jpg");
+        result["warehouse"].description = "'The Trimble 3D Warehouse (formerly Google 3D Warehouse) is an accompanying website for SketchUp where modelers can upload, download and share three-dimensional models.' ref http://en.wikipedia.org/wiki/Trimble_3D_Warehouse"
     }
     // if(get.prototype)
     // handler.handleResult("database not connected")

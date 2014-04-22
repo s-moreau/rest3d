@@ -670,8 +670,10 @@ define(['channel','codemirror','webglUtils', 'WebGLDebugUtils','pnotify','colorp
         return html;
     }
 
-    GUI.addInput = function (_id, _defaultValue, _parent, _onChangeCallback) {
-        var html = '<span><input type="text" id="' + _id + '" name="' + _id + '"></span>';
+    GUI.addInput = function (_id, _defaultValue, _parent, _onChangeCallback,mode) {
+        var type = "text";
+        if(mode){type="password"}
+        var html = '<span><input type="'+type+'" id="' + _id + '" name="' + _id + '"></span>';
         var jqueryObjectInput = $(html);
         var input = jqueryObjectInput.find("input");
         input.val(_defaultValue);
