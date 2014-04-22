@@ -18,6 +18,10 @@ module.exports = function(config) {
   var fs      = require('fs');
   var toJSON  = require('./tojson');
 
+// need this to create tmp folder per sid
+  var Collection = require('./collection')
+  var path = require('path')
+
   // where we store active sessions
   session.sessions = {};
   session.timeouts = {};
@@ -133,7 +137,7 @@ module.exports = function(config) {
           if (err) {
             console.log('createSid new Key='+sid);
             session.sessions[sid]={};
-            return cb.call(session, undefined, sid);
+            createTMP(sid,cb)
           } else {
             console.log('createSid got Existing Key!!')
             createSid(cb);
@@ -142,10 +146,24 @@ module.exports = function(config) {
       } else {
         console.log("Created sessionID="+sid);
         session.sessions[sid]={};
-        cb.call(session, undefined, sid);
+        createTMP(sid,cb)
       }
     }
   };
+
+var createTMP = function(sid,cb){
+  // create tmp folder
+  Collection.create('tmp',path.join('/',sid),0, function(err,collection){
+    if (err){
+      console.log('Could NOT create TMP folder for user='+sid)
+      cb('Could NOT create TMP folder for user='+sid);
+    } 
+    else {
+      console.log('Created TMP for user='+sid)
+      cb.call(session, undefined, sid);
+    }
+  })
+}
 
   /**
    * Save session data
@@ -404,6 +422,8 @@ module.exports = function(config) {
     var next=_next;
 
     if (cfg.debug) {
+
+      cfg.logger.log('SessionManager !!')
       cfg.logger.log(session.name + ': request url: ' + req.url);
     }
 
@@ -416,10 +436,10 @@ module.exports = function(config) {
     }
     reqSid = reqSid || rest3dCookie;
     
-    console.log('SessionManager !!')
     session.load(reqSid, function(loadErr, data){
       if (loadErr) {
-        console.log('creating new Key')
+        if (cfg.debug)
+          cfg.logger.log('creating new Key')
         createSid(function(createErr, sid) {
           if (!createErr) {
             console.log('sessionManager -> addSessionData:'+sid);
@@ -437,7 +457,8 @@ module.exports = function(config) {
           }
         });
       } else {
-        console.log('sessionManager found Key ='+reqSid);
+        if (cfg.debug)
+          cfg.logger.log('sessionManager found Key ='+reqSid);
         session.refresh(reqSid,function(err,resp) {
           setSessionData(reqSid, data, req, res, next);
         })
