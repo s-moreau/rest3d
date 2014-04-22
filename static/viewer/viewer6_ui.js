@@ -1620,6 +1620,7 @@ viewer.INIT =  function (){
     // setTimeout(function(){
     //     welcomePanel();
     // },1500);
+    $('#mainLayout-west').css('backgroundColor', '#b9f09e');
 }
 
   return viewer;

@@ -411,7 +411,7 @@ function (viewer, gui, setViewer6Upload, rest3d, Q, COLLADA, glTF, RENDERER, Sta
         this.loginArea = function(){
             // var html = $("<div id='loginDiv' style='border:2px solid red'></div>");
             // renderMenu[stock.name + "_tab"].append(html)"login_"+stock.name
-            renderMenu[stock.name + "_tab"].append("<a style='text-decoration:underline'>description</a>")
+
             var loginButton = GUI.button("",renderMenu[stock.name + "_tab"],function(){
                 var tmp = '<div id="frame_'+stock.name+'"></div>';
                 GUI.notification({
@@ -446,10 +446,12 @@ function (viewer, gui, setViewer6Upload, rest3d, Q, COLLADA, glTF, RENDERER, Sta
         console.debug(this.login)
         switch(this.login){
             case 0:
+                renderMenu[stock.name + "_tab"].append("<a style='text-decoration:underline'>description</a>")
                 this.descriptionArea();
                 this.generateCoreTab();
                 break;
             case 1:
+                renderMenu[stock.name + "_tab"].append("<a style='text-decoration:underline'>description</a>")
                 this.loginArea();
                 renderMenu[stock.name + "_tab"].append("<br></br>");
                 this.descriptionArea();
@@ -457,6 +459,8 @@ function (viewer, gui, setViewer6Upload, rest3d, Q, COLLADA, glTF, RENDERER, Sta
                 this.generateCoreTab();
                 break;
             case 2:
+                var tmp = $("<a style='color: red;'>login required</a>");
+                renderMenu[stock.name + "_tab"].append(tmp);
                 this.loginArea();
                 renderMenu[stock.name + "_tab"].append("<br></br>");
                 this.descriptionArea();

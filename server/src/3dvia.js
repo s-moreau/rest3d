@@ -26,7 +26,7 @@ THE SOFTWARE.
 'use strict';
 
 module.exports = function (server) {
-  server.3dvia = true;
+  server.dvia = true;
   var request = require('request');
   var cheerio = require('cheerio');
   var toJSON = require('./tojson');
