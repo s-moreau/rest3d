@@ -401,15 +401,14 @@ server.post(/^\/rest3d\/convert.*/, function (req, res, next) {
 
 // static server
 server.get(/^\/.*/, function (req, res, next) {
-
+  var handler = new Handler(req,res,next);
     // parse out parameters from url
     var filename = req.url.split('\?')[0];
     var p = path.resolve(staticPath + filename);
 
     console.log('http get path=' + filename);
 
-    sendFile(req, res, p);
-    return next();
+  sendFile(handler,p);
 });
 
 // clean exit

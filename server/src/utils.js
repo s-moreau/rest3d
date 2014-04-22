@@ -25,7 +25,7 @@ THE SOFTWARE.
 */
 
 String.prototype.endsWith = function(suffix) {
-    return this.indexOf(suffix, this.length - suffix.length) !== -1;
+  return this.indexOf(suffix, this.length - suffix.length) !== -1;
 };
 String.prototype.startsWith = function(prefix) {
   return this.lastIndexOf(prefix, 0) === 0;
@@ -33,3 +33,12 @@ String.prototype.startsWith = function(prefix) {
 Number.prototype.clamp = function(min, max) {
   return Math.min(Math.max(this, min), max);
 };
+String.prototype.contains = function(it) {
+  return this.indexOf(it) != -1; 
+}; 
+String.prototype.stringBefore = function(it) {
+  return this.substr(0,this.indexOf(it));
+}
+String.prototype.stringAfter = function(it) {
+  return this.substring(this.indexOf(it)+1);
+}

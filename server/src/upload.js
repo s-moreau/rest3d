@@ -6,7 +6,6 @@ module.exports = function (server) {
     var fs = require('fs');
     var path = require('path');
     var imageMagick = require('imagemagick');
-    var uuid = require('node-uuid');
 
     var memoryStream = require('memorystream');
     var request = require('request');
@@ -15,14 +14,24 @@ module.exports = function (server) {
     var sendFile = require('./sendfile');
 
     var UploadHandler = require('./handler');
-    var zipFile = require('./zipfile')(server);;
+  var zipFile = require('./zipfile')(server);
+
+  var Collection = require('./collection');
+  var Resource = require('./resource');
+
+  var Mime = require('mime');
+
+  var extend = require('./extend')
+
+  Mime.define({'model/collada+xml': ['dae']});
+  Mime.define({'text/x-glsl': ['glsl']});
 
     var utf8encode = function (str) {
         return unescape(encodeURIComponent(str));
     };
 
     // upload one or more files
-    UploadHandler.prototype.post = function () {
+  UploadHandler.prototype.post = function (collection,path) {
         var handler = this;
         var form = new formidable.IncomingForm();
         var tmpFiles = [];
@@ -30,57 +39,62 @@ module.exports = function (server) {
         var map = {}
         var counter = 1;
         var redirect = undefined;
-        var finish = function (err, res) {
+    var relativepath='.';
+    var finish = function (err,asset) {
             if (err) {
                 console.log('ERROR IN FINISH');
                 handler.handleError(err);
                 counter = -1;
                 return;
             }
-            counter -= 1;
-            if (counter === 0) {
-                try {
-                    files.forEach(function (fileInfo) {
-                        //fileInfo.initUrls(handler.req);
-                        var timeout = function () {
-                            fileInfo.delete();
+      counter -= 1;
+      if (counter===0) {
+        try {
+          var results = [];
+          counter = files.length;
+          files.forEach(function (fileInfo) {
+            //fileInfo.initUrls(handler.req);
+            var timeout = function(handler) {
+              fileInfo.delete(handler);
                             console.log('timeout !! ' + fileInfo.name + ' was deleted');
                         }
-                        setTimeout(function () {
-                            timeout()
-                        }, 60 * 60 * 1000);
-                    });
-                    handler.handleResult({
-                        files: files
-                    }, redirect);
-                    return;
-                }
-                catch (e) {
-                    handler.handleError(e);
-                    return
-                }
-            }
+            setTimeout(timeout ,60 * 60 * 1000, handler);
+
+            fileInfo.asset.get(function(err,res){
+              if (err) {
+                if (counter != -1)
+                  handler.handleError(err);
+                  counter = -1;
+                return
+              } else {
+                results.push(res)
+                counter--;
+                if (counter ==0)
+                  handler.handleResult(results);
+              }
+            })
+            
+          });
+        } catch (e) {
+          counter = -1;
+          handler.handleError(e);
+        }
+      }
         };
 
         form.uploadDir = FileInfo.options.tmpDir;
         form.on('fileBegin', function (name, file) {
-            try {
-                tmpFiles.push(file.path);
-                var fileInfo = new FileInfo(file);
-                fileInfo.safeName();
-                map[file.path] = fileInfo;
-                files.push(fileInfo);
 
-            }
-            catch (e) {
-                handler.handleError(e);
-                return
-            };
+            tmpFiles.push(file.path);
+            var fileInfo = new FileInfo(file,collection,path);
+            //fileInfo.safeName();
+            map[file.path] = fileInfo;
+            files.push(fileInfo);
+
         }).on('field', function (name, value) {
             if (name === 'redirect') {
                 redirect = value;
-            }
-            if (name === 'url') {
+      } else if (name === 'url') {
                 // downloading file and uncompressing if needed
                 var params = {};
                 params.uid = uuid.v1(); // time based uuid generation
@@ -112,8 +126,9 @@ module.exports = function (server) {
                     }
                 };
                 params.url = value;
+
                 if (handler.hasOwnProperty("iduser")) {
-                    params.where = handler.createSyncPath("/rest3d/upload/" + handler.iduser);
+          params.where = mkdirp.sync(path.join("/rest3d/upload/",handler.iduser));
                     console.log(params.where);
                 }
                 else {
@@ -123,18 +138,17 @@ module.exports = function (server) {
                 zipFile.unzip(params.uid, params.url, null, params.where, params.cb); //jar?
             }
         }).on('file', function (name, file) {
-            console.log("post ");
-            var fileInfo = map[file.path];
-            fileInfo.size = file.size;
-            fileInfo.type = file.type;
-            fileInfo.file = file;
-            fileInfo.assetId = uuid.v1();
+      var fileInfo = map[file.path];
+      fileInfo.size = file.size;
+      fileInfo.type = Mime.lookup(fileInfo.file.name);
+
             /*
       if (!fileInfo.validate()) {
         fs.unlinkSync(file.path);
         return;
       }
       */
+      counter ++;
             fileInfo.upload(handler, finish);
 
         }).on('aborted', function () {
@@ -158,13 +172,13 @@ module.exports = function (server) {
             files = [];
         fs.readdir(FileInfo.options.uploadDir, function (err, list) {
             list.forEach(function (name) {
-                var stats = fs.statSync(FileInfo.options.uploadDir + '/' + name),
+        var stats = fs.statSync(path.join(FileInfo.options.uploadDir, name)),
                     fileInfo;
                 if (stats.isFile() && name[0] !== '.') {
                     fileInfo = new FileInfo({
                         name: name,
                         size: stats.size,
-                        path: FileInfo.options.uploadDir + '/' + name
+            path: path.join(FileInfo.options.uploadDir,name)
                     });
                     fileInfo.initUrls(handler.req);
                     files.push(fileInfo);
@@ -185,9 +199,9 @@ module.exports = function (server) {
         if (handler.req.url.slice(0, FileInfo.options.uploadUrl.length) === FileInfo.options.uploadUrl) {
             fileName = path.basename(decodeURIComponent(handler.req.url));
             if (fileName[0] !== '.') {
-                fs.unlink(FileInfo.options.uploadDir + '/' + fileName, function (ex) {
+        fs.unlink(path.join(FileInfo.options.uploadDir, fileName), function (ex) {
                     Object.keys(FileInfo.options.imageVersions).forEach(function (version) {
-                        fs.unlink(FileInfo.options.uploadDir + '/' + version + '/' + fileName);
+            fs.unlink(path.join(FileInfo.options.uploadDir, version, fileName));
                     });
                     handler.handleResult({
                         success: !ex
@@ -203,39 +217,112 @@ module.exports = function (server) {
     };
 
     // rest3d post upload API
-    server.post(/^\/rest3d\/upload.*/, function (req, res, next) {
+  server.post(/^\/rest3d\/tmp\/upload.*/, function(req,res,next){
 
         var handler = new UploadHandler(req, res, next);
         handler.allowOrigin();
 
-        handler.post();
+    var params = req.url.split("/tmp/upload")[1];
+    
 
-        return next();
+    Collection.find('tmp',path.join('/',handler.sid,'/',params),function(err,result){
+
+      console.log('res POST returned match ='+result.path+' asset ='+result.assetpath);
+
+      handler.post(result.path,result.assetpath);
+      //return next();
+    })
+
     });
 
 
     // rest3d get upload API
-    server.get(/^\/rest3d\/upload.*/, function (req, res, next) {
-        console.debug(req);
+  server.get(/^\/rest3d\/tmp.*/, function(req,res,next){
         var handler = new UploadHandler(req, res, next);
         handler.allowOrigin();
 
-        var asset = req.url.split("/upload/")[1];
+      var params = req.url.split("/tmp")[1];
+      if (params.contains('?'))
+        params = params.stringBefore('?');
+      while (params.slice(-1) ==='/') params=params.slice(0, - 1);
 
-        console.log('in GET upload/ for asset=' + asset)
+      var uuid = req.query.uuid;
 
-        if (asset === undefined || asset === '') {
-            if (req.method === 'GET') {
-                handler.get();
-            }
-            else {
-                res.end();
-            }
-        }
-        else {
-            var p = path.resolve(FileInfo.options.uploadDir + '/' + asset);
-            sendFile(req, res, p);
-        }
-        return next();
-    });
+      var p=null;
+
+        
+      console.log('in GET tmp/ for asset='+params)
+      console.log('in GET tmp/upload with path ='+uuid);
+
+
+      if (!params && !uuid) {
+        Collection.find('tmp',path.join('/',handler.sid),function(err,result){
+          if (err) return handler.handlerError(err);
+          else {
+            result.collection.get(function(err,result){
+              if (err) handler.handleError(err);
+              else {
+                // replace sid with '/' in col path, so this is hidden from client
+                result.name='/';
+                handler.handleResult(result);
+              }
+            })
+          }
+        })
+        
+      } else if (uuid) {
+        console.log('looking for uuid='+uuid);
+        Resource.load('tmp',uuid,function(err,resource){
+          if (err) handler.handleError(err);
+          else {
+            resource.get(function(err,result){
+              if (err) handler.handleError(err)
+              else {
+                if (result.name ===handler.sid)
+                  result.name='/';
+                handler.handleResult(result);
+              }
+            })
+          }
+        })
+      } else /* this is a path */ {
+        
+        console.log('get tmp quering for collection ='+path.join('/',handler.sid,'/',params));
+
+        Collection.find('tmp',path.join('/',handler.sid,'/',params),function(err,res){
+          if (err) return handler.handlerError(err);
+          else {
+            // res = {path collection}
+            // this is a collection that we queried for
+
+            // remove path from query
+            console.log('res upload returned match ='+res.path+' asset ='+res.assetpath);
+
+            if (!res.assetpath) // we found a collection
+              return handler.handleResult(res.collection);
+
+            // let see if there is an asset there
+            console.log('upload, looking for asset at '+res.path+' name='+res.assetpath);
+
+            res.collection.getAssetId(res.assetpath,function(err,assetId){
+              if (err) return handler.handleError(err);
+              if (!assetId) console.log('get /tmp/ cannot find asset='+res.assetpath)
+              // we have the asset, now we just need its ID
+              p = path.resolve(FileInfo.options.uploadDir,handler.sid,assetId);
+              console.log('sending file='+p)
+              sendFile(handler,p);
+            })
+
+           
+          }
+        })
+
+      } 
+/*
+      else {
+        p=path.resolve(path.resolve(FileInfo.options.uploadDir,handler.sid,params));
+        sendfile(handler,p);
+      }
+      */
+  });
 };

@@ -144,7 +144,7 @@ console.log('*************');
   query(xquery, callback);
 }
 // delete an object in a key/pair database
-var removeKey = exports.removeKey = function(collection,id, value, callback) {
+var removeKey = exports.removeKey = function(collection,id, callback) {
 
   console.log('removeKey['+id+']')
 
