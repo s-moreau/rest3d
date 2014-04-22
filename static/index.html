@@ -223,26 +223,35 @@ THE SOFTWARE.
       </ul>
 
 
-      <h3> upload test </h3>
+      <h3> tmp tests </h3>
       <ul>
+        <li> <a href="/rest3d/tmp/"> /rest3d/tmp/</a>
+           query tmp collection
+        </li>
+
+        <li> <a href="javascript:getit('/rest3d/tmp/?uuid=','s0');"> /rest3d/tmp/?uuid=</a>
+          <input type="text" size="51" value="uuid" id="s0" onkeydown="if (event.keyCode == 13) getit('/rest3d/tmp/?uuid=','s0');" /> Request collection or asset info (meta-data)
+        </li>
+
         <li>
-          <form id='url-upload' action="/rest3d/upload/" enctype="application/x-www-form-urlencoded" method="POST">
-            [POST URL] /rest3d/upload/
+          <form id='url-upload-1' action="/rest3d/tmp/upload/" enctype="application/x-www-form-urlencoded" method="POST">
+            [POST URL] /rest3d/tmp/upload/
             <input id="url" size="150" name="url" value="https://3dwarehouse.sketchup.com/3dw/getbinary?subjectId=ac9c3413d59e8e4a7f7fbfb94ac070c5&subjectClass=entity&name=k2" />
             <input type="submit" value="Upload" />send url to upload (zip file example)
           </form>
         </li>
 
         <li>
-          <form id='url-upload' action="/rest3d/upload/" enctype="application/x-www-form-urlencoded" method="POST">
+          <form id='url-upload-2' action="/rest3d/tmp/upload/" enctype="application/x-www-form-urlencoded" method="POST">
             [POST URL] /rest3d/upload/
             <input id="url" size="150" name="url" value="http://timenewsfeed.files.wordpress.com/2013/05/duckband.jpg?w=753" />
             <input type="submit" value="Upload" />send url to upload (single file example)
           </form>
         </li>
         <li>
-          <form id='file-upload' action="/rest3d/upload/" enctype="multipart/form-data" method="POST">
+          <form id='file-upload-3' action="/rest3d/tmp/upload/" enctype="multipart/form-data" method="POST">
             [POST files] /rest3d/upload/
+            <input type="text" size="40" value="" onkeyup="document.getElementById('file-upload-3').action = '/rest3d/tmp/upload/'+this.value;"/>
             <input type="file" name="upload" multiple="multiple" />
             <input type="submit" value="Upload" />send files to upload
           </form>
