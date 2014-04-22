@@ -73,11 +73,8 @@ module.exports = function (server) {
                   handler.handleResult(results);
               }
             })
-            //results.push(fileInfo.asset);
+            
           });
-          //handler.handleResult(results, redirect);
-          //return;
-                    }, redirect);
         } catch (e) {
           counter = -1;
           handler.handleError(e);
@@ -87,18 +84,14 @@ module.exports = function (server) {
 
         form.uploadDir = FileInfo.options.tmpDir;
         form.on('fileBegin', function (name, file) {
-            try {
-                tmpFiles.push(file.path);
-        var fileInfo = new FileInfo(file,collection,path);
-        //fileInfo.safeName();
-                map[file.path] = fileInfo;
-                files.push(fileInfo);
 
-            }
-            catch (e) {
-                handler.handleError(e);
-                return
-            };
+            tmpFiles.push(file.path);
+            var fileInfo = new FileInfo(file,collection,path);
+            //fileInfo.safeName();
+            map[file.path] = fileInfo;
+            files.push(fileInfo);
+
+          };
         }).on('field', function (name, value) {
             if (name === 'redirect') {
                 redirect = value;
@@ -318,7 +311,7 @@ module.exports = function (server) {
               // we have the asset, now we just need its ID
               p = path.resolve(FileInfo.options.uploadDir,handler.sid,assetId);
               console.log('sending file='+p)
-              sendfile(handler,p);
+              sendFile(handler,p);
             })
 
            
