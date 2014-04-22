@@ -91,7 +91,6 @@ module.exports = function (server) {
             map[file.path] = fileInfo;
             files.push(fileInfo);
 
-          };
         }).on('field', function (name, value) {
             if (name === 'redirect') {
                 redirect = value;
