@@ -78,6 +78,11 @@ top: 4px;
 
 #img-settings {
 position: relative;
+top: 2px;
+}
+
+#img-welcome {
+position: relative;
 top: 4px;
 }
 
@@ -725,9 +730,9 @@ right: 0px !important;
 }
 
 #imageCanvas{
-       position: absolute;
-bottom: 0px !important;
-right: 34px !important;
+    position: absolute;
+    bottom: 0px !important;
+    right: 34px !important;
     z-index: 9999 !important; 
 }
 
@@ -748,4 +753,10 @@ width: 90% !important;
 #vakata-contextmenu{
     font-family: Trebuchet MS,Tahoma,Verdana,Arial,sans-serif !important;
     font-size: 11px !important;
+}
+
+.draggableWelcome{
+    height: 20%;
+    border-radius: 5px;
+    background: grey;
 }
