@@ -59,8 +59,8 @@ var rmdirSync = require('./src/rmdir');
 var copyFileSync = require('./src/cp');
 
 var toJSON = require('./src/tojson');
+var sendfile = require('./src/sendfile')
 
-var sendFile = require('./src/sendfile');
 var Handler= require('./src/handler');
 
 var platform = os.type().match(/^Win/) ? 'win' : 
@@ -389,15 +389,14 @@ server.post(/^\/rest3d\/convert.*/,function(req,res,next){
 
 // static server
 server.get(/^\/.*/, function (req, res, next) {
-  
+  var handler = new Handler(req,res,next);
   // parse out parameters from url
   var filename = req.url.split('\?')[0];
   var p=path.resolve(staticPath + filename);
 
   console.log('http get path='+filename);
 
-  sendFile(req,res,p);
-  return next();
+  sendfile(handler,p);
 });
 
 // clean exit

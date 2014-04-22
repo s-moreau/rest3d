@@ -9,16 +9,8 @@ var Handler = function (req, res, next) {
       this.res = res;
       this.next = next;
 
-      // Replace this. 
-      // use req.session instead
-      if(req.headers.hasOwnProperty("x-iduser")){
-        console.log("iduser detected : "+req.headers["x-iduser"]);
-        this.iduser = req.headers["x-iduser"];
-      }
-      if(req.headers.hasOwnProperty("x-folder")){
-        console.log("idfolder detected : "+req.headers["x-folder"]);
-        this.folder = req.headers["x-folder"];
-      }
+     
+      this.sid = req.session.sid;
 };
 
 Handler.prototype.allowOrigin = function () {
@@ -68,33 +60,6 @@ Handler.prototype.handleError = function (error) {
   this.res.end(toJSON(error));
   //if (this.next) this.next();
 };
-
-Handler.prototype.createSyncPath = function(path){
-      var array = path.split("/");
-      var index = array.length;
-      var result;
-      console.log(path,array)
-      for(var i=3;i<index;i++){
-        if(array[i].split(".").length==1){
-          console.log("in",array[i])
-          array[i]=array[i-1]+"/"+array[i];
-          console.log("in1",array[i])
-          var flag = fs.existsSync(array[i]);
-          console.log("in2",flag)
-          if(!flag){
-            console.log("createfoler "+array[i])
-            fs.mkdirSync(array[i]);
-          }
-        }
-        else{
-          console.log("out",array[i])
-
-          array[i]=array[i-1]+"/"+array[i];
-        }
-      }    
-      console.log("array",array[index-1])  
-      return array[index-1];
-}
 
 Handler.prototype.handleResult = function (result, redirect) {
 
