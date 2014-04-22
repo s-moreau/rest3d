@@ -1,0 +1,114 @@
+// extend an object with a copy of another object
+// 
+// see https://gist.github.com/jonjaques/3036701 - a rewrite of jquery extend function
+// modified so it does NOT copy functions. 
+// first argument is optional - true/false deep copy (changed default to true)
+// second argument is destination - use {} for a clone
+
+  function type(obj) {
+    var checker = {};
+    var types = "Boolean Number String Function Array Date RegExp Object".split(" ");
+    for(var i in types){
+      checker[ "[object " + types[i] + "]" ] = types[i].toLowerCase();
+    }
+    return obj == null ?
+        String( obj ) :
+        checker[ Object.prototype.toString.call(obj) ] || "object";
+  }
+  function isFunction(obj) {
+    return type(obj) === "function";
+  }
+  function isWindow(obj) {
+    return obj != null && obj == obj.window;
+  }
+  function isPlainObject(obj) {
+    var hasOwn = Object.prototype.hasOwnProperty;
+    // Must be an Object.
+    // Because of IE, we also have to check the presence of the constructor property.
+    // Make sure that DOM nodes and window objects don't pass through, as well
+    if ( !obj || type(obj) !== "object" || obj.nodeType || isWindow( obj ) ) {
+      return false;
+    }
+ 
+    try {
+      // Not own constructor property must be Object
+      if ( obj.constructor &&
+        !hasOwn.call(obj, "constructor") &&
+        !hasOwn.call(obj.constructor.prototype, "isPrototypeOf") ) {
+        return false;
+      }
+    } catch ( e ) {
+      // IE8,9 Will throw exceptions on certain host objects #9897
+      return false;
+    }
+ 
+    // Own properties are enumerated firstly, so to speed up,
+    // if last one is own, then all properties are own.
+    var key;
+    for ( key in obj ) {}
+    return key === undefined || hasOwn.call( obj, key );
+  }
+  function isArray(obj){
+    return type(obj) === "array";
+  }
+  // Make this public
+  function extend() {
+    var options, name, src, copy, copyIsArray, clone,
+      target = arguments[0] || {},
+      i = 1,
+      length = arguments.length,
+      deep = true;
+ 
+    // Handle a deep copy situation
+    if ( typeof target === "boolean" ) {
+      deep = target;
+      target = arguments[1] || {};
+      // skip the boolean and the target
+      i = 2;
+    }
+ 
+    // Handle case when target is a string or something (possible in deep copy)
+    if ( typeof target !== "object" && !isFunction(target) ) {
+      target = {};
+    }
+ 
+    for ( ; i < length; i++ ) {
+      // Only deal with non-null/undefined values
+      if ( (options = arguments[ i ]) != null ) {
+        // Extend the base object
+        for ( name in options ) {
+          src = target[ name ];
+          copy = options[ name ];
+ 
+          // Prevent never-ending loop
+          if ( target === copy ) {
+            continue;
+          }
+ 
+          // Recurse if we're merging plain objects or arrays
+          if ( deep && copy && ( isPlainObject(copy) || (copyIsArray = isArray(copy)) ) ) {
+            if ( copyIsArray ) {
+              copyIsArray = false;
+              clone = src && isArray(src) ? src : [];
+ 
+            } else {
+              clone = src && isPlainObject(src) ? src : {};
+            }
+            // Never move original objects, clone them
+            target[ name ] = extend( deep, clone, copy );
+ 
+          // do not copy functions
+          } else if (isFunction(copy)) {
+          // Don't bring in undefined values
+          } else if ( copy !== undefined ) {
+            target[ name ] = copy;
+          }
+        }
+      }
+    }
+ 
+    // Return the modified object
+    return target;
+  };
+ 
+  module.exports = extend;
