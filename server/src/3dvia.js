@@ -281,7 +281,7 @@ module.exports = function (server) {
 
               //proxie with cache
               
-              var asset = zipFile.upload(uid,url,jar, FileInfo.options.uploadDir, function(error, result){
+              zipFile.uploadUrl(tdvia,url,jar, function(error, result){
                 if (error)
                   tdvia.handleError(error);
                 else {
@@ -385,15 +385,21 @@ module.exports = function (server) {
             var url = "http://www.3dvia.com/download.php?media_id="+id+"&file=/3dsearch/Content/"+id+"."+format;
 
             // note: this is using diskcache
-            var asset = zipFile.unzip(uid,url,jar, FileInfo.options.uploadDir, function(error, result){
-              if (error)
-                tdvia.handleError(error);
+            Collection.find('tmp', path.join('/', tdvia.sid), function (err, result) {
+              if (err) return tdvia.handlerError(err);
               else {
-                for (var file in results) 
-                   FileInfo.upload(handler,file.path);
-                tdvia.handleResult(result);
+                zipFile.unzipUrl(tdvia,result.collection, result.assetpath, url,jar, function(error, result){
+                  if (error)
+                    tdvia.handleError(error);
+                  else {
+                    for (var file in results) 
+                       FileInfo.upload(handler,file.path);
+                    tdvia.handleResult(result);
+                  }
+                });
               }
-            });
+            })
+            
         });
 
       } else { // request information about asset 
@@ -419,7 +425,7 @@ module.exports = function (server) {
             //var url= "http://www.3dvia.com/3dsearch/Content/"+uid+".zip";
 
             // note: this is using diskcache
-            var asset = zipFile.getAssetInfo(uid,url,jar, function(error, result){
+            var asset = zipFile.getAssetInfoUrl(tdvia,url,jar, function(error, result){
               if (error)
                 tdvia.handleError(error);
               else

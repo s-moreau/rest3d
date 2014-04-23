@@ -165,8 +165,9 @@ module.exports = function (server) {
         var url = "https://3dwarehouse.sketchup.com/3dw/getbinary?subjectId="+id[1]+"&subjectClass=entity&name="+id[2];
 
         // note: this is using diskcache
-        // no jar defined -> user=guest
-        var asset = zipFile.getAssetInfo(uid,url, undefined, function(error, result){
+        // no jar -> undefined -> user=guest
+        
+        var asset = zipFile.getAssetInfoUrl(warehouseHandler,url, undefined, function(error, result){
           if (error)
             warehouseHandler.handleError(error);
           else

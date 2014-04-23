@@ -12,14 +12,40 @@
   var nameCountFunc = function (s, index, ext) {
         return ' (' + ((parseInt(index, 10) || 0) + 1) + ')' + (ext || '');
       };
+  var copyFile = function(source, target, cb) {
+    var cbCalled = false;
 
-  var FileInfo = function (file, collection, assetpath) {
-      this.file = file;
-      this.name = file.name;
-      this.size = file.size;
-      this.type = file.type;
-      this.collection = collection;
-      this.assetpath = assetpath;
+    var rd = fs.createReadStream(source);
+    rd.on("error", done);
+
+    var wr = fs.createWriteStream(target);
+    wr.on("error", done);
+    wr.on("close", function(ex) {
+      done();
+    });
+    rd.pipe(wr);
+
+    function done(err) {
+      if (!cbCalled) {
+        cb(err);
+        cbCalled = true;
+      }
+    }
+  }
+
+  var FileInfo = function (file, collectionpath, assetpath) {
+      // file -> name, path, optional:size, type, not used: hash, lastModifiedDate)
+      this.name = file.name; // name according to sender
+      this.path = file.path; // where is it now?
+
+      // asset information
+      this.collectionpath = collectionpath; // where to put it -> a collection object
+      this.assetpath = assetpath; // path of asset inside collection
+
+      // optional? probably unknown when new FileInfo() is called
+      this.size = file.size; // do we need that? we can ask the file for its size
+      this.type = file.type; // type according to sender
+
   };
 
   FileInfo.options = {
@@ -85,7 +111,7 @@
       var that = this,
         baseUrl = (FileInfo.options.ssl ? 'https:' : 'http:') +
           '//' + req.headers.host ;
-      this.url = baseUrl + encodeURIComponent(this.path);
+      this.url = baseUrl + encodeURIComponent(this.assetpath);
       //this.delete_url = this.url;
       if (FileInfo.options.imageVersions)
         Object.keys(FileInfo.options.imageVersions).forEach(function (version) {
@@ -123,10 +149,14 @@
         })
     } else {
       fs.unlink(pah.join(FileInfo.options.uploadDir,fileInfo.asset.assetId), function (ex) {
+
+        /*
         if (FileInfo.options.imageVersions)
           Object.keys(FileInfo.options.imageVersions).forEach(function (version) {
             fs.unlinkSync(FileInfo.options.uploadDir + '/' + version + '/' + fileName);
           });
+        */
+
         if (ex) {
           handler.handleError(ex);
         } else {
@@ -147,7 +177,7 @@
     var cb=callback;
     var uid=userid;
 
-    var collectionpath = this.collection;
+    var collectionpath = this.collectionpath;
     var assetpath = this.assetpath;
 
     //if (fileInfo.asset) cb(undefined, fileInfo.asset.assetId);
@@ -200,7 +230,7 @@
           if (err) return cb(err);
 
           // database store asset file, and update assets info uppon success
-          handler.db.store(assetId,fileInfo.file.path, function(err,assetId){
+          handler.db.store(assetId,fileInfo.path, function(err,assetId){
                 if (err) {
                   console.log('Error storing asset='+assetId);
                   cb && cb(err,null);
@@ -225,20 +255,25 @@
       } else { // this is the 'tmp' database 
         // make an asset out of this fileInfo, in database 'tmp'
         // TODO -> replace handler.sid with hander.uid (user id)
+        var finish = function(err) {
+           if (err) {
+                console.log('error in fileInfo.toAsset -> '+err);
+                cb && cb(err);
+              } else {
+                cb && cb(undefined, fileInfo.asset);
+              }
+        };
+
         fileInfo.toAsset('tmp',handler.sid,function(err,assetId) {
           if (err) return cb(err);
-          var assetPath=Path.resolve(FileInfo.options.uploadDir,fileInfo.collection);
-          mkdirp(assetPath);
-          console.log('created dir='+assetPath)
-          fs.rename(fileInfo.file.path, Path.join(assetPath,assetId), function(err){
-            if (err) {
-              console.log('error in FileInfo.upload ->'+err);
-              cb && cb(err);
-            } else {
-              console.log('moved asset')
-              cb && cb(undefined, fileInfo.asset);
-            }
-          })
+          
+          if (fileInfo.buffer) {
+            fs.writeFile(Path.join(FileInfo.options.uploadDir,assetId), fileInfo.buffer, 'binary', finish);
+          } else if (fileInfo.donotmove){
+            copyFile(fileInfo.path, Path.join(FileInfo.options.uploadDir,assetId), finish);
+          } else {
+            fs.rename(fileInfo.path, Path.join(FileInfo.options.uploadDir,assetId), finish);
+          }
         })
       }
       
