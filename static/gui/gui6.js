@@ -1183,8 +1183,8 @@ define(['channel','codemirror','webglUtils', 'WebGLDebugUtils','pnotify','colorp
                 }
             }
 
-            $.fn.focusTab=function(){
-                $('li[aria-controls="' + $(this).prop("id") + '"] a').click();
+            $.fn.focusTab=function(callback){
+                $('li[aria-controls="' + $(this).prop("id") + '"] a').click(callback);
             }
 
             $.fn.removeTab = function (_idTabWindow, id) {
@@ -2756,7 +2756,7 @@ define(['channel','codemirror','webglUtils', 'WebGLDebugUtils','pnotify','colorp
                 this.tmp = $.pnotify(entry);
             }
             this.remove = function(){
-                this.tmp.remove();
+                this.tmp.pnotify_remove();
             }
             // this.disableHistory = function(){
 
