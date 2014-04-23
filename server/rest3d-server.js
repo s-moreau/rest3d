@@ -49,6 +49,8 @@ var walk = require('walk');
 var path = require('path');
 var cache = require('./src/diskcache');
 
+var request = require('request');
+
 // get content from zip files
 var zip = require("zip");
 
@@ -216,12 +218,14 @@ server.db.init(function (b) {
 
 server.get(/^\/rest3d\/info/, function (req, res, next) {
     var handler = new Handler(req, res, next);
-    /// indexLogin : 0 -> no login needed, 1 -> optional, 2 -> required
-    function database(name,indexLogin,pictureTmp){
+    /// indexLogin : 0 -> no login needed, 1 -> optional, 2 -> required, 3-> not yet implemented
+    function database(name,indexLogin,pictureTmp,description,signin){
         this.name = name;
         this.login = indexLogin;
         this.picture = pictureTmp;
-    }
+        this.description = description;
+        this.signin = signin;
+        }
     var result = {};
     if (server.db) {
         result[server.db.name] = new database(server.db.name,0,"../gui/images/upload_d.png")
@@ -230,10 +234,14 @@ server.get(/^\/rest3d\/info/, function (req, res, next) {
         console.log("database not connected");
     }
     if(server.hasOwnProperty("dvia")){
-        result["dvia"] = new database("dvia",2,"../gui/images/3dvia.png");
+        result["dvia"] = new database("3dvia",2,"../gui/images/3dvia.png");
+        result["dvia"].description = "'Whether you're building a scene and want the perfect elements to fill it or need models with intelligence for your next interactive game, save time and resources by downloading assets from 3DVIA's Content Warehouse with a combined 85,000 free user contributed and premium models available for download. You're bound to find what you're looking for.' ref http://www.3dvia.com/resources";
+        result["dvia"].signin ="https://www.3dvia.com/join";
     }
     if(server.hasOwnProperty("warehouse")){
-        result["warehouse"] = new database("warehouse",2,"../gui/images/warehouse.jpg");
+        result["warehouse"] = new database("warehouse",3,"../gui/images/warehouse.jpg");
+        result["warehouse"].description = "'The Trimble 3D Warehouse (formerly Google 3D Warehouse) is an accompanying website for SketchUp where modelers can upload, download and share three-dimensional models.' ref http://en.wikipedia.org/wiki/Trimble_3D_Warehouse";
+        result["warehouse"].signin =["https://3dwarehouse.sketchup.com/?redirect=1"];
     }
     // if(get.prototype)
     // handler.handleResult("database not connected")

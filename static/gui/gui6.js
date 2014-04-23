@@ -670,8 +670,10 @@ define(['channel','codemirror','webglUtils', 'WebGLDebugUtils','pnotify','colorp
         return html;
     }
 
-    GUI.addInput = function (_id, _defaultValue, _parent, _onChangeCallback) {
-        var html = '<span><input type="text" id="' + _id + '" name="' + _id + '"></span>';
+    GUI.addInput = function (_id, _defaultValue, _parent, _onChangeCallback,mode) {
+        var type = "text";
+        if(mode){type="password"}
+        var html = '<span><input type="'+type+'" id="' + _id + '" name="' + _id + '"></span>';
         var jqueryObjectInput = $(html);
         var input = jqueryObjectInput.find("input");
         input.val(_defaultValue);
@@ -1181,8 +1183,8 @@ define(['channel','codemirror','webglUtils', 'WebGLDebugUtils','pnotify','colorp
                 }
             }
 
-            $.fn.focusTab=function(){
-                $('li[aria-controls="' + $(this).prop("id") + '"] a').click();
+            $.fn.focusTab=function(callback){
+                $('li[aria-controls="' + $(this).prop("id") + '"] a').click(callback);
             }
 
             $.fn.removeTab = function (_idTabWindow, id) {
@@ -2751,7 +2753,10 @@ define(['channel','codemirror','webglUtils', 'WebGLDebugUtils','pnotify','colorp
                 if (this.json.hasOwnProperty("type")) {
                     entry["type"] = this.json.type;
                 }
-                $.pnotify(entry);
+                this.tmp = $.pnotify(entry);
+            }
+            this.remove = function(){
+                this.tmp.pnotify_remove();
             }
             // this.disableHistory = function(){
 
