@@ -2753,7 +2753,10 @@ define(['channel','codemirror','webglUtils', 'WebGLDebugUtils','pnotify','colorp
                 if (this.json.hasOwnProperty("type")) {
                     entry["type"] = this.json.type;
                 }
-                $.pnotify(entry);
+                this.tmp = $.pnotify(entry);
+            }
+            this.remove = function(){
+                this.tmp.remove();
             }
             // this.disableHistory = function(){
 

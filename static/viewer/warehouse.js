@@ -6,6 +6,7 @@ function (viewer, gui, setViewer6Upload, rest3d, Q, COLLADA, glTF, RENDERER, Sta
         this.login = _json.login;
         this.picture = _json.picture;
         this.description = _json.description;
+        this.signin = _json.signin;
         var nodeBuffer;
         var stock = this;
         window.renderMenu.addTab({
@@ -176,6 +177,7 @@ function (viewer, gui, setViewer6Upload, rest3d, Q, COLLADA, glTF, RENDERER, Sta
             });
         }
         this.generateCoreTab = function () {
+            renderMenu[stock.name + "_tab"].append("<a style='text-decoration:underline'>Features:</a><br></br>");
             var accor = GUI.accordion({
                 id: stock.name + "_accor",
                 parent: renderMenu[stock.name + "_tab"],
@@ -411,21 +413,70 @@ function (viewer, gui, setViewer6Upload, rest3d, Q, COLLADA, glTF, RENDERER, Sta
         this.loginArea = function(){
             // var html = $("<div id='loginDiv' style='border:2px solid red'></div>");
             // renderMenu[stock.name + "_tab"].append(html)"login_"+stock.name
-
+            var im;
+            stock = this;
             var loginButton = GUI.button("",renderMenu[stock.name + "_tab"],function(){
                 var tmp = '<div id="frame_'+stock.name+'"></div>';
-                GUI.notification({
+                var notif = GUI.notification({
                     title: stock.name+" login",
                     text: tmp,
                     type: "text",
                 });
     //GUI.addInput = function (_id, _defaultValue, _parent, _onChangeCallback) {
                 tmp = $("#frame_"+stock.name);
-                GUI.addInput("username_"+stock.name,"Username",tmp);
-                GUI.addInput("pwd_"+stock.name,"pwd",tmp,"","pwd");
-                var tmp2 = GUI.button("",tmp,function(){
-
-                });
+                var username = GUI.addInput("username_"+stock.name,"Username",tmp);
+                var pwd = GUI.addInput("pwd_"+stock.name,"pwd",tmp,"","pwd");
+                var callbackAuth = function(){
+                   window.pleaseWait(true);
+                   function async(){ 
+                    var defer = Q.defer();
+                    $.ajax({
+                      type: "POST",
+                      url: '/rest3d/'+stock.name+'/login',
+                      data: {"user":username.val(),"passwd":pwd.val()},
+                      success: function(data){
+                        data = jQuery.parseJSON(data);
+                        im.prop("src","../gui/images/traffic-cone_blue.png");
+                        loginButton.prop('disabled', true);
+                        GUI.addTooltip({
+                            parent: loginButton,
+                            content: data.message,
+                        });
+                        tmp2.prop('disabled', true);
+                        notif.remove();
+                        GUI.notification({
+                            title: stock.name+" login",
+                            text: data.message,
+                            type: "info",
+                        }); 
+                        $("#header_"+stock.name).text("Welcome "+data.message.split(" ").pop()+"!");
+                        defer.resolve();
+                      },
+                      error:function(data){
+                          // data = jQuery.parseJSON(data);
+                          GUI.notification({
+                            title: stock.name+" login",
+                            text: "Authentification failed",
+                            type: "info",
+                        }); 
+                          defer.resolve();
+                      },
+                      contentType: 'application/x-www-form-urlencoded',
+                    });
+                return defer.promise;
+                }
+                async().then(
+                    function(){
+                        window.pleaseWait(false); 
+                    })
+                }
+                var tmp2 = GUI.button("",tmp,callbackAuth);
+                pwd.keypress(
+                    function(e){
+                        if (e.keyCode==13){
+                           tmp2.click(); 
+                        } 
+                    });
                 tmp2.find("span").remove();
                 GUI.addIcon(tmp2, "ui-icon-unlocked");
             });
@@ -435,36 +486,79 @@ function (viewer, gui, setViewer6Upload, rest3d, Q, COLLADA, glTF, RENDERER, Sta
                         parent: loginButton,
                         content: "Not connected",
                     });
-            var im = GUI.image(loginButton,"traffic-light", "../gui/images/traffic-cone_red.png", '20', '20');
+            im = GUI.image(loginButton,"traffic-light", "../gui/images/traffic-cone_red.png", '20', '20');
 
 
         };
         this.descriptionArea = function(){
-            renderMenu[stock.name + "_tab"].append(stock.description);
+            renderMenu[stock.name + "_tab"].append("<br>");
+            var html = $('<div style="background:white;box-shadow: 5px 5px 5px #888888;">');
+            renderMenu[stock.name + "_tab"].append(html);
+            html.append(stock.description);
+            renderMenu[stock.name + "_tab"].append("<br>");
         }
+        stock = this;
+        window["login_"+stock.name] = function(){
+            if(typeof stock.signin == "string"){
+                $("#dialog").dialog("close");
+                var gitHtml = $('<div id="dialog"><iframe id="myIframe" src="" style="height:100% !important; width:100% !important; border:0px;"></div>');
+                $('body').append(gitHtml);
+                $("#dialog").dialog({
+                    title: stock.name+" sign in!",
+                    width: '600',
+                    height: '500',
+                    open: function () {
+                        console.debug(stock.signin);
+                        $('#myIframe').attr('src', stock.signin);
+                        console.debug(gitHtml.find('iframe').contents())
+                    },
+                    close: function () {
+                        gitHtml.remove();
+                    },
+                });
+                $("#dialog").css({
+                    'min-height': 'none !important;'
+                });
+            }
+            else{
+                var win=window.open(stock.signin[0], '_blank');
+                win.focus();
+            }
+    }
                 // this.generateCoreTab();
-        console.debug(this.login)
+                stock = this;
+
         switch(this.login){
-            case 0:
-                renderMenu[stock.name + "_tab"].append("<a style='text-decoration:underline'>description</a>")
+            case 0,3:
+                if(this.login==0){
+                    var text = '(no authentification required)';
+                }
+                else{
+                    var text = '(authentification not yet implemented)';
+                }
+                var tmp = $("<a style='color: red;'>"+text+"</a>");
+                 renderMenu[stock.name + "_tab"].append(tmp);
+                   renderMenu[stock.name + "_tab"].append("<br><br>");
                 this.descriptionArea();
+                renderMenu[stock.name + "_tab"].append("<br><hr><br>")
                 this.generateCoreTab();
                 break;
             case 1:
-                renderMenu[stock.name + "_tab"].append("<a style='text-decoration:underline'>description</a>")
+                var tmp = $("<a style='color: red;'>(authentification is optional)</a>");
+                renderMenu[stock.name + "_tab"].append(tmp);
                 this.loginArea();
-                renderMenu[stock.name + "_tab"].append("<br></br>");
+                renderMenu[stock.name + "_tab"].append("<br><br>");
                 this.descriptionArea();
-                renderMenu[stock.name + "_tab"].append("<br><hr></br>");
+                renderMenu[stock.name + "_tab"].append("<a style='float:right;' href='javascript:window.login_"+stock.name+"()'>+Sign in</a><br><hr></br>");
                 this.generateCoreTab();
                 break;
             case 2:
-                var tmp = $("<a style='color: red;'>login required</a>");
+                var tmp = $("<a id='header_"+stock.name+"' style='color: red;'>(authentification is required)</a>");
                 renderMenu[stock.name + "_tab"].append(tmp);
                 this.loginArea();
-                renderMenu[stock.name + "_tab"].append("<br></br>");
+                renderMenu[stock.name + "_tab"].append("<br><br>");
                 this.descriptionArea();
-                renderMenu[stock.name + "_tab"].append("<hr><br>")
+                renderMenu[stock.name + "_tab"].append("<a style='float:right;' href='javascript:window.login_"+stock.name+"()'>+Sign in</a><br><hr><br>")
                 break;
         }
         GUI.image(renderMenu[stock.name + "_tab"].title, "img-render", stock.picture, 12, 14, "before");
