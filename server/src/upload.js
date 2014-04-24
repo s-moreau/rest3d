@@ -230,12 +230,12 @@ module.exports = function (server) {
   };
 
   // rest3d post upload API
-  server.post(/^\/rest3d\/tmp\/upload.*/, function (req, res, next) {
+  server.post(/^\/rest3d\/tmp.*/, function (req, res, next) {
 
     var handler = new UploadHandler(req, res, next);
     handler.allowOrigin();
 
-    var params = req.url.split("/tmp/upload")[1];
+    var params = req.url.split("/tmp")[1];
 
 
     Collection.find('tmp', path.join('/', handler.sid, '/', params), function (err, result) {

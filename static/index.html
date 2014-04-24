@@ -153,10 +153,10 @@ THE SOFTWARE.
         <li><a href="/rest3d/info"> /rest3d/info </a>
         </li>
         <li>
-          <form id='fl4re-upload' action="/rest3d/fl4re/upload/" enctype="multipart/form-data" method="POST">
-            [POST files] /rest3d/fl4re/upload/
+          <form id='fl4re-upload' action="/rest3d/fl4re/" enctype="multipart/form-data" method="POST">
+            [POST files] /rest3d/fl4re/
             <input type="file" name="upload" multiple="multiple" />
-            <input type="submit" value="Upload" />send files to upload
+            <input type="submit" value="Upload" />send files to tmp
           </form>
         </li>
       </ul>
@@ -234,24 +234,24 @@ THE SOFTWARE.
         </li>
 
         <li>
-          <form id='url-upload-1' action="/rest3d/tmp/upload/" enctype="application/x-www-form-urlencoded" method="POST">
-            [POST URL] /rest3d/tmp/upload/
+          <form id='url-upload-1' action="/rest3d/tmp/" enctype="application/x-www-form-urlencoded" method="POST">
+            [POST URL] /rest3d/tmp
             <input id="url" size="150" name="url" value="https://3dwarehouse.sketchup.com/3dw/getbinary?subjectId=ac9c3413d59e8e4a7f7fbfb94ac070c5&subjectClass=entity&name=k2" />
             <input type="submit" value="Upload" />send url to upload (zip file example)
           </form>
         </li>
 
         <li>
-          <form id='url-upload-2' action="/rest3d/tmp/upload/" enctype="application/x-www-form-urlencoded" method="POST">
-            [POST URL] /rest3d/upload/
+          <form id='url-upload-2' action="/rest3d/tmp/" enctype="application/x-www-form-urlencoded" method="POST">
+            [POST URL] /rest3d/tmp
             <input id="url" size="150" name="url" value="http://timenewsfeed.files.wordpress.com/2013/05/duckband.jpg?w=753" />
             <input type="submit" value="Upload" />send url to upload (single file example)
           </form>
         </li>
         <li>
-          <form id='file-upload-3' action="/rest3d/tmp/upload/" enctype="multipart/form-data" method="POST">
-            [POST files] /rest3d/upload/
-            <input type="text" size="40" value="" onkeyup="document.getElementById('file-upload-3').action = '/rest3d/tmp/upload/'+this.value;"/>
+          <form id='file-upload-3' action="/rest3d/tmp/" enctype="multipart/form-data" method="POST">
+            [POST files] /rest3d/tmp
+            <input type="text" size="40" value="" onkeyup="document.getElementById('file-upload-3').action = '/rest3d/tmp'+this.value;"/>
             <input type="file" name="upload" multiple="multiple" />
             <input type="submit" value="Upload" />send files to upload
           </form>
