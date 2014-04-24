@@ -243,14 +243,14 @@ THE SOFTWARE.
 
         <li>
           <form id='url-upload-2' action="/rest3d/tmp/upload/" enctype="application/x-www-form-urlencoded" method="POST">
-            [POST URL] /rest3d/upload/
+            [POST URL] /rest3d/tmp/upload/
             <input id="url" size="150" name="url" value="http://timenewsfeed.files.wordpress.com/2013/05/duckband.jpg?w=753" />
             <input type="submit" value="Upload" />send url to upload (single file example)
           </form>
         </li>
         <li>
           <form id='file-upload-3' action="/rest3d/tmp/upload/" enctype="multipart/form-data" method="POST">
-            [POST files] /rest3d/upload/
+            [POST files] /rest3d/tmp/upload/
             <input type="text" size="40" value="" onkeyup="document.getElementById('file-upload-3').action = '/rest3d/tmp/upload/'+this.value;"/>
             <input type="file" name="upload" multiple="multiple" />
             <input type="submit" value="Upload" />send files to upload

@@ -962,7 +962,7 @@ viewer.INIT =  function (){
         })
         accordionUp.upload.header.click();
 
-        var upload = GUI.upload({parent:accordionUp.upload, id:"upModel", url:location.protocol+"//"+location.host+'/rest3d/upload', idUser: viewer.idUser});
+        var upload = GUI.upload({parent:accordionUp.upload, id:"upModel", url:location.protocol+"//"+location.host+'/rest3d/tmp/upload', idUser: viewer.idUser});
         upload.progress.progress_upModel.width("100%");
         setViewer6Upload($,upload,rest3d,viewer);
 
