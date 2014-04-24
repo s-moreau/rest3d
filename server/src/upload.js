@@ -73,6 +73,16 @@ module.exports = function (server) {
               counter = -1;
               return
             } else {
+              res.assetpath = fileInfo.assetpath;
+              res.collectionpath = fileInfo.collectionpath;
+              // remove sid from collectionpath for database tmp
+              if (res.database==='tmp') {
+                if (res.collectionpath.contains('/'))
+                  res.collectionpath = res.collectionpath.stringAfter('/')
+                else
+                  res.collectionpath = "";
+                
+              }
               results.push(res)
               counter--;
               if (counter == 0)
@@ -92,7 +102,7 @@ module.exports = function (server) {
       var fileInfo = new FileInfo(file, collectionpath, assetpath);
       //fileInfo.safeName();
       map[file.path] = fileInfo;
-      files.push(fileInfo);
+      //files.push(fileInfo); -> this will happen later
 
     }).on('field', function (name, value) {
       if (name === 'redirect') {
@@ -124,18 +134,34 @@ module.exports = function (server) {
         });
       }
     }).on('file', function (name, file) {
+
       var fileInfo = map[file.path];
       fileInfo.size = file.size;
       fileInfo.type = Mime.lookup(fileInfo.name);
 
-      /*
-      if (!fileInfo.validate()) {
-        fs.unlinkSync(file.path);
-        return;
-      }
-      */
-      counter++;
-      fileInfo.upload(handler, finish);
+
+      counter++; // so that 'end' does not finish
+      //                                                              no jar
+      zipFile.unzipFile(handler, collectionpath, assetpath, fileInfo.name, fileInfo.path, null, function(error,result) {
+        if (error)
+          handler.handleError(error);
+        else {
+          // turn {asset} into fileInfos
+          var getFileInfos = function (results) {
+
+            if (results.fileInfo) 
+              files.push(results.fileInfo);
+
+            if (results.children) {
+              for (var i = 0; i < results.children.length; i++) {
+                getFileInfos(results.children[i]);
+              }
+            }
+          };
+          getFileInfos(result);
+          finish(undefined);
+        }
+      });
 
     }).on('aborted', function () {
       tmpFiles.forEach(function (file) {
@@ -204,12 +230,12 @@ module.exports = function (server) {
   };
 
   // rest3d post upload API
-  server.post(/^\/rest3d\/tmp\/upload.*/, function (req, res, next) {
+  server.post(/^\/rest3d\/tmp.*/, function (req, res, next) {
 
     var handler = new UploadHandler(req, res, next);
     handler.allowOrigin();
 
-    var params = req.url.split("/tmp/upload")[1];
+    var params = req.url.split("/tmp")[1];
 
 
     Collection.find('tmp', path.join('/', handler.sid, '/', params), function (err, result) {

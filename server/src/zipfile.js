@@ -106,6 +106,7 @@ module.exports = function (server) {
         if (entry) {
           console.log('zip disk cache HIT!=' + entry.filename);
           getname(entry,params);
+          params.donotmove=true;
           unzip(params);
         } else {
           var buffer = new memoryStream(null, {
@@ -121,6 +122,7 @@ module.exports = function (server) {
                 return params.cb(err);
 
               getname(entry,params);
+              params.donotmove=true;
               unzip(params);
             });
           });
@@ -144,6 +146,7 @@ module.exports = function (server) {
       });
     else {
       // callers has to set params.name and params.filename
+      params.donotmove=false;
       unzip(params);
     }
   };
@@ -204,9 +207,7 @@ module.exports = function (server) {
         type: 'file'
       });
 
-    // let's create a collection for the zip/model
-    params.collectionpath = Path.join(params.collectionpath,name);
-
+   
     var asset = {
       type: 'asset',
       name: name,
@@ -235,9 +236,16 @@ module.exports = function (server) {
       var data = fs.readFileSync(params.filename);
       var reader = zip.Reader(data);
       var there_was_an_error = false;
+      var first_time=true
 
+      // note: this will throw an error if this is not a zip file
       reader.forEach(function (entry) {
         if (there_was_an_error) return;
+        if (first_time){
+          first_time=false;
+          // let's create a collection for the zip/model
+          params.collectionpath = Path.join(params.collectionpath,name);
+        }
         
         var filename = entry.getName();
         var currentpath = params.assetpath || "";
@@ -326,7 +334,7 @@ module.exports = function (server) {
         files.push(fileInfo);
         asset = {name:params.name, path:params.filename, type:'file'};
 
-        fileInfo.donotmove = true;
+        fileInfo.donotmove = params.donotmove;
         counter++;
         if (!params.dryrun) {
            fileInfo.upload(params.handler, function(err,rest_asset){
