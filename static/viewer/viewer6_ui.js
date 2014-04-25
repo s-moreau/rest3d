@@ -962,7 +962,7 @@ viewer.INIT =  function (){
         })
         accordionUp.upload.header.click();
 
-        var upload = GUI.upload({parent:accordionUp.upload, id:"upModel", url:location.protocol+"//"+location.host+'/rest3d/tmp/upload', idUser: viewer.idUser});
+        var upload = GUI.upload({parent:accordionUp.upload, id:"upModel", url:location.protocol+"//"+location.host+'/rest3d/tmp/', idUser: viewer.idUser});
         upload.progress.progress_upModel.width("100%");
         setViewer6Upload($,upload,rest3d,viewer);
 
@@ -1404,7 +1404,7 @@ viewer.INIT =  function (){
         layout.jqueryObject.initContent("center");
         layout.jqueryObject.initContent("west");
         
-        window.loadCss("pepper-grinder");
+        window.loadCss("hot-sneaks");
         
         // $("#mainLayout-west").append('<div id="colorSelector"  style="z-index:9999!important;"><div style="background-color: #0000ff"></div></div>');
         GUI.button("undefined",$("#mainLayout-west")).prop("id","colorSelector");

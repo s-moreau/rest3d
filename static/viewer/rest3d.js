@@ -102,7 +102,7 @@ rest3d.urlUpload = function(url,cb,idUser){
             {
                 request.setRequestHeader("X-iduser",idUser);
             },
-           'url': "/rest3d/tmp/upload/",
+           'url': "/rest3d/tmp/",
            'size': 150,
            'name':"url",
            'enctype': "application/x-www-form-urlencoded",
