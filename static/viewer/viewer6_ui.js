@@ -772,6 +772,8 @@ viewer.INIT =  function (){
             content: sample
         });
 
+        renderMenu.script.append("<br><hr></br>");
+
         script.object.setSize("100%", "93%");
         renderMenu.refresh();
 
@@ -948,7 +950,6 @@ viewer.INIT =  function (){
             renderMenu.render.append("<br></br>");
         }
 
-        GUI.label('welcome1', "Upload your own model:", renderMenu.render);
         jumpLine();
 
         // renderMenu.render.append("<h4>Welcome to rest3d's viewer!</h4>");
@@ -966,8 +967,6 @@ viewer.INIT =  function (){
         upload.progress.progress_upModel.width("100%");
         setViewer6Upload($,upload,rest3d,viewer);
 
-        jumpLine();
-        GUI.label('welcome', "Load some sample models among those accordions:", renderMenu.render);
         jumpLine();
 
         var accordion = GUI.accordion({

@@ -346,6 +346,11 @@ overflow:hidden;
 
 .ui-menu { 
     overflow: hidden;
+    font-weight:bold !important;
+}
+
+.ui-menu a { 
+font-weight:bold !important;    /*font-size: :;*/
 }
 
 .ui-menu ul li ul {
@@ -760,3 +765,18 @@ width: 90% !important;
     border-radius: 5px;
     background: grey;
 }
+
+#script form{
+    height: 85% ;
+    box-shadow: 5px 5px 2px #888888 !important;
+}
+
+
+#scenes, #Upload, #collada_header, #collada, #gltf_header, #gltf{
+  box-shadow: 5px 5px 2px #888888 !important;
+}
+
+/*#mainLayout-north > ul >li>a{
+    box-shadow: 5px 5px 2px #888888 !important;
+   border: 1px solid !important;
+ }*/
