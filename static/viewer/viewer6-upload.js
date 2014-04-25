@@ -359,6 +359,8 @@ define(['jquerymin', 'rest3d', 'gltf', 'collada', 'viewer', 'q'], function ($, r
 
             function encodeStringToId(string) {
                 string = string.split(".").join("-");
+                string = encodeURIComponent(string);
+                string = string.split("%").join(":")
                 return string;
             }
 
@@ -388,7 +390,9 @@ define(['jquerymin', 'rest3d', 'gltf', 'collada', 'viewer', 'q'], function ($, r
                 // var collection = file.collectionpath;
                 var origin = parent;
                 var relativePath = file.assetpath;
-                parent = createCollection(file, parent);
+                if(file.collectionpath !== ""){
+                    parent = createCollection(file, parent);
+                }
                 if (file.assetpath == "") {
                     createNodeDatabase(file, parent);
                     parent = origin;
@@ -665,7 +669,7 @@ define(['jquerymin', 'rest3d', 'gltf', 'collada', 'viewer', 'q'], function ($, r
 
         upload.object.fileupload("option", "done", function (e, data) {
             // data.files[0].relativePath.attr("id", data.result.files[0].assetId);
-            console.debug("teFssfsfds", data);
+            console.debug(data.result[0]);
             var object = data.result;
             var e = {};
             e.idDatabase = "c_" + viewer.idUser;
