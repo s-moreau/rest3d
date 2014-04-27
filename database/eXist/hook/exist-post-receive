@@ -27,9 +27,11 @@ rm /git/apps/exist/autodeploy/eXide*
 #restart
 cd bin
 export JAVA_HOME=/usr/lib/jvm/jre-1.6.0-openjdk
-pm2 delete startup.sh
-killall java
-sleep 10
+pm2 -s delete startup.sh&
+sleep 5
+pm2 -s delete startup.sh
+pm2 flush
+
 pm2 start -x startup.sh -o /git/apps/exist/webapp/WEB-INF/logs/eXist-stdout.log -e /git/apps/exist/webapp/WEB-INF/logs/eXist-stderr.log
 
 #get the logs
@@ -37,5 +39,4 @@ cd /git/apps/Lockets
 pm2 --silent delete lockets_pm2.json
 pm2 flush
 pm2 --silent start lockets_pm2.json
-
 
