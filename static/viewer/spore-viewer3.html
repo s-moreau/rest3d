@@ -28,7 +28,7 @@ THE SOFTWARE.
     <script type="text/javascript">
     require.config({ 
     paths: {
-        jquerymin: "../deps/jquery-2.0.3.min",
+        jquery: "../deps/jquery-2.0.3.min",
         glmatrix: '../deps/gl-matrix',
         glmatrixExt: '../lib/gl-matrix-ext',
         webglUtils: "../deps/webgl-utils",
@@ -40,11 +40,11 @@ THE SOFTWARE.
     },
     shim: {
         'jqueryui':{
-            deps: ['jquerymin'],
+            deps: ['jquery'],
             exports: '$.ui'
         },
         'jquerylayout':{
-            deps: ['jquerymin','jqueryui'],
+            deps: ['jqueryui'],
             exports: '$.fn.layout;'
         },
         'glmatrixExt':{

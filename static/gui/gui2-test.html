@@ -89,7 +89,7 @@
 <script type="text/javascript">
 require.config({ 
     paths: {
-        jquerymin: "../deps/jquery-2.0.3.min",
+        jquery: "../deps/jquery-2.0.3.min",
         jqueryui: '../deps/jquery-ui-1.9.2.min',
         jquerylayout: "../deps/jquery.layout-1.3.0.min",
         glmatrix: '../deps/gl-matrix',
@@ -100,11 +100,11 @@ require.config({
     },
     shim: {
     	'jqueryui':{
-            deps: ['jquerymin'],
+            deps: ['jquery'],
             exports: '$.ui'
         },
         'jquerylayout':{
-            deps: ['jquerymin','jqueryui'],
+            deps: ['jqueryui'],
             exports: '$.fn.layout;'
         },
         'glmatrixExt':{

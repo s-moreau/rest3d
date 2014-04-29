@@ -499,7 +499,13 @@ var query = exports.query = function(xquery, callback) {
         message = JSON.parse(err.message);
       } catch (e)
       {
-        console.log('could not parse error message in eXitdb:query')
+        console.log('tentative - parsing xml error')
+        if (err.message) {
+          message={};
+          message.data = err.message.stringAfter('<message>').stringBefore('</');
+          if (message.data.contains('permission'))
+            err.statusCode = 403;
+        }
       }
       if (message && message.data) {
         var error = new Error(message.data);

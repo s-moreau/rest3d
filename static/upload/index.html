@@ -35,7 +35,7 @@
 <script type="text/javascript">
 require.config({
     paths: {
-        jquerymin: "../deps/jquery-2.0.3.min",
+        jquery: '../deps/jquery-2.1.0.min',
         jqueryui: '../deps/jquery-ui-1.9.2.min',
         upload: '../deps/upload/jquery.fileupload',
         uploadProcess: '../deps/upload/jquery.fileupload-process',
@@ -44,8 +44,12 @@ require.config({
         rest3d: '../viewer/rest3d',
     },
     shim: {
+        'jquery':{
+            deps: [],
+            exports: '$'
+        },
         'jqueryui':{
-            deps: ['jquerymin'],
+            deps: ['jquery'],
             exports: '$.ui'
         },
         'uploadProcess':{
@@ -57,11 +61,11 @@ require.config({
             exports: '$.blueimp.fileupload',
         },
         'uploadTransport':{
-             deps: ['jquerymin'],
+             deps: ['jquery'],
              exports: '$',
         },
         'upload':{
-            deps: ['jquerymin','jqueryui'],
+            deps: ['jqueryui'],
             exports: "$.fn.fileupload",
         },
     },
@@ -69,6 +73,7 @@ require.config({
 
 
 </script>
+
 </head>
 <body>
 
@@ -115,13 +120,13 @@ require.config({
 
 'use strict';
 
-require(['../viewer/rest3d','jquerymin','jqueryui','upload','uploadProcess','uploadValidate','uploadTransport'],function(rest3d){
+require(['rest3d','jquery','jqueryui','upload','uploadProcess','uploadValidate','uploadTransport'],function(rest3d){
 
     function INIT (){
 
       
         // Change this to the location of your server-side upload handler:
-        var url = '/rest3d/upload',
+        var url = '/rest3d/tmp',
             uploadButton = $('<button/>')
                 .addClass('btn')
                 .prop('disabled', true)
@@ -169,7 +174,7 @@ require(['../viewer/rest3d','jquerymin','jqueryui','upload','uploadProcess','upl
                                 var span = '<p><span><a href=/rest3d/upload/'+decodeURIComponent(file.name)+' target="_blank"><p><span>'+formatName(data,file)+'</a>';
                                 // endsWith
                                 if (file.name.indexOf('.json', file.name.length - '.json'.length) !== -1) {
-                                    var url='/viewer/easy-viewer.html?file=/rest3d/upload/'+decodeURIComponent(file.name);
+                                    var url='/viewer/easy-viewer.html?file=/rest3d/tmp/'+decodeURIComponent(file.name);
                                     span += ' -> <a href="'+url+'" target="_blank"> View '+formatName(data,file)+'</a>';
                                 }
                                 span += '</span></p>';

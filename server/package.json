@@ -17,7 +17,6 @@
     "request":"",
     "cheerio":"",
     "zip":"",
-    "blueimp-file-upload":"",
     "formidable":"",
     "imagemagick":"",
     "memorystream":"",
@@ -29,7 +28,8 @@
     "cookies":"",
     "ncp":"",
     "walk":"",
-    "ncp":""
+    "ncp":"",
+    "passport":""
   },
   "devDependencies": {
     "mocha": "1.7.4",

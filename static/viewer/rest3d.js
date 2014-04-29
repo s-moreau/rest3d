@@ -24,7 +24,7 @@ THE SOFTWARE.*/
 
 'use strict';//
 
-define(["jquerymin"], function($) {
+define(["jquery"], function($) {
 
 // rest3d convert API
 // this is draft -> should create a convert request, and then do a long pull for query status
@@ -69,7 +69,7 @@ rest3d.fileUpload = function(_params,_cb){
     $input = $('<input id="fileupload" style="display:none;" type="file" name="files[]" multiple>');
     $("body").append($input);
     $input.fileupload({
-        url: 'http://node.fl4re.com/rest3d/upload',
+        url: 'http://node.fl4re.com/rest3d/tmp',
         dataType: 'json',
         autoUpload: false,
         acceptFileTypes: /(\.|\/)(dae|png|tga)$/i,

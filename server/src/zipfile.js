@@ -339,7 +339,7 @@ module.exports = function (server) {
         if (!params.dryrun) {
            fileInfo.upload(params.handler, function(err,rest_asset){
              asset.fileInfo = fileInfo;
-             finish(undefined,rest_asset);
+             finish(err,rest_asset);
            });
         } else
           finish(undefined);
