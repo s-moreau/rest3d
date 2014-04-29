@@ -39,7 +39,7 @@ require.config({
         uploadViewer: '../viewer/viewer6-upload',
         fpsCounter: '../viewer/fpscounter',
         viewer_ui : '../viewer/viewer6_ui',
-        warehouse : '../viewer/viewer6-database',
+        database : '../viewer/viewer6-database',
     },
     shim: {
         'jqueryui':{

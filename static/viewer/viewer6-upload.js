@@ -236,10 +236,10 @@ define(['jquerymin', 'rest3d', 'gltf', 'collada', 'viewer', 'q'], function ($, r
                     var index = "a";
                     ext = name.match(/\.[^.]+$/)[0];
                     var ext = extensionToType(ext);
-                    if (ext == "collada" || ext == "gltf") {
-                        parent.attr("id", "m_" + encodePathToId(parent.attr('path')));
-                        parent.attr("rel", "model");
-                    }
+                    // if (ext == "collada" || ext == "gltf") {
+                    //     parent.attr("id", "m_" + encodePathToId(parent.attr('path')));
+                    //     parent.attr("rel", "model");
+                    // }
 
                 }
                 else if (attr == "model" || attr == "child") {

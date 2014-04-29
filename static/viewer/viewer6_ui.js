@@ -1,8 +1,31 @@
+/*
+The MIT License (MIT)
+
+Copyright (c) 2013 Rémi Arnaud - Advanced Micro Devices, Inc.
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in
+all copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+THE SOFTWARE.*/
+
 'use strict';
 define(   ['viewer','gui','uploadViewer'    , 'rest3d','q','collada','gltf','renderer','state','channel'], 
   function(viewer  , gui , setViewer6Upload , rest3d  , Q , COLLADA , glTF , RENDERER , State , Channel) {
 
-
+viewer.databases = {};
 viewer.idUser =  "User_"+Math.floor(Math.random() * 100000000000000) + 1;
 viewer.INIT =  function (){  
         "use strict";//
@@ -126,10 +149,9 @@ viewer.INIT =  function (){
                 text: "Welcome guest!",
                 id: "welcomeMenu",
                 callback: function(){
-                    welcomePanel();
-                                    var tefa = function(data){
-                    console.debug(data);
-                }
+                    var tefa = function(data){
+                        welcomePanel(data);
+                    }
                     rest3d.info(tefa);
                 },
             },{
@@ -229,9 +251,9 @@ viewer.INIT =  function (){
         GUI.image(menu.themes.text, "img-themes", "../gui/images/jquery.png", 15, 15, "before");
         GUI.addIcon(menu.fullscreen.text, "ui-icon-arrow-4-diag", "position: relative !important; right:10px !important;bottom: 10px !important;", "before");
         menu.fullscreen.moveToRightFromLeft();
-        menu.support.moveToRightFromLeft(25);
-        menu.themes.moveToRightFromLeft();
-        menu.settings.moveToRightFromLeft(220);
+        menu.support.moveToRightFromLeft(40);
+        menu.themes.moveToRightFromLeft(150);
+        menu.settings.moveToRightFromLeft(275);
 
          //------------------------------//render menu ---------------------------------------------------------------------------------------------
 
@@ -1513,49 +1535,146 @@ viewer.INIT =  function (){
         $("#dialog").dialog("close");
         var gitHtml = $('<div id="dialog"><img src="../gui/images/loading.gif"/></div>');
         gitPanel = $('body').append(gitHtml);
-        var draggableZone= $('<div class="draggableWelcome"></div>'); var guestZone;
-        var createButton = function(name,parent){
-            switch(name){
-                case "3dvia":
-                var link = "../gui/images/3dvia.png";
-                break;
-                case "warehouse":
-                var link = "../gui/images/warehouse.jpg";
-                break;
-                default:
-                var link = "../gui/images/upload_d.png";
-                break;
-            }
-            var button = GUI.button("", parent, function () {
-                    console.debug(link);
-                    });
-            GUI.image(button, "img-welcome", link, 77, 57, "before");
-            // button.height(85.781)
-            return button;
-        }
-        window.guest = function(){
-            console.debug("guestt")
-            $("#guestArea").append(guestZone);
 
+        function header (html,parent,text,draggableFlag,visibleFlag,button){
+            this.flag = true;
+            this.html = html;
+            this.text = text;
+            this.parent = parent;
+            this.draggableFlag = draggableFlag;
+            this.visibleFlag = visibleFlag;
+            this.button = button;
+            this.createDraggable = function(){
+                this.draggableZone= $('<div class="draggableWelcome ui-widget-header" style="display:inline-block"></div>');
+                this.header = this.header.append(this.draggableZone);
+                this.draggableZone.width(478).height(71);
+            }
+            this.createHeader = function(){
+                this.header = $("<div></div>");
+                this.linkArea = $("<div style = 'display:inline;'></div>");
+                this.link = $("<a style='float:right;'  href='#'>+"+this.text+"</a>");
+                // else{this.button="";}
+                this.parent.append(this.header)
+                if(this.button){this.button = $("<a style='float:left;'  href='#'>"+this.button+"</a>");this.linkArea.append(this.button)}
+                this.parent.append(this.linkArea,'<br><hr>');
+                this.linkArea.append(this.link);
+                this.header.append(this.html,"<br></br>");
+                this.header.css({"text-align":"justify", "text-justify":"inter-word"})
+                this.header.hide();
+            }
+            this.createButton = function(name,data){
+                var button = GUI.button("",this.draggableZone)
+                if(name==""){
+                    // button.prop('disabled', true);
+                    var link = "../gui/images/upload_d.png";
+                    GUI.addTooltip({
+                        parent: button,
+                        content: "This is your own temporary repository hosted by our cloud and used for linking node/the database",
+                    });
+                }
+                else{
+                    var link = data[name].picture;
+                    GUI.addTooltip({
+                        parent: button,
+                        content: data[name].description,
+                    });
+                    button.data(data[name]);
+                }
+                GUI.image(button, "img-welcome", link, 77, 57, "before");
+                // button.width(57).height(77);
+                // button.height(85.781)
+                return button;
+            }
+            this.change = function(){
+                if(this.flag==true){
+                    this.header.show();
+                    if(this.button)this.button.show();
+                    this.link[0].innerText = "-"+this.text;
+                    this.flag = false;
+                }
+                else{
+                    this.header.hide();
+                    if(this.button)this.button.hide();
+                    this.link[0].innerText = "+"+this.text;
+                    this.flag = true;
+                }
+            }
+            this.addDraggable = function(){
+               this.createDraggable();
+            }
+            this.createHeader();
+            var stock = this;
+            this.link.on("click",function(){
+                stock.change();
+            });
+            if(this.draggableFlag){
+                this.addDraggable();
+                if(this.visibleFlag){
+                    this.link.click();
+                }
+                }
+            }
+
+        var setDraggable = function(object,drop,zone){
+            object.draggable({ revert: "invalid",cancel: false});
+            drop.droppable({
+        activeClass: "ui-state-default",
+      hoverClass: "ui-state-hover",
+           drop: function (event, ui) {
+            var position = drop.find("button").last().position();
+            if(position==undefined){
+                position = {"top":84.5,"left":-50};
+            }
+            drop.append(ui.draggable);
+            ui.draggable.css({position:"absolute",top:position.top,left:position.left+63});
+            var json = ui.draggable.data();
+            if(!viewer.databases.hasOwnProperty(json.name)){viewer.databases[json.name] = json}
+            else{delete viewer.databases[json.name];}
+            // object.remove(); 
+            // object.draggable("destroy");
+            // drop.droppable("destroy");
+            setDraggable(ui.draggable,zone,drop);
+        }
+        });
         }
 
         var callback = function(data){
-            console.debug(data);
-            gitHtml.find("img").replaceWith("<h4>We are proposing a new version of our viewer elaborated with gui6. In addition of the basic functionnalites available in the last version, you are now able to display some model samples in COLLADA/glTF format, convert a COLLADA object and edit a scene. You can either explore some others databases listed below for editing your favorite models, upload your models to your own project stocked in our cloud or just working statically.</h4>")
-            gitHtml.append(draggableZone);
-            draggableZone.width(478).height(71);
-            guestZone = draggableZone.clone(true);
-            createButton("3dvia",draggableZone);
-            createButton("warehouse",draggableZone);
-            createButton("",draggableZone);
-            gitHtml.append("<hr>");
-            var guest = $("<div id='guestArea'></div><a style='float:right;' href='javascript:window.guest()'>+Guest account</a>");
-            gitHtml.append(guest)
-            gitHtml.append("<br><hr>");
-            var logIn = $("<a style='float:right;' href='javascript:window.login()'>+Log sin via google</a>");
-            gitHtml.append(logIn);
-            gitHtml.append("<br><hr>");
+            data = jQuery.parseJSON(data);
+            gitHtml.find("img").replaceWith("");
+            var what = "<a>We are proposing a new version of our viewer elaborated with gui6. In addition of the basic functionnalites available in the last version, you are now able to display some model samples in COLLADA/glTF format, convert a COLLADA object to glTF and edit a scene. You can either explore some solutions listed below for editing models hosted by their databases, upload your models to your own project stocked in our cloud or just work statically.";
+            what = new header(what,gitHtml,"Description&Features",true,true);
+            var guest = "<a>This section is dedicated to users who wants to fastly use our application. The user session will be automatically removed once expired. Drag and drop the features you want to exploit and get started!</a>";
+            guest = new header(guest,gitHtml,"Guest account",true,true,"Get started!");
+            guest.createButton("",data);
+            var login = "<a>OAuth authentification not yet implemented</a>";
+            login = new header(login,gitHtml,"Login via google",false,false);
+            var about = "<a>AMD is sponsoring the main open-source (MIT licensed) prototype. It is a turn-key rest3d server composed of a XML database, a nodejs rest server, and viewer/loader code for the client. Source code available at https://github.com/amd/rest3d </a>";
+            about = new header(about,gitHtml,"About",false,false);
+            if(data.hasOwnProperty("dvia")){
+                // tmp.prop("disabled",true)
+                // tmp.find('button').css({"pointer-events":"none"})
+                setDraggable(what.createButton("dvia",data),guest.draggableZone,what.draggableZone);
+            }
+            if(data.hasOwnProperty("warehouse")){
+                setDraggable(what.createButton("warehouse",data),guest.draggableZone,what.draggableZone);
+            }
+            guest.button.click(function(){
+                $("#dialog").dialog("close");
+                window.renderMenu = renderMenu;
+                console.debug(viewer.databases);
+                if(viewer.databases.hasOwnProperty("warehouse")){
+                    require(["database"],function(databaseTab){
+                        var tmp = new databaseTab(viewer.databases.warehouse);
+                    });
+                }
+                if(viewer.databases.hasOwnProperty("3dvia")){
+                    require(["database"],function(databaseTab){
+                        var tmp = new databaseTab(viewer.databases["3dvia"]);
+                    });
+                }
+            })
         }
+
         $("#dialog").dialog({
             width: '500',
             height: 'auto',
@@ -1574,14 +1693,6 @@ viewer.INIT =  function (){
         });
 
     }
-
- // GUI.notification({
- //        title: "Welcome to rest3d's viewer!",
- //        text: "We are proposing a new version of our viewer elaborated with gui6. You are able to display some model samples in COLLADA/glTF format or explore 3D warehouse for displaying your favorite objects.",
- //        type: "notice",
- //        time:"10000",
- //    })
-
     viewer.fpsCounter = new viewer.FPSCounter();
     viewer.flagTick = false;
     viewer.fpsCounter.createElement( document.getElementById("fps"));
@@ -1594,31 +1705,33 @@ viewer.INIT =  function (){
     GUI.container.initContent("center");
     GUI.container.initContent("west");
 
-    rest3d.info(function(data){
+    rest3d.tmp(function(data){
         data = jQuery.parseJSON(data);
-        window.renderMenu = renderMenu;
-        if(data.hasOwnProperty("warehouse")){
-            require(["warehouse"],function(databaseTab){
-                var tmp = new databaseTab(data.warehouse);
-            });
-
+        console.debug(data);
+        if(jQuery.isEmptyObject(data.children)&&jQuery.isEmptyObject(data.children)){
+            welcomePanel();
         }
-        if(data.hasOwnProperty("dvia")){
-            // window.renderMenu.addTab({
-            //     id: "_3dvia",
-            //     text: "  3dvia",
-            // });
-            require(["warehouse"],function(databaseTab){
-                var tmp = new databaseTab(data.dvia);
-            });
-            
+        else{
+            rest3d.info(function(data){
+                window.renderMenu = renderMenu;
+                data = jQuery.parseJSON(data);
+                if(data.hasOwnProperty("warehouse")){
+                    require(["database"],function(databaseTab){
+                        var tmp = new databaseTab(data.warehouse);
+                    });
+                }
+                if(data.hasOwnProperty("dvia")){
+                    require(["database"],function(databaseTab){
+                        var tmp = new databaseTab(data.dvia);
+                    });
+                }
+            })
         }
+        //welcomePanel();
+    
     });
     // window.renderMenu = renderMenu;
     // require(["warehouse"]);
-    // setTimeout(function(){
-    //     welcomePanel();
-    // },1500);
     $('#mainLayout-west').css('backgroundColor', '#b9f09e');
 }
 

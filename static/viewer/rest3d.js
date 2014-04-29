@@ -128,12 +128,22 @@ rest3d.info = function(cb){
            {
             if (cb) {
                 cb(data)
-                // .then(function(){
-                // });
             }
            },
          });
+}
 
+rest3d.tmp = function(cb){
+     $.ajax({
+           'type': "GET",
+           'url': "/rest3d/tmp/",
+           success: function(data)
+           {
+            if (cb) {
+                cb(data)
+            }
+           },
+         });
 }
 // rest3d.urlUpload = function(_params,_cb){
 //     _params = warehouse.zip;

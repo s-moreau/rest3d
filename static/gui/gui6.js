@@ -201,7 +201,7 @@ define(['channel','codemirror','webglUtils', 'WebGLDebugUtils','pnotify','colorp
                     parent: this[this.id],
                     json:  {
                         "data":{
-                            "data":stock.idUser,"attr":{"id":"c_"+stock.idUser,"rel":"collection","path":"/rest3d/upload/"+stock.idUser,"file":stock.idUser,}},
+                            "data":"Guest_repository","attr":{"id":"c_"+stock.idUser,"rel":"collection","path":"/rest3d/upload/"+stock.idUser,"file":stock.idUser,}},
                         },
                         "dnd" : {
                                 "drop_finish" : function (data) { 
@@ -295,7 +295,8 @@ define(['channel','codemirror','webglUtils', 'WebGLDebugUtils','pnotify','colorp
                     id:"progress_"+this.id,
                     parent:this[this.id],
                 });
-                this[this.id].append('<div id="fileArea_'+this.id+'"></div>');
+
+                this[this.id].append('<br><div id="fileArea_'+this.id+'"></div>');
 
                 this.optionLog= GUI.addCheckBox("uploadSetting", "Use log interface", this[this.id]);
                 this.setting = GUI.button("Upload", this.optionLog);
