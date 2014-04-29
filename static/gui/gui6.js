@@ -1577,8 +1577,8 @@ define(['channel','codemirror','webglUtils', 'WebGLDebugUtils','pnotify','colorp
         }
         $("#" + _id).dialog({
             resizable: true,
-            height: '500',
-            width: '900',
+            height: 'auto',
+            width: 'auto',
             modalType: Boolean,
             Default: false
         });

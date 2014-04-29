@@ -158,13 +158,7 @@ define(['viewer', 'gui', 'uploadViewer', 'rest3d', 'q', 'collada', 'gltf', 'rend
                 parent: layout.jqueryObjectNorth,
                 item: [{
                     text: "Welcome guest!",
-                    id: "welcomeMenu",
-                    callback: function () {
-                        var tefa = function (data) {
-                            welcomePanel(data);
-                        }
-                        rest3d.info(tefa);
-                    },
+                    id: "welcomeMenu"
                 }, {
                     text: "Settings",
                     id: "settings"
@@ -719,13 +713,9 @@ define(['viewer', 'gui', 'uploadViewer', 'rest3d', 'q', 'collada', 'gltf', 'rend
                         }
 
                         function local(array, index) {
-
-                            //local(callbackArray[g].id,callbackArray[g].value,setValue)
                             var id = array[index].id;
                             var value = array[index].value;
-                            // console.debug("input",value);
                             $("#" + id).click(function () {
-                                // console.debug(viewer.scenes);
                                 var tmp = trs.create();
                                 trs.fromMat4(tmp, value);
                                 var e = euler.create();
@@ -1657,10 +1647,22 @@ define(['viewer', 'gui', 'uploadViewer', 'rest3d', 'q', 'collada', 'gltf', 'rend
                     this.draggableFlag = draggableFlag;
                     this.visibleFlag = visibleFlag;
                     this.button = button;
-                    this.createDraggable = function () {
+                    this.createDraggable = function (flag) {
                         this.draggableZone = $('<div class="draggableWelcome ui-widget-header" style="display:inline-block"></div>');
                         this.header = this.header.append(this.draggableZone);
-                        this.draggableZone.width(478).height(71);
+                        this.draggableZone.width("100%").height(71);
+                        if(this.text=="Description&Features"){
+                            var plus = $('<div style="float:right;margin-top:12px;margin-right:10px;"></div>');
+                            this.draggableZone.append(plus);
+                            GUI.image(plus, "img-welcome", "../gui/images/green-plus.png", 70, 40, "before");
+                            GUI.addTooltip({
+                                parent: plus,
+                                content: "Add your own features",
+                            });
+                            plus.click(function(){
+                                GUI.messageDialog("yes","","Not yet implemented") 
+                            })
+                        }
                     }
                     this.createHeader = function () {
                         this.header = $("<div></div>");
@@ -1794,7 +1796,6 @@ define(['viewer', 'gui', 'uploadViewer', 'rest3d', 'q', 'collada', 'gltf', 'rend
                     guest.button.click(function () {
                         $("#dialog").dialog("close");
                         window.renderMenu = renderMenu;
-                        console.debug(viewer.databases);
                         if (viewer.databases.hasOwnProperty("warehouse")) {
                             require(["database"], function (databaseTab) {
                                 var tmp = new databaseTab(viewer.databases.warehouse);
@@ -1838,10 +1839,9 @@ define(['viewer', 'gui', 'uploadViewer', 'rest3d', 'q', 'collada', 'gltf', 'rend
             GUI.container.initContent("center");
             GUI.container.initContent("west");
 
-            rest3d.tmp(function (data) {
+            rest3d.tmp("",function (data) {
                 data = jQuery.parseJSON(data);
-                console.debug(data);
-                if (jQuery.isEmptyObject(data.children) && jQuery.isEmptyObject(data.children)) {
+                if (jQuery.isEmptyObject(data.children) && jQuery.isEmptyObject(data.assets)) {
                     welcomePanel();
                 }
                 else {
@@ -1860,7 +1860,6 @@ define(['viewer', 'gui', 'uploadViewer', 'rest3d', 'q', 'collada', 'gltf', 'rend
                         }
                     })
                 var loop = function(data,parent){
-                    console.debug(data.assets)
                     for(var key in data.assets){
                         var uuid = data.assets[key];
                         var tmp = key.split("/");
@@ -1874,19 +1873,15 @@ define(['viewer', 'gui', 'uploadViewer', 'rest3d', 'q', 'collada', 'gltf', 'rend
                     }
                     for(var key1 in data.children){
                         var uuid = data.children[key1];
-                        var par = upload.createCollection({"collectionpath":key1},parent);
-                        rest3d.tmp(function(data){
-                            //console.debug(data);
-                            data=jQuery.parseJSON(data);
-                            loop(data,par);
+                        rest3d.tmp({key:key1,parent:parent},function(data){
+                            loop(jQuery.parseJSON(data.data),upload.createCollection({"collectionpath":data.key},data.parent));
                         },uuid)
                     }
                 }
                 loop(data,$('#c_'+viewer.idUser));
-                $("#uploadTree").jstree('open_all');
                 }
                 //welcomePanel();
-
+                setTimeout(function(){$("#uploadTree").jstree('open_all')},1500);
             });
             // window.renderMenu = renderMenu;
             // require(["warehouse"]);

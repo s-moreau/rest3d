@@ -133,7 +133,7 @@ rest3d.info = function(cb){
          });
 }
 
-rest3d.tmp = function(cb,uuid){
+rest3d.tmp = function(params,cb,uuid){
     if(uuid){
       var id="?uuid="+uuid;}
     else{
@@ -144,8 +144,14 @@ rest3d.tmp = function(cb,uuid){
            'url': "/rest3d/tmp/"+id,
            success: function(data)
            {
+            if(params==""){
+              params = data;
+            }
+            else{
+              params.data = data;
+            }
             if (cb) {
-                cb(data)
+                cb(params)
             }
            },
          });
