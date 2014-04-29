@@ -30,7 +30,6 @@ module.exports = function (server) {
   var request = require('request');
   var cheerio = require('cheerio');
   var toJSON = require('./tojson');
-  var sendfile = require('./sendfile');
 
   var handler = require('./handler');
   var zipFile = require('./zipfile')(server);
@@ -287,7 +286,7 @@ module.exports = function (server) {
                 else {
 
                   tdvia.res.setHeader('Content-Disposition', 'inline; filename='+result.name);
-                  sendfile(tdvia,result.filename);
+                  tdvia.sendfile(result.filename);
                   
                 }
               });
