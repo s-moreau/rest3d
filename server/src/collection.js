@@ -63,7 +63,14 @@ Collection.prototype.create = function(_path,_uid,_callback){
   }
 }
 
+
 // add or return a child collection
+// this will acquire a lock on the collection, so it can either
+//  - get the latest version of collection in case its been written at same time by another user
+//  - modify the collection to create the new child
+
+// return -> child collection
+
 Collection.prototype.mkdir = function(_path,_uid,_callback) {
   var collection= this;
   var cb=_callback;
@@ -105,7 +112,16 @@ Collection.prototype.mkdir = function(_path,_uid,_callback) {
       }
   })
 }
-// add or return an asset at path
+// add or modify an asset at path, provided the new resource
+// see if the asset already exists in the collection
+// yes -> then acquire lock on asset, and then modify asset with new resource
+// no -> acquire lock on collection,
+//       check if asset already exists (its possible, in case another user was adding an asset at same time
+//       yes -> acquire lock on asset, and then modify asset with new resource -> unlock asset
+//       no -> create new asset with resource, unlock collection
+//         (no need to lock asset, since it's new, and nobody else has access to it
+
+// return -> child Asset
 
 Collection.prototype.mkAsset = function(_path,_uid,_resource,_callback) {
   var collection= this;
@@ -116,7 +132,7 @@ Collection.prototype.mkAsset = function(_path,_uid,_resource,_callback) {
   var newasset; // this is what we return
 
   var next = function(err){
-    // always try to unlock
+    // always try to unlock collection
     collection.unlock(function(err2,asset) {
       if (err) return cb(err);
       if (err2) return cb(err2);
@@ -124,47 +140,50 @@ Collection.prototype.mkAsset = function(_path,_uid,_resource,_callback) {
     })
   }
 
-  var add_resource = function() {
-    // finally add the new asset to the collection
-    addAsset(collection,newasset,name, function(err,collection){
-      if (err) next(err)
-      else next(undefined,resource.uuid);
-
-    });
+// TODO -> lock resource, instead of resource load, need resource lock
+  var add_resource = function(cb) {
+    var next=cb;
+    Resource.load(collection.database,col.assets[name], function(err,res){
+        newasset=res;
+        newasset.addResource(resource,next);
+    })
   }
 
-  this.lock(
-    function(err,asset){
-      if (err) return cb(err);
+  var col = collection.getResourceSync();
+      
+  if (col.assets[name]) {
+    newasset=col.assets[name];
+    add_resource(cb);
+  } else {
 
-      // now that we have a lock, let's update the value
-      collection =asset;
-      var col = collection.getResourceSync();
-      if (col.assets[name]) {
-        // there is already an asset at that path
-        // let's get that asset, and then add a resource to that asset 
-        console.log('mkAsset '+collection.name+' - asset load at path ='+name)
-        Resource.load(collection.database,col.assets[name], function(err,res){
-          newasset=res;
-          // TODO -> need to lock the asset before adding a resource to that asset
-          newasset.addResource(resource);
-          if (err) return next(err);
-          
-          add_resource();
-        });
-      } else {
-        // there is no asset at that path
-        // create a new asset, with the resource attached
-        var asset = new Asset(resource.database,resource.name,resource);
-        Asset.create(asset, resource.userId, function(err,asset){
-          if (err) return next(err);
-          newasset=asset;
-          add_resource();
-         
-        })
+    this.lock(
+      function(err,asset){
+        if (err) return cb(err);
+
+        // now that we have a lock, let's update the value
+        collection =asset;
+        var col = collection.getResourceSync();
+        if (col.assets[name]) {
+          // there is already an asset at that path
+          // let's get that asset, and then add a resource to that asset 
+          console.log('mkAsset '+collection.name+' - asset load at path ='+name)
+
+          add_resource(next);
+
+        } else {
+          // there is no asset at that path
+          // create a new asset, with the resource attached
+          var asset = new Asset(resource.database,resource.name,resource);
+          Asset.create(asset, resource.userId, function(err,asset){
+            if (err) return next(err);
+            newasset=asset;
+            // add new asset, no need to lock this new asset
+            addAsset(collection, newasset, name, next);
+          })
+        }
       }
-    }
-  )
+    )
+  }
 }
 
 // find as much path in the collection hierarchy
