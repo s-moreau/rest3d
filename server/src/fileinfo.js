@@ -125,6 +125,7 @@
     }
   };
   FileInfo.prototype.delete = function(handler){
+    console.log('********* DELETE *************')
     var fileInfo = this;
     if (handler.db) {
       // remove asset file from database, and update assets info uppon success
@@ -171,7 +172,7 @@
   // create an asset out of this fileInfo
   // folder is a subcollection path. 
   // returns the uuid for the fileInfo (resource)
-  // TODO - separate sid from userid
+  // TODO - separate sid from userid 
   FileInfo.prototype.toAsset = function(database,userid,callback) {
     var fileInfo = this;
     var cb=callback;
@@ -180,39 +181,42 @@
     var collectionpath = this.collectionpath;
     var assetpath = this.assetpath;
 
-    //if (fileInfo.asset) cb(undefined, fileInfo.asset.assetId);
-    // We need a uuid for our data file. How do we make sure this uuid is not used already ?
-    var resource = new Resource(database, fileInfo.name, fileInfo.type);
-    resource.size = fileInfo.size;
-    Resource.create(resource, userid, function(err,resource){
-      if (err) cb(err);
-      else {
-
-        var name = resource.name; //.substr(0,resource.name.lastIndexOf('.'));
+    // create collection if needed
+    Collection.create(database,collectionpath,uid, function(err,_col){
+      if (err) return cb(err);
+      // upload data
+      var collection=_col;
+      var resource = new Resource(collection.database, fileInfo.name, fileInfo.type);
+      resource.size = fileInfo.size;
+      fileInfo.resource = resource;
+      Resource.create(resource, userid, function(err,resource){
+        if (err) return cb(err);
+        collection.mkAsset(Path.join(assetpath,resource.name), uid, resource, function(err,asset){
+          fileInfo.asset = asset;
+          cb(undefined,fileInfo.resource.uuid);
+        });
+/*
+        // create associated Asset
+        var name = resource.name;
         var asset = new Asset(resource.database,name,resource);
         Asset.create(asset, resource.userId, function(err,asset){
-          if (err) cb(err);
-          else {
-            fileInfo.asset = asset;
-            fileInfo.resource = resource;
-            
-            // this create an empty collection or return existing one
+          if (err) return cb(err);
 
-            Collection.create(resource.database,collectionpath,uid, function(err,collection){
-               if (err) cb(err);
-               else {
+          fileInfo.asset = asset;
+          fileInfo.resource = resource;
+          
+          // finally add the new asset to the collection
+          collection.addAsset(fileInfo.asset,Path.join(assetpath,asset.name), function(err,collection){
+            if (err) cb(err)
+            else cb(undefined,fileInfo.resource.uuid);
 
-                 collection.addAsset(fileInfo.asset,Path.join(assetpath,asset.name), function(err,collection){
-                    if (err) cb(err)
-                    else cb(undefined,fileInfo.resource.uuid);
-                 })
-               }
-            })
-          }
-        });
-      }
-    })
+          });
+  */
 
+
+      })
+
+    });
   }
 
   // move a file to upload area, assign a uuid
@@ -222,77 +226,67 @@
   FileInfo.prototype.upload = function (handler, callback) {
     var cb=callback;
     var fileInfo = this;
-
-      if (handler.db){
-        // make an asset out of this fileInfo
-        // create a uuid
-        fileInfo.toAsset(handler.db.name,folder,handler.sid, function(err,assetId) {
-          if (err) return cb(err);
-
-          // database store asset file, and update assets info uppon success
-          handler.db.store(assetId,fileInfo.path, function(err,assetId){
-                if (err) {
-                  console.log('Error storing asset='+assetId);
-                  cb && cb(err,null);
-                } else {
-                  fileInfo.created = new Date().getTime();
-                  console.log('Success storing asset='+assetId);
-                  handler.db.insertKeyPair('assets',assetId, fileInfo.asset, function (err,res){
-                  if (err) {
-                    console.log('Error inserting assets');
-                    console.log(err);
-                    cb && cb(err, null);
-                  } else {
-                    console.log('asset entry added')
-                    console.log('->'+res)
-                    cb && cb(undefined, res);
-                  }
-                })
-              }
-            })
-        })
-
-      } else { // this is the 'tmp' database 
-        // make an asset out of this fileInfo, in database 'tmp'
-        // TODO -> replace handler.sid with hander.uid (user id)
-        var finish = function(err) {
-           if (err) {
-                console.log('error in fileInfo.toAsset -> '+err);
-                cb && cb(err);
-              } else {
-                cb && cb(undefined, fileInfo.asset);
-              }
-        };
-
-        fileInfo.toAsset('tmp',handler.sid,function(err,assetId) {
-          if (err) return cb(err);
-          
-          if (fileInfo.buffer) {
-            fs.writeFile(Path.join(FileInfo.options.uploadDir,assetId), fileInfo.buffer, 'binary', finish);
-          } else if (fileInfo.donotmove){
-            copyFile(fileInfo.path, Path.join(FileInfo.options.uploadDir,assetId), finish);
-          } else {
-            fs.rename(fileInfo.path, Path.join(FileInfo.options.uploadDir,assetId), finish);
-          }
-        })
+    var finish = function(err) {
+      if (err) {
+        console.log('error in fileInfo.toAsset -> '+err);
+        cb(err);
+      } else {
+        cb(undefined, fileInfo.asset);
       }
-      
-      /* Image resize -> need to enable this code at open point?
+    };
 
-      if (FileInfo.options.imageTypes.test(fileInfo.name)) {
-        Object.keys(FileInfo.options.imageVersions).forEach(function (version) {
-          counter += 1;
-          var opts = FileInfo.ptions.imageVersions[version];
-          imageMagick.resize({
-            width: opts.width,
-            height: opts.height,
-            srcPath: FileInfo.options.uploadDir + '/' + fileInfo.name,
-            dstPath: FileInfo.options.uploadDir + '/' + version + '/' +
-              fileInfo.name
-          }, finish);
-        });
-      }
-      */
+
+    if (handler.db.name !== 'tmp'){
+      // make an asset out of this fileInfo
+      // create a uuid
+      fileInfo.toAsset(handler.db,handler.sid, function(err,assetId) {
+        if (err) return cb(err);
+
+        if (fileInfo.buffer) {
+           handler.db.store(assetId,fileInfo.buffer, finish);
+        } else 
+           handler.db.store(assetId,fileInfo.path, finish);
+           /*
+        if (!fileInfo.donotmove){ // this can be done whenever - don't care if it does not work
+          fs.unlink(fileInfo.path);
+        }
+        */
+      })
+  
+
+    } else { // this is the 'tmp' database 
+      // make an asset out of this fileInfo, in database 'tmp'
+      // TODO -> replace handler.sid with hander.uid (user id)
+
+      fileInfo.toAsset(handler.db,handler.sid,function(err,assetId) {
+        if (err) return cb(err);
+        
+        if (fileInfo.buffer) {
+          fs.writeFile(Path.join(FileInfo.options.uploadDir,assetId), fileInfo.buffer, 'binary', finish);
+        } else if (fileInfo.donotmove){
+          copyFile(fileInfo.path, Path.join(FileInfo.options.uploadDir,assetId), finish);
+        } else {
+          fs.rename(fileInfo.path, Path.join(FileInfo.options.uploadDir,assetId), finish);
+        }
+      })
+    }
+    
+    /* Image resize -> need to enable this code at open point?
+
+    if (FileInfo.options.imageTypes.test(fileInfo.name)) {
+      Object.keys(FileInfo.options.imageVersions).forEach(function (version) {
+        counter += 1;
+        var opts = FileInfo.ptions.imageVersions[version];
+        imageMagick.resize({
+          width: opts.width,
+          height: opts.height,
+          srcPath: FileInfo.options.uploadDir + '/' + fileInfo.name,
+          dstPath: FileInfo.options.uploadDir + '/' + version + '/' +
+            fileInfo.name
+        }, finish);
+      });
+    }
+    */
   };
 
    module.exports = FileInfo;
