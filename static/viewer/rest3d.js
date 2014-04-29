@@ -133,10 +133,15 @@ rest3d.info = function(cb){
          });
 }
 
-rest3d.tmp = function(cb){
-     $.ajax({
+rest3d.tmp = function(cb,uuid){
+    if(uuid){
+      var id="?uuid="+uuid;}
+    else{
+      var id="";
+    }
+    $.ajax({
            'type': "GET",
-           'url': "/rest3d/tmp/",
+           'url': "/rest3d/tmp/"+id,
            success: function(data)
            {
             if (cb) {
@@ -145,6 +150,8 @@ rest3d.tmp = function(cb){
            },
          });
 }
+
+
 // rest3d.urlUpload = function(_params,_cb){
 //     _params = warehouse.zip;
 

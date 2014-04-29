@@ -1859,6 +1859,31 @@ define(['viewer', 'gui', 'uploadViewer', 'rest3d', 'q', 'collada', 'gltf', 'rend
                             });
                         }
                     })
+                var loop = function(data,parent){
+                    console.debug(data.assets)
+                    for(var key in data.assets){
+                        var uuid = data.assets[key];
+                        var tmp = key.split("/");
+                        for(var i=0;i<tmp.length;i++){
+                            if(i !== tmp.length - 1){                             
+                            }
+                            else{
+                                upload.createNodeDatabase({"name":tmp[i], "uuid":uuid, "collectionpath":"", "assetpath":""},parent);
+                            }
+                        }
+                    }
+                    for(var key1 in data.children){
+                        var uuid = data.children[key1];
+                        var par = upload.createCollection({"collectionpath":key1},parent);
+                        rest3d.tmp(function(data){
+                            //console.debug(data);
+                            data=jQuery.parseJSON(data);
+                            loop(data,par);
+                        },uuid)
+                    }
+                }
+                loop(data,$('#c_'+viewer.idUser));
+                $("#uploadTree").jstree('open_all');
                 }
                 //welcomePanel();
 
