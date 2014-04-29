@@ -7,8 +7,10 @@ var extend = require('./extend')
 var mime_type = 'model/rest3d-asset+json';
 
 var Asset = function (database,name, resource){
-  Resource.call(this, database, name,mime_type); // call parent constructor
-  this.resources = [resource];
+  if (arguments.length) {
+    Resource.call(this, database, name,mime_type); // call parent constructor
+    this.resources = [resource];
+  }
 };
 
 Asset.prototype = Object.create(Resource.prototype);
@@ -29,8 +31,23 @@ Asset.prototype.addResource = function(resource,callback){
 }
 
 // TODO -> do something clever to get the right resource back
-Asset.prototype.getResource = function(callback){
-  callback(undefined,this.resources[0]);
+Asset.prototype.lock = function(callback){
+  if (this.database.lockAsset) {
+      this.database.lockAsset(this, callback);
+  } else{
+    callback(undefined,this);
+  }
+}
+
+Asset.prototype.unlock = function(callback){
+  if (this.database.unlockAsset) {
+    this.database.unlockAsset(this,callback);
+  } else
+    callback(undefined, this);
+}
+
+Asset.prototype.getResourceSync = function(){
+  return this.resources[0];
 }
 
 // get resource for REST API output
@@ -38,10 +55,11 @@ Asset.prototype.get = function(callback) {
   var result=extend({},this);
   var cb=callback;
   delete result.resources;
-  this.getResource(function(err,col){
-    extend(result,col);
-    cb(err,result);
-  })
+  var col = this.getResourceSync();
+  extend(result,col);
+  result.database && result.database.name && (result.database = result.database.name);
+  cb(undefined,result);
+
 }
 Asset.tmpAssets = {};
 

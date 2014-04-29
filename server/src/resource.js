@@ -4,9 +4,11 @@ var uuid = require('node-uuid');
 var extend = require('./extend')
 
 var Resource = function (database,name,type){
-  this.database = database;
-  this.name = name;
-  this.type = type;
+  if (arguments.length) {
+    this.database = database;
+    this.name = name;
+    this.type = type;
+  }
 };
 
 // this set a creation date and a uuid, and save the resource
@@ -21,9 +23,11 @@ var getuuid = function(resource, callback) {
 
   if (!resource.uuid){
     var id = uuid.v1();
+    /*
     if (Resource.tmpAssets[id])
       return getuuid(resource,cb);
     else
+      */
       resource.uuid = id;
   }
   resource.save(cb);
@@ -31,28 +35,22 @@ var getuuid = function(resource, callback) {
 
 // delete this resource 
 Resource.prototype.del = function(callback) {
- // TODO -> delete the actual resource file !! if type===Resource
- delete Resource.tmpAssets[this.uuid];
- callback(undefined, this);
+   // TODO -> delete the actual resource file !! if type===Resource
+ this.database.delAsset(this.uuid);
 }
 
 Resource.prototype.save = function(callback) {
-  // store as a key/pair
-  Resource.tmpAssets[this.uuid] = this;
-  callback(undefined,this);
+  this.database.saveAsset(this, callback);
 }
 
 Resource.load = function(database,id,callback){
-  var result = Resource.tmpAssets[id];
-  if (result)
-    callback(undefined, result)
-  else
-    callback('cannot find asset id='+id)
+  database.loadAsset(database,id,callback);
 }
 
 // get resource for REST API output
 Resource.prototype.get = function(callback) {
   var result=extend({},this);
+  result.database && result.database.name && (result.database = result.database.name);
   callback(undefined,result);
 }
 
