@@ -762,7 +762,6 @@ define(['viewer', 'gui', 'uploadViewer', 'rest3d', 'q', 'collada', 'gltf', 'rend
                                                 break;
                                             }
                                         }
-                                        // console.debug(type,min,max,step)
                                     parent.append("<a>" + type + "</a><br>")
                                     var title = $("<a>X: " + element[0] + "</a>");
                                     parent.append(title);
@@ -797,17 +796,12 @@ define(['viewer', 'gui', 'uploadViewer', 'rest3d', 'q', 'collada', 'gltf', 'rend
                                 createSliders($(html), "Scale", tmp.scale);
 
                                 function decodeAndPush(trans, rot, scale) {
-                                    // console.debug(trans,rot,scale);
-
                                     var q = quat.create();
                                     quat.fromEuler(q, rot);
-                                    //     console.debug(q);
                                     var trs1 = trs.fromValues(trans, q, scale);
                                     var mat1 = mat4.create();
                                     mat4.fromTrs(mat1, trs1);
-                                    // console.debug("output ",mat1);
                                     array[index].parent[array[index].type] = mat1;
-                                    // console.debug(viewer.scenes);
                                     viewer.draw();
                                 }
                             });
@@ -1793,6 +1787,9 @@ define(['viewer', 'gui', 'uploadViewer', 'rest3d', 'q', 'collada', 'gltf', 'rend
                     if (data.hasOwnProperty("warehouse")) {
                         setDraggable(what.createButton("warehouse", data), guest.draggableZone, what.draggableZone);
                     }
+                    if(data.hasOwnProperty("db")){
+                        setDraggable(what.createButton("db", data), guest.draggableZone, what.draggableZone);
+                    }
                     guest.button.click(function () {
                         $("#dialog").dialog("close");
                         window.renderMenu = renderMenu;
@@ -1806,6 +1803,12 @@ define(['viewer', 'gui', 'uploadViewer', 'rest3d', 'q', 'collada', 'gltf', 'rend
                                 var tmp = new databaseTab(viewer.databases["3dvia"]);
                             });
                         }
+                       if (data.hasOwnProperty("db")) {
+                            require(["database"], function (databaseTab) {
+                                console.debug(data.db)
+                                var tmp = new databaseTab(data.db);
+                            });
+                        }
                     })
                 }
 
@@ -1816,7 +1819,7 @@ define(['viewer', 'gui', 'uploadViewer', 'rest3d', 'q', 'collada', 'gltf', 'rend
                     title: 'Welcome to rest3d!',
                     modal: true,
                     create: function () {
-                        $(this).css("maxHeight", 400);
+                        $(this).css("maxHeight", 450);
                     },
                     open: function (ev, ui) {
                         rest3d.info(callback);
@@ -1858,6 +1861,11 @@ define(['viewer', 'gui', 'uploadViewer', 'rest3d', 'q', 'collada', 'gltf', 'rend
                                 var tmp = new databaseTab(data.dvia);
                             });
                         }
+                        if (data.hasOwnProperty("db")) {
+                            require(["database"], function (databaseTab) {
+                                var tmp = new databaseTab(data.dvia);
+                            });
+                        }
                     })
                 var loop = function(data,parent){
                     for(var key in data.assets){
@@ -1882,7 +1890,9 @@ define(['viewer', 'gui', 'uploadViewer', 'rest3d', 'q', 'collada', 'gltf', 'rend
                 }
                 //welcomePanel();
                 setTimeout(function(){$("#uploadTree").jstree('open_all')},1500);
+                  $("#tabindex_2").click(); 
             });
+            $("#tabindex_2").click(); // TAB API NEED TO BE IMPROVED
             // window.renderMenu = renderMenu;
             // require(["warehouse"]);
             $('#mainLayout-west').css('backgroundColor', '#b9f09e');
