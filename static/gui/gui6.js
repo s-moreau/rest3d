@@ -448,7 +448,6 @@ define(['channel','codemirror','webglUtils', 'WebGLDebugUtils','pnotify','colorp
                         content: tooltip,
                     });
                     button1.hide();
-//
                     var $spanButton2 = htmlSpan($newLine,10);
                     var tooltip = button.html();
                     button.html("");
@@ -1184,7 +1183,10 @@ define(['channel','codemirror','webglUtils', 'WebGLDebugUtils','pnotify','colorp
             }
 
             $.fn.focusTab=function(callback){
-                $('li[aria-controls="' + $(this).prop("id") + '"] a').click(callback);
+                if(callback){$('li[aria-controls="' + $(this).prop("id") + '"] a').click(callback);}
+                else{
+                    $('li[aria-controls="' + $(this).prop("id") + '"] a').click();
+                }
             }
 
             $.fn.removeTab = function (_idTabWindow, id) {

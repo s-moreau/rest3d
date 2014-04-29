@@ -772,6 +772,8 @@ viewer.INIT =  function (){
             content: sample
         });
 
+        renderMenu.script.append("<br><hr></br>");
+
         script.object.setSize("100%", "93%");
         renderMenu.refresh();
 
@@ -948,7 +950,6 @@ viewer.INIT =  function (){
             renderMenu.render.append("<br></br>");
         }
 
-        GUI.label('welcome1', "Upload your own model:", renderMenu.render);
         jumpLine();
 
         // renderMenu.render.append("<h4>Welcome to rest3d's viewer!</h4>");
@@ -962,12 +963,10 @@ viewer.INIT =  function (){
         })
         accordionUp.upload.header.click();
 
-        var upload = GUI.upload({parent:accordionUp.upload, id:"upModel", url:location.protocol+"//"+location.host+'/rest3d/upload', idUser: viewer.idUser});
+        var upload = GUI.upload({parent:accordionUp.upload, id:"upModel", url:location.protocol+"//"+location.host+'/rest3d/tmp/', idUser: viewer.idUser});
         upload.progress.progress_upModel.width("100%");
         setViewer6Upload($,upload,rest3d,viewer);
 
-        jumpLine();
-        GUI.label('welcome', "Load some sample models among those accordions:", renderMenu.render);
         jumpLine();
 
         var accordion = GUI.accordion({
@@ -1404,7 +1403,7 @@ viewer.INIT =  function (){
         layout.jqueryObject.initContent("center");
         layout.jqueryObject.initContent("west");
         
-        window.loadCss("pepper-grinder");
+        window.loadCss("hot-sneaks");
         
         // $("#mainLayout-west").append('<div id="colorSelector"  style="z-index:9999!important;"><div style="background-color: #0000ff"></div></div>');
         GUI.button("undefined",$("#mainLayout-west")).prop("id","colorSelector");

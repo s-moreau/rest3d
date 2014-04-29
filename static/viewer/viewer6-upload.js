@@ -1,3 +1,4 @@
+
 /*
 
 The MIT License (MIT)
@@ -29,6 +30,7 @@ define(['jquerymin', 'rest3d', 'gltf', 'collada', 'viewer', 'q'], function ($, r
         var id;
         var flag;
         var url = '/rest3d/upload';
+
 
         function callbackConvert(data) {
             var buffer = data;
@@ -112,20 +114,20 @@ define(['jquerymin', 'rest3d', 'gltf', 'collada', 'viewer', 'q'], function ($, r
 
         function displayCollada(node) {
             window.pleaseWait(true);
-            COLLADA.load(node.attr("path"), viewer.parse_dae).then(
+            COLLADA.load("/rest3d/tmp/" + node.attr("path"), viewer.parse_dae).then(
                 function (flag) {
                     window.pleaseWait(false);
-                    buffer.notif(node.attr("path"));
+                    buffer.notif(node.attr("name"));
                 })
         }
         upload.displayCollada = displayCollada;
 
         function displayGltf(node) {
             window.pleaseWait(true);
-            glTF.load(node.attr("path"), viewer.parse_gltf).then(
+            glTF.load("/rest3d/tmp/" + node.attr("path").encodeURIComponent(), viewer.parse_gltf).then(
                 function (flag) {
                     window.pleaseWait(false);
-                    window.notif(node.attr("path"));
+                    window.notif(node.attr("name"));
                 })
         }
         upload.displayGltf = displayGltf;
@@ -169,9 +171,7 @@ define(['jquerymin', 'rest3d', 'gltf', 'collada', 'viewer', 'q'], function ($, r
             this.removeNodes = function () {
                 if (stock.flag) {
                     for (var j = 0; j < stock.bufferNode.length; j++) {
-
                         if ($(stock.bufferNode[j]).attr("uploadstatus") !== "true") {
-                            console.debug($(stock.bufferNode[j]).attr("uploadstatus"));
                             $("#uploadTree").jstree("delete_node", $(stock.bufferNode[j]));
                         }
                     }
@@ -337,8 +337,83 @@ define(['jquerymin', 'rest3d', 'gltf', 'collada', 'viewer', 'q'], function ($, r
                 return parent;
             }
 
+            function createCollection(file, parent) {
+                var id = encodeStringToId(file.collectionpath);
+                parent.data({});
+                if (!parent.data().hasOwnProperty(file.collectionpath)) {
+                    var flagCollection = {};
+                    flagCollection[file.collectionpath] = true;
+                    parent.data(flagCollection);
+                    $("#uploadTree").jstree("create_node", parent, "inside", {
+                        "data": file.collectionpath,
+                        "attr": {
+                            "id": id,
+                            "collectionpath": file.collectionpath,
+                            "rel": "collection",
+                            "uploadstatus": true,
+                        }
+                    }, false, true);
+                }
+                return $("#" + id);
+            }
+
+            function encodeStringToId(string) {
+                string = string.split(".").join("-");
+                return string;
+            }
+
+            function createNodeDatabase(file, parent) {
+                $("#uploadTree").jstree("create_node", parent, "inside", {
+                    "data": file.name,
+                    "attr": {
+                        "id": "a_" + file.uuid,
+                        "name": file.name,
+                        "path": file.collectionpath + "/" + file.assetpath + "/" + file.name,
+                        "collectionpath": file.collectionpath,
+                        "assetpath": file.assetpath,
+                        "rel": extensionToType(file.name.match(/\.[^.]+$/)[0]),
+                        "uploadstatus": true,
+                    }
+                }, false, true);
+                file.idToTarget = "#a_" + file.uuid
+                GUI.addTooltip({
+                    parent: $("#a_" + file.uuid),
+                    content: "size: " + file.size,
+                    //wait new tooltip for showing date + User fields
+                });
+                return $("a_" + file.uuid);
+            }
+
+            function parsePathDatabase(file, parent) {
+                // var collection = file.collectionpath;
+                var origin = parent;
+                var relativePath = file.assetpath;
+                parent = createCollection(file, parent);
+                if (file.assetpath == "") {
+                    createNodeDatabase(file, parent);
+                    parent = origin;
+                }
+                else {
+                    relativePath = relativePath.split("/");
+                    for (var z = 0; z < relativePath.length; z++) {
+                        if (z !== relativePath.length - 1) { //if folder
+                            file.collectionpath = relativePath[z];
+                            parent = createCollection(file, parent);
+                        }
+                        else { //if file
+                            createNodeDatabase(file, parent);
+                            parent = origin;
+                        }
+                    }
+                }
+                return parent;
+            }
+
             if (mode) {
                 var parent = $("#" + mode.attr("id"));
+            }
+            else if (e.hasOwnProperty("idDatabase")) {
+                var parent = $("#" + e.idDatabase)
             }
             else {
                 var parent = $("#" + e.idToDrop);
@@ -349,7 +424,11 @@ define(['jquerymin', 'rest3d', 'gltf', 'collada', 'viewer', 'q'], function ($, r
                 });
             }
             else {
-                e.preventDefault();
+                // e.preventDefault();
+                // var buf = parent;
+                for (var i = 0; i < data.length; i++) {
+                    parsePathDatabase(data[i], $("#c_" + viewer.idUser));
+                }
             }
             defer.resolve();
             $("#uploadTree").jstree('open_all');
@@ -362,10 +441,21 @@ define(['jquerymin', 'rest3d', 'gltf', 'collada', 'viewer', 'q'], function ($, r
                 url.attr("uploadstatus", true);
                 url.append("<img style='float:right;' src='../gui/images/accept.png' >");
                 $(url).data({
-                    file: file
+                    file: file,
                 });
             });
+        }
 
+
+        window.visualizeDatabase = function (data) {
+            for (var z = 0; z < data.length; z++) {
+                var url = $(data[z].idToTarget);
+                url.attr("uploadstatus", true);
+                url.append("<img style='float:right;' src='../gui/images/accept.png' >");
+                $(url).data({
+                    file: data[z],
+                });
+            }
         }
 
         setTimeout(function () {
@@ -437,6 +527,10 @@ define(['jquerymin', 'rest3d', 'gltf', 'collada', 'viewer', 'q'], function ($, r
                 setTimeout(function () {
                     button.click()
                 }, 1000);
+                if (ext == null) {
+                    ext = [];
+                    ext[0] == "unknown"
+                }
                 if (ext[0] == ".dae" || ext[0] == ".DAE") {
 
                     var $dialog = $("<button>Launch</button>").on("click", function () {
@@ -515,13 +609,13 @@ define(['jquerymin', 'rest3d', 'gltf', 'collada', 'viewer', 'q'], function ($, r
             upload.progress.setValue(progress);
         }).on('fileuploaddone', function (e, data) {
             var buffer1 = data.tmp;
-            $.each(data.result.files, function (index, file) {
+            $.each(data.result, function (index, file) {
                 data.buttonToReplace[index].parent().data({
                     file: file,
                     context: data.context,
                 })
                 if (upload.getOptionLog()) {
-                    file.assetName = data.result.files[index].name;
+                    file.assetName = data.result[index].name;
 
                     var $node = convertButton.clone(true).data({
                         file: file,
@@ -545,33 +639,41 @@ define(['jquerymin', 'rest3d', 'gltf', 'collada', 'viewer', 'q'], function ($, r
             });
 
         }).on('fileuploadfail', function (e, data) {
-            if (!data.result) {
-                $(data.context.children()[0])
-                    .append('<br>')
-                    .append('error communicating with server')
-                    .find('button').remove();
-            }
-            else {
-                $.each(data.result.files, function (index, file) {
-                    var error = $('<span/>').text(file.error);
-                    $(data.context.children()[index])
-                        .append('<br>')
-                        .append(error)
-                        .find('button').remove();
-                });
-            }
+            console.error("fail!");
+            // if (!data.result) {
+            //     $(data.context.children()[0])
+            //         .append('<br>')
+            //         .append('error communicating with server')
+            //         .find('button').remove();
+            // }
+            // else {
+            //     $.each(data.result.files, function (index, file) {
+            //         var error = $('<span/>').text(file.error);
+            //         $(data.context.children()[index])
+            //             .append('<br>')
+            //             .append(error)
+            //             .find('button').remove();
+            //     });
+            // }
         });
 
         upload.object.fileupload("option", "beforeSend", function (xhr, data) {
             var node = data.files[0].relativePath;
             node.attr("uploadstatus", true);
             node.parent().parent().attr("uploadstatus", true);
-            xhr.setRequestHeader("X-iduser", viewer.idUser);
-            xhr.setRequestHeader("X-folder", node.attr("path"));
         });
 
         upload.object.fileupload("option", "done", function (e, data) {
-            data.files[0].relativePath.attr("id", data.result.files[0].assetId);
+            // data.files[0].relativePath.attr("id", data.result.files[0].assetId);
+            console.debug("teFssfsfds", data);
+            var object = data.result;
+            var e = {};
+            e.idDatabase = "c_" + viewer.idUser;
+            data.files[0].relativePath.remove();
+            window.sortAssetDrop(e, object);
+            window.visualizeDatabase(object);
+
+
         });
     }
     return setViewer6Upload;

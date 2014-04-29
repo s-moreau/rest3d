@@ -136,12 +136,12 @@ define(['viewer', 'gui', 'uploadViewer', 'rest3d', 'q', 'collada', 'gltf', 'rend
                 var call = function (data) {
                     var deferred = Q.defer();
                     var e = {};
-                    e.idToDrop = "c_" + viewer.idUser;
+                    e.idDatabase = "c_" + viewer.idUser;
                     data = jQuery.parseJSON(data);
                     window.sortAssetDrop(e, data);
-                    window.visualize(data);
-                    deferred.resolve();
+                    window.visualizeDatabase(data);
                     renderMenu.render.focusTab();
+                    deferred.resolve();
                     return deferred.promise;
                 };
                 rest3d.urlUpload(uri, call, viewer.idUser);
@@ -455,6 +455,7 @@ define(['viewer', 'gui', 'uploadViewer', 'rest3d', 'q', 'collada', 'gltf', 'rend
                         text: tmp,
                         type: "text",
                     });
+
                     //GUI.addInput = function (_id, _defaultValue, _parent, _onChangeCallback) {
                     tmp = $("#frame_" + stock.name);
                     var username = GUI.addInput("username_" + stock.name, "Username", tmp);
@@ -520,7 +521,8 @@ define(['viewer', 'gui', 'uploadViewer', 'rest3d', 'q', 'collada', 'gltf', 'rend
                     GUI.addIcon(tmp2, "ui-icon-unlocked");
                 });
                 loginButton.css({
-                    "float": "right"
+                    "float": "right",
+                    "box-shadow": "3px 3px 1px #888888",
                 });
                 loginButton.find("span").remove();
                 GUI.addTooltip({

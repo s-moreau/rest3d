@@ -34,12 +34,12 @@ THE SOFTWARE.
   <script>
   function get(url, _a, _b) {
 
-  	var goto=url;
-  	if (_a && document.getElementById(_a)) {
-	    var a = document.getElementById(_a).value;
-	    if (a && a !== '') 
-	     goto += '?'+_a+'=' + a;
-  	}
+    var goto=url;
+    if (_a && document.getElementById(_a)) {
+      var a = document.getElementById(_a).value;
+      if (a && a !== '') 
+       goto += '?'+_a+'=' + a;
+    }
     if (_b && document.getElementById(_b)) {
       var b = document.getElementById(_b).value;
       if (b && b !== '')
@@ -64,12 +64,12 @@ THE SOFTWARE.
 
   function post(url, _a, _b) {
 
-  	var param={};
-  	if (_a && document.getElementById(_a)) {
-	    var a = document.getElementById(_a).value;
-	    if (a && a !== '') 
-	     param[_a]= a;
-  	}
+    var param={};
+    if (_a && document.getElementById(_a)) {
+      var a = document.getElementById(_a).value;
+      if (a && a !== '') 
+       param[_a]= a;
+    }
     if (_b && document.getElementById(_b)) {
       var b = document.getElementById(_b).value;
       if (b && b !== '')
