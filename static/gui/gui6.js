@@ -201,7 +201,7 @@ define(['channel','codemirror','webglUtils', 'WebGLDebugUtils','pnotify','colorp
                     parent: this[this.id],
                     json:  {
                         "data":{
-                            "data":stock.idUser,"attr":{"id":"c_"+stock.idUser,"rel":"collection","path":"/rest3d/upload/"+stock.idUser,"file":stock.idUser,}},
+                            "data":"Guest_repository","attr":{"id":"c_"+stock.idUser,"rel":"collection","path":"/rest3d/upload/"+stock.idUser,"file":stock.idUser,}},
                         },
                         "dnd" : {
                                 "drop_finish" : function (data) { 
@@ -295,7 +295,8 @@ define(['channel','codemirror','webglUtils', 'WebGLDebugUtils','pnotify','colorp
                     id:"progress_"+this.id,
                     parent:this[this.id],
                 });
-                this[this.id].append('<div id="fileArea_'+this.id+'"></div>');
+
+                this[this.id].append('<br><div id="fileArea_'+this.id+'"></div>');
 
                 this.optionLog= GUI.addCheckBox("uploadSetting", "Use log interface", this[this.id]);
                 this.setting = GUI.button("Upload", this.optionLog);
@@ -328,6 +329,94 @@ define(['channel','codemirror','webglUtils', 'WebGLDebugUtils','pnotify','colorp
                 })
                 }
             }
+            this.extensionToType=function(ext) {
+                var result;
+                switch (ext) {
+                case ".dae":
+                    result = "collada";
+                    break;
+                case ".DAE":
+                    result = "collada";
+                    break;
+                case ".json":
+                    result = "gltf";
+                    break;
+                case ".JSON":
+                    result = "gltf";
+                    break;
+                case ".png":
+                    result = "texture";
+                    break;
+                case ".jpeg":
+                    result = "texture";
+                    break;
+                case ".tga":
+                    result = "texture";
+                    break;
+                case ".jpg":
+                    result = "texture";
+                    break;
+                case ".glsl":
+                    result = "shader";
+                    break;
+                default:
+                    result = "file";
+                    break;
+                }
+                return result;
+            }
+
+            this.encodeStringToId=function(string) {
+                string = string.split(".").join("-");
+                string = encodeURIComponent(string);
+                string = string.split("%").join("z");
+                return string;
+            }
+            this.createNodeDatabase=function(file, parent) { //upload.createNodeDatabase file.name file.uuid file.collectionpath file.assetpath parent
+                var stock = this;
+                $("#uploadTree").jstree("create_node", parent, "inside", {
+                    "data": file.name,
+                    "attr": {
+                        "id": "a_" + file.uuid,
+                        "name": file.name,
+                        "path": file.collectionpath + "/" + file.assetpath + "/" + file.name,
+                        "collectionpath": file.collectionpath,
+                        "assetpath": file.assetpath,
+                        "rel": stock.extensionToType(file.name.match(/\.[^.]+$/)[0]),
+                        "uploadstatus": true,
+                    }
+                }, false, true);
+                file.idToTarget = "#a_" + file.uuid
+                if(file.hasOwnProperty("size"))
+                {
+                    GUI.addTooltip({
+                        parent: $("#a_" + file.uuid),
+                        content: "size: " + file.size,
+                        //wait new tooltip for showing date + User fields
+                    });
+                }
+                return $(file.idToTarget);
+            }
+            this.createCollection =  function(file, parent) {
+                var id = this.encodeStringToId(file.collectionpath);
+                parent.data({});
+                console.debug(parent);
+                if (!parent.data().hasOwnProperty(file.collectionpath)) {
+                    var flagCollection = {};
+                    flagCollection[file.collectionpath] = true;
+                    parent.data(flagCollection);
+                    $("#uploadTree").jstree("create_node", parent, "inside", {
+                        "data": file.collectionpath,
+                        "attr": {
+                            "id": id,
+                            "collectionpath": file.collectionpath,
+                            "rel": "collection",
+                            "uploadstatus": true,
+                        }
+                    }, false, true);
+                }
+                return $("#" + id);
+            } 
             this.jqueryUpload = function(){
                 var stock = this;  
                 setTimeout(function(){
@@ -1488,8 +1577,8 @@ define(['channel','codemirror','webglUtils', 'WebGLDebugUtils','pnotify','colorp
         }
         $("#" + _id).dialog({
             resizable: true,
-            height: '500',
-            width: '900',
+            height: 'auto',
+            width: 'auto',
             modalType: Boolean,
             Default: false
         });

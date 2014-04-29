@@ -128,13 +128,36 @@ rest3d.info = function(cb){
            {
             if (cb) {
                 cb(data)
-                // .then(function(){
-                // });
             }
            },
          });
-
 }
+
+rest3d.tmp = function(params,cb,uuid){
+    if(uuid){
+      var id="?uuid="+uuid;}
+    else{
+      var id="";
+    }
+    $.ajax({
+           'type': "GET",
+           'url': "/rest3d/tmp/"+id,
+           success: function(data)
+           {
+            if(params==""){
+              params = data;
+            }
+            else{
+              params.data = data;
+            }
+            if (cb) {
+                cb(params)
+            }
+           },
+         });
+}
+
+
 // rest3d.urlUpload = function(_params,_cb){
 //     _params = warehouse.zip;
 

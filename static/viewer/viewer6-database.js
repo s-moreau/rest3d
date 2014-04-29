@@ -572,7 +572,9 @@ define(['viewer', 'gui', 'uploadViewer', 'rest3d', 'q', 'collada', 'gltf', 'rend
             stock = this;
 
             switch (this.login) {
-            case 0, 3:
+            case 0:
+            case 3:
+                console.debug("in");
                 if (this.login == 0) {
                     var text = '(no authentification required)';
                 }

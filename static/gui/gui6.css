@@ -349,7 +349,7 @@ overflow:hidden;
     font-weight:bold !important;
 }
 
-.ui-menu a { 
+.ui-menu a, #mainLayout-south { 
 font-weight:bold !important;    /*font-size: :;*/
 }
 
@@ -776,7 +776,12 @@ width: 90% !important;
   box-shadow: 5px 5px 2px #888888 !important;
 }
 
-/*#mainLayout-north > ul >li>a{
-    box-shadow: 5px 5px 2px #888888 !important;
+#mainLayout-north > ul >li>a{
+/*    box-shadow: 5px 5px 2px #888888 !important;*/
    border: 1px solid !important;
- }*/
+ }
+
+ #mainLayout-north > ul >li>a:hover{
+    box-shadow: 5px 5px 2px #888888 !important;
+/*   border: 1px solid !important;*/
+ }
