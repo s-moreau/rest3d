@@ -23,7 +23,7 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.*/
 //
-define(['jquerymin', 'rest3d', 'gltf', 'collada', 'viewer', 'q'], function ($, rest3d, glTF, COLLADA, viewer, Q) {
+define(['jquery', 'rest3d', 'gltf', 'collada', 'viewer', 'q'], function ($, rest3d, glTF, COLLADA, viewer, Q) {
 
     function setViewer6Upload($, upload, rest3d, viewer) {
         var index;

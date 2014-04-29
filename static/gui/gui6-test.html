@@ -30,7 +30,7 @@ THE SOFTWARE.
     <script type="text/javascript">
     require.config({
     paths: {
-        jquerymin: "../deps/jquery-2.0.3.min",
+        jquery: "../deps/jquery-2.0.3.min",
         jqueryui: '../deps/jquery-ui-1.9.2.min',
         codemirror: "../deps/codemirror/codemirror.min",
         javascript: "../deps/codemirror/javascript",
@@ -67,15 +67,15 @@ THE SOFTWARE.
             exports: 'CodeMirror'
         },
         'jqueryui':{
-            deps: ['jquerymin'],
+            deps: ['jquery'],
             exports: '$.ui'
         },
         'jquerylayout':{
-            deps: ['jquerymin','jqueryui'],
+            deps: ['jqueryui'],
             exports: '$.fn.layout;'
         },
         'skinner':{
-            deps: ['jquerymin'],
+            deps: ['jquery'],
             exports: '$.fn.skinner'
         },
         'uploadProcess':{
@@ -87,35 +87,35 @@ THE SOFTWARE.
             exports: '$.blueimp.fileupload',
         },
         'uploadTransport':{
-             deps: ['jquerymin'],
+             deps: ['jquery'],
              exports: '$',
         },
         'upload':{
-            deps: ['jquerymin','jqueryui'],
+            deps: ['jqueryui'],
             exports: "$.fn.fileupload",
         },
         'toolbar':{
-            deps: ['jquerymin'],
+            deps: ['jquery'],
             exports: "$.fn.toolbar",
         },
         'terminal':{
-            deps: ['jquerymin'],
+            deps: ['jquery'],
             exports: '$.fn.terminal',
         },
         'pnotify':{
-            deps: ['jquerymin'],
+            deps: ['jquery'],
             exports: '$.pnotify',
         },
         'jstree':{
-           deps: ['jquerymin'],
+           deps: ['jquery'],
            exports: '$.fn.jstree' 
         },
         'colorpicker':{
-            deps: ['jquerymin'],
+            deps: ['jquery'],
             exports: '$.fn.ColorPicker',
         },
         'eye':{
-            deps: ['jquerymin'],
+            deps: ['jquery'],
             exports: 'window.EYE',
         },
         'utils':{
@@ -187,7 +187,7 @@ function loadStyle(){
 };
 
 loadStyle();
-require(['jquerymin','jqueryui','codemirror','javascript','showHint','javacriptHint','dialog','search','searchCursor','jquerylayout','upload','uploadProcess','uploadValidate','uploadTransport','skinner','jstree','glmatrixExt','toolbar','terminal','pnotify','colorpicker','eye','utils','webglUtils','WebGLDebugUtils','console','screenfull','gui'],function(e){
+require(['jquery','jqueryui','codemirror','javascript','showHint','javacriptHint','dialog','search','searchCursor','jquerylayout','upload','uploadProcess','uploadValidate','uploadTransport','skinner','jstree','glmatrixExt','toolbar','terminal','pnotify','colorpicker','eye','utils','webglUtils','WebGLDebugUtils','console','screenfull','gui'],function(e){
     INIT();
 })
 

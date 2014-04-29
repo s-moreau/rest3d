@@ -1,7 +1,7 @@
 
 require.config({
     paths: {
-        jquerymin: "../deps/jquery-2.0.3.min",
+        jquery: "../deps/jquery-2.0.3.min",
         jqueryui: '../deps/jquery-ui-1.9.2.min',
         codemirror: "../deps/codemirror/codemirror.min",
         javascript: "../deps/codemirror/javascript",
@@ -43,15 +43,15 @@ require.config({
     },
     shim: {
         'jqueryui':{
-            deps: ['jquerymin'],
+            deps: ['jquery'],
             exports: '$.ui'
         },
         'jquerylayout':{
-            deps: ['jquerymin','jqueryui'],
+            deps: ['jqueryui'],
             exports: '$.fn.layout;'
         },
         'skinner':{
-            deps: ['jquerymin'],
+            deps: ['jquery'],
             exports: '$.fn.skinner'
         },
         'uploadProcess':{
@@ -63,35 +63,35 @@ require.config({
             exports: '$.blueimp.fileupload',
         },
         'uploadTransport':{
-             deps: ['jquerymin'],
+             deps: ['jquery'],
              exports: '$',
         },
         'upload':{
-            deps: ['jquerymin','jqueryui'],
+            deps: ['jqueryui'],
             exports: "$.fn.fileupload",
         },
         'toolbar':{
-            deps: ['jquerymin'],
+            deps: ['jquery'],
             exports: "$.fn.toolbar",
         },
         'terminal':{
-            deps: ['jquerymin'],
+            deps: ['jquery'],
             exports: '$.fn.terminal',
         },
         'pnotify':{
-            deps: ['jquerymin'],
+            deps: ['jquery'],
             exports: '$.pnotify',
         },
         'jstree':{
-           deps: ['jquerymin'],
+           deps: ['jquery'],
            exports: '$.fn.jstree' 
         },
         'colorpicker':{
-            deps: ['jquerymin'],
+            deps: ['jquery'],
             exports: '$.fn.ColorPicker',
         },
         'eye':{
-            deps: ['jquerymin'],
+            deps: ['jquery'],
             exports: 'window.EYE',
         },
         'colorpickerUtils':{
@@ -105,7 +105,7 @@ require.config({
             exports: 'WebGLDebugUtils',
         },
         'console':{
-            deps: ['jquerymin'],
+            deps: ['jquery'],
             exports: 'CONSOLE',
         },
         'camera':{
@@ -139,7 +139,7 @@ require.config({
             exports: 'Q'
         },
         'gui':{
-            deps: ['jquerymin']
+            deps: ['jquery']
         }
     },
 })
