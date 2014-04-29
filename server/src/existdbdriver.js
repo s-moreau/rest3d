@@ -36,52 +36,220 @@ var Connection = require('existdb-node');
 // use this to local debug existd-node
 //var Connection = require('./index');
 
+var Asset = require('./asset');
+var Resource = require('./resource')
+var Collection = require('./collection')
+var extend = require('./extend')
+var zipFile = require('./zipfile')
+
+var memoryStream = require('memorystream');
+
+
 var options = {
     host: process.env.XML_SERVER || "localhost",
     port: process.env.XML_SERVER_PORT || 8081,
     rest: "/exist/rest",
-    auth: "rest3d:itsfl4r3rest3d"
+    auth: (process.env.REST3D_USER || 'guest') +':'+(process.env.REST3D_PASSWD || 'guest')
 };
 
 var connection = new Connection(options);
 
-//check_eXist();
 
-console.log('eXist host='+options.host+" port="+options.port+ " REST server="+options.rest);
+//console.log('eXist host='+options.host+" port="+options.port+ " auth="+options.auth+" server="+options.rest);
 
 exports.name = "eXist"; 
 
-exports.get = function(url, callback) {
+ exports.getUrl = function(assetId){
+  return 'http://'+connection.config.auth+'@'+connection.config.host+':'+connection.config.port+connection.config.rest+'/db/apps/rest3d/data/'+assetId
+ }
+exports.getData = function(assetId, callback) {
 	var cb=callback;
-	connection.get(url, function(res) {
-    // collect input and print it out upon end
-    var data = [];
-    res.on("data", function(chunk) {
-        data.push(chunk);
+	
+    //http://127.0.0.1:8081/exist/rest//db/apps/rest3d/data/de613ff0-cc42-11e3-806e-4d9d627d5b75
+    /*
+    http://localhost:8081//exist/rest/db/apps/rest3d/data/de61
+    var options = {
+        host: this.config.host,
+        port: this.config.port,
+        method: "DELETE",
+        path: this.config.rest + path + params,
+        auth: this.config.auth || "guest:guest"
+    };
+    */
+    var url = 'http://'+connection.config.auth+'@'+connection.config.host+':'+connection.config.port+connection.config.rest+'/db/apps/rest3d/data/'+assetId
+zipFile.uploadUrl(tdvia,url,jar, function(error, result){
+                if (error)
+                  tdvia.handleError(error);
+                else {
+
+                  tdvia.res.setHeader('Content-Disposition', 'inline; filename='+result.name);
+                  tdvia.sendfile(result.filename);
+                  
+                }
+              });
+/*
+var buffer = new memoryStream(null, {
+            readable: false
+          });
+          buffer.on('error', function (error) {
+            cb(error);
+          });
+          buffer.on('end', function () {
+            var data = this.toBuffer();
+            cb(undefined,data);
+          });
+
+          var options = {
+            url: url
+          };
+         // if (params.jar) options.jar = params.jar;
+
+            var req = request.get(options);
+            req.pipe(buffer);
+            */
+  
+  /*
+  request({ // 3d building collections ?
+    url: url,
+    },function(err, resp, body){
+      if (err){
+        console.log('ERROR asking exist rest url');
+        console.log(err)
+        cb('ERROR requesting data url='+url)
+      }
+      else if (resp.statusCode !== 200){
+        console.log('Error code='+resp.statusCode+'- url='+url);
+        cb('Error code='+resp.statusCode+'- url='+url)
+      } else
+        console.log('got data from url='+url)
+        cb(undefined,body);
     });
-    res.on("end", function() {
-        var res = data.join("");
-        if (cb) cb(null, res);
+*/
+
+    // e.g. pipe all input directly to stdout
+    //res.pipe(process.stdout);
+};
+
+// this locks an asset, waiting forever for lock to be available
+var lockAsset = exports.lockAsset = function(_asset,_cb, _n){
+  var asset=_asset;
+  var cb=_cb;
+  var n=_n || 0;
+
+  console.log('++ lock asset name['+asset.uuid+']='+asset.name);
+
+  lockKey('assets',asset.uuid, function(err,res){
+    if (err){
+      if (err.statusCode === 423){
+        // try again later
+        if (n===100)
+          return cb(new Error('could not lock asset aftre 100 trials'))
+        else {
+          console.log('asset ['+asset.uuid+'] ='+asset.name+' is locked - trying again('+(n+1)+')');
+          return setTimeout(lockAsset,100,asset,cb,n+1);
+        }
+      } 
+      console.log('database[eXist] cannot find asset id='+asset.uuid);
+      return cb(err);
+    }
+    if (res) {
+      if (res.type === Collection.type)
+        res = extend(new Collection(),res);
+      else if (res.type === Asset.type)
+        res = extend(new Asset(),res);
+      else
+        res = extend(new Resource(),res);
+      res.database=exports;
+      cb(undefined,res);
+    }
+    else {
+      console.log('database[eXist] cannot find asset id='+id);
+      var error = new Error('cannot find asset id='+id);
+      error.statusCode = 404;
+      cb(error);
+    }
+  })
+}
+// unlock asset
+var unlockAsset = exports.unlockAsset = function(_asset,_cb){
+  var asset=_asset;
+  var cb=_cb;
+
+  console.log('++ unlock asset['+asset.uuid+'] name='+asset.name);
+
+  unlockKey('assets',asset.uuid, function(err,garbage){
+    if (err) return cb(err);
+    cb(undefined,asset);
+  });
+}
+
+// If the asset cannot be saved, because it is locked or otherwise
+//  return to callers, as it has to do something about it
+
+var saveAsset = exports.saveAsset = function(_asset,_cb){
+  var asset=_asset;
+  var cb=_cb;
+
+  console.log('-- saveAsset ['+asset.uuid+'] name='+asset.name)
+
+  if (asset.name === '/') 
+    saveRoot(asset, function(err,res){
+      if (err) return cb(err);
+      cb(undefined,asset);
     });
-    res.on("error", function(err) {
-        console.log("eXist get error: " + err);
-        if (cb) cb(err,null);
+  else
+    insertKeyPair('assets',asset.uuid, asset, function(err,garbage){
+      cb(err,asset);
     });
-	});
+
+}
+
+// TODO - database is not necessary as 'exports' contains existdb already
+var loadAsset = exports.loadAsset = function(_database,_id,_cb){
+  var id=_id;
+  var cb=_cb;
+  var database=_database;
+  var value;
+
+
+  console.log('-- loadAsset id='+id)
+
+  getKey('assets',id, function (err,res){
+    if (err) return cb(err);
+    if (res) {
+      if (res.type === Collection.type)
+        res = extend(new Collection(),res);
+      else if (res.type === Asset.type)
+        res = extend(new Asset(),res);
+      else
+        res = extend(new Resource(),res);
+      res.database=database;
+      cb(undefined,res);
+    }
+    else {
+      console.log('database[eXist] cannot find asset id='+id);
+      cb(err);
+    }
+  });
+}
+
+// FIXME !!
+var delAsset = exports.delAsset = function(asset,cb){
+  removeKey('assets',asset.uuid, cb);
 }
 
 // store an asset
-var store = exports.store = function(asset,filename, callback) {
+var store = exports.store = function(asset,filename_or_buffer, callback) {
 
   var cb = callback;
   // other optional arg: destination filename
-	connection.store(filename, '/apps/rest3d/data/', asset, function(err) {
+	connection.store(filename_or_buffer, '/apps/rest3d/data/', asset, function(err) {
     if (err) {
-        console.log("eXist.store(): An error occurred: " + err);
-        if (cb) cb(err,asset);
+      console.log("eXist.store(): An error occurred: " + err);
+      cb(err,asset);
     } else {
       console.log("eXist: "+asset+" Upload completed!")
-    	if (cb) cb(undefined,asset)
+    	cb(undefined,asset)
     }
 	});
 }
@@ -94,17 +262,18 @@ var del = exports.del = function(asset, callback) {
   // other optional arg: destination filename
   connection.del(path, function(err,res) {
     if (err) {
-        cb && cb(err,null);
-        console.log("eXist.store(): An error occurred: " + err);
+      console.log("eXist.store(): An error occurred: " + err);
+      cb(err,null);
     } else {
-      cb && cb(undefined,"eXist: "+path+" Upload completed!")
+      cb(undefined,"eXist: "+path+" Upload completed!")
     }
   });
 }
 // insert an object in a key/pair database
+// Warning -> this returns garbage in res
 var insertKeyPair = exports.insertKeyPair = function(collection, id, value, callback) {
 
-
+  var cb=callback;
   var text = value;
   if (!text) {
     text= "";
@@ -113,19 +282,21 @@ var insertKeyPair = exports.insertKeyPair = function(collection, id, value, call
     text = toJSON(text);
   }
 
-console.log('insertKeyPair['+id+','+text+']')
-// encode characters for xQuery 
+
+  console.log('insertKeyPair['+id+'] name='+value.name);
+  // encode characters for xQuery 
   text = text.replace(/&/g, '&amp;')
          .replace(/</g,'&lt;').replace(/>/g,'&gt;')
          .replace(/\r/g,'&#xA;').replace(/\n/g,'&#xD;').replace(/ /g,'&#160;').replace(/\t/g,'&#009;')
          .replace(/'/g, '&apos;').replace(/"/g, '&quot;')
          .replace(/{/g, '&#123;').replace(/}/g, '&#125;');
 
+
   //var text = xmlbuilder.buildObject(value);
   var xquery = 'xquery version "3.0";\
                 let $db := doc("/db/apps/rest3d/data/'+collection+'.xml")/items \
                 let $item := $db/item[@id="'+id+'"]\
-                let $newitem := <item id= "'+id+'">'+text+'</item> \
+                let $newitem := element item {$item/(@* except @id), attribute id {"'+id+'"} ,"'+text+'"}\
 							  return\
                 if ($db)\
                 then\
@@ -136,13 +307,141 @@ console.log('insertKeyPair['+id+','+text+']')
                    update insert $newitem into $db\
                 else\
                   (response:set-status-code( 404 ), "cannot find '+collection+'.xml")';
-/*
-console.log('*************');
-console.log(xquery)
-console.log('*************');
-*/
+  /*
+  console.log('*************');
+  console.log(xquery)
+  console.log('*************');
+  */
+  query(xquery, function(err,res){
+    cb(err,res);
+  });
+}
+
+var saveRoot = exports.saveRoot = function(collection, callback){
+  console.log('set root ['+collection.uuid+'] name = '+collection.name+' ');
+  var text = toJSON(collection);
+  var id = collection.uuid;
+  text = text.replace(/&/g, '&amp;')
+         .replace(/</g,'&lt;').replace(/>/g,'&gt;')
+         .replace(/\r/g,'&#xA;').replace(/\n/g,'&#xD;').replace(/ /g,'&#160;').replace(/\t/g,'&#009;')
+         .replace(/'/g, '&apos;').replace(/"/g, '&quot;')
+         .replace(/{/g, '&#123;').replace(/}/g, '&#125;');
+    
+
+  //var text = xmlbuilder.buildObject(value);
+  var xquery = 'xquery version "3.0";\
+                let $db := doc("/db/apps/rest3d/data/assets.xml")/items \
+                let $item := $db/item[@id="'+id+'"]\
+                let $newitem := element item {$item/(@* except (@id,@root)), attribute root {"true"}, attribute id {"'+id+'"}, "'+text+'"}\
+                return\
+                if ($db)\
+                then\
+                  if ($item)\
+                  then \
+                   update replace $item with $newitem\
+                  else \
+                   update insert $newitem into $db\
+                else\
+                  (response:set-status-code( 404 ), "cannot find '+collection+'.xml")';
+   query(xquery, callback);
+}
+
+
+var getRoot = exports.getRoot = function(callback) {
+  var cb=callback;
+ console.log('getRoot');
+ var xquery='xquery version "3.0";\
+             let $db := doc("/db/apps/rest3d/data/assets.xml")/items \
+             let $item := $db/item[@root]\
+             return\
+             if ($item) then\
+                 $item/text()\
+             else\
+               (response:set-status-code(404), "root not found")';
+         
+    query(xquery,function(err,res){
+      if (err) return cb(err);
+
+      // at this point err is null
+      var result;
+      try  {
+        var result=JSON.parse(res[0]);
+      } catch (e) {
+        console.log('could not parse result of query in eXist:getRoot');
+        err = new Error(res);
+      }
+      if (err) return cb(err)
+      result=extend(new Collection(),result);
+      result.database=exports;
+      cb(undefined,result);
+    });
+}
+
+var lockKey = exports.lockKey = function(collection, id, callback) {
+  var cb = callback;
+  console.log('lock key['+id+']')
+  var xquery = 'xquery version "3.0";\
+              declare namespace xh="http://www.w3.org/1999/html";\
+              declare function xh:lock($db, $item) as xs:string\
+              {\
+                let $lock := $item/@lock\
+                let $newitem := element item {$item/(@* except (@lock,@id)), attribute lock {"true"}, attribute id {"'+id+'"}, $item/text()}\
+                return\
+                  if ($lock) then\
+                    (response:set-status-code(423), "key is locked")\
+                  else\
+                    if ($item) then\
+                      (update replace $item with $newitem, $newitem/text())\
+                    else\
+                      (update insert $newitem into $db, $newitem/text())\
+               };\
+              let $db := doc("/db/apps/rest3d/data/'+collection+'.xml")/items \
+              let $item := $db/item[@id="'+id+'"]\
+              return util:exclusive-lock($item, xh:lock($db, $item))';
+
+   query(xquery,function(err,res){
+      if (err){
+        if (err.statusCode === 423) {
+          return cb(err)
+        } else
+          return cb(err);
+      } 
+      var result=res;
+      try  {
+        result=JSON.parse(res[0]);
+      } catch (e) {
+        console.log('could not parse result of query in eXist:lockKey');
+      }
+      cb(undefined,result);
+    });
+}
+
+var unlockKey = exports.unlockKey = function(collection, id, callback) {
+
+  console.log('unlock key['+id+']')
+
+  var xquery = 'xquery version "3.0";\
+              declare namespace xh="http://www.w3.org/1999/html";\
+              declare function xh:unlock($item) as xs:string\
+              {\
+                let $lock := $item/@lock\
+                let $newitem := element item {$item/(@* except @lock), $item/text()}\
+                return\
+                  if ($lock) then\
+                    (update replace $item with $newitem , $newitem/text())\
+                  else\
+                    if ($item) then\
+                      $item/text()\
+                    else\
+                      (response:set-status-code(404), "key not found")\
+               };\
+              let $db := doc("/db/apps/rest3d/data/'+collection+'.xml")/items \
+              let $item := $db/item[@id="'+id+'"]\
+              return util:exclusive-lock($item, xh:unlock($item))';
+
   query(xquery, callback);
 }
+
 // delete an object in a key/pair database
 var removeKey = exports.removeKey = function(collection,id, callback) {
 
@@ -158,52 +457,34 @@ var removeKey = exports.removeKey = function(collection,id, callback) {
   query(xquery, callback);
 }
 
-// delete an object in a key/pair database
+
+// get a Key value, retry until it is unlocked
 var getKey = exports.getKey = function(collection,id, callback) {
-  var cb=callback;
-/*
-  var xquery = 'xquery version "3.0";\
-                declare namespace json="http://www.json.org";\
-                declare option exist:serialize "method=json media-type=text/javascript";\
-                let $db := doc("/db/apps/rest3d/data/'+collection+'.xml")/items \
-                return\
-                 if ($db)\
-                then\
-							    $db/item[@id="'+id+'"]\
-                else\
-                  (response:set-status-code( 404 ), "cannot find '+collection+'.xml")';
-*/
+ var cb=callback;
+ console.log('getKey['+id+']')
 
-console.log('getKey['+id+']')
-
-  var xquery = 'xquery version "3.0";\
-                let $db := doc("/db/apps/rest3d/data/'+collection+'.xml")/items\
-                let $data := $db/item[@id="'+id+'"]/text() \
-                return\
-                  if ($db)\
-                  then\
-                    if ($data)\
-                    then\
-                      $data\
-                    else\
-                      (response:set-status-code( 404 ), "cannot find item[@id='+id+']")\
-                  else\
-                   (response:set-status-code( 404 ), "cannot find collection '+collection+'.xml")';
+ var xquery='xquery version "3.0";\
+             let $db := doc("/db/apps/rest3d/data/'+collection+'.xml")/items\
+             let $item := $db/item[@id="'+id+'"] \
+             return\
+             if ($item) then\
+                 $item/text()\
+             else\
+               (response:set-status-code(404), "key not found")';
 
 
-  query(xquery, function(err,res) {
-  	var result = "";
+         
+    query(xquery,function(err,res){
+      if (err) return cb(err);
 
-  	if (err) {
-      cb && cb(err,null)
-  	} else if (res) {
-	    result=JSON.parse(res);
-	    cb && cb(undefined,result);
-	  } else {
-      console.log('key not found')
-      cb && cb(new Error('key not found'),null)
-    }
-  })
+      var result=res;
+      try {
+        result=JSON.parse(res[0]);
+      } catch (e) {
+        cb(new Error('could not parse result of query in eXist:getRoot'));
+      }
+      cb(undefined,result);
+    });
 }
 
 var query = exports.query = function(xquery, callback) {
@@ -212,15 +493,28 @@ var query = exports.query = function(xquery, callback) {
   var data =[];
 
 	query.on("error", function(err) {
-	  //console.log("eXist.query(): An error occurred: " + err);
-		if (cb) cb(err,null);
+	   if (err.message){
+      var message = null;
+      try {
+        message = JSON.parse(err.message);
+      } catch (e)
+      {
+        console.log('could not parse error message in eXitdb:query')
+      }
+      if (message && message.data) {
+        var error = new Error(message.data);
+        error.statusCode = err.statusCode;
+        return cb(error);
+      }
+     } // this will catch all remaining errors
+		cb(new Error(err));
 	});
 	var results=[];
 	query.each(function(item,hits,offset) {
       results.push(item);
     });
 	query.on('end',function(){
-		if (cb) cb(null,results)
+		cb(undefined,results)
 	})
 
 }
@@ -276,14 +570,14 @@ var init = exports.init = function (callback){
 			} else if (res[0]==="true") {
 				return check_existdb_1(cb);
 			} else {
-				console.log('creating cookies.xml');
+				console.log('creating assets.xml');
 				xquery = 'xquery version "3.0";\
                   let $my-doc := <items/> \
                   return\
                   xmldb:store("/apps/rest3d/data", "assets.xml", $my-doc)';
         query(xquery, function(err,res) {
         	if (err) {
-        		console.log('Error creating cookies.xml');
+        		console.log('Error creating assets.xml');
         		console.log(err);
         		return cb(false);
         	} else {
@@ -307,23 +601,34 @@ var check_existdb_1 = function (callback) {
         console.log("delete cookies - error ");
         console.log(err);
         return cb(false);
-    } else {
-      console.log('cookies deleted, creating new jar');
-        var xquery = 'xquery version "3.0";\
-                    let $my-doc := <items/> \
-                    return\
-                    xmldb:store("/apps/rest3d/data", "cookies.xml", $my-doc)';
-          query(xquery, function(err,res) {
-            if (err) {
-              console.log('Error creating cookies.xml');
-              console.log(err);
-              return cb(false)
-            } else {
-              console.log('cookies.xml created')
-              return cb(true);
-            }
-          })
-    }
+    } 
+    console.log('cookies deleted, creating new jar');
+    var xquery = 'xquery version "3.0";\
+                let $my-doc := <items/> \
+                return\
+                xmldb:store("/apps/rest3d/data", "cookies.xml", $my-doc)';
+    query(xquery, function(err,res) {
+      if (err) {
+        console.log('Error creating cookies.xml');
+        console.log(err);
+        return cb(false)
+      } 
+      console.log('cookies.xml created')
+
+      // Ok, lets create root if it does not exists
+      getRoot(function(err,res){
+        if (err) {
+          console.log('root does not exists');
+          console.log(' -->'+err);
+          cb(true);
+        } else {
+          console.log('root already exists')
+          cb(true);
+        }
+      })
+      
+
+    })
   });
 
 /* TEST FUNCTIONS -> do not remove

@@ -11,7 +11,6 @@ module.exports = function (server) {
   var request = require('request');
 
   var FileInfo = require('./fileinfo');
-  var sendFile = require('./sendfile');
 
   var UploadHandler = require('./handler');
   var zipFile = require('./zipfile')(server);
@@ -22,6 +21,7 @@ module.exports = function (server) {
   var Mime = require('mime');
 
   var extend = require('./extend')
+  var toJSON = require('./tojson')
 
   Mime.define({
     'model/collada+xml': ['dae']
@@ -33,6 +33,38 @@ module.exports = function (server) {
   var utf8encode = function (str) {
     return unescape(encodeURIComponent(str));
   };
+
+  // here's a dummy database
+  var tmpdb={};
+  tmpdb.assets={};
+  tmpdb.name = 'tmp';
+  UploadHandler.tmpdb = tmpdb; // needed to create TMP folder in session
+  tmpdb.root = null;
+  tmpdb.saveAsset = function(asset,cb){
+    // update root if this asset is the root folder
+    if (asset.name === '/') tmpdb.root = asset;
+    tmpdb.assets[asset.uuid] = asset;
+    cb(undefined,asset);
+  }
+  tmpdb.loadAsset = function(database,id,cb){
+    var result = tmpdb.assets[id];
+    result.database=database;
+    if (result)
+      cb(undefined, result)
+    else
+      cb('database[tmp] cannot find asset id='+id)
+  }
+ 
+  tmpdb.delAsset = function(asset,cb){
+    delete tmpdb.assets[asset.uuid];
+    // Garbage collection will collect asset if it is not referenced anywhere
+    cb(undefined, undefined);
+  }
+
+  tmpdb.getRoot = function(cb){
+    cb(undefined, tmpdb.root);
+  }
+
 
   // upload one or more files
   UploadHandler.prototype.post = function (collectionpath, assetpath) {
@@ -76,13 +108,13 @@ module.exports = function (server) {
               res.assetpath = fileInfo.assetpath;
               res.collectionpath = fileInfo.collectionpath;
               // remove sid from collectionpath for database tmp
-              if (res.database==='tmp') {
+              if (res.database === 'tmp') {
                 if (res.collectionpath.contains('/'))
                   res.collectionpath = res.collectionpath.stringAfter('/')
                 else
                   res.collectionpath = "";
-                
-              }
+              } else 
+                res 
               results.push(res)
               counter--;
               if (counter == 0)
@@ -169,7 +201,6 @@ module.exports = function (server) {
       });
     }).on('error', function (e) {
       handler.handleError(e);
-      return
     }).on('progress', function (bytesReceived, bytesExpected) {
       if (bytesReceived > FileInfo.options.maxPostSize) {
         handler.req.connection.destroy();
@@ -177,6 +208,8 @@ module.exports = function (server) {
     }).on('end', finish);
     form.parse(handler.req);
   };
+
+  /*
 
   // get a file 
   UploadHandler.prototype.get = function () {
@@ -204,6 +237,7 @@ module.exports = function (server) {
       return;
     });
   };
+  */
 
   // delete a file
   UploadHandler.prototype.destroy = function () {
@@ -234,16 +268,17 @@ module.exports = function (server) {
 
     var handler = new UploadHandler(req, res, next);
     handler.allowOrigin();
+    handler.db = tmpdb;
 
     var params = req.url.split("/tmp")[1];
 
 
-    Collection.find('tmp', path.join('/', handler.sid, '/', params), function (err, result) {
+    Collection.find(handler.db, path.join('/', handler.sid, '/', params), function (err, result) {
 
       console.log('res POST returned match =' + result.path + ' asset =' + result.assetpath);
 
       handler.post(result.path, result.assetpath);
-      //return next();
+
     })
 
   });
@@ -253,6 +288,7 @@ module.exports = function (server) {
   server.get(/^\/rest3d\/tmp.*/, function (req, res, next) {
     var handler = new UploadHandler(req, res, next);
     handler.allowOrigin();
+    handler.db = tmpdb;
 
     var params = req.url.split("/tmp")[1];
     if (params.contains('?'))
@@ -261,76 +297,161 @@ module.exports = function (server) {
 
     var uuid = req.query.uuid;
 
-    var p = null;
-
 
     console.log('in GET tmp/ for asset=' + params)
     console.log('in GET tmp/upload with path =' + uuid);
 
-
-    if (!params && !uuid) {
-      Collection.find('tmp', path.join('/', handler.sid), function (err, result) {
-        if (err) return handler.handlerError(err);
-        else {
-          result.collection.get(function (err, result) {
-            if (err) handler.handleError(err);
-            else {
-              // replace sid with '/' in col path, so this is hidden from client
-              result.name = '/';
-              handler.handleResult(result);
-            }
-          })
-        }
-      })
-
-    } else if (uuid) {
-      console.log('looking for uuid=' + uuid);
-      Resource.load('tmp', uuid, function (err, resource) {
-        if (err) handler.handleError(err);
-        else {
-          resource.get(function (err, result) {
-            if (err) handler.handleError(err)
-            else {
-              if (result.name === handler.sid)
-                result.name = '/';
-              handler.handleResult(result);
-            }
-          })
-        }
-      })
-    } else /* this is a path */ {
-
-      console.log('get tmp quering for collection =' + path.join('/', handler.sid, '/', params));
-
-      Collection.find('tmp', path.join('/', handler.sid, '/', params), function (err, res) {
-        if (err) return handler.handlerError(err);
-        else {
-          // res = {path collection}
-          // this is a collection that we queried for
-
-          // remove path from query
-          console.log('res upload returned match =' + res.path + ' asset =' + res.assetpath);
-
-          if (!res.assetpath) // we found a collection
-            return handler.handleResult(res.collection);
-
-          // let see if there is an asset there
-          console.log('upload, looking for asset at ' + res.path + ' name=' + res.assetpath);
-
-          res.collection.getAssetId(res.assetpath, function (err, assetId) {
-            if (err) return handler.handleError(err);
-            if (!assetId) console.log('get /tmp/ cannot find asset=' + res.assetpath)
-            // we have the asset, now we just need its ID
-            p = path.resolve(FileInfo.options.uploadDir, assetId);
-            console.log('sending file=' + p)
-            sendFile(handler, p);
-          })
-
-
-        }
-      })
-
-    }
-
+    handler.get(params, req.query.uuid);
   });
+
+  UploadHandler.prototype.get = function(params,uuid){
+
+    var handler = this;
+
+    // refctor this, this is a lot of code duplicaton !!!
+
+    if (handler.db !== tmpdb) {
+      if (!params && !uuid) {
+        Collection.find(handler.db, '/', function (err, result) {
+          if (err) return handler.handleError(err);
+          else {
+            result.collection.get(function (err, result) {
+              if (err) handler.handleError(err);
+              else handler.handleResult(result);
+            })
+          }
+        })
+
+      } else if (uuid) {
+          console.log('handler.get UUID='+uuid);
+          Resource.load(handler.db, uuid, function (err, resource) {
+          if (err) handler.handleError(err);
+          else {
+            resource.get(function (err, result) {
+              if (err) handler.handleError(err)
+              else handler.handleResult(result);
+            })
+          }
+        })
+      } else /* this is a path */ {
+        Collection.find(handler.db, params, function (err, res) {
+          if (err) return handler.handleError(err);
+          else {
+            // res = {path collection}
+            // this is a collection that we queried for
+
+            // remove path from query
+            console.log('res upload returned match =' + res.path + ' asset =' + res.assetpath);
+
+            if (!res.assetpath) { // we found a collection
+              res.collection.get(function(err,result){
+                if (err) handler.handleError(err);
+                else handler.handleResult(result);
+              })
+            } else {
+
+              // let see if there is an asset there
+              console.log('upload, looking for asset at ' + res.path + ' name=' + res.assetpath);
+
+              res.collection.getAsset(res.assetpath, function (err, asset) {
+                if (err) return handler.handleError(err);
+                if (!asset) return handler.handleError('get '+handler.db.name+' could not find asset id =' + res.assetpath);
+                // we have the asset, now we just need its data
+
+                var url = handler.db.getUrl(asset.uuid);
+                zipFile.uploadUrl(handler,url,null, function(error, result){
+                  if (error)
+                    handler.handleError(error);
+                  else {
+
+                    //handler.res.setHeader('Content-Disposition', 'inline; filename='+result.name);
+                    console.log('sending asset'+toJSON(asset))
+                    handler.sendFile(result.path, asset.type, asset.name);
+                    
+                  }
+                });
+  /*
+                handler.db.getData(asset.uuid, function(err,data){
+                  if (err)
+                    handler.handleError(err);
+                  else
+                    handler.sendData(data, asset.type, asset.name);
+                })
+*/
+              })
+            }
+          }
+        })
+      }
+    } else {
+
+      if (!params && !uuid) {
+        Collection.find(handler.db, path.join('/', handler.sid), function (err, result) {
+          if (err) return handler.handleError(err);
+          else {
+            result.collection.get(function (err, result) {
+              if (err) handler.handleError(err);
+              else {
+                // replace sid with '/' in col path, so this is hidden from client
+                result.name = '/';
+                handler.handleResult(result);
+              }
+            })
+          }
+        })
+
+      } else if (uuid) {
+        console.log('handler.get uuid=' + uuid);
+        Resource.load(handler.db, uuid, function (err, resource) {
+          if (err) handler.handleError(err);
+          else {
+            resource.get(function (err, result) {
+              if (err) handler.handleError(err)
+              else {
+                if (result.name === handler.sid)
+                  result.name = '/';
+                handler.handleResult(result);
+              }
+            })
+          }
+        })
+      } else /* this is a path */ {
+
+        console.log('get tmp quering for collection =' + path.join('/', handler.sid, '/', params));
+
+        Collection.find(handler.db, path.join('/', handler.sid, '/', params), function (err, res) {
+          if (err) return handler.handleError(err);
+          else {
+            // res = {path collection}
+            // this is a collection that we queried for
+
+            // remove path from query
+            console.log('res upload returned match =' + res.path + ' asset =' + res.assetpath);
+
+            if (!res.assetpath) { // we found a collection
+              res.collection.get(function(err,result){
+                if (err) handler.handleError(err);
+                else handler.handleResult(result);
+              })
+            } else {
+
+              // let see if there is an asset there
+              console.log('upload, looking for asset at ' + res.path + ' name=' + res.assetpath);
+
+              res.collection.getAsset(res.assetpath, function (err, asset) {
+                if (err) return handler.handleError(err);
+                if (!asset) return handler.handleError('get /tmp/ cannot find asset=' + res.assetpath);
+                
+                // TODO: replace with var url = handler.db.getUrl(asset.uuid);
+                var p = path.resolve(FileInfo.options.uploadDir, asset.uuid);
+                console.log('sending file=' + p)
+                handler.sendFile(p,asset.type,asset.name);
+              })
+            }
+          }
+        })
+
+      }
+    }
+  };
 };

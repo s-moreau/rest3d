@@ -28,12 +28,12 @@ THE SOFTWARE.
 module.exports = function (server) {
 
   var basex = server.db = require('./basexdriver');
-  var sendFile = require('./sendfile');
+ 
   var restify = require('restify')
 
   exports.name = "baseX"; 
 
-  server.get(/^\/rest3d\/fl4re\/info/,function(req, res, next) {
+  server.get(/^\/rest3d\/db\/info/,function(req, res, next) {
   
     console.log('[rest3d]'+req.url);
         res.writeHead(200, {"Content-Type": "text/ascii"});  
@@ -58,17 +58,12 @@ module.exports = function (server) {
   });
 
 
-  server.put(/^\/rest3d\/fl4re\/assets.*/,function(req, res, next) {
-    var asset = req.url.split('assets/')[1];
+  server.put(/^\/rest3d\/db\/assets.*/,function(req, res, next) {
+    var asset = req.url.stringAfter('assets');
     var h = new handler(req, res, next)
     // need asset uri !
     if (asset === undefined || asset == null || asset === '')
-    {
-        res.writeHead(400);
-        res.write('put need asset uri');
-        res.end();
-        return next();
-    }
+      h.handleError('put need asset uri')
 
     // read body using formidable
    
@@ -79,9 +74,8 @@ module.exports = function (server) {
 
  
     form.parse(req, function(err, fields, files) {
-    if (err) {
-      h.handleError(error);
-    }
+    if (err) 
+      return h.handleError(error);
 
     // will execute when form is parsed
     console.log('put asset='+asset)
@@ -311,7 +305,7 @@ module.exports = function (server) {
   });
 });
 
-server.get(/^\/rest3d\/fl4re\/assets.*/,function(req, res, next) {
+server.get(/^\/rest3d\/db\/assets.*/,function(req, res, next) {
   
 
   var asset = req.url.split("/assets/")[1];
@@ -328,28 +322,14 @@ server.get(/^\/rest3d\/fl4re\/assets.*/,function(req, res, next) {
               ']]></text></query>';
 
       basex.post('/assets',query,function(err,res2){
-        if (err)
-        {
-          console.log('got ERROR from REST QUERY')
-          console.log(err)
-          res.send(new restify.InternalError(err))
-        }
+        if (err)  h.handleError('got ERROR from REST QUERY');
         else {
-          console.log('got RESULT from REST QUERY')
-          res.writeHead(200, {'Content-Type': 'application/json' });
-
-          res.write(res2.body);
-          res.end();
-
+          console.log('basex got RESULT from REST QUERY')
+          h.handleData(res2.body,'application/json')
         }
-        return next();
       });
-    } else { // basex not running, return a directory listing
-      res.writeHead(404);
-      res.write('basex not runing - TODO: return directory listing');
-      res.end();
-      return next();
-    }
+    } else 
+      h.handleError('basex not runing - TODO: return directory listing');
 
 
   } else
@@ -364,9 +344,9 @@ server.get(/^\/rest3d\/fl4re\/assets.*/,function(req, res, next) {
           console.log('disk cache HIT!');
           res.setHeader('Content-Type', entry.headers['content-type']);
           console.log('set content-type to ['+entry.headers['content-type']+']')
-        sendFile(req,res,entry.filename);
-        return next();
-        }
+          h.sendFile(entry.filename);
+
+        } else
         // not in the cache - query basex for asset
 
         if (basex.session) {
@@ -385,17 +365,10 @@ server.get(/^\/rest3d\/fl4re\/assets.*/,function(req, res, next) {
               console.log('query_xml');
                 query_doc.execute(function(err, r) {
                 console.log('second query');
-                if (err) {
-                  
-                  res.end(err);
-                  console.log('err'+err)
-                  return next(404);
-                } else
-                {
+                if (err) h.handleEror(err);
+                else {               
                   console.log('writing query results');
-                  res.write(r.result);
-                  res.end();
-                  return next();
+                  h.handleResult(r.result);
                 }
               });
 
@@ -407,23 +380,21 @@ server.get(/^\/rest3d\/fl4re\/assets.*/,function(req, res, next) {
                 // this may have been fixed now
                 // but for the time being - use the rest http API
                 basex.get(redirect,function(err,res2){
-                  if (err)
-                  {
-                  res.end(err);
-                  console.log('err'+err)
-                  return next(404);
+                  if (err) h.handleError(err);
+                  
                   } else
-                  server.diskcache.store(redirect,res2,function(err,entry){
-                    if (err){
+                    server.diskcache.store(redirect,res2,function(err,entry){
+                    if (err) {
+
                       console.log('DISK CACHE ERROR')
                       console.log(err)
-                      return next(err);
+                      h.handleError(err)
+
+                    } else {
+
+                      console.log('SERVE CONTENT NOW!!='+entry.filename)
+                      h.sendFile(entry.filename, entry.headers['content-type']);
                     }
-                    console.log('SERVE CONTENT NOW!!='+entry.filename)
-                    res.setHeader('Content-Type', entry.headers['content-type']);
-                    console.log('set content-type to ['+entry.headers['content-type']+']')
-                    sendFile(req,res,entry.filename);
-                    return next();
                   });
                 });
               }
@@ -432,16 +403,11 @@ server.get(/^\/rest3d\/fl4re\/assets.*/,function(req, res, next) {
           {
             console.log('error 404!')
             console.log(err);
-            return next(new restify.ResourceNotFoundError(err));
-
+            
+            h.handleError(new restify.ResourceNotFoundError(err));
           }
         });
-        } else { // Database is not running, so get from static filesystem directly 
-        res.writeHead(404)
-        res.write("Database is not running, TODO - get files from filesystem")
-        res.end()
-        return next();
-        }
+        } else  h.handleError("Database is not running, TODO - get files from filesystem");
 
       });
 

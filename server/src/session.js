@@ -151,12 +151,14 @@ module.exports = function(config) {
     }
   };
 
+// Do something, this function should be in upload.js ?
 var createTMP = function(sid,cb){
   // create tmp folder
-  Collection.create('tmp',path.join('/',sid),0, function(err,collection){
+  var handler=require('./handler');
+  Collection.create(handler.tmpdb,path.join('/',sid),0, function(err,collection){
     if (err){
       console.log('Could NOT create TMP folder for user='+sid)
-      cb('Could NOT create TMP folder for user='+sid);
+      cb(err);
     } 
     else {
       console.log('Created TMP for user='+sid)

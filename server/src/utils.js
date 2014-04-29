@@ -40,5 +40,5 @@ String.prototype.stringBefore = function(it) {
   return this.substr(0,this.indexOf(it));
 }
 String.prototype.stringAfter = function(it) {
-  return this.substring(this.indexOf(it)+1);
+  return this.substring(this.indexOf(it)+it.length);
 }

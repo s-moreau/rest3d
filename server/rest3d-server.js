@@ -61,7 +61,6 @@ var copyFileSync = require('./src/cp');
 
 var toJSON = require('./src/tojson');
 
-var sendFile = require('./src/sendfile');
 var Handler = require('./src/handler');
 
 var platform = os.type().match(/^Win/) ? 'win' :
@@ -413,7 +412,7 @@ server.get(/^\/.*/, function (req, res, next) {
 
     console.log('http get path=' + filename);
 
-  sendFile(handler,p);
+  handler.sendFile(p);
 });
 
 // clean exit
