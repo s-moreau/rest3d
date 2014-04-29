@@ -1695,7 +1695,13 @@ define(['viewer', 'gui', 'uploadViewer', 'rest3d', 'q', 'collada', 'gltf', 'rend
                             });
                             button.data(data[name]);
                         }
-                        GUI.image(button, "img-welcome", link, 77, 57, "before");
+                        // button.width(55).height(66);
+                      
+                        if(link=="../gui/images/exist.png"){
+                            GUI.image(button, "img-welcome", link, 90, 54, "before");
+                        }else{
+                              GUI.image(button, "img-welcome", link, 77, 57, "before");
+                        }
                         // button.width(57).height(77);
                         // button.height(85.781)
                         return button;
