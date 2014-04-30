@@ -37,6 +37,8 @@ THE SOFTWARE.
         gui: "/gui/gui3",
         jqueryui: '../deps/jquery-ui-1.9.2.min',
         jquerylayout: "../deps/jquery.layout-1.3.0.min",
+        q: '../deps/q',
+        collada:"../loaders/collada",
     },
     shim: {
         'jqueryui':{
@@ -63,7 +65,7 @@ THE SOFTWARE.
         },
     },
 })
-require(['jqueryui','jquerylayout','glmatrixExt','webglUtils','collada','sporefile','gui'],function(){INIT();});
+require(['jqueryui','jquerylayout','glmatrixExt','webglUtils','collada','gui','sporefile'],function(){INIT();});
     </script>
     <style type="text/css">
         .ui-widget {

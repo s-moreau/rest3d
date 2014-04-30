@@ -1,4 +1,3 @@
-
 require.config({
     paths: {
         jquery: "../deps/jquery-2.0.3.min",

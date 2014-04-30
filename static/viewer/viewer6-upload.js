@@ -30,7 +30,489 @@ define(['jquery', 'rest3d', 'gltf', 'collada', 'viewer', 'q'], function ($, rest
         var id;
         var flag;
         var url = '/rest3d/upload';
+        this.upload = function(_json){
+            function Upload(_json){
+                this.id = _json.id;
+                this.parent = _json.parent;
+                this.url = _json.url;
+                if(_json.hasOwnProperty("idUser")){
+                    this.idUser = _json.idUser;
+                }
+                this.generateHTML = function(){
+                    this.html = "<div id='"+this.id+"' class='container'>";
+                    this.html+="<input id='fileupload_"+this.id+"' style='display:none;' type='file' name='files[]' multiple>"
+                }
+                this.createWidget = function(){   
+                    this.parent.append(this.html);
+                    this.createJqueryObject();
+                    var stock=this;
+                    this.button = function(node){
+                        stock.callback(node);
+                        $('#fileupload_'+stock.id).click();
+                    };
+                    // this[this.id].append("<hr>");
 
+                    // this.dropzone = GUI.image(this[this.id],"image_"+this.id,"../gui/images/upload_d.png","100%","100px");
+                    // GUI.addTooltip({
+                    //         parent: this.dropzone,
+                    //         content: "Drag&drop area",
+                    //     });
+                    // this[this.id].css("text-align","center");
+        
+                    var tmp = GUI.treeBis({
+                        id:'uploadTree',
+                        parent: this[this.id],
+                        json:  {
+                            "data":{
+                                "data":"Guest_repository","attr":{"id":"c_"+stock.idUser,"rel":"collection","path":"/rest3d/tmp/","file":stock.idUser,}},
+                            },
+                            "dnd" : {
+                                    "drop_finish" : function (data) { 
+                                      console.log('drop finish'+data);
+                            //this is where the actual call to the sever is made for rearranging the triples for drag n drop.
+                            //console.log(data);
+                            //console.log('target '+ data.r);
+                            
+                        },},
+                    "plugin": ["themes", "json_data", "ui", "types","sort","search","contextmenu"],
+                          "contextmenu" : {
+                    "items" : function (node) {
+                        var result = {};
+                        var rel =node.attr("rel");
+                        var up = node.attr("uploadstatus");
+                        if(rel=="collection"||rel=="model"||rel=="child"){
+                            result.icon = {'label':'Add files','action':stock.button,};}
+                        if((rel=="collada"||rel=="gltf")&&up=="true"){
+                            result.preview = {'label':'Preview','action':stock.preview,};
+                        }
+                        if(rel=="gltf"&&up=="true"){
+                            result.display = {'label':'Display','action':stock.displayGltf,};
+                        }
+                        if(rel=="collada"&&up=="true"){
+                            result.display = {'label':'Display','action':stock.displayCollada,};
+                            result.convert = {'label':'Convert','action':stock.convertMenu,};
+                        }
+                        return result;
+                    }
+                },
+                type:{ "types": {
+                    "child": {
+                        "icon" : {
+                            "image" : "../gui/images/folder.png",
+                        },
+                        },
+                    "collection": {
+                        "icon" : {
+                            "image" : "../gui/images/menu-scenes.png",
+                        },
+                        },
+                    "collada": {
+                        "icon" : {
+                            "image" : "../favicon.ico",
+                        },
+                        },
+                    "gltf": {
+                        "icon" : {
+                            "image" : "../favicon.ico",
+                        },
+                        },
+                    'shader': {
+                        "icon" : {
+                            "image" : "../gui/images/geometry.png",
+                        },
+                        },
+                    "file": {
+                        "icon" : {
+                            "image" : "../gui/images/file.png",
+                        },
+                        },
+                    "kml": {
+                        "icon" : {
+                            "image" : "../gui/images/kml.png",
+                        },
+                        },
+                     "texture": {
+                        "icon" : {
+                            "image" : "../gui/images/media-image.png",
+                        },
+                        },
+                    "model": {
+                        "icon" : {
+                            "image" : "../gui/images/bunny.png",
+                        },
+                        },
+                    "empty": {
+                        "icon" : {
+                            "image" : "../gui/images/cross.jpg",
+                        },
+                        },
+                }},
+                        themes:{
+                            "theme":"apple",
+                        },
+                    });
+                    this.tree = tmp.uploadTree;
+                    this[this.id].append("<hr>");//
+
+                    this.progress = GUI.progress({
+                        id:"progress_"+this.id,
+                        parent:this[this.id],
+                    });
+
+                    this[this.id].append('<br><div id="fileArea_'+this.id+'"></div>');
+
+                    this.optionLog= GUI.addCheckBox("uploadSetting", "Use log interface", this[this.id]);
+                    this.setting = GUI.button("Upload", this.optionLog);
+                    var ex = this.setting;
+                    this.setting.css({"float":"right"})
+                    this.optionLog.find('input').on("change",function(){
+                        if($(this).is(':checked')){
+                            $("#fileArea_"+this.id).hide();
+                            ex.hide();
+                     }
+                     else{
+                            $("#fileArea_"+this.id).show();
+                            ex.show();
+                     }      
+                    });
+                    this.optionLog.hide();
+                    this.setting.hide();
+                }
+                    
+                   // $('#fileArea_'+this.id).append('<div style="border: 1px solid grey; border-top: none; width:100%;" ><span style="float:left !important;">Fildsdsdsdsde</span></div>');
+                
+                this.getOptionLog = function(){
+                    return this.optionLog.find('input').is(':checked');
+                }
+
+                this.callOnClick = function(cb){
+                    if(this.button){
+                        this.button.on('click',function(){
+                        cb.call();
+                    })
+                    }
+                }
+                this.extensionToType=function(ext) {
+                    var result;
+                    switch (ext) {
+                    case ".dae":
+                        result = "collada";
+                        break;
+                    case ".DAE":
+                        result = "collada";
+                        break;
+                    case ".json":
+                        result = "gltf";
+                        break;
+                    case ".JSON":
+                        result = "gltf";
+                        break;
+                    case ".png":
+                        result = "texture";
+                        break;
+                    case ".jpeg":
+                        result = "texture";
+                        break;
+                    case ".tga":
+                        result = "texture";
+                        break;
+                    case ".jpg":
+                        result = "texture";
+                        break;
+                    case ".glsl":
+                        result = "shader";
+                        break;
+                    default:
+                        result = "file";
+                        break;
+                    }
+                    return result;
+                }
+
+                this.encodeStringToId=function(string) {
+                    string = string.split(".").join("-");
+                    string = encodeURIComponent(string);
+                    string = string.split("%").join("z");
+                    return string;
+                }
+                this.createNodeDatabase=function(file, parent) { //upload.createNodeDatabase file.name file.uuid file.collectionpath file.assetpath parent
+                var stock = this;
+                $("#uploadTree").jstree("create_node", parent, "inside", {
+                    "data": file.name,
+                    "attr": {
+                        "id": "a_" + file.uuid,
+                        "name": file.name,
+                        "path": file.collectionpath + "/" + file.assetpath + "/" + file.name,
+                        "collectionpath": file.collectionpath,
+                        "assetpath": file.assetpath,
+                        "rel": stock.extensionToType(file.name.match(/\.[^.]+$/)[0]),
+                        "uploadstatus": true,
+                    }
+                }, false, true);
+                file.idToTarget = "#a_" + file.uuid
+                if(file.hasOwnProperty("size"))
+                {
+                    GUI.addTooltip({
+                        parent: $("#a_" + file.uuid),
+                        content: "size: " + file.size,
+                        //wait new tooltip for showing date + User fields
+                    });
+                }
+                return $(file.idToTarget);
+            }
+            this.createCollection =  function(file, parent) {
+                var id = this.encodeStringToId(file.collectionpath);
+                parent.data({});
+                console.debug(parent);
+                if (!parent.data().hasOwnProperty(file.collectionpath)) {
+                    var flagCollection = {};
+                    flagCollection[file.collectionpath] = true;
+                    parent.data(flagCollection);
+                    $("#uploadTree").jstree("create_node", parent, "inside", {
+                        "data": file.collectionpath,
+                        "attr": {
+                            "id": id,
+                            "collectionpath": file.collectionpath,
+                            "rel": "collection",
+                            "uploadstatus": true,
+                        }
+                    }, false, true);
+                }
+                return $("#" + id);
+            } 
+                this.jqueryUpload = function(){
+                    var stock = this;  
+                    setTimeout(function(){
+                    stock.dropzone = $("#uploadTree"/*+stock.idUser +"> a"*/);
+                    },500);
+                    var json = {
+                        url: stock.url,
+                        dataType: 'json',
+                        autoUpload: false,
+                        acceptFileTypes: /(\.|\/)(dae|png|tga)$/i,
+                        maxFileSize: 100000000, // 100 MB
+                        loadImageMaxFileSize: 15000000, // 15MB
+                        disableImageResize: false,
+                        previewMaxWidth: 100,
+                        previewMaxHeight: 100,
+                        previewCrop: true,
+                    };  
+                    // if(this.idUser){
+                    //     var idtmp = this.idUser;
+                    //     json["beforeSend"]=function(xhr, data) {
+                    //         xhr.setRequestHeader('X-idUser', idtmp);
+                    //     }
+                    // }                                                                                                                                                                   
+                    stock.object = stock.upload1.fileupload(json);
+                    // },50);
+
+                }
+                this.createJqueryObject = function(){
+                    this[this.id]=$('#'+this.id);
+                    this.upload1 = $('#fileupload_'+this.id);
+                    this.filesArea = $('#fileArea_'+this.id);
+                }
+                function htmlSpan(parent,percentage,html){
+                        if(!html){html="";}
+                        var $result = $('<span style="display:inline-block !important; width:'+percentage+'% !important;">'+html+'</span>');
+                        parent.append($result);
+                        if(percentage<20)$result.addClass("btn-upload");
+                        return $result;
+                    }
+
+                function htmlDiv(parent,head){
+                        if(head){
+                            var $result = $('<div style="border: 1px solid grey; width:100%;"></div>');}
+                        else{
+                            var $result = $('<div style="border: 1px solid grey; border-top:none; width:100%;"></div>');}
+                        parent.append($result);
+                        return $result;
+                    }
+
+                this.header = function(flag,button){
+                    var stock = this;
+                    var $follow = this.filesArea.append($('<br>'));
+                    var $frame = $('<div class="upload_header"></div>');
+                    this.filesArea.append($frame);
+                    var $head = htmlDiv($frame,true);
+                    if(flag&&typeof(flag)!="function"){
+                        var $span = htmlSpan($head,90,GUI.time(true)+" convert "+flag);
+                    }
+                    else if(typeof(flag)=="function"&&button){
+                        var $span = htmlSpan($head,80,GUI.time(true)+" Upload");
+                    }
+                    else{var $span = htmlSpan($head,90,GUI.time(true)+" Upload");}
+                    if(typeof(flag)=="function"&&button){
+                        var $spanButton1 = htmlSpan($head,10);
+                        $spanButton1.append(button);
+                    }
+                    $span.css("font-weight","bold");
+                    var $spanButton = htmlSpan($head,10);
+                    var flag1 = flag;
+                    var $j = $("<button>X</button>").on('click', function (){
+                            $frame.hide();
+                            stock.filesArea.children("br").last().remove();
+                            if(typeof(flag1) == "function"){
+                                flag1();
+                            }
+                    });
+                    $spanButton.append($j);
+                    $follow.hide();
+                    $frame.hide();
+                    $frame.tmp = $follow;
+                    return $frame;
+                };
+                this.upload = function(parent,link,button,button1,button2){
+                    parent.show();
+                     parent.tmp.show();
+                    var $newLine = htmlDiv(parent,false);
+                    if(!button&&!button1&&!button2){
+                        var $span = htmlSpan($newLine,100,link);
+                        $span.css("text-align","left");}
+                    else if(!button1&&!button2){
+                        var $span = htmlSpan($newLine,90,link);
+                        $span.css("text-align","left");
+                        var $spanButton = htmlSpan($newLine,10);
+                        $spanButton.append(button);
+                          var arrowre = GUI.addIcon(button, "ui-icon-arrowrefresh-1-n", "", "before");
+                        var array = ["ui-icon-arrowrefresh-1-n","ui-icon-arrowrefresh-1-e","ui-icon-arrowrefresh-1-s","ui-icon-arrowrefresh-1-w"]
+                        button.click(function(){
+                            var i = 1;
+                            setInterval(function(){
+                                if(i>3){i=0;}
+                                arrowre.remove();
+                                arrowre = GUI.addIcon(button, array[i], "", "before");
+                                i++;
+                            },500)
+                        });
+                    }
+                    else{
+                        var $span = htmlSpan($newLine,70,link);
+                        $span.css("text-align","left");
+                        var $spanButton = htmlSpan($newLine,10);
+                        var tooltip = button1.html();
+                        button1.html("");
+                        GUI.addIcon(button1, "ui-icon-play", "", "before");
+                        $spanButton.append(button1);
+                        button1.addClass("btn-upload");
+                        GUI.addTooltip({
+                            parent: button1,
+                            content: tooltip,
+                        });
+                        button1.hide();
+                        var $spanButton2 = htmlSpan($newLine,10);
+                        var tooltip = button.html();
+                        button.html("");
+                        GUI.addIcon(button, "ui-icon-newwin", "", "before");
+                        $spanButton2.append(button);//
+                         button.addClass("btn-upload");
+                        GUI.addTooltip({
+                            parent: button,
+                            content: tooltip,
+                        });
+                        button.hide();
+
+                        var $spanButton1 = htmlSpan($newLine,10);
+                        var tooltip = button2.html();
+                        button2.html("");
+                        var arrowre = GUI.addIcon(button2, "ui-icon-arrowrefresh-1-n", "", "before");
+                        $spanButton1.append(button2);
+                        button2.addClass("btn-upload");
+                        GUI.addTooltip({
+                            parent: button2,
+                            content: tooltip,
+                        });
+                        var array = ["ui-icon-arrowrefresh-1-n","ui-icon-arrowrefresh-1-e","ui-icon-arrowrefresh-1-s","ui-icon-arrowrefresh-1-w"]
+                        button2.click(function(){
+                            var i = 1;
+                            setInterval(function(){
+                                if(i>3){i=0;}
+                                arrowre.remove();
+                                arrowre = GUI.addIcon(button2, array[i], "", "before");
+                                i++;
+                            },500)
+                        });
+                    }
+                    return $newLine;
+                }
+                this.download = function(parent,link,button){
+                      parent.show();
+                     parent.tmp.show();
+
+                    var $newLine = htmlDiv(parent,false);
+                    var $span = htmlSpan($newLine,90,link);
+                    $span.css("text-align","left");
+                    var $spanButton1 = htmlSpan($newLine,10);
+                    var tooltip = button.html();
+                    button.html("");
+                    GUI.addIcon(button, "ui-icon-disk", "", "before");
+                    button.addClass("btn-upload");
+                    $spanButton1.append(button);
+                    GUI.addTooltip({
+                            parent: button,
+                            content: tooltip,
+                        });
+                }
+                this.convert = function(parent,link,launch,download,preview){
+                      parent.show();
+                     parent.tmp.show();
+                    var $newLine = htmlDiv(parent,false);
+                    var $span = htmlSpan($newLine,70,link);
+                    $span.css("text-align","left");
+                    var $spanButton1 = htmlSpan($newLine,10);
+                    var tooltip = launch.html();
+                    
+               
+                    launch.html("");
+                    GUI.addIcon(launch, "ui-icon-play", "", "before");
+                    $spanButton1.append(launch).addClass("btn-upload");
+                    GUI.addTooltip({
+                            parent: launch,
+                            content: tooltip,
+                        });
+                    var width = $spanButton1.width();
+                    //launch.width(width);
+
+                    var $spanButton2 = htmlSpan($newLine,10);
+                    tooltip = download.html();
+                    width = download.parent().width();
+                    download.html("");
+                    GUI.addIcon(download, "ui-icon-disk", "", "before");
+                    $spanButton2.append(download).addClass("btn-upload");
+                    GUI.addTooltip({
+                            parent: download,
+                            content: tooltip,
+                        });
+                    width = $spanButton2.width();
+                    // download.width(width);
+
+                    var $spanButton3 = htmlSpan($newLine,10);
+                    tooltip = preview.html();
+                    preview.html("");
+                    GUI.addIcon(preview, "ui-icon-newwin", "", "before");
+                    $spanButton3.append(preview).addClass("btn-upload");
+                    GUI.addTooltip({
+                            parent: preview,
+                            content: tooltip,
+                        });
+                    width = $spanButton3.width();
+                    // preview.width(width);
+                }
+                // this.createInfo = function(name,href,button){
+                //     var tmp = this.header();
+                //     this.upload(tmp,"tefa.js",$("<button>Upload</button>"))
+                //     this.convert(tmp,"tefadsssss.js",$("<button>Dialog</button>"),$("<button>Display</button>"),$("<button>Downlo</button>"))
+                // }
+            }   
+            var tmp = new Upload(_json);
+            tmp.generateHTML();
+            tmp.createWidget();
+            tmp.createJqueryObject();
+            tmp.jqueryUpload();
+            return tmp;
+        }
+        this.result = this.upload(upload);
+        upload = this.result;
 
         function callbackConvert(data) {
             var buffer = data;
@@ -106,7 +588,7 @@ define(['jquery', 'rest3d', 'gltf', 'collada', 'viewer', 'q'], function ($, rest
                 width: '600',
                 height: '500',
                 open: function (ev, ui) {
-                    $('#myIframe').attr('src', '/viewer/easy-viewer.html?file=' + node.attr("path"));
+                    $('#myIframe').attr('src', '/viewer/easy-viewer.html?file=/rest3d/tmp/' + node.attr("path"));
                 },
             });
         }
@@ -124,7 +606,7 @@ define(['jquery', 'rest3d', 'gltf', 'collada', 'viewer', 'q'], function ($, rest
 
         function displayGltf(node) {
             window.pleaseWait(true);
-            glTF.load("/rest3d/tmp/" + node.attr("path").encodeURIComponent(), viewer.parse_gltf).then(
+            glTF.load("/rest3d/tmp/" + node.attr("path"), viewer.parse_gltf).then(
                 function (flag) {
                     window.pleaseWait(false);
                     window.notif(node.attr("name"));
@@ -238,7 +720,6 @@ define(['jquery', 'rest3d', 'gltf', 'collada', 'viewer', 'q'], function ($, rest
                         "attr": {
                             "id": id,
                             "file": name,
-                            "path": parent.attr('path') + "/" + name,
                             "rel": rel,
                             "uploadstatus": false,
                         }
@@ -258,7 +739,6 @@ define(['jquery', 'rest3d', 'gltf', 'collada', 'viewer', 'q'], function ($, rest
                             "attr": {
                                 "id": flag,
                                 "file": name,
-                                "path": parent.attr('path') + "/" + name,
                                 "rel": rel,
                                 "uploadstatus": false,
                             }
@@ -300,7 +780,7 @@ define(['jquery', 'rest3d', 'gltf', 'collada', 'viewer', 'q'], function ($, rest
                 }
                 return parent;
             }
-
+            var tmp="";
             function parsePathDatabase(file, parent) {
                 // var collection = file.collectionpath;
                 var origin = parent;
@@ -320,10 +800,12 @@ define(['jquery', 'rest3d', 'gltf', 'collada', 'viewer', 'q'], function ($, rest
                             parent = upload.createCollection(file, parent);
                         }
                         else { //if file
+                            file.path = tmp+'/'+relativePath[z];
                             upload.createNodeDatabase(file, parent);
                             parent = origin;
                         }
                     }
+                    tmp = tmp + "/" + relativePath[z];
                 }
                 return parent;
             }
@@ -338,6 +820,7 @@ define(['jquery', 'rest3d', 'gltf', 'collada', 'viewer', 'q'], function ($, rest
                 var parent = $("#" + e.idToDrop);
             }
             if (mode || (!mode && e.idToDrop != undefined)) {
+                console.debug(data);
                 $.each(data.files, function (index, file) {
                     parent = parsePath(file, parent);
                 });
@@ -577,6 +1060,7 @@ define(['jquery', 'rest3d', 'gltf', 'collada', 'viewer', 'q'], function ($, rest
         });
 
         upload.object.fileupload("option", "beforeSend", function (xhr, data) {
+            console.debug(data);
             var node = data.files[0].relativePath;
             node.attr("uploadstatus", true);
             node.parent().parent().attr("uploadstatus", true);
@@ -594,6 +1078,7 @@ define(['jquery', 'rest3d', 'gltf', 'collada', 'viewer', 'q'], function ($, rest
 
 
         });
+        return this.result;
     }
     return setViewer6Upload;
 
