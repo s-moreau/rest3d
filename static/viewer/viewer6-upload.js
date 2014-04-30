@@ -236,94 +236,50 @@ define(['jquery', 'rest3d', 'gltf', 'collada', 'viewer', 'q'], function ($, rest
                     return string;
                 }
                 this.createNodeDatabase=function(file, parent) { //upload.createNodeDatabase file.name file.uuid file.collectionpath file.assetpath parent
-                    var stock = this;
-                    console.debug(file);
-                    if(file.hasOwnProperty('path')){
-                        var path = file.path;
+                var stock = this;
+                $("#uploadTree").jstree("create_node", parent, "inside", {
+                    "data": file.name,
+                    "attr": {
+                        "id": "a_" + file.uuid,
+                        "name": file.name,
+                        "path": file.collectionpath + "/" + file.assetpath + "/" + file.name,
+                        "collectionpath": file.collectionpath,
+                        "assetpath": file.assetpath,
+                        "rel": stock.extensionToType(file.name.match(/\.[^.]+$/)[0]),
+                        "uploadstatus": true,
                     }
-                    else{
-                        var path="";
-                        if(!file.collectionpath==""){
-                            path += "/"+file.collectionpath;
-                        }
-                        if(!file.assetpath==""){
-                            path += "/" + file.assetpath;
-                        }
-                        path +="/" + file.name;
-                    }
-                    var json = {
-                        "data": file.name,
+                }, false, true);
+                file.idToTarget = "#a_" + file.uuid
+                if(file.hasOwnProperty("size"))
+                {
+                    GUI.addTooltip({
+                        parent: $("#a_" + file.uuid),
+                        content: "size: " + file.size,
+                        //wait new tooltip for showing date + User fields
+                    });
+                }
+                return $(file.idToTarget);
+            }
+            this.createCollection =  function(file, parent) {
+                var id = this.encodeStringToId(file.collectionpath);
+                parent.data({});
+                console.debug(parent);
+                if (!parent.data().hasOwnProperty(file.collectionpath)) {
+                    var flagCollection = {};
+                    flagCollection[file.collectionpath] = true;
+                    parent.data(flagCollection);
+                    $("#uploadTree").jstree("create_node", parent, "inside", {
+                        "data": file.collectionpath,
                         "attr": {
-                            "id": "a_" + file.uuid,
-                            "name": file.name,
-                            "path": path,
+                            "id": id,
                             "collectionpath": file.collectionpath,
-                            "assetpath": file.assetpath,
-                            "rel": stock.extensionToType(file.name.match(/\.[^.]+$/)[0]),
+                            "rel": "collection",
                             "uploadstatus": true,
                         }
-                    }
-                    if(file.collectionpath==""&&file.assetpath==""&&parent.attr("id")=="c_"+stock.idUser){
-                        console.debug(parent.attr("id"))
-                        delete json.attr.collectionpath;
-                        delete json.attr.assetpath;
-                        json.attr.path = file.name;
-                    }
-                    $("#uploadTree").jstree("create_node", parent, "inside", json, false, true);
-                    file.idToTarget = "#a_" + file.uuid
-                    if(file.hasOwnProperty("size"))
-                    {
-                        GUI.addTooltip({
-                            parent: $("#a_" + file.uuid),
-                            content: "size: " + file.size,
-                            //wait new tooltip for showing date + User fields
-                        });
-                    }
-                    return $(file.idToTarget);
+                    }, false, true);
                 }
-                this.createNode = function(file,parent){
-                    var id = this.encodeStringToId(file.name+"_"+Math.floor(Math.random() * 100000) + 1);
-                    var json = {
-                            "data": file.name,
-                            "attr": {
-                                "id": id,
-                                "rel": "collection",
-                                "uploadstatus": true,
-                            }
-                        }
-                    if(file.hasOwnProperty('assetpath')){
-                        if(file.assetpath!==""){
-                            json.attr.assetpath=file.assetpath;
-                        }
-                    }
-                     if(file.hasOwnProperty('collectionpath')){
-                        if(file.collectionpath!==""){
-                            json.attr.collectionpath = file.collectionpath;
-                        }
-                    }
-                    $("#uploadTree").jstree("create_node", parent, "inside",json, false, true);
-                    return $("#"+id);
-                }
-                this.createCollection =  function(file, parent) {
-                    var id = this.encodeStringToId(file.collectionpath);
-                    parent.data({});
-                    console.debug(parent);
-                    if (!parent.data().hasOwnProperty(file.collectionpath)) {
-                        var flagCollection = {};
-                        flagCollection[file.collectionpath] = true;
-                        parent.data(flagCollection);
-                        $("#uploadTree").jstree("create_node", parent, "inside", {
-                            "data": file.collectionpath,
-                            "attr": {
-                                "id": id,
-                                "collectionpath": file.collectionpath,
-                                "rel": "collection",
-                                "uploadstatus": true,
-                            }
-                        }, false, true);
-                    }
-                    return $("#" + id);
-                } 
+                return $("#" + id);
+            } 
                 this.jqueryUpload = function(){
                     var stock = this;  
                     setTimeout(function(){
