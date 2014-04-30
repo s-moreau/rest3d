@@ -53,9 +53,10 @@
         
       if (!Passport.initialized) {
           Passport.initialized = true;
+          var protocol = (req.isSecure() ? 'https' : 'http');
           passport.use(new GoogleStrategy({
-            returnURL: (req.isSecure()) ? 'https' : 'http' + '://' + req.headers.host +'/rest3d/auth/return',
-            realm: (req.isSecure()) ? 'https' : 'http' + '://' + req.headers.host +'/',
+            returnURL: protocol + '://' + req.headers.host +'/rest3d/auth/return',
+            realm: protocol + '://' + req.headers.host +'/',
           },
           function(identifier, profile, done) {
             // asynchronous verification, for effect...
