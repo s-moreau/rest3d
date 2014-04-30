@@ -1051,14 +1051,15 @@ define(['viewer', 'gui', 'uploadViewer', 'rest3d', 'q', 'collada', 'gltf', 'rend
             })
             accordionUp.upload.header.click();
 
-            var upload = GUI.upload({
+            var upload = {
                 parent: accordionUp.upload,
                 id: "upModel",
                 url: location.protocol + "//" + location.host + '/rest3d/tmp/',
                 idUser: viewer.idUser
-            });
-            upload.progress.progress_upModel.width("100%");
-            setViewer6Upload($, upload, rest3d, viewer);
+            };
+            upload = setViewer6Upload($, upload, rest3d, viewer);
+             upload.progress.progress_upModel.width("100%");
+
 
             jumpLine();
 
@@ -1501,7 +1502,7 @@ define(['viewer', 'gui', 'uploadViewer', 'rest3d', 'q', 'collada', 'gltf', 'rend
             button1.hide();
 
             setTimeout(function () {
-                layout.jqueryObject.sizePane("west", $(window).width() - 499);
+                layout.jqueryObject.sizePane("west", $(window).width() - 549);
             }, 1000);
 
             layout.jqueryObject.resizeAll();
@@ -1869,36 +1870,145 @@ define(['viewer', 'gui', 'uploadViewer', 'rest3d', 'q', 'collada', 'gltf', 'rend
                         }
                         if (data.hasOwnProperty("db")) {
                             require(["database"], function (databaseTab) {
-                                var tmp = new databaseTab(data.dvia);
+                                var tmp = new databaseTab(data.db);
                             });
                         }
                     })
-                var loop = function(data,parent){
+                var tmp = new parseREST3D();
+                tmp.loop(data,$('#c_'+viewer.idUser));
+                }
+                //welcomePanel();
+                setTimeout(function(){$("#uploadTree").jstree('open_all');},1500);
+             // TAB API NEED TO BE IMPROVED
+            });
+            var parseREST3D = function(){
+                this.loop = function(data,parent,flag){
+                    var stock = this;
+                    var origin = parent;
                     for(var key in data.assets){
+                        parent = origin;
                         var uuid = data.assets[key];
                         var tmp = key.split("/");
+                        var flag2 = false;
                         for(var i=0;i<tmp.length;i++){
-                            if(i !== tmp.length - 1){                             
+                            if(i !== tmp.length - 1){  
+                                parent = stock.createNode({"name":tmp[i],"collectionpath":parent.attr('collectionpath')},parent);
+                                if(!flag2){flag2=tmp[i];}
+                                else{
+                                    flag2 += "/"+tmp[i]; 
+                                }
+                                flag=true;                        
                             }
                             else{
-                                upload.createNodeDatabase({"name":tmp[i], "uuid":uuid, "collectionpath":"", "assetpath":""},parent);
+                                var json = {"name":tmp[i], "uuid":uuid, "collectionpath":"", "assetpath":""};
+                                if(flag){
+                                    json.collectionpath = parent.attr('collectionpath');
+                                }
+                                if(flag2){
+                                    json.assetpath = flag2;
+                                }
+                                stock.createNodeDatabase(json,parent);
                             }
                         }
                     }
                     for(var key1 in data.children){
                         var uuid = data.children[key1];
                         rest3d.tmp({key:key1,parent:parent},function(data){
-                            loop(jQuery.parseJSON(data.data),upload.createCollection({"collectionpath":data.key},data.parent));
+                            stock.loop(jQuery.parseJSON(data.data),stock.createCollection({"collectionpath":data.key},data.parent),true);
                         },uuid)
                     }
                 }
-                loop(data,$('#c_'+viewer.idUser));
+                this.createNodeDatabase=function(file, parent) { //upload.createNodeDatabase file.name file.uuid file.collectionpath file.assetpath parent
+                    var stock = this;
+                    console.debug(file);
+                    if(file.hasOwnProperty('path')){
+                        var path = file.path;
+                    }
+                    else{
+                        var path="";
+                        if(!file.collectionpath==""){
+                            path += "/"+file.collectionpath;
+                        }
+                        if(!file.assetpath==""){
+                            path += "/" + file.assetpath;
+                        }
+                        path +="/" + file.name;
+                    }
+                    var json = {
+                        "data": file.name,
+                        "attr": {
+                            "id": "a_" + file.uuid,
+                            "name": file.name,
+                            "path": path,
+                            "collectionpath": file.collectionpath,
+                            "assetpath": file.assetpath,
+                            "rel": upload.extensionToType(file.name.match(/\.[^.]+$/)[0]),
+                            "uploadstatus": true,
+                        }
+                    }
+                    if(file.collectionpath==""&&file.assetpath==""&&parent.attr("id")=="c_"+stock.idUser){
+                        console.debug(parent.attr("id"))
+                        delete json.attr.collectionpath;
+                        delete json.attr.assetpath;
+                        json.attr.path = file.name;
+                    }
+                    $("#uploadTree").jstree("create_node", parent, "inside", json, false, true);
+                    file.idToTarget = "#a_" + file.uuid
+                    if(file.hasOwnProperty("size"))
+                    {
+                        GUI.addTooltip({
+                            parent: $("#a_" + file.uuid),
+                            content: "size: " + file.size,
+                            //wait new tooltip for showing date + User fields
+                        });
+                    }
+                    return $(file.idToTarget);
                 }
-                //welcomePanel();
-                setTimeout(function(){$("#uploadTree").jstree('open_all')},1500);
-                  $("#tabindex_2").click(); 
-            });
-            $("#tabindex_2").click(); // TAB API NEED TO BE IMPROVED
+                this.createNode = function(file,parent){
+                    var id = upload.encodeStringToId(file.name+"_"+Math.floor(Math.random() * 100000) + 1);
+                    var json = {
+                            "data": file.name,
+                            "attr": {
+                                "id": id,
+                                "rel": "collection",
+                                "uploadstatus": true,
+                            }
+                        }
+                    if(file.hasOwnProperty('assetpath')){
+                        if(file.assetpath!==""){
+                            json.attr.assetpath=file.assetpath;
+                        }
+                    }
+                     if(file.hasOwnProperty('collectionpath')){
+                        if(file.collectionpath!==""){
+                            json.attr.collectionpath = file.collectionpath;
+                        }
+                    }
+                    $("#uploadTree").jstree("create_node", parent, "inside",json, false, true);
+                    return $("#"+id);
+                }
+                this.createCollection =  function(file, parent) {
+                    var id = upload.encodeStringToId(file.collectionpath);
+                    parent.data({});
+                    console.debug(parent);
+                    if (!parent.data().hasOwnProperty(file.collectionpath)) {
+                        var flagCollection = {};
+                        flagCollection[file.collectionpath] = true;
+                        parent.data(flagCollection);
+                        $("#uploadTree").jstree("create_node", parent, "inside", {
+                            "data": file.collectionpath,
+                            "attr": {
+                                "id": id,
+                                "collectionpath": file.collectionpath,
+                                "rel": "collection",
+                                "uploadstatus": true,
+                            }
+                        }, false, true);
+                    }
+                    return $("#" + id);
+                } 
+
+            }
             // window.renderMenu = renderMenu;
             // require(["warehouse"]);
             $('#mainLayout-west').css('backgroundColor', '#b9f09e');
