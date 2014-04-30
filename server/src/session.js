@@ -155,16 +155,21 @@ module.exports = function(config) {
 var createTMP = function(sid,cb){
   // create tmp folder
   var handler=require('./handler');
-  Collection.create(handler.tmpdb,path.join('/',sid),0, function(err,collection){
-    if (err){
-      console.log('Could NOT create TMP folder for user='+sid)
-      cb(err);
-    } 
-    else {
-      console.log('Created TMP for user='+sid)
-      cb.call(session, undefined, sid);
-    }
-  })
+  if (handler.tmpdb)
+    Collection.create(handler.tmpdb,path.join('/',sid),0, function(err,collection){
+      if (err){
+        console.log('Could NOT create TMP folder for user='+sid)
+        cb(err);
+      } 
+      else {
+        console.log('Created TMP for user='+sid)
+        cb.call(session, undefined, sid);
+      }
+    })
+  else {
+    console.log('running without a tmp database')
+    cb.call(session,undefined,sid)
+  }
 }
 
   /**

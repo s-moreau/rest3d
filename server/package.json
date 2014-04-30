@@ -29,7 +29,8 @@
     "ncp":"",
     "walk":"",
     "ncp":"",
-    "passport":""
+    "passport":"",
+    "passport-google":""
   },
   "devDependencies": {
     "mocha": "1.7.4",

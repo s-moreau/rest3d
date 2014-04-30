@@ -94,10 +94,6 @@ this.req.pipe(data).pipe(this.res);
 Handler.prototype.sendFile = function(p,type,name) {
 
   var handler = this;
-  if (this.errorSet) {
-    console.log('caught repeated error in sendfile')
-    return;
-  }
 
 
   function error(err) {
@@ -113,7 +109,7 @@ Handler.prototype.sendFile = function(p,type,name) {
   }
 
   if (type) handler.res.setHeader('Content-Type', type);
-  if (name) this.res.setHeader('Content-disposition', 'attachment; filename='+name);
+  if (name) handler.res.setHeader('Content-disposition', 'attachment; filename='+name);
 
   console.log('sendFile dir='+ p);
   console.log('         type='+type);
@@ -128,6 +124,13 @@ Handler.prototype.sendFile = function(p,type,name) {
  };
 
 Handler.prototype.handleError = function (error) {
+
+  if (this.sentHeaders) {
+    console.log('caught repeated sent headers in handleError')
+    this.next()
+    return;
+  }
+  this.sentHeaders = true;
 
   if (typeof error === 'string')
     error = {
@@ -145,9 +148,6 @@ Handler.prototype.handleError = function (error) {
     };
   }
 
-  // avoid repeated errors that crashes nodejs
-
-  if (!this.errorSet) {
 
     this.setNoCacheHeaders();
     this.res.writeHead(error.statusCode, {
@@ -155,20 +155,37 @@ Handler.prototype.handleError = function (error) {
         'application/json' : 'text/plain'
     });
     this.res.end(toJSON(error));
-    this.errorSet = error.statusCode;
-    //if (this.next) this.next(new restify.ResourceNotFoundError(err))
-  } else
-  {
-    console.log('caught repeated error !')
-  }
+
+ 
 };
+
+Handler.prototype.redirect = function(whereto) {
+
+  if (this.sentHeaders) {
+    console.log('caught repeated sent headers in redirect')
+    this.next()
+    return;
+  }
+  this.sentHeaders = true;
+
+  this.setNoCacheHeaders();
+  this.res.writeHead(302, {
+    'Location': whereto
+  })
+  this.res.end();
+  this.next();
+}
 
 Handler.prototype.handleResult = function (result, code) {
 
-if (this.errorSet) {
-    console.log('caught repeated error in handleResult')
+  if (this.sentHeaders) {
+    console.log('caught repeated sent headers in handleResult')
+    this.next()
     return;
   }
+  this.sentHeaders = true;
+  if (code ===302)
+    return this.redirect(result);
 
   if (typeof result === 'string')
     result = {
@@ -178,24 +195,15 @@ if (this.errorSet) {
   if (result instanceof Error)
     return this.handleError(result);
 
-  if (code === 302) {
-    this.res.writeHead(302, {
-      'Location': redirect.replace(
-        /%s/,
-        encodeURIComponent(toJSON.stringify(result)))
-    });
-    this.res.end();
-  } else {
-
-    this.setNoCacheHeaders();
-    this.res.writeHead(code?code:200, {
-      'Content-Type': this.req.headers.accept.indexOf('application/json') !== -1 ?
-        'application/json' : 'text/plain',
-      'Access-Control-Allow-Origin': '*'
-    });
-    this.res.end(toJSON(result));
-  }
-  if (this.next) this.next();
+  this.setNoCacheHeaders();
+  this.res.writeHead(code?code:200, {
+    'Content-Type': this.req.headers.accept.indexOf('application/json') !== -1 ?
+      'application/json' : 'text/plain',
+    'Access-Control-Allow-Origin': '*'
+  });
+  this.res.end(toJSON(result));
+ 
+  this.next();
 };
 
 module.exports = Handler;
