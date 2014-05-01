@@ -34,18 +34,23 @@
   }
 
   var FileInfo = function (file, collectionpath, assetpath) {
-      // file -> name, path, optional:size, type, not used: hash, lastModifiedDate)
-      this.name = file.name; // name according to sender
-      this.path = file.path; // where is it now?
+      if (file) {
+        // file -> name, path, optional:size, type, not used: hash, lastModifiedDate)
+        this.name = file.name; // name according to sender
+        this.path = file.path; // where is it now?
+         // optional? probably unknown when new FileInfo() is called
+        this.size = file.size; // do we need that? we can ask the file for its size
+        this.type = file.type; // type according to sender
 
-      // asset information
+        this.isFolder = false; // true if this is a folder and not a file
+      } else
+        this.isFolder = true; // true if this is a folder and not a file
+
+        // asset information
       this.collectionpath = collectionpath; // where to put it -> a collection object
       this.assetpath = assetpath; // path of asset inside collection
 
-      // optional? probably unknown when new FileInfo() is called
-      this.size = file.size; // do we need that? we can ask the file for its size
-      this.type = file.type; // type according to sender
-
+     
   };
 
   FileInfo.options = {

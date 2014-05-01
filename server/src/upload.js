@@ -4,7 +4,7 @@ module.exports = function (server) {
 
   var formidable = require('formidable');
   var fs = require('fs');
-  var path = require('path');
+  var Path = require('path');
   var imageMagick = require('imagemagick');
 
   var memoryStream = require('memorystream');
@@ -74,7 +74,6 @@ module.exports = function (server) {
     var files = [];
     var map = {}
     var counter = 1;
-    var redirect = undefined;
   
     var finish = function (err, asset) {
       if (err) {
@@ -137,9 +136,7 @@ module.exports = function (server) {
       //files.push(fileInfo); -> this will happen later
 
     }).on('field', function (name, value) {
-      if (name === 'redirect') {
-        redirect = value;
-      } else if (name === 'url') {
+       if (name === 'url') {
         // downloading file and uncompressing if needed
         // counter++; -> getting all files at once
         //                                                      no jar
@@ -163,6 +160,18 @@ module.exports = function (server) {
             getFileInfos(result);
             finish(undefined);
           }
+        });
+      } else if (name === 'collection') {
+        // create a collection at path 
+        counter++; // one more result to POST
+        var newcollection = value;
+        if (value.contains('/')) return finish('collection name cannot include character /');
+        Collection.create(handler.db, Path.join(collectionpath,value), assetpath, function(err,col){
+          if (err) return finish(err);
+          var fileInfo = new FileInfo(undefined, collectionpath, assetpath);
+          fileInfo.asset = col;
+          files.push(fileInfo);
+          finish(undefined,col);
         });
       }
     }).on('file', function (name, file) {
@@ -209,46 +218,16 @@ module.exports = function (server) {
     form.parse(handler.req);
   };
 
-  /*
-
-  // get a file 
-  UploadHandler.prototype.get = function () {
-    var handler = this;
-    var files = [];
-
-    fs.readdir(FileInfo.options.uploadDir, function (err, list) {
-      list.forEach(function (name) {
-        var stats = fs.statSync(path.join(FileInfo.options.uploadDir, name)),
-          fileInfo;
-        if (stats.isFile() && name[0] !== '.') {
-          fileInfo = new FileInfo({
-            name: name,
-            size: stats.size,
-            path: path.join(FileInfo.options.uploadDir, name)
-          });
-          fileInfo.initUrls(handler.req);
-          files.push(fileInfo);
-        }
-      });
-      handler.handleResult({
-        success: true,
-        files: files
-      });
-      return;
-    });
-  };
-  */
-
   // delete a file
   UploadHandler.prototype.destroy = function () {
     var handler = this;
 
     if (handler.req.url.slice(0, FileInfo.options.uploadUrl.length) === FileInfo.options.uploadUrl) {
-      var fileName = path.basename(decodeURIComponent(handler.req.url));
+      var fileName = Path.basename(decodeURIComponent(handler.req.url));
       if (fileName[0] !== '.') {
-        fs.unlink(path.join(FileInfo.options.uploadDir, fileName), function (ex) {
+        fs.unlink(Path.join(FileInfo.options.uploadDir, fileName), function (ex) {
           Object.keys(FileInfo.options.imageVersions).forEach(function (version) {
-            fs.unlink(path.join(FileInfo.options.uploadDir, version, fileName));
+            fs.unlink(Path.join(FileInfo.options.uploadDir, version, fileName));
           });
           handler.handleResult({
             success: !ex
@@ -263,46 +242,6 @@ module.exports = function (server) {
     });
   };
 
-  // rest3d post upload API
-  server.post(/^\/rest3d\/tmp.*/, function (req, res, next) {
-
-    var handler = new UploadHandler(req, res, next);
-    handler.allowOrigin();
-    handler.db = tmpdb;
-
-    var params = req.url.split("/tmp")[1];
-
-
-    Collection.find(handler.db, path.join('/', handler.sid, '/', params), function (err, result) {
-
-      console.log('res POST returned match =' + result.path + ' asset =' + result.assetpath);
-
-      handler.post(result.path, result.assetpath);
-
-    })
-
-  });
-
-
-  // rest3d get upload API
-  server.get(/^\/rest3d\/tmp.*/, function (req, res, next) {
-    var handler = new UploadHandler(req, res, next);
-    handler.allowOrigin();
-    handler.db = tmpdb;
-
-    var params = req.url.split("/tmp")[1];
-    if (params.contains('?'))
-      params = params.stringBefore('?');
-    while (params.slice(-1) === '/') params = params.slice(0, -1);
-
-    var uuid = req.query.uuid;
-
-
-    console.log('in GET tmp/ for asset=' + params)
-    console.log('in GET tmp/upload with path =' + uuid);
-
-    handler.get(params, req.query.uuid);
-  });
 
   UploadHandler.prototype.get = function(params,uuid){
 
@@ -386,7 +325,7 @@ module.exports = function (server) {
     } else {
 
       if (!params && !uuid) {
-        Collection.find(handler.db, path.join('/', handler.sid), function (err, result) {
+        Collection.find(handler.db, Path.join('/', handler.sid), function (err, result) {
           if (err) return handler.handleError(err);
           else {
             result.collection.get(function (err, result) {
@@ -417,9 +356,9 @@ module.exports = function (server) {
         })
       } else /* this is a path */ {
 
-        console.log('get tmp quering for collection =' + path.join('/', handler.sid, '/', params));
+        console.log('get tmp quering for collection =' + Path.join('/', handler.sid, params));
 
-        Collection.find(handler.db, path.join('/', handler.sid, '/', params), function (err, res) {
+        Collection.find(handler.db, Path.join('/', handler.sid, params), function (err, res) {
           if (err) return handler.handleError(err);
           else {
             // res = {path collection}
@@ -443,7 +382,7 @@ module.exports = function (server) {
                 if (!asset) return handler.handleError('get /tmp/ cannot find asset=' + res.assetpath);
                 
                 // TODO: replace with var url = handler.db.getUrl(asset.uuid);
-                var p = path.resolve(FileInfo.options.uploadDir, asset.uuid);
+                var p = Path.resolve(FileInfo.options.uploadDir, asset.uuid);
                 console.log('sending file=' + p)
                 handler.sendFile(p,asset.type,asset.name);
               })
@@ -454,4 +393,46 @@ module.exports = function (server) {
       }
     }
   };
+
+  // rest3d post upload API
+  server.post(/^\/rest3d\/tmp.*/, function (req, res, next) {
+
+    var handler = new UploadHandler(req, res, next);
+    handler.allowOrigin();
+    handler.db = tmpdb;
+
+    var params = req.url.split("/tmp")[1];
+
+
+    Collection.find(handler.db, Path.join('/', handler.sid, params), function (err, result) {
+
+      console.log('res POST returned match =' + result.path + ' asset =' + result.assetpath);
+
+      handler.post(result.path, result.assetpath);
+
+    })
+
+  });
+
+
+  // rest3d get upload API
+  server.get(/^\/rest3d\/tmp.*/, function (req, res, next) {
+    var handler = new UploadHandler(req, res, next);
+    handler.allowOrigin();
+    handler.db = tmpdb;
+
+    var params = req.url.split("/tmp")[1];
+    if (params.contains('?'))
+      params = params.stringBefore('?');
+    while (params.slice(-1) === '/') params = params.slice(0, -1);
+
+    var uuid = req.query.uuid;
+
+
+
+    console.log('in GET tmp/ for asset=' + params)
+    console.log('in GET tmp/upload with path =' + uuid);
+
+    handler.get(params, req.query.uuid);
+  });
 };

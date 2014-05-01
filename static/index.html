@@ -238,6 +238,15 @@ THE SOFTWARE.
         </li>
 
         <li>
+          <form id='create-collection' action="/rest3d/tmp/" enctype="multipart/form-data" method="POST">
+            [POST collection] /rest3d/tmp/
+            <input type="text" size="40" value="" onkeyup="document.getElementById('create-collection').action = '/rest3d/tmp/'+this.value;"/>
+            <input id="collection" size="50" name="collection" value="tmp" />
+            <input type="submit"/> create new collection at path
+          </form>
+        </li>
+
+        <li>
           <form id='url-upload-1' action="/rest3d/tmp/" enctype="application/x-www-form-urlencoded" method="POST">
             [POST URL] /rest3d/tmp/
             <input type="text" size="40" value="" onkeyup="document.getElementById('url-upload-1').action = '/rest3d/tmp/'+this.value;"/>
