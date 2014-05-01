@@ -226,10 +226,10 @@ server.get(/^\/rest3d\/info/, function (req, res, next) {
         this.signin = signin;
         }
     var result = {};
-    if (server.db) {
+    // if (server.db) {
         result["db"] = new database("db",0,"../gui/images/exist.png");
         result["db"].description = "Your cloud repository";
-        result["db"].signin = "";}
+        result["db"].signin = "";
     if(server.hasOwnProperty("dvia")){
         result["dvia"] = new database("3dvia",2,"../gui/images/3dvia.png");
         result["dvia"].description = "'Whether you're building a scene and want the perfect elements to fill it or need models with intelligence for your next interactive game, save time and resources by downloading assets from 3DVIA's Content Warehouse with a combined 85,000 free user contributed and premium models available for download. You're bound to find what you're looking for.' ref http://www.3dvia.com/resources";

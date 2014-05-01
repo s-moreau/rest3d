@@ -6,11 +6,11 @@ require.config({
         javascript: "../deps/codemirror/javascript",
         showHint: "../deps/codemirror/show-hint",
         javacriptHint: "../deps/codemirror/javascript-hint",
-        dialog:"../deps/codemirror/dialog",
-        search:"../deps/codemirror/search",
-        searchCursor:"../deps/codemirror/search-cursor",
+        dialog: "../deps/codemirror/dialog",
+        search: "../deps/codemirror/search",
+        searchCursor: "../deps/codemirror/search-cursor",
         jquerylayout: "../deps/jquery.layout-1.3.0.min",
-        upload: '../deps/upload/jquery.fileupload',
+        uploadPlugin: '../deps/upload/jquery.fileupload',
         uploadProcess: '../deps/upload/jquery.fileupload-process',
         uploadValidate: '../deps/upload/jquery.fileupload-validate',
         uploadTransport: '../deps/upload/jquery.iframe-transport',
@@ -25,142 +25,145 @@ require.config({
         eye: "../deps/colorpicker/eye",
         colorpickerUtils: "../deps/colorpicker/utils",
         webglUtils: "../deps/webgl-utils",
-        WebGLDebugUtils:"../deps/webgl-debug",
+        WebGLDebugUtils: "../deps/webgl-debug",
         q: '../deps/q',
-        collada:"../loaders/collada",
-        gltf:"../loaders/gltf",
-        console:"../deps/console",
-        screenfull:"../deps/screenfull.min",
-        gui:"../gui/gui6",
+        collada: "../loaders/collada",
+        gltf: "../loaders/gltf",
+        console: "../viewer/tab_console",
+        screenfull: "../deps/screenfull.min",
+        gui: "../gui/gui6",
         rest3dUtils: '../lib/utils',
         viewer: '../viewer/viewer6',
-        channel:"../viewer/channel",
-        uploadViewer: '../viewer/viewer6-upload',
+        channel: "../viewer/channel",
+        upload: '../viewer/viewer6_upload',
         fpsCounter: '../viewer/fpscounter',
-        viewer_ui : '../viewer/viewer6_ui',
-        database : '../viewer/viewer6-database',
+        viewer_ui: '../viewer/viewer6_ui',
+        database: '../viewer/viewer6_database',
+        rest3dToTree: '/viewer/rest3dToTree',
+        scene: '/viewer/tab_scene',
+        script: '/viewer/tab_script'
     },
     shim: {
-        'jqueryui':{
+        'jqueryui': {
             deps: ['jquery'],
             exports: '$.ui'
         },
-        'jquerylayout':{
+        'jquerylayout': {
             deps: ['jqueryui'],
             exports: '$.fn.layout;'
         },
-        'skinner':{
+        'skinner': {
             deps: ['jquery'],
             exports: '$.fn.skinner'
         },
-        'uploadProcess':{
-             deps: ['upload'],
-             exports: 'originalAdd',
+        'uploadProcess': {
+            deps: ['upload'],
+            exports: 'originalAdd',
         },
-        'uploadValidate':{
+        'uploadValidate': {
             deps: ['uploadProcess'],
             exports: '$.blueimp.fileupload',
         },
-        'uploadTransport':{
-             deps: ['jquery'],
-             exports: '$',
+        'uploadTransport': {
+            deps: ['jquery'],
+            exports: '$',
         },
-        'upload':{
+        'uploadPlugin': {
             deps: ['jqueryui'],
             exports: "$.fn.fileupload",
         },
-        'toolbar':{
+        'toolbar': {
             deps: ['jquery'],
             exports: "$.fn.toolbar",
         },
-        'terminal':{
+        'terminal': {
             deps: ['jquery'],
             exports: '$.fn.terminal',
         },
-        'pnotify':{
+        'pnotify': {
             deps: ['jquery'],
             exports: '$.pnotify',
         },
-        'jstree':{
-           deps: ['jquery'],
-           exports: '$.fn.jstree' 
+        'jstree': {
+            deps: ['jquery'],
+            exports: '$.fn.jstree'
         },
-        'colorpicker':{
+        'colorpicker': {
             deps: ['jquery'],
             exports: '$.fn.ColorPicker',
         },
-        'eye':{
+        'eye': {
             deps: ['jquery'],
             exports: 'window.EYE',
         },
-        'colorpickerUtils':{
+        'colorpickerUtils': {
             deps: ['eye'],
             exports: 'window.EYE',
         },
-        'webglUtils':{
+        'webglUtils': {
             exports: 'WebGLUtils',
         },
-        'WebGLDebugUtils':{
+        'WebGLDebugUtils': {
             exports: 'WebGLDebugUtils',
         },
-        'console':{
+        'console': {
             deps: ['jquery'],
             exports: 'CONSOLE',
         },
-        'camera':{
+        'camera': {
             exports: 'Camera',
         },
-        'screenfull':{
+        'screenfull': {
             exports: 'screenfull',
         },
-        'javascript':{
+        'javascript': {
             deps: ['codemirror']
         },
-        'showHint':{
+        'showHint': {
             deps: ['codemirror']
         },
-        'javacriptHint':{
+        'javacriptHint': {
             deps: ['codemirror']
         },
-        "dialog":{
+        "dialog": {
             deps: ['codemirror']
         },
-        "search":{
+        "search": {
             deps: ['codemirror']
         },
-        "searchCursor":{
+        "searchCursor": {
             deps: ['codemirror']
         },
-        'codemirror':{
+        'codemirror': {
             exports: 'CodeMirror'
         },
-        'q':{
+        'q': {
             exports: 'Q'
         },
-        'gui':{
+        'gui': {
             deps: ['jquery']
         }
     },
 })
 
 var css = [
-"../gui/gui6.css",
-"../deps/codemirror/css/eclipse.css",
-"../deps/css/jquery-skinner.css",
-"../deps/codemirror/css/codemirror.css",
-"../deps/codemirror/css/show-hint.css",
-"../deps/codemirror/css/dialog.css",
-"../deps/css/bootstrap.icons.css",
-"../deps/css/jquery.toolbars.css",
-"../deps/css/jquery.terminal.css",
-"../deps/jstree/themes/apple/style.css",
-"../deps/css/jquery.pnotify.default.css",
-"../deps/colorpicker/css/colorpicker.css",
-"../deps/colorpicker/css/layout.css",
+    "../gui/gui6.css",
+    "../deps/codemirror/css/eclipse.css",
+    "../deps/css/jquery-skinner.css",
+    "../deps/codemirror/css/codemirror.css",
+    "../deps/codemirror/css/show-hint.css",
+    "../deps/codemirror/css/dialog.css",
+    "../deps/css/bootstrap.icons.css",
+    "../deps/css/jquery.toolbars.css",
+    "../deps/css/jquery.terminal.css",
+    "../deps/jstree/themes/apple/style.css",
+    "../deps/css/jquery.pnotify.default.css",
+    "../deps/colorpicker/css/colorpicker.css",
+    "../deps/colorpicker/css/layout.css",
 ]
 
-function loadStyle(){
-    for(var i=0;i<css.length;i++){
+function loadStyle() {
+    for (var i = 0; i < css.length; i++) {
         var s = document.createElement('link');
         s.rel = 'stylesheet';
         s.href = css[i];
@@ -169,6 +172,7 @@ function loadStyle(){
 };
 
 loadStyle();
-require(['viewer_ui','fpsCounter'], function(viewer, FPSCounter) { 
-    viewer.INIT(); 
+
+require(['viewer_ui', 'fpsCounter'], function (viewer, FPSCounter) {
+    viewer.INIT();
 });

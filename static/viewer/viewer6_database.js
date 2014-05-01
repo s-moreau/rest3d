@@ -1,5 +1,5 @@
 'use strict';
-define(['viewer', 'gui', 'uploadViewer', 'rest3d', 'q', 'collada', 'gltf', 'renderer', 'state', 'channel'],
+define(['viewer', 'gui', 'rest3d', 'q', 'collada', 'gltf', 'renderer', 'state', 'channel'],
     function (viewer, gui, setViewer6Upload, rest3d, Q, COLLADA, glTF, RENDERER, State, Channel) {
         function databaseTab(_json) {
             this.name = _json.name;
@@ -144,7 +144,7 @@ define(['viewer', 'gui', 'uploadViewer', 'rest3d', 'q', 'collada', 'gltf', 'rend
                     deferred.resolve();
                     return deferred.promise;
                 };
-                rest3d.urlUpload(uri, call, viewer.idUser);
+                rest3d.urlUpload(uri, call);
             }
             this.preview = function (node) {
                 $("#dialog").dialog("close");
@@ -551,9 +551,7 @@ define(['viewer', 'gui', 'uploadViewer', 'rest3d', 'q', 'collada', 'gltf', 'rend
                         width: '600',
                         height: '500',
                         open: function () {
-                            console.debug(stock.signin);
                             $('#myIframe').attr('src', stock.signin);
-                            console.debug(gitHtml.find('iframe').contents())
                         },
                         close: function () {
                             gitHtml.remove();
@@ -574,7 +572,6 @@ define(['viewer', 'gui', 'uploadViewer', 'rest3d', 'q', 'collada', 'gltf', 'rend
             switch (this.login) {
             case 0:
             case 3:
-                console.debug("in");
                 if (this.login == 0) {
                     var text = '(no authentification required)';
                 }
