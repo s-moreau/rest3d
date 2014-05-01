@@ -1119,23 +1119,6 @@ define(['viewer', 'gui', 'uploadViewer', 'rest3d', 'q', 'collada', 'gltf', 'rend
             }).width("90%");
             accordion.collada.append("<hr></hr>");
 
-
-            GUI.button('duck rest3d(need database)', accordion.collada, function () {
-                pleaseWait(true);
-                var url = "/rest3d/assets/duck/duck.dae";
-                COLLADA.load(url, viewer.parse_dae).then(
-                    function (flag) {
-                        pleaseWait(false);
-                        window.notif(url);
-                    }, function (error) {
-                        // If there's an error or a non-200 status code, log the error.
-                        console.error("cs " + error);
-                    });
-
-            }).width("90%");
-            accordion.collada.append("<hr></hr>");
-
-
             GUI.button('cat skinned', accordion.gltf, function () {
                 pleaseWait(true);
                 var url = "/models/cat/cat-skin.json";
