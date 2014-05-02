@@ -186,11 +186,15 @@
     var collectionpath = this.collectionpath;
     var assetpath = this.assetpath;
 
-    // create collection if needed
-    Collection.create(database,collectionpath,uid, function(err,_col){
+    // find collection 
+    
+    Collection.find(database,collectionpath,function(err,result){
       if (err) return cb(err);
+      if (result.path !== collectionpath)
+        return cb('cannot find collection at path +='+collectionpath);
+ 
       // upload data
-      var collection=_col;
+      var collection=result.collection;
       var resource = new Resource(collection.database, fileInfo.name, fileInfo.type);
       resource.size = fileInfo.size;
       fileInfo.resource = resource;
@@ -200,23 +204,6 @@
           fileInfo.asset = asset;
           cb(undefined,fileInfo.resource.uuid);
         });
-/*
-        // create associated Asset
-        var name = resource.name;
-        var asset = new Asset(resource.database,name,resource);
-        Asset.create(asset, resource.userId, function(err,asset){
-          if (err) return cb(err);
-
-          fileInfo.asset = asset;
-          fileInfo.resource = resource;
-          
-          // finally add the new asset to the collection
-          collection.addAsset(fileInfo.asset,Path.join(assetpath,asset.name), function(err,collection){
-            if (err) cb(err)
-            else cb(undefined,fileInfo.resource.uuid);
-
-          });
-  */
 
 
       })
@@ -244,6 +231,14 @@
     if (handler.db.name !== 'tmp'){
       // make an asset out of this fileInfo
       // create a uuid
+
+      // We do not accept files in the root
+      if (fileInfo.collectionpath === ''){
+        var error = {};
+        error.message='missing collection path';
+        error.statusCode=403;
+        return cb(error)
+      }
       fileInfo.toAsset(handler.db,handler.sid, function(err,assetId) {
         if (err) return cb(err);
 
