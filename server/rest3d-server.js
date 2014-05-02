@@ -227,17 +227,17 @@ server.get(/^\/rest3d\/info/, function (req, res, next) {
         this.signin;///It's an url. if array, redirection with new window. If not, iframe used
         this.upload;/// Set whether or not the upload feature is available
         }
-    var result = {};
-    // if (server.db) {
+        var result = {};
         result["tmp"] = new database("tmp",0,"../gui/images/upload_d.png")
         result["tmp"].description = "This is your cloud repository, any assets manipulated over this tab is stocked in a node server's job created at your session initialization. Everything will be lost once the session expires.";
         result["tmp"].signin = "";
         result["tmp"].upload = true;
-
+     if(server.db) {
         result["db"] = new database("db",0,"../gui/images/exist.png");
         result["db"].description = "Your cloud repository";
         result["db"].signin = "";
         result["db"].upload = true;
+    }
     if(server.hasOwnProperty("dvia")){
         result["dvia"] = new database("3dvia",2,"../gui/images/3dvia.png");
         result["dvia"].description = "'Whether you're building a scene and want the perfect elements to fill it or need models with intelligence for your next interactive game, save time and resources by downloading assets from 3DVIA's Content Warehouse with a combined 85,000 free user contributed and premium models available for download. You're bound to find what you're looking for.' ref http://www.3dvia.com/resources";

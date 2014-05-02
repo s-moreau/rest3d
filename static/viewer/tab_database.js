@@ -432,10 +432,10 @@ define(['q'],
 
                 stock = this;
                 if (this.login != 2) {
-                    stock.treeCallback();
-                    // this.parent.focusTab(function () {
-                    //     stock.treeCallback();
-                    // });
+                    // stock.treeCallback();
+                    this.parent.focusTab(function () {
+                        stock.treeCallback();
+                    });
                 }
                 else {
                     // treeCallback(); 
@@ -589,7 +589,12 @@ define(['q'],
                 else{
                     this.rest3dToTree.createTree();
                     var stock = this;
-                    setTimeout(function(){stock.rest3dToTree.setUpload()},1000);
+                    setTimeout(function(){
+                        stock.rest3dToTree.setUpload();
+                    },50);
+                    this.parent.focusTab(function(){
+                        stock.rest3dToTree.refresh();
+                    });
                 }
                 break;
             case 1:
@@ -602,8 +607,13 @@ define(['q'],
                 if(!this.upload)this.generateCoreTab();
                 else{this.rest3dToTree.createTree();
                     var stock = this;
-
-                    setTimeout(function(){stock.rest3dToTree.setUpload()},1000);
+                    setTimeout(function(){
+                        stock.rest3dToTree.setUpload();
+                     },50);
+                    this.parent.focusTab(function(){
+                        stock.rest3dToTree.refresh();
+                    });
+                   
                 }
                 break;
             case 2:

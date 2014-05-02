@@ -1111,8 +1111,29 @@ define(['viewer', 'gui', 'rest3d', 'q', 'collada', 'gltf', 'renderer', 'state', 
             GUI.container.initContent("west");
 
             //Linking UI to the rest3d API 
-             welcomePanel();
-
+             // welcomePanel();
+            rest3d.database({}, function(data){
+                 if (jQuery.isEmptyObject(data.children) && jQuery.isEmptyObject(data.assets)) { // If no activities on the tmp repository exist
+                    welcomePanel();
+                }
+                else { // else check databases enabled from the server and load their tabs
+                    // tmp.infoServer(); // lunch request
+                    rest3d.info(function(data){
+                        for(var key in data){
+                                var name = key;
+                                window.renderMenu.addTab({
+                                    id: "tab_"+name,
+                                    text: "  " + name,
+                                });
+                                var rest3dToTree = new window.rest3dToTree(data[key],window.renderMenu["tab_"+name]);
+                                $("#dialog").dialog("close");
+                            }
+                        });
+                    // setTimeout(function () {
+                    //     tmp.tree.jstree('open_all');
+                    // }, 1500); // open all nodes of the tab
+                }              
+            }, "/tmp");
             // //LOADING OF TMP DATABASE BY DEFAULT
             // window.renderMenu = renderMenu;
             // var tmp = new rest3dToTree("tmp"); //Object instancied from the new database(tmp). It creates automatically his tree;

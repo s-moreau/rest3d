@@ -43,10 +43,10 @@ define(['rest3d', 'upload', 'viewer','database'], function (rest3d, setViewer6Up
             var tmp = new databaseTab(this,this.data,this.area);        
         }
 
-        this.refresh = function (callback) {
+        this.refresh = function () {
             var stock = this;
             var cb = function (data) {
-                callback(data);
+                // callback(data);
                 stock.loop(data, stock.nodeRoot);
             }
             rest3d.database({}, cb, "/" + this.name);
@@ -236,21 +236,71 @@ define(['rest3d', 'upload', 'viewer','database'], function (rest3d, setViewer6Up
             return string;
         }
 
+        this.parseMessage = function(new_data){
+            console.debug(new_data);
+        }
+
         this.createTree = function () {
             var stock = this;
+            // json: {
+            //                     "ajax": {
+            //                         "type": 'GET',
+            //                         "url": function (node) {
+            //                             nodeBuffer = node;
+            //                             var nodeId = "";
+            //                             var url = "";
+            //                             // var type = node.attr('type'); 
+            //                             if (node == -1) {
+            //                                 url = location.protocol + "//" + location.host + "/rest3d/" + stock.name + "/search/" + searchInput.val();
+            //                             }
+            //                             else if (node.attr('rel') == "collection" || "model") {
+            //                                 nodeId = node.attr('id');
+            //                                 url = location.protocol + "//" + location.host + "/rest3d/" + stock.name + "/" + nodeId;
+            //                             }
+            //                             return url;
+            //                         },
+            //                         "success": function (new_data) {
+            //                             var result = [];
+            //                             $("#img-loadingWarehouse").remove();
+            //                             result = stock.parseDatabaseJson(new_data, result);
+            //                             return result;
+            //                         }
+            //                     }
+            //                 },
             this.tree = GUI.treeBis({
                 id: 'tree_' + this.name,
                 parent: this.area,
                 json: {
-                    "data": {
-                        "data": "Guest_repository",
-                        "attr": {
-                            "id": this.id,
-                            "rel": "collection",
-                            "path": "/rest3d/tmp/",
-                            "file": this.id,
+                    // "data": {
+                    //     "data": "Guest_repository",
+                    //     "attr": {
+                    //         "id": this.id,
+                    //         "rel": "collection",
+                    //         "path": "/rest3d/tmp/",
+                    //         "file": this.id,
+                    //     }
+                    // },
+                    "ajax": {
+                        "type": 'GET',
+                        "url": function (node) {
+                            var nodeId = "";
+                            var url = "";
+                            // var type = node.attr('type'); 
+                            if (node == -1) {
+                                url = location.protocol + "//" + location.host + "/rest3d/" + stock.name + "/";
+                            }
+                            else if (node.attr('rel') == "collection" || "model") {
+                                nodeId = node.attr('id');
+                                url = location.protocol + "//" + location.host + "/rest3d/" + stock.name + "/";
+                            }
+                            return url;
+                        },
+                        "success": function (new_data) {
+                            var result = [];//result.state = "closed";
+                            result = stock.parseMessage(new_data);
+                            return result;
                         }
-                    },
+                    }
                 },
                 "dnd": {
                     "drop_finish": function (data) {
