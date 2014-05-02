@@ -38,14 +38,16 @@ module.exports = function (server) {
   var tmpdb={};
   tmpdb.assets={};
   tmpdb.name = 'tmp';
-  UploadHandler.tmpdb = tmpdb; // needed to create TMP folder in session
-  tmpdb.root = null;
+
+  tmpdb.root = null; // where we store each user root collection
+
   tmpdb.saveAsset = function(asset,cb){
     // update root if this asset is the root folder
     if (asset.name === '/') tmpdb.root = asset;
     tmpdb.assets[asset.uuid] = asset;
     cb(undefined,asset);
   }
+
   tmpdb.loadAsset = function(database,id,cb){
     var result = tmpdb.assets[id];
     result.database=database;
@@ -65,6 +67,27 @@ module.exports = function (server) {
     cb(undefined, tmpdb.root);
   }
 
+  // make sure we have a tmp folder for this user
+  server.use(function(req,res,next){
+    if (!req.session || !req.session.sid)
+    return next(new Error('cannot find sid in upload::createTMP'))
+    if (!req.session.tmpdir) {
+      // create tmp folder for user
+      Collection.create(tmpdb,Path.join('/',req.session.sid),0, function(err,collection){
+        if (err){
+          console.log('Could NOT create TMP folder for user='+req.session.sid)
+          next(err);
+        } 
+        else {
+          console.log('Created TMP for user='+req.session.sid)
+          req.session.tmpdir=collection;
+          server.sessionManager.save(req.session.sid, req.session, next)
+        }
+      })
+    } else
+    next();
+  })
+
 
   // upload one or more files
   UploadHandler.prototype.post = function (collectionpath, assetpath) {
@@ -74,6 +97,7 @@ module.exports = function (server) {
     var files = [];
     var map = {}
     var counter = 1;
+
   
     var finish = function (err, asset) {
       if (err) {
@@ -140,7 +164,7 @@ module.exports = function (server) {
         // downloading file and uncompressing if needed
         // counter++; -> getting all files at once
         //                                                      no jar
-        counter++; // so that 'end' does not finish
+        counter++; // one more result to POST
         zipFile.unzipUrl(handler, collectionpath, assetpath, value, null, function(error,result) {
           if (error)
             handler.handleError(error);
