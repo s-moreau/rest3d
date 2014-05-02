@@ -38,7 +38,7 @@ require.config({
         upload: '../viewer/viewer6_upload',
         fpsCounter: '../viewer/fpscounter',
         viewer_ui: '../viewer/viewer6_ui',
-        database: '../viewer/viewer6_database',
+        database: '../viewer/tab_database',
         rest3dToTree: '/viewer/rest3dToTree',
         scene: '/viewer/tab_scene',
         script: '/viewer/tab_script'

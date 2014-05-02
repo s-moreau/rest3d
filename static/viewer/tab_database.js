@@ -1,18 +1,19 @@
 'use strict';
-define(['viewer', 'gui', 'rest3d', 'q', 'collada', 'gltf', 'renderer', 'state', 'channel'],
-    function (viewer, gui, setViewer6Upload, rest3d, Q, COLLADA, glTF, RENDERER, State, Channel) {
-        function databaseTab(_json) {
-            this.name = _json.name;
-            this.login = _json.login;
-            this.picture = _json.picture;
-            this.description = _json.description;
-            this.signin = _json.signin;
+define(['q'],
+    function (Q) {
+        function databaseTab(rest3dToTree,data,parent) {
+            this.rest3dToTree = rest3dToTree;
+            console.debug(this.rest3dToTree)
+            this.name = data.name;
+            this.login = data.login;
+            this.picture = data.picture;
+            this.description = data.description;
+            this.upload = data.upload;
+            this.login = data.login;
+            this.signin = data.signin;
+            this.parent = parent;
             var nodeBuffer;
             var stock = this;
-            window.renderMenu.addTab({
-                id: stock.name + "_tab",
-                text: "  " + stock.name,
-            });
             this.parseDatabaseJson = function (param_in, param_out) {
                 function children(param_in, param_out) {
                     for (var j = 0; j < param_in.length; j++) {
@@ -186,10 +187,10 @@ define(['viewer', 'gui', 'rest3d', 'q', 'collada', 'gltf', 'renderer', 'state', 
             }
             this.trees;
             this.generateCoreTab = function () {
-                renderMenu[stock.name + "_tab"].append("<a style='text-decoration:underline'>Features:</a><br></br>");
+                this.parent.append("<a style='text-decoration:underline'>Features:</a><br></br>");
                 this.accor = GUI.accordion({
                     id: stock.name + "_accor",
-                    parent: renderMenu[stock.name + "_tab"],
+                    parent: this.parent,
                     item: [{
                         id: "sample_" + stock.name,
                         text: "Sample of collections"
@@ -431,9 +432,10 @@ define(['viewer', 'gui', 'rest3d', 'q', 'collada', 'gltf', 'renderer', 'state', 
 
                 stock = this;
                 if (this.login != 2) {
-                    renderMenu[stock.name + "_tab"].focusTab(function () {
-                        stock.treeCallback();
-                    });
+                    stock.treeCallback();
+                    // this.parent.focusTab(function () {
+                    //     stock.treeCallback();
+                    // });
                 }
                 else {
                     // treeCallback(); 
@@ -445,10 +447,10 @@ define(['viewer', 'gui', 'rest3d', 'q', 'collada', 'gltf', 'renderer', 'state', 
             //window["trees_"+stock.name]
             this.loginArea = function () {
                 // var html = $("<div id='loginDiv' style='border:2px solid red'></div>");
-                // renderMenu[stock.name + "_tab"].append(html)"login_"+stock.name
+                // renderMenu["tab_"+stock.name].append(html)"login_"+stock.name
                 var im;
                 stock = this;
-                var loginButton = GUI.button("", renderMenu[stock.name + "_tab"], function () {
+                var loginButton = GUI.button("", this.parent, function () {
                     var tmp = '<div id="frame_' + stock.name + '"></div>';
                     var notif = GUI.notification({
                         title: stock.name + " login",
@@ -534,11 +536,11 @@ define(['viewer', 'gui', 'rest3d', 'q', 'collada', 'gltf', 'renderer', 'state', 
 
             };
             this.descriptionArea = function () {
-                renderMenu[stock.name + "_tab"].append("<br>");
+                this.parent.append("<br>");
                 var html = $('<div style="background:white;box-shadow: 5px 5px 5px #888888;">');
-                renderMenu[stock.name + "_tab"].append(html);
+                this.parent.append(html);
                 html.append(stock.description);
-                renderMenu[stock.name + "_tab"].append("<br>");
+                this.parent.append("<br>");
             }
             stock = this;
             window["login_" + stock.name] = function () {
@@ -567,7 +569,6 @@ define(['viewer', 'gui', 'rest3d', 'q', 'collada', 'gltf', 'renderer', 'state', 
                 }
             }
             // this.generateCoreTab();
-            stock = this;
 
             switch (this.login) {
             case 0:
@@ -579,31 +580,42 @@ define(['viewer', 'gui', 'rest3d', 'q', 'collada', 'gltf', 'renderer', 'state', 
                     var text = '(authentification not yet implemented)';
                 }
                 var tmp = $("<a style='color: red;'>" + text + "</a>");
-                renderMenu[stock.name + "_tab"].append(tmp);
-                renderMenu[stock.name + "_tab"].append("<br><br>");
+                this.parent.append(tmp);
+                this.parent.append("<br><br>");
                 this.descriptionArea();
-                renderMenu[stock.name + "_tab"].append("<br><hr><br>")
-                this.generateCoreTab();
+                this.parent.append("<br><hr><br>")
+                if(!this.upload){
+                    this.generateCoreTab();}
+                else{
+                    this.rest3dToTree.createTree();
+                    var stock = this;
+                    setTimeout(function(){stock.rest3dToTree.setUpload()},1000);
+                }
                 break;
             case 1:
                 var tmp = $("<a style='color: red;'>(authentification is optional)</a>");
-                renderMenu[stock.name + "_tab"].append(tmp);
+                this.parent.append(tmp);
                 this.loginArea();
-                renderMenu[stock.name + "_tab"].append("<br><br>");
+                this.parent.append("<br><br>");
                 this.descriptionArea();
-                renderMenu[stock.name + "_tab"].append("<a style='float:right;' href='javascript:window.login_" + stock.name + "()'>+Sign in</a><br><hr></br>");
-                this.generateCoreTab();
+                this.parent.append("<a style='float:right;' href='javascript:window.login_" + stock.name + "()'>+Sign in</a><br><hr></br>");
+                if(!this.upload)this.generateCoreTab();
+                else{this.rest3dToTree.createTree();
+                    var stock = this;
+
+                    setTimeout(function(){stock.rest3dToTree.setUpload()},1000);
+                }
                 break;
             case 2:
                 var tmp = $("<a id='header_" + stock.name + "' style='color: red;'>(authentification is required)</a>");
-                renderMenu[stock.name + "_tab"].append(tmp);
+                this.parent.append(tmp);
                 this.loginArea();
-                renderMenu[stock.name + "_tab"].append("<br><br>");
+                this.parent.append("<br><br>");
                 this.descriptionArea();
-                renderMenu[stock.name + "_tab"].append("<a style='float:right;' href='javascript:window.login_" + stock.name + "()'>+Sign in</a><br><hr><br>");
+                this.parent.append("<a style='float:right;' href='javascript:window.login_" + stock.name + "()'>+Sign in</a><br><hr><br>");
                 break;
             }
-            GUI.image(renderMenu[stock.name + "_tab"].title, "img-render", stock.picture, 12, 14, "before");
+            GUI.image(this.parent.title, "img-render", stock.picture, 12, 14, "before");
 
         };
         return databaseTab;

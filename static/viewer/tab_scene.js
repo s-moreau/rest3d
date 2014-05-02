@@ -22,16 +22,13 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.*/
 'use strict';
 define([], function () {
-    function scene_init() {
+    function scene_init(parent) {
         var treeScene = false;
         var treeJson = {};
         var callbackArray = [];
         var $flagScene = $("<h3 style='text-align:center !important;'>No scenes loaded yet</h3>");
-        window.renderMenu.addTab({
-            id: "scenes",
-            text: " Scenes",
-        });
-        window.renderMenu.scenes.append($flagScene);
+        if(!parent.hasOwnProperty("scenes"))parent.script = parent;
+        parent.scenes.append($flagScene);
 
         window.refreshScenesTree = function () {
             $flagScene.hide();
@@ -314,7 +311,7 @@ define([], function () {
             var nodeBuffer;
             treeScene = GUI.treeBis({
                 id: 'Tree',
-                parent: renderMenu.scenes,
+                parent: parent,
                 json: {
                     "ajax": {
                         "type": 'GET',

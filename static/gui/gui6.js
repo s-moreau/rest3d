@@ -247,6 +247,9 @@ define(['channel', 'codemirror', 'webglUtils', 'WebGLDebugUtils', 'pnotify', 'co
                         _cb(a, b)
                     });
                 }
+                this.openAll = function(){
+                    this[this.id].jstree('open_all');
+                }
                 this.remove = function () {
                     this[this.id].remove();
                     delete this;

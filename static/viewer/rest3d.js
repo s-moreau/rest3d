@@ -23,7 +23,7 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.*/
 'use strict'; //
 
-define(["jquery"], function ($) {
+define(["jquery","q"], function ($,Q) {
 
     // rest3d convert API
     // this is draft -> should create a convert request, and then do a long pull for query status
@@ -122,18 +122,22 @@ define(["jquery"], function ($) {
     }
 
     rest3d.info = function (cb) {
+        var defer = Q.defer();
         $.ajax({
             'type': "GET",
             'url': "/rest3d/info",
             success: function (data) {
                 if (cb) {
                     cb(jQuery.parseJSON(data))
+                    defer.resolve(jQuery.parseJSON(data));
                 }
             },
         });
+        return defer.promise;
     }
 
     rest3d.database = function (params, cb, path, uuid) {
+        var defer = Q.defer();
         if (uuid) {
             var id = "/?uuid=" + uuid;
         }
@@ -151,10 +155,12 @@ define(["jquery"], function ($) {
                     params.data = jQuery.parseJSON(data);
                 }
                 if (cb) {
-                    cb(params)
+                    cb(params);
+                    defer.resolve(params);
                 }
             },
         });
+        return defer.promise;
     }
 
 

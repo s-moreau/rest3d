@@ -217,28 +217,38 @@ server.db.init(function (b) {
 
 server.get(/^\/rest3d\/info/, function (req, res, next) {
     var handler = new Handler(req, res, next);
-    /// indexLogin : 0 -> no login needed, 1 -> optional, 2 -> required, 3-> not yet implemented
-    function database(name,indexLogin,pictureTmp,description,signin){
+    
+    /// if sign
+    function database(name,indexLogin,pictureTmp){
         this.name = name;
-        this.login = indexLogin;
+        this.login = indexLogin;/// indexLogin : 0 -> no login needed, 1 -> optional, 2 -> required, 3-> not yet implemented
         this.picture = pictureTmp;
-        this.description = description;
-        this.signin = signin;
+        this.description;
+        this.signin;///It's an url. if array, redirection with new window. If not, iframe used
+        this.upload;/// Set whether or not the upload feature is available
         }
     var result = {};
     // if (server.db) {
+        result["tmp"] = new database("tmp",0,"../gui/images/upload_d.png")
+        result["tmp"].description = "This is your cloud repository, any assets manipulated over this tab is stocked in a node server's job created at your session initialization. Everything will be lost once the session expires.";
+        result["tmp"].signin = "";
+        result["tmp"].upload = true;
+
         result["db"] = new database("db",0,"../gui/images/exist.png");
         result["db"].description = "Your cloud repository";
         result["db"].signin = "";
+        result["db"].upload = true;
     if(server.hasOwnProperty("dvia")){
         result["dvia"] = new database("3dvia",2,"../gui/images/3dvia.png");
         result["dvia"].description = "'Whether you're building a scene and want the perfect elements to fill it or need models with intelligence for your next interactive game, save time and resources by downloading assets from 3DVIA's Content Warehouse with a combined 85,000 free user contributed and premium models available for download. You're bound to find what you're looking for.' ref http://www.3dvia.com/resources";
         result["dvia"].signin ="https://www.3dvia.com/join";
+        result["dvia"].upload = false;
     }
     if(server.hasOwnProperty("warehouse")){
         result["warehouse"] = new database("warehouse",3,"../gui/images/warehouse.jpg");
         result["warehouse"].description = "'The Trimble 3D Warehouse (formerly Google 3D Warehouse) is an accompanying website for SketchUp where modelers can upload, download and share three-dimensional models.' ref http://en.wikipedia.org/wiki/Trimble_3D_Warehouse";
         result["warehouse"].signin =["https://3dwarehouse.sketchup.com/?redirect=1"];
+        result["warehouse"].upload = false;
     }
     // if(get.prototype)
     // handler.handleResult("database not connected")

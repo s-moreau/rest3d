@@ -1,28 +1,48 @@
 'use strict';
-define(['rest3d', 'upload', 'viewer'], function (rest3d, setViewer6Upload, viewer) {
-    var rest3dToTree = function (nameDatabase, parentTree) {
-        this.name = nameDatabase;
+       // this.name = name;
+       //  this.login = indexLogin;/// indexLogin : 0 -> no login needed, 1 -> optional, 2 -> required, 3-> not yet implemented
+       //  this.picture = pictureTmp;
+       //  this.description;
+       //  this.signin;///It's an url. if array, redirection with new window. If not, iframe used
+       //  this.upload;/// Set whether or not the upload feature is available
+define(['rest3d', 'upload', 'viewer','database'], function (rest3d, setViewer6Upload, viewer,databaseTab) {
+    var rest3dToTree = function (data,parent) {
+        var upload = "";
+        this.data = data;
+        this.login = data.login;
+        this.picture = data.picture;
+        this.signin = data.signin;
+        this.name = data.name;
+        this.upload = data.upload;
+        this.description = data.description;
         this.id = GUI.uniqueId();
-        this.area = parentTree;
-        this.infoServer = function () {
-            rest3d.info(function (data) {
-                if (data.hasOwnProperty("warehouse")) {
-                    require(["database"], function (databaseTab) {
-                        var tmp = new databaseTab(data.warehouse);
-                    });
-                }
-                if (data.hasOwnProperty("dvia")) {
-                    require(["database"], function (databaseTab) {
-                        var tmp = new databaseTab(data.dvia);
-                    });
-                }
-                if (data.hasOwnProperty("db")) {
-                    require(["database"], function (databaseTab) {
-                        var tmp = new databaseTab(data.db);
-                    });
-                }
-            })
+        this.area = parent;
+           // window["tab_"+name]=function(data,name){
+            //         window.renderMenu.addTab({
+            //             id: "tab_"+name,
+            //              text: "  " + name,
+            //         });
+            //         var tmp = new databaseTab(data[name],window.renderMenu["tab_"+name]);
+        // this.infoServer = function (cb) {
+        //     //  rest3d.info(
+        //     //     //function (data) {
+
+        //     //     // if (data.hasOwnProperty("warehouse")) {
+        //     //     //     window.tab_warehouse(data.warehouse,"warehouse")
+        //     //     // }
+        //     //     // if (data.hasOwnProperty("dvia")) {
+        //     //     // }
+        //     //     // if (data.hasOwnProperty("db")) {
+        //     //     // }
+        //     //     // if (data.hasOwnProperty("tmp")) {
+        //     //     // }
+        //     //     //}
+        //     // ).then(cb);
+        // }
+        this.init = function(){
+            var tmp = new databaseTab(this,this.data,this.area);        
         }
+
         this.refresh = function (callback) {
             var stock = this;
             var cb = function (data) {
@@ -217,6 +237,7 @@ define(['rest3d', 'upload', 'viewer'], function (rest3d, setViewer6Upload, viewe
         }
 
         this.createTree = function () {
+            var stock = this;
             this.tree = GUI.treeBis({
                 id: 'tree_' + this.name,
                 parent: this.area,
@@ -335,19 +356,24 @@ define(['rest3d', 'upload', 'viewer'], function (rest3d, setViewer6Upload, viewe
                     "theme": "apple",
                 },
             });
-            this.nodeRoot = $("#" + this.id);
         }
         this.setUpload = function () {
+            this.nodeRoot = $("#"+this.id)
             var upload = {
                 parent: this.area,
                 id: this.id,
                 url: location.protocol + "//" + location.host + '/rest3d/tmp/',
+                tree: this.tree["tree_"+this.name],
+                nodeRoot: this.nodeRoot
             };
-            upload = setViewer6Upload($, upload, rest3d, viewer);
+            console.debug(this.nodeRoot.length)
+            upload = setViewer6Upload(upload);
             upload.progress["progress_" + this.id].width("100%");
+            this.button =upload.button;
         }
-        this.createTree();
-        this.setUpload(); //we load the upload feature, by default for the moment
+                this.init();
+        // this.createTree();
+        // this.setUpload(); //we load the upload feature, by default for the moment
     }
     return rest3dToTree;
 })

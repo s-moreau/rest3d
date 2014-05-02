@@ -22,7 +22,9 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.*/
 define(['jquery', 'rest3d', 'gltf', 'collada', 'viewer', 'q'], function ($, rest3d, glTF, COLLADA, viewer, Q) {
 
-    function setViewer6Upload($, upload, rest3d, viewer) {
+    function setViewer6Upload(upload) {
+        var tree = upload.tree;
+        var nodeRoot = upload.nodeRoot;
         var index;
         var id;
         var flag;
@@ -36,7 +38,7 @@ define(['jquery', 'rest3d', 'gltf', 'collada', 'viewer', 'q'], function ($, rest
                     this.idUser = _json.idUser;
                 }
                 this.generateHTML = function(){
-                    this.html = "<div id='"+this.id+"' class='container'>";
+                    this.html = "<div id='container_"+this.id+"' class='container'>";
                     this.html+="<input id='fileupload_"+this.id+"' style='display:none;' type='file' name='files[]' multiple>"
                 }
                 this.createWidget = function(){   
@@ -142,7 +144,7 @@ define(['jquery', 'rest3d', 'gltf', 'collada', 'viewer', 'q'], function ($, rest
                 }
                 this.createNodeDatabase=function(file, parent) { //upload.createNodeDatabase file.name file.uuid file.collectionpath file.assetpath parent
                 var stock = this;
-                $("#uploadTree").jstree("create_node", parent, "inside", {
+                tree.jstree("create_node", parent, "inside", {
                     "data": file.name,
                     "attr": {
                         "id": "a_" + file.uuid,
@@ -172,7 +174,7 @@ define(['jquery', 'rest3d', 'gltf', 'collada', 'viewer', 'q'], function ($, rest
                     var flagCollection = {};
                     flagCollection[file.collectionpath] = true;
                     parent.data(flagCollection);
-                    $("#uploadTree").jstree("create_node", parent, "inside", {
+                    tree.jstree("create_node", parent, "inside", {
                         "data": file.collectionpath,
                         "attr": {
                             "id": id,
@@ -186,9 +188,7 @@ define(['jquery', 'rest3d', 'gltf', 'collada', 'viewer', 'q'], function ($, rest
             } 
                 this.jqueryUpload = function(){
                     var stock = this;  
-                    setTimeout(function(){
-                    stock.dropzone = $("#uploadTree"/*+stock.idUser +"> a"*/);
-                    },500);
+                    stock.dropzone = nodeRoot;
                     var json = {
                         url: stock.url,
                         dataType: 'json',
@@ -212,7 +212,7 @@ define(['jquery', 'rest3d', 'gltf', 'collada', 'viewer', 'q'], function ($, rest
 
                 }
                 this.createJqueryObject = function(){
-                    this[this.id]=$('#'+this.id);
+                    this[this.id]=$('#container_'+this.id);
                     this.upload1 = $('#fileupload_'+this.id);
                     this.filesArea = $('#fileArea_'+this.id);
                 }
@@ -479,7 +479,7 @@ define(['jquery', 'rest3d', 'gltf', 'collada', 'viewer', 'q'], function ($, rest
                 else {
                     var e = {};
                     e.idToDrop = "c_" + viewer.idUser;
-                    window.sortAssetDrop(e, buffer.result);
+                    sortAssetDrop(e, buffer.result);
                     window.visualize(buffer.result);
                 }
             }
@@ -517,7 +517,7 @@ define(['jquery', 'rest3d', 'gltf', 'collada', 'viewer', 'q'], function ($, rest
                 if (stock.flag) {
                     for (var j = 0; j < stock.bufferNode.length; j++) {
                         if ($(stock.bufferNode[j]).attr("uploadstatus") !== "true") {
-                            $("#uploadTree").jstree("delete_node", $(stock.bufferNode[j]));
+                            tree.jstree("delete_node", $(stock.bufferNode[j]));
                         }
                     }
                 }
@@ -528,7 +528,7 @@ define(['jquery', 'rest3d', 'gltf', 'collada', 'viewer', 'q'], function ($, rest
             var stock = this;
         }
 
-        window.sortAssetDrop = function (e, data, mode) {
+        var sortAssetDrop = function (e, data, mode) {
             var defer = Q.defer();
             if (!upload.getOptionLog()) {
                 upload.filesArea.children("br").last().remove();
@@ -578,7 +578,7 @@ define(['jquery', 'rest3d', 'gltf', 'collada', 'viewer', 'q'], function ($, rest
                     var rmp = parent.attr('path') + "/" + name;
                     rmp = encodePathToId(rmp);
                     var id = index + "_" + rmp;
-                    rmp = $("#uploadTree").jstree("create_node", parent, "inside", {
+                    rmp = tree.jstree("create_node", parent, "inside", {
                         "data": name,
                         "attr": {
                             "id": id,
@@ -597,7 +597,7 @@ define(['jquery', 'rest3d', 'gltf', 'collada', 'viewer', 'q'], function ($, rest
                         var rmp = parent.attr('path') + "/" + name;
                         rmp = encodePathToId(rmp);
                         flag = index + "_" + rmp;
-                        rmp = $("#uploadTree").jstree("create_node", parent, "inside", {
+                        rmp = tree.jstree("create_node", parent, "inside", {
                             "data": name,
                             "attr": {
                                 "id": flag,
@@ -695,7 +695,7 @@ define(['jquery', 'rest3d', 'gltf', 'collada', 'viewer', 'q'], function ($, rest
                 }
             }
             defer.resolve();
-            $("#uploadTree").jstree('open_all');
+            tree.jstree('open_all');
             return defer.promise;
         }
 
@@ -723,10 +723,10 @@ define(['jquery', 'rest3d', 'gltf', 'collada', 'viewer', 'q'], function ($, rest
         }
 
         setTimeout(function () {
-            upload.object.fileupload('option', 'dropZone', $("#c_" + viewer.idUser));
+            upload.object.fileupload('option', 'dropZone', nodeRoot);
             upload.object.bind('fileuploaddrop', function (e, data) {
                 window.pleaseWait(true);
-                window.sortAssetDrop(e, data).then(function () {
+                sortAssetDrop(e, data).then(function () {
                     window.pleaseWait(false);
                 })
             });
@@ -736,7 +736,7 @@ define(['jquery', 'rest3d', 'gltf', 'collada', 'viewer', 'q'], function ($, rest
             this.object.off('fileuploadchange');
             this.object.on('fileuploadchange', function (e, data) {
                 window.pleaseWait(true);
-                window.sortAssetDrop(e, data, node).then(function () {
+                sortAssetDrop(e, data, node).then(function () {
                     window.pleaseWait(false);
                 })
             })
@@ -935,7 +935,7 @@ define(['jquery', 'rest3d', 'gltf', 'collada', 'viewer', 'q'], function ($, rest
             var e = {};
             e.idDatabase = "c_" + viewer.idUser;
             data.files[0].relativePath.remove();
-            window.sortAssetDrop(e, object);
+            sortAssetDrop(e, object);
             window.visualizeDatabase(object);
 
 

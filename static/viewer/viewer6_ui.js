@@ -304,25 +304,27 @@ define(['viewer', 'gui', 'rest3d', 'q', 'collada', 'gltf', 'renderer', 'state', 
             var renderMenu = GUI.tab({
                 id: "renderMenus",
                 parent: layout.jqueryObjectCenter,
-                item: [{
-                        id: "render",
-                        text: "  Load DAE/glTF"
+                item: [
+                    {
+                        id: "scenes",
+                        text: " Scenes",
                     },
-                    // {
-                    //     id: "tree",
-                    //     text: "  Warehouse",
-                    // },
-
-
+                    {
+                    id: "script",
+                    text: "  Script"
+                },
                 ]
             })
             renderMenu.sortable();
             renderMenu.tabManager();
             window.renderMenu = renderMenu;
 
-            scene_init();
+            scene_init(window.renderMenu);
+            window.renderMenu.refresh();
             viewer.onload = window.refreshScenesTree;
-            script_init();
+            script_init(window.renderMenu);
+            window.renderMenu.refresh();
+
 
             // function jumpLine() {
             //     renderMenu.render.append("<br></br>");
@@ -331,15 +333,15 @@ define(['viewer', 'gui', 'rest3d', 'q', 'collada', 'gltf', 'renderer', 'state', 
             // jumpLine();
 
             // // renderMenu.render.append("<h4>Welcome to rest3d's viewer!</h4>");
-            var accordionUp = GUI.accordion({
-                id: "Upload",
-                parent: window.renderMenu.render,
-                item: [{
-                    id: "upload",
-                    text: "Upload"
-                }]
-            })
-            accordionUp.upload.header.click();
+            // var accordionUp = GUI.accordion({
+            //     id: "Upload",
+            //     parent: window.renderMenu.render,
+            //     item: [{
+            //         id: "upload",
+            //         text: "Upload"
+            //     }]
+            // })
+            // accordionUp.upload.header.click();
 
             // jumpLine();
 
@@ -357,7 +359,7 @@ define(['viewer', 'gui', 'rest3d', 'q', 'collada', 'gltf', 'renderer', 'state', 
             // accordion.autoScrollDown();
             // GUI.image(accordion.collada.header, "img-settings", "../gui/images/collada.png", 40, 80, "before");
             // GUI.image(accordion.gltf.header, "img-settissngs1", "../gui/images/glTF.png", 40, 35, "before");
-            GUI.image(window.renderMenu.render.title, "img-render", "../gui/images/menu-render.png", 12, 14, "before");
+            //GUI.image(window.renderMenu.render.title, "img-render", "../gui/images/menu-render.png", 12, 14, "before");
             GUI.image(window.renderMenu.scenes.title, "img-render", "../gui/images/scene-root.png", 12, 14, "before");
             // // accordion.collada.header.append()
 
@@ -866,12 +868,12 @@ define(['viewer', 'gui', 'rest3d', 'q', 'collada', 'gltf', 'renderer', 'state', 
                 parent: button,
                 content: "Load an image as background",
             });
+            window.rest3dToTree=rest3dToTree;
             //WELCOME PANEL, panel displayed when the user session is 'new'
             function welcomePanel() {
                 $("#dialog").dialog("close");
                 var gitHtml = $('<div id="dialog"><img src="../gui/images/loading.gif"/></div>');
                 gitPanel = $('body').append(gitHtml);
-
                 function header(html, parent, text, draggableFlag, visibleFlag, button) {
                     this.flag = true;
                     this.html = html;
@@ -1015,45 +1017,61 @@ define(['viewer', 'gui', 'rest3d', 'q', 'collada', 'gltf', 'renderer', 'state', 
                 }
 
                 var callback = function (data) {
+                    console.debug("callback")
                     gitHtml.find("img").replaceWith("");
                     var what = "<a>We are proposing a new version of our viewer elaborated with gui6. In addition of the basic functionnalites available in the last version, you are now able to display some model samples in COLLADA/glTF format, convert a COLLADA object to glTF and edit a scene. You can either explore some solutions listed below for editing models hosted by their databases, upload your models to your own project stocked in our cloud or just work statically.";
                     what = new header(what, gitHtml, "Description&Features", true, true);
                     var guest = "<a>This section is dedicated to users who wants to fastly use our application. The user session will be automatically removed once expired. Drag and drop the features you want to exploit and get started!</a>";
                     guest = new header(guest, gitHtml, "Guest account", true, true, "Get started!");
-                    guest.createButton("", data);
+                    // guest.createButton("", data);
                     var login = "<a>OAuth authentification not yet implemented</a>";
                     login = new header(login, gitHtml, "Login via google", false, false);
                     var about = "<a>AMD is sponsoring the main open-source (MIT licensed) prototype. It is a turn-key rest3d server composed of a XML database, a nodejs rest server, and viewer/loader code for the client. Source code available at https://github.com/amd/rest3d </a>";
                     about = new header(about, gitHtml, "About", false, false);
-                    if (data.hasOwnProperty("dvia")) {
-                        // tmp.prop("disabled",true)
-                        // tmp.find('button').css({"pointer-events":"none"})
-                        setDraggable(what.createButton("dvia", data), guest.draggableZone, what.draggableZone);
+                    for(var key in data){
+                        if(key!=="tmp"){setDraggable(what.createButton(key, data), guest.draggableZone, what.draggableZone);}
+                        else{guest.createButton(key, data);}
                     }
-                    if (data.hasOwnProperty("warehouse")) {
-                        setDraggable(what.createButton("warehouse", data), guest.draggableZone, what.draggableZone);
-                    }
-                    if (data.hasOwnProperty("db")) {
-                        setDraggable(what.createButton("db", data), guest.draggableZone, what.draggableZone);
-                    }
+                    // if (data.hasOwnProperty("dvia")) {
+                    //     // tmp.prop("disabled",true)
+                    //     // tmp.find('button').css({"pointer-events":"none"})
+                    //     setDraggable(what.createButton("dvia", data), guest.draggableZone, what.draggableZone);
+                    // }
+                    // if (data.hasOwnProperty("warehouse")) {
+                    //     setDraggable(what.createButton("warehouse", data), guest.draggableZone, what.draggableZone);
+                    // }
+                    // if (data.hasOwnProperty("db")) {
+                    //     setDraggable(what.createButton("db", data), guest.draggableZone, what.draggableZone);
+                    // }
                     guest.button.click(function () {
-                        $("#dialog").dialog("close");
-                        window.renderMenu = renderMenu;
-                        if (viewer.databases.hasOwnProperty("warehouse")) {
-                            require(["database"], function (databaseTab) {
-                                var tmp = new databaseTab(viewer.databases.warehouse);
+                        viewer.databases["tmp"]=data.tmp;
+                        for(var key in viewer.databases){
+                            var name = key;
+                            window.renderMenu.addTab({
+                                id: "tab_"+name,
+                                text: "  " + name,
                             });
+                            var rest3dToTree = new window.rest3dToTree(viewer.databases[key],window.renderMenu["tab_"+name]);
+                            $("#dialog").dialog("close");
                         }
-                        if (viewer.databases.hasOwnProperty("3dvia")) {
-                            require(["database"], function (databaseTab) {
-                                var tmp = new databaseTab(viewer.databases["3dvia"]);
-                            });
-                        }
-                        if (data.hasOwnProperty("db")) {
-                            require(["database"], function (databaseTab) {
-                                var tmp = new databaseTab(data.db);
-                            });
-                        }
+                        // rest3dToTree.
+                        // $("#dialog").dialog("close");
+                        // window.renderMenu = renderMenu;
+                        // if (viewer.databases.hasOwnProperty("warehouse")) {
+                        //     require(["database"], function (databaseTab) {
+                        //         var tmp = new databaseTab(viewer.databases.warehouse);
+                        //     });
+                        // }
+                        // if (viewer.databases.hasOwnProperty("3dvia")) {
+                        //     require(["database"], function (databaseTab) {
+                        //         var tmp = new databaseTab(viewer.databases["3dvia"]);
+                        //     });
+                        // }
+                        // if (data.hasOwnProperty("db")) {
+                        //     require(["database"], function (databaseTab) {
+                        //         var tmp = new databaseTab(data.db);
+                        //     });
+                        // }
                     })
                 }
 
@@ -1074,6 +1092,7 @@ define(['viewer', 'gui', 'rest3d', 'q', 'collada', 'gltf', 'renderer', 'state', 
                     },
                 });
 
+                rest3d.info().then(callback);
             }
             //FPS counter
             viewer.fpsCounter = new viewer.FPSCounter();
@@ -1091,21 +1110,24 @@ define(['viewer', 'gui', 'rest3d', 'q', 'collada', 'gltf', 'renderer', 'state', 
             GUI.container.initContent("center");
             GUI.container.initContent("west");
 
-            //LOADING OF TMP DATABASE BY DEFAULT
-            window.renderMenu = renderMenu;
-            var tmp = new rest3dToTree("tmp", accordionUp.upload); //Object instancied from the new database(tmp). It creates automatically his tree;
-            tmp.refresh(function (data) { //refresh the tab, convert rest3d messages to nodes into the tree associated
-                if (jQuery.isEmptyObject(data.children) && jQuery.isEmptyObject(data.assets)) { // If no activities on the tmp repository exist
-                    welcomePanel();
-                }
-                else { // else check databases enabled from the server and load their tabs
-                    tmp.infoServer(); // lunch request
+            //Linking UI to the rest3d API 
+             welcomePanel();
 
-                    setTimeout(function () {
-                        $("#uploadTree").jstree('open_all');
-                    }, 1500); // open all nodes of the tab
-                }
-            })
+            // //LOADING OF TMP DATABASE BY DEFAULT
+            // window.renderMenu = renderMenu;
+            // var tmp = new rest3dToTree("tmp"); //Object instancied from the new database(tmp). It creates automatically his tree;
+            // tmp.refresh(function (data) { //refresh the tab, convert rest3d messages to nodes into the tree associated
+            //     if (jQuery.isEmptyObject(data.children) && jQuery.isEmptyObject(data.assets)) { // If no activities on the tmp repository exist
+            //         welcomePanel();
+            //     }
+            //     else { // else check databases enabled from the server and load their tabs
+            //         tmp.infoServer(); // lunch request
+
+            //         setTimeout(function () {
+            //             tmp.tree.jstree('open_all');
+            //         }, 1500); // open all nodes of the tab
+            //     }
+            // })
 
 
         }

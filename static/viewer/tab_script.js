@@ -22,25 +22,21 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.*/
 'use strict';
 define([], function () {
-    function script_init() {
+    function script_init(parent) {
+        if(!parent.hasOwnProperty("script"))parent.script = parent;
         var flagStatus = false;
-        window.renderMenu.addTab({
-            id: "script",
-            text: "  Script"
-        });
-
         var sample = "$('body').keypress(\n  function(e){\n  if (e.keyCode==113){\n//if key 'q' \n console.debug(e.keyCode)\n  //tape your code here \n } \n});";
 
         var script = GUI.script({
             id: "scriptArea",
-            parent: window.renderMenu.script,
+            parent: parent.script,
             content: sample
         });
 
-        window.renderMenu.script.append("<br><hr></br>");
+        parent.script.append("<br><hr></br>");
 
         script.object.setSize("100%", "93%");
-        window.renderMenu.refresh();
+     
 
         var play;
         var stop;
@@ -49,8 +45,8 @@ define([], function () {
         var save;
         var load;
 
-        GUI.image(window.renderMenu.script.title, "img-script", "../gui/images/script.png", 20, 14, "before");
-        play = GUI.button("Play", window.renderMenu.script, function () {
+        GUI.image(parent.script.title, "img-script", "../gui/images/script.png", 20, 14, "before");
+        play = GUI.button("Play", parent.script, function () {
             window.runStatus();
             window.interprate();
             script.parent.on('keyup', function () {
@@ -71,7 +67,7 @@ define([], function () {
             parent: play,
             content: "Run script"
         });
-        stop = GUI.button("Stop", window.renderMenu.script, function () {
+        stop = GUI.button("Stop", parent.script, function () {
             script.parent.off();
             play.removeClass("disablehide");
             stop.addClass("disablehide");
@@ -86,7 +82,7 @@ define([], function () {
             parent: stop,
             content: "Stop script"
         });
-        clear = GUI.button("Clear", window.renderMenu.script, function () {
+        clear = GUI.button("Clear", parent.script, function () {
             script.parent.off();
             script.object.setValue(sample);
             script.object.clearHistory();
@@ -99,7 +95,7 @@ define([], function () {
             parent: clear,
             content: "Clear script"
         });
-        help = GUI.button("Help", window.renderMenu.script, function () {
+        help = GUI.button("Help", parent.script, function () {
             var html = "<dl><dt>Ctrl-F / Cmd-F</dt><dd>Start searching</dd><dt>Ctrl-G / Cmd-G</dt><dd>Find next</dd><dt>Shift-Ctrl-G / Shift-Cmd-G</dt><dd>Find previous</dd><dt>Shift-Ctrl-F / Cmd-Option-F</dt><dd>Replace</dd> <dt>Shift-Ctrl-R / Shift-Cmd-Option-F</dt><dd>Replace all</dd><dt>Ctrl-Space / Cmd-Space</dt><dd>Auto-complete</dd></dl>"
             GUI.notification({
                 title: "Script hotkeys",
@@ -115,7 +111,7 @@ define([], function () {
             content: "Hotkeys"
         });
 
-        save = GUI.button("Save", window.renderMenu.script, function () {
+        save = GUI.button("Save", parent.script, function () {
 
         })
         save.html('');
@@ -128,7 +124,7 @@ define([], function () {
 
         var loadInput = GUI.input({
             id: "loadScript",
-            parent: window.renderMenu.script,
+            parent: parent.script,
             hide: true,
             extension: "application/javascript",
             mode: "readText",
@@ -141,7 +137,7 @@ define([], function () {
                 });
             }
         });
-        load = GUI.button("Load", window.renderMenu.script, function () {
+        load = GUI.button("Load", parent.script, function () {
             loadInput.click();
             script.refresh();
         });
@@ -152,7 +148,7 @@ define([], function () {
             content: "Load script"
         });
 
-        var runStatus = GUI.image(window.renderMenu.script, "traffic-light", "../gui/images/traffic-cone_blue.png", '20', '20');
+        var runStatus = GUI.image(parent.script, "traffic-light", "../gui/images/traffic-cone_blue.png", '20', '20');
         GUI.addTooltip({
             parent: runStatus,
             content: "Ready to run"
@@ -179,7 +175,7 @@ define([], function () {
 
         window.readyStatus = function () {
             runStatus.remove();
-            runStatus = GUI.image(window.renderMenu.script, "traffic-light", "../gui/images/traffic-cone_blue.png", '20', '20');
+            runStatus = GUI.image(parent.script, "traffic-light", "../gui/images/traffic-cone_blue.png", '20', '20');
             GUI.addTooltip({
                 parent: runStatus,
                 content: "Ready to run"
@@ -188,7 +184,7 @@ define([], function () {
 
         window.errorStatus = function () {
             runStatus.remove();
-            runStatus = GUI.image(window.renderMenu.script, "traffic-light", "../gui/images/traffic-cone_red.png", '20', '20');
+            runStatus = GUI.image(parent.script, "traffic-light", "../gui/images/traffic-cone_red.png", '20', '20');
             GUI.addTooltip({
                 parent: runStatus,
                 content: "Error detected into the script, please consult the console"
@@ -197,7 +193,7 @@ define([], function () {
 
         window.runStatus = function () {
             runStatus.remove();
-            runStatus = GUI.image(window.renderMenu.script, "traffic-light", "../gui/images/traffic-cone_green.png", '20', '20');
+            runStatus = GUI.image(parent.script, "traffic-light", "../gui/images/traffic-cone_green.png", '20', '20');
             GUI.addTooltip({
                 parent: runStatus,
                 content: "Running..."
