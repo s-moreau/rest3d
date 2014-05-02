@@ -94,15 +94,11 @@ this.req.pipe(data).pipe(this.res);
 Handler.prototype.sendFile = function(p,type,name) {
 
   var handler = this;
-  if (this.errorSet) {
-    console.log('caught repeated error in sendfile')
-    return;
-  }
 
-
+/// TODO - translate error message
   function error(err) {
-    console.log('sendFile error');
-    handler.handleError(err);
+    console.log('sendFile error - assuming file not found error');
+    handler.handleError(err, 404);
   }
 
   function redirect() {
@@ -113,7 +109,7 @@ Handler.prototype.sendFile = function(p,type,name) {
   }
 
   if (type) handler.res.setHeader('Content-Type', type);
-  if (name) this.res.setHeader('Content-disposition', 'attachment; filename='+name);
+  if (name) handler.res.setHeader('Content-disposition', 'attachment; filename='+name);
 
   console.log('sendFile dir='+ p);
   console.log('         type='+type);
@@ -127,75 +123,82 @@ Handler.prototype.sendFile = function(p,type,name) {
 
  };
 
-Handler.prototype.handleError = function (error) {
+Handler.prototype.handleError = function (error, code) {
 
-  if (typeof error === 'string')
-    error = {
-      success: false,
-      statusCode: 500,
-      message: error
-    };
+  if (this.sentHeaders) {
+    console.log('caught repeated sent headers in handleError')
+    this.next()
+    return;
+  }
+  this.sentHeaders = true;
+  var message,statusCode;
 
   if (error instanceof Error) {
-    var message = error.stack || error.message || "internal error";
-    error = {
-      success: false,
-      message: message,
-      statusCode: (error.statusCode ? error.statusCode : 500)
-    };
+    message = error.stack || error.message || "internal error";
+    statusCode = code || (error.statusCode ? error.statusCode : 500);
   }
 
-  // avoid repeated errors that crashes nodejs
+  else if (typeof error === "object") {
+    // make sure we have success and status code
+    message = error.message || "internal error";
+    statusCode= code || (error.statusCode ? error.statusCode : 500)
 
-  if (!this.errorSet) {
+  } else {
+    message = error;
+    statusCode= code || 500;
+  } 
 
-    this.setNoCacheHeaders();
-    this.res.writeHead(error.statusCode, {
-      'Content-Type': this.req.headers.accept.indexOf('application/json') !== -1 ?
-        'application/json' : 'text/plain'
-    });
-    this.res.end(toJSON(error));
-    this.errorSet = error.statusCode;
-    //if (this.next) this.next(new restify.ResourceNotFoundError(err))
-  } else
-  {
-    console.log('caught repeated error !')
-  }
+  this.setNoCacheHeaders();
+  this.res.writeHead(statusCode, {
+    'Content-Type': this.req.headers.accept.indexOf('application/json') !== -1 ?
+      'application/json' : 'text/plain'
+  });
+  this.res.end(toJSON(message));
+ 
 };
+
+Handler.prototype.redirect = function(whereto) {
+
+  if (this.sentHeaders) {
+    console.log('caught repeated sent headers in redirect')
+    this.next()
+    return;
+  }
+  this.sentHeaders = true;
+
+  this.setNoCacheHeaders();
+  this.res.writeHead(302, {
+    'Location': whereto
+  })
+  this.res.end();
+  this.next();
+}
 
 Handler.prototype.handleResult = function (result, code) {
 
-if (this.errorSet) {
-    console.log('caught repeated error in handleResult')
+  if (code ===302)
+    return this.redirect(result);
+
+  if (this.sentHeaders) {
+    console.log('caught repeated sent headers in handleResult')
+    this.next()
     return;
   }
+  var statusCode = code || 200;
 
-  if (typeof result === 'string')
-    result = {
-      success: true,
-      message: result
-    };
+  this.sentHeaders = true;
   if (result instanceof Error)
     return this.handleError(result);
 
-  if (code === 302) {
-    this.res.writeHead(302, {
-      'Location': redirect.replace(
-        /%s/,
-        encodeURIComponent(toJSON.stringify(result)))
-    });
-    this.res.end();
-  } else {
-
-    this.setNoCacheHeaders();
-    this.res.writeHead(code?code:200, {
-      'Content-Type': this.req.headers.accept.indexOf('application/json') !== -1 ?
-        'application/json' : 'text/plain',
-      'Access-Control-Allow-Origin': '*'
-    });
-    this.res.end(toJSON(result));
-  }
-  if (this.next) this.next();
+  this.setNoCacheHeaders();
+  this.res.writeHead(code?code:statusCode, {
+    'Content-Type': this.req.headers.accept.indexOf('application/json') !== -1 ?
+      'application/json' : 'text/plain',
+    'Access-Control-Allow-Origin': '*'
+  });
+  this.res.end(toJSON(result));
+ 
+  this.next();
 };
 
 module.exports = Handler;

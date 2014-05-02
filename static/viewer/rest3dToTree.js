@@ -235,9 +235,92 @@ define(['rest3d', 'upload', 'viewer','database'], function (rest3d, setViewer6Up
             string = string.split("%").join("z");
             return string;
         }
-
-        this.parseMessage = function(new_data){
-            console.debug(new_data);
+        this.encodeToId = function(name,uuid){
+            name=name+'_'+uuid.split("-")[1];
+            return name;
+        }
+        //  var asset = assets[i];
+        //                 result.data = asset.name.substr(0, 60);
+        //                 result.state = "closed";
+        //                 result.attr = {
+        //                     "id": asset.id,
+        //                     "rel": asset.type,
+        //                     "iconuri": asset.iconUri,
+        //                     "name": result.data,
+        //                     "previewuri": asset.previewUri,
+        //                     "asseturi": asset.assetUri
+        //                 };
+        //                 param_out.push(result);
+        //             }
+        this.nodeArray = function(name,id,uuid,type,path){
+            var result = {};
+            result.data = name.substr(0, 60);
+            // if()result.state = "closed";
+            result.attr = {
+                "id": id,
+                "uuid": uuid,
+                "rel":type,
+            }   
+            if(path)result.attr.assetpath=path;
+            result.children = [];
+            this.arrayId.push(name);
+            return result;
+        }
+        this.arrayId = [];
+        this.assets = function(path,uuid){
+            // var node = $("#a_"+uuid);
+            var tmp;
+            var parent;
+            var splitPath = path.split("/");
+            for(var i=0;i<splitPath[i];i++){
+                var id = this.encodeToId(splitPath[i],uuid);
+                var ext = splitPath[i].match(/\.[^.]+$/);
+                var type = upload.extensionToType(ext[0]);
+                if($.inArray(splitPath[i], this.arrayId)== -1){
+                    if(ext==null||ext[0]==".kmz"){ // if asset folder
+                        var object = this.nodeArray(splitPath[i],id,uuid,type);
+                        tmp.push({obj:object,index:i});
+                        // tmp = tmp[tmp.length-1].children;
+                    }   
+                    else{ //if file
+                        var object = this.nodeArray(splitPath[i],id,uuid,type,path);
+                        tmp.push({obj:object,index:i});
+                    }
+                }
+                else{
+                    tmp.push({obj:false,index:i});
+                }
+            }
+            return tmp;
+        }
+        this.parseMessage = function(data){
+            // var result = [];
+            // for(var key in data.children){
+            //     // this.node("collection",)
+            // }
+            // var assets = [];
+            // var counter = 0;
+            // for(var key1 in data.assets){
+            //     var node = this.assets(key1,data.assets[key1],result));
+            //     for(var j=0;j<node.length;j++){
+            //         var inst = nodes[index].obj;
+            //         var i = nodes[index].index;
+            //         result[counter].children;
+            //     }
+            //     counter++;
+            // }
+            // for(var j=0;j<assets.length;j++){
+            //     var obj = assets[index];
+            //     $.each(obj,function(nodes,index1){
+                 
+            //     })
+            // }
+            // $.each(assets,function(asset,index){
+                
+            
+            // })
+            console.debug("parseMessage",data);
+            return result;
         }
 
         this.createTree = function () {
@@ -296,6 +379,7 @@ define(['rest3d', 'upload', 'viewer','database'], function (rest3d, setViewer6Up
                             return url;
                         },
                         "success": function (new_data) {
+                            console.debug("IN")
                             var result = [];//result.state = "closed";
                             result = stock.parseMessage(new_data);
                             return result;

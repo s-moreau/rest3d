@@ -34,18 +34,23 @@
   }
 
   var FileInfo = function (file, collectionpath, assetpath) {
-      // file -> name, path, optional:size, type, not used: hash, lastModifiedDate)
-      this.name = file.name; // name according to sender
-      this.path = file.path; // where is it now?
+      if (file) {
+        // file -> name, path, optional:size, type, not used: hash, lastModifiedDate)
+        this.name = file.name; // name according to sender
+        this.path = file.path; // where is it now?
+         // optional? probably unknown when new FileInfo() is called
+        this.size = file.size; // do we need that? we can ask the file for its size
+        this.type = file.type; // type according to sender
 
-      // asset information
+        this.isFolder = false; // true if this is a folder and not a file
+      } else
+        this.isFolder = true; // true if this is a folder and not a file
+
+        // asset information
       this.collectionpath = collectionpath; // where to put it -> a collection object
       this.assetpath = assetpath; // path of asset inside collection
 
-      // optional? probably unknown when new FileInfo() is called
-      this.size = file.size; // do we need that? we can ask the file for its size
-      this.type = file.type; // type according to sender
-
+     
   };
 
   FileInfo.options = {
@@ -181,11 +186,15 @@
     var collectionpath = this.collectionpath;
     var assetpath = this.assetpath;
 
-    // create collection if needed
-    Collection.create(database,collectionpath,uid, function(err,_col){
+    // find collection 
+    
+    Collection.find(database,collectionpath,function(err,result){
       if (err) return cb(err);
+      if (result.assetpath !== "") 
+        return cb({message: 'cannot find collection ['+result.assetpath+']', statusCode:404});
+ 
       // upload data
-      var collection=_col;
+      var collection=result.collection;
       var resource = new Resource(collection.database, fileInfo.name, fileInfo.type);
       resource.size = fileInfo.size;
       fileInfo.resource = resource;
@@ -195,23 +204,6 @@
           fileInfo.asset = asset;
           cb(undefined,fileInfo.resource.uuid);
         });
-/*
-        // create associated Asset
-        var name = resource.name;
-        var asset = new Asset(resource.database,name,resource);
-        Asset.create(asset, resource.userId, function(err,asset){
-          if (err) return cb(err);
-
-          fileInfo.asset = asset;
-          fileInfo.resource = resource;
-          
-          // finally add the new asset to the collection
-          collection.addAsset(fileInfo.asset,Path.join(assetpath,asset.name), function(err,collection){
-            if (err) cb(err)
-            else cb(undefined,fileInfo.resource.uuid);
-
-          });
-  */
 
 
       })
@@ -239,6 +231,14 @@
     if (handler.db.name !== 'tmp'){
       // make an asset out of this fileInfo
       // create a uuid
+
+      // We do not accept files in the root
+      if (fileInfo.collectionpath === ''){
+        var error = {};
+        error.message='missing collection path';
+        error.statusCode=403;
+        return cb(error)
+      }
       fileInfo.toAsset(handler.db,handler.sid, function(err,assetId) {
         if (err) return cb(err);
 

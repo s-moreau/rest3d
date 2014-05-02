@@ -155,6 +155,7 @@ THE SOFTWARE.
          <li> <a href="/rest3d/db/"> /rest3d/db/</a>
            query db collection
         </li>
+
         <li>
           <form id='db-upload-1' action="/rest3d/db/" enctype="multipart/form-data" method="POST">
             [POST files] /rest3d/db/
@@ -164,6 +165,26 @@ THE SOFTWARE.
           </form>
         </li>
       </ul>
+
+
+        <li>
+          <form id='url-upload-4' action="/rest3d/db/" enctype="application/x-www-form-urlencoded" method="POST">
+            [POST URL] /rest3d/db/
+            <input type="text" size="40" value="tmp" onkeyup="document.getElementById('url-upload-4').action = '/rest3d/db/'+this.value;"/>
+            <input id="url" size="150" name="url" value="https://3dwarehouse.sketchup.com/3dw/getbinary?subjectId=ac9c3413d59e8e4a7f7fbfb94ac070c5&subjectClass=entity&name=k2" />
+            <input type="submit" />send url to upload (zip file example)
+          </form>
+        </li>
+
+      <li>
+        <form id='create-collection-1' action="/rest3d/db/" enctype="multipart/form-data" method="POST">
+          [POST collection] /rest3d/db/
+          <input type="text" size="40" value="" onkeyup="document.getElementById('create-collection-1').action = '/rest3d/tmp/'+this.value;"/>
+          <input id="collection" size="50" name="collection" value="tmp" />
+          <input type="submit"/> create new collection at path
+        </form>
+      </li>
+
 
       <h3> upload / glFT convert demo </h3>
       <ul>
@@ -235,6 +256,15 @@ THE SOFTWARE.
 
         <li> <a href="javascript:getit('/rest3d/tmp/?uuid=','s0');"> /rest3d/tmp/?uuid=</a>
           <input type="text" size="51" value="uuid" id="s0" onkeydown="if (event.keyCode == 13) getit('/rest3d/tmp/?uuid=','s0');" /> Request collection or asset info (meta-data)
+        </li>
+
+        <li>
+          <form id='create-collection' action="/rest3d/tmp/" enctype="multipart/form-data" method="POST">
+            [POST collection] /rest3d/tmp/
+            <input type="text" size="40" value="" onkeyup="document.getElementById('create-collection').action = '/rest3d/tmp/'+this.value;"/>
+            <input id="collection" size="50" name="collection" value="tmp" />
+            <input type="submit"/> create new collection at path
+          </form>
         </li>
 
         <li>

@@ -429,20 +429,18 @@ define(['q'],
                         stock.flagTrees = false;
                     }
                 };
+            }
+            //     stock = this;
+            //     if (this.login != 2) {
+            //         // stock.treeCallback();
 
-                stock = this;
-                if (this.login != 2) {
-                    // stock.treeCallback();
-                    this.parent.focusTab(function () {
-                        stock.treeCallback();
-                    });
-                }
-                else {
-                    // treeCallback(); 
-                    window.treeCallback = stock.treeCallback();
-                }
+            //     }
+            //     else {
+            //         // treeCallback(); 
+            //         window.treeCallback = stock.treeCallback();
+            //     }
 
-            };
+            // };
 
             //window["trees_"+stock.name]
             this.loginArea = function () {
@@ -584,17 +582,24 @@ define(['q'],
                 this.parent.append("<br><br>");
                 this.descriptionArea();
                 this.parent.append("<br><hr><br>")
-                if(!this.upload){
-                    this.generateCoreTab();}
-                else{
-                    this.rest3dToTree.createTree();
-                    var stock = this;
-                    setTimeout(function(){
-                        stock.rest3dToTree.setUpload();
-                    },50);
-                    this.parent.focusTab(function(){
-                        stock.rest3dToTree.refresh();
+           if(!this.upload){
+                    this.generateCoreTab();
+                                        this.parent.focusTab(function () {
+                        stock.treeCallback();
                     });
+                                    }
+                else{
+                    var stock = this;
+                    var flag = true;
+                    this.parent.focusTab(function(){
+                        if(flag){
+                            stock.rest3dToTree.createTree();
+                        setTimeout(function(){
+                              stock.rest3dToTree.setUpload();
+                        },50);   
+                        }
+                        flag=false;               
+                    });    
                 }
                 break;
             case 1:
@@ -604,16 +609,24 @@ define(['q'],
                 this.parent.append("<br><br>");
                 this.descriptionArea();
                 this.parent.append("<a style='float:right;' href='javascript:window.login_" + stock.name + "()'>+Sign in</a><br><hr></br>");
-                if(!this.upload)this.generateCoreTab();
-                else{this.rest3dToTree.createTree();
-                    var stock = this;
-                    setTimeout(function(){
-                        stock.rest3dToTree.setUpload();
-                     },50);
-                    this.parent.focusTab(function(){
-                        stock.rest3dToTree.refresh();
+                if(!this.upload){
+                    this.generateCoreTab();
+                    this.parent.focusTab(function () {
+                        stock.treeCallback();
                     });
-                   
+                }
+                else{
+                    var stock = this;
+                    var flag = true;
+                    this.parent.focusTab(function(){
+                        if(flag){
+                            stock.rest3dToTree.createTree();
+                        setTimeout(function(){
+                              stock.rest3dToTree.setUpload();
+                        },50);   
+                        }
+                        flag=false;               
+                    });                
                 }
                 break;
             case 2:

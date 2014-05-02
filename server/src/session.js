@@ -137,35 +137,19 @@ module.exports = function(config) {
           if (err) {
             console.log('createSid new Key='+sid);
             session.sessions[sid]={};
-            createTMP(sid,cb)
+            cb(undefined,sid);
           } else {
-            console.log('createSid got Existing Key!!')
+            console.log('sid collision - trying again')
             createSid(cb);
           }
         })
       } else {
         console.log("Created sessionID="+sid);
         session.sessions[sid]={};
-        createTMP(sid,cb)
+        cb(undefined,sid);
       }
     }
   };
-
-// Do something, this function should be in upload.js ?
-var createTMP = function(sid,cb){
-  // create tmp folder
-  var handler=require('./handler');
-  Collection.create(handler.tmpdb,path.join('/',sid),0, function(err,collection){
-    if (err){
-      console.log('Could NOT create TMP folder for user='+sid)
-      cb(err);
-    } 
-    else {
-      console.log('Created TMP for user='+sid)
-      cb.call(session, undefined, sid);
-    }
-  })
-}
 
   /**
    * Save session data

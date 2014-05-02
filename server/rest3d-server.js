@@ -141,10 +141,14 @@ server.use(restify.queryParser());
 server.use(restify.gzipResponse());
 restify.defaultResponseHeaders = false;
 
-
 var session = require('./src/session')();
+
 server.sessionManager = session;
 server.use(session.sessionManager);
+
+// call passport after we have set the session manager
+var passport = require('./src/passport')
+passport.init(server);
 
 // include routes
 require('./src/warehouse')(server);
