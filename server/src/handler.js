@@ -189,11 +189,6 @@ Handler.prototype.handleResult = function (result, code) {
   this.sentHeaders = true;
   if (result instanceof Error)
     return this.handleError(result);
-  else if (typeof result === "object") {
-    // make sure we have success and status code
-    result = result.message || 'N/A';
-    statusCode = code || result.statusCode || 200;
-  }
 
   this.setNoCacheHeaders();
   this.res.writeHead(code?code:statusCode, {
