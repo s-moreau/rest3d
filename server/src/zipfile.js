@@ -197,20 +197,18 @@ module.exports = function (server) {
   var unzip = function (params) {
 
     var daefilename = ""; // this will look for a .dae in the zip file
-    var name = params.name;
     if (!params.name) return params.cb(new Error('cannot find name in unzip'))
 
     if (params.uploadOnly)
       return params.cb(null, {
         path: params.filename,
-        name: name,
+        name: params.name,
         type: 'file'
       });
 
-   
     var asset = {
       type: 'asset',
-      name: name,
+      name: params.name,
       id: 'params.uid',
       url: params.url
     };
@@ -236,19 +234,13 @@ module.exports = function (server) {
       var data = fs.readFileSync(params.filename);
       var reader = zip.Reader(data);
       var there_was_an_error = false;
-      var first_time=true
 
       // note: this will throw an error if this is not a zip file
       reader.forEach(function (entry) {
         if (there_was_an_error) return;
-        if (first_time){
-          first_time=false;
-          // let's create a collection for the zip/model
-          params.collectionpath = Path.join(params.collectionpath,name);
-        }
         
         var filename = entry.getName();
-        var currentpath = params.assetpath || "";
+        var currentpath = Path.join(params.name,params.assetpath) || "";
        
         var path = filename;
         var index = path.indexOf('/'); // where to cut

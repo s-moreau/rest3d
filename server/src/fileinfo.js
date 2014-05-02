@@ -190,8 +190,8 @@
     
     Collection.find(database,collectionpath,function(err,result){
       if (err) return cb(err);
-      if (result.path !== collectionpath)
-        return cb('cannot find collection at path +='+collectionpath);
+      if (result.assetpath !== "") 
+        return cb({message: 'cannot find collection ['+result.assetpath+']', statusCode:404});
  
       // upload data
       var collection=result.collection;
