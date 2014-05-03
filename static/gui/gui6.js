@@ -559,7 +559,7 @@ define(['channel', 'codemirror', 'webglUtils', 'WebGLDebugUtils', 'pnotify', 'co
                 $.fn.removeJqueryObjectA = function () {
                     delete stock[this.prop("id")];
                 }
-
+                
                 $.fn.openAccordion = function () {
                     var tmp = $(this);
                     if ($(this).hasClass("ui-state-active")) {

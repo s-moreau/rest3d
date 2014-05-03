@@ -235,8 +235,8 @@ define(['rest3d', 'upload', 'viewer','database'], function (rest3d, setViewer6Up
             string = string.split("%").join("z");
             return string;
         }
-        this.encodeToId = function(name,uuid){
-            name=name+'_'+uuid.split("-")[1];
+        this.encodeToId = function(name,path){
+            name=name+'_'+path.split('/').join(":");
             return name;
         }
         //  var asset = assets[i];
@@ -251,76 +251,167 @@ define(['rest3d', 'upload', 'viewer','database'], function (rest3d, setViewer6Up
         //                     "asseturi": asset.assetUri
         //                 };
         //                 param_out.push(result);
+        //   
+        this.arrayId = [];
+   
+        this.extensionToType=function(ext) {
+                    var result;
+            if(ext==null){
+                return "folder";
+            }
+            else{
+                switch (ext[0]) {
+                    case ".dae":
+                        result = "collada";
+                        break;
+                    case ".DAE":
+                        result = "collada";
+                        break;
+                    case ".json":
+                        result = "gltf";
+                        break;
+                    case ".JSON":
+                        result = "gltf";
+                        break;
+                    case ".png":
+                        result = "texture";
+                        break;
+                    case ".jpeg":
+                        result = "texture";
+                        break;
+                    case ".tga":
+                        result = "texture";
+                        break;
+                    case ".jpg":
+                        result = "texture";
+                        break;
+                    case ".glsl":
+                        result = "shader";
+                        break;
+                    case "":
+                        result = "folder";
+                        break;
+                    case ".kmz":
+                        result = "zip";
+                        break;
+                    default:
+                        result = "file";
+                        break;
+                    }
+                    return result;
+                }
+            }
+      
+        // this.assets = function(path,uuid){
+        //     // var node = $("#a_"+uuid);
+        //     var tmp;
+        //     var parent;
+        //     var splitPath = path.split("/");
+        //     var buffer = "root";
+        //     for(var i=0;i<splitPath[i];i++){
+        //         var id = this.encodeToId(splitPath[i],uuid);
+        //         var ext = splitPath[i].match(/\.[^.]+$/);
+        //         var type = upload.extensionToType(ext);
+        //         if($.inArray(splitPath[i], this.arrayId)== -1){
+        //             if(ext==null||ext[0]==".kmz"){ // if asset folder
+        //                 var object = this.nodeArray(splitPath[i],id,uuid,type);
+        //                tmp[id] = [buffer,i];
+        //                 // tmp = tmp[tmp.length-1].children;
+        //             }   
+        //             else{ //if file
+        //                 var object = this.nodeArray(splitPath[i],id,uuid,type,path);
+        //                 tmp.push({obj:object,index:i});
         //             }
-        this.nodeArray = function(name,id,uuid,type,path){
+        //         }
+        //     }
+        //     return tmp;
+        // }
+        this.convertAssetsToTree = function(path,uuid){
+            var tmp;
+            var parent;
+            var splitPath = path.split("/");
+            var buffer = "root";
+            console.debug(splitPath);
+            for(var i=0;i<splitPath.length;i++){
+                console.debug("assets",this["assets_"+i])
+                if(!this["assets_"+i]){
+                    this["assets_"+i] = {};
+                    console.debug("new assetId",i);
+                }
+                if(!this["assets_"+i][splitPath[i]]){
+                    var id = this.encodeToId(splitPath[i],uuid);
+                    var ext = splitPath[i].match(/\.[^.]+$/);
+                    var type = this.extensionToType(ext);
+                    // if(ext==null||ext[0]==".kmz"){ // if asset folder
+                    //     this["assets_"+i][splitPath[i]]=this.nodeArray(splitPath[i],id,uuid,"");
+                    // }   
+                    // else{ //if file
+                    if(splitPath[i-1]!==undefined){
+                        if(!this["assets_"+i][splitPath[i-1]]){
+                            this["assets_"+i][splitPath[i-1]] = [];
+                        }
+                        this["assets_"+i][splitPath[i-1]].push(this.nodeArray(splitPath[i],id,uuid,type,path));
+                    }
+                    else{
+                        if(!this["assets_"+i][splitPath[i]]){
+                            this["assets_"+i][splitPath[i]] = [];
+                        }
+                        this["assets_"+i][splitPath[i]].push(this.nodeArray(splitPath[i],id,uuid,type,path));
+                    }
+                    // }
+                }
+            };
+        }
+
+        this.nodeArray = function(parent,name,id,uuid,type){
             var result = {};
             result.data = name.substr(0, 60);
-            // if()result.state = "closed";
             result.attr = {
                 "id": id,
                 "uuid": uuid,
                 "rel":type,
-            }   
-            if(path)result.attr.assetpath=path;
+            }
             result.children = [];
-            this.arrayId.push(name);
-            return result;
+            parent.push(result);
         }
-        this.arrayId = [];
-        this.assets = function(path,uuid){
-            // var node = $("#a_"+uuid);
-            var tmp;
-            var parent;
-            var splitPath = path.split("/");
-            for(var i=0;i<splitPath[i];i++){
-                var id = this.encodeToId(splitPath[i],uuid);
-                var ext = splitPath[i].match(/\.[^.]+$/);
-                var type = upload.extensionToType(ext[0]);
-                if($.inArray(splitPath[i], this.arrayId)== -1){
-                    if(ext==null||ext[0]==".kmz"){ // if asset folder
-                        var object = this.nodeArray(splitPath[i],id,uuid,type);
-                        tmp.push({obj:object,index:i});
-                        // tmp = tmp[tmp.length-1].children;
-                    }   
-                    else{ //if file
-                        var object = this.nodeArray(splitPath[i],id,uuid,type,path);
-                        tmp.push({obj:object,index:i});
-                    }
-                }
-                else{
-                    tmp.push({obj:false,index:i});
+
+        var checkIfChildren = function(value,arbre){
+            for(var i=0;i<arbre.length;i++){
+                if(value==arbre[i].data){
+                    return i;
                 }
             }
-            return tmp;
+            return -1;
         }
+
+        this.buildJson= function(split,uuid,arbre,counter){
+            counter--;
+            if(counter==0){return;}
+            console.debug(split)
+            var check = checkIfChildren(split[0],arbre);
+            var id = this.encodeToId(split[0],uuid);
+            var ext = split[0].match(/\.[^.]+$/);
+            var type = this.extensionToType(ext);
+            if(check!==-1){
+                split.shift();
+                this.buildJson(split,uuid,arbre[check].children,counter);
+            }
+            else{
+                this.nodeArray(arbre, split[0], id, uuid, type);
+                split.shift();
+                this.buildJson(split,uuid,arbre[arbre.length-1].children,counter);
+            }
+        }
+
         this.parseMessage = function(data){
-            // var result = [];
-            // for(var key in data.children){
-            //     // this.node("collection",)
-            // }
-            // var assets = [];
-            // var counter = 0;
-            // for(var key1 in data.assets){
-            //     var node = this.assets(key1,data.assets[key1],result));
-            //     for(var j=0;j<node.length;j++){
-            //         var inst = nodes[index].obj;
-            //         var i = nodes[index].index;
-            //         result[counter].children;
-            //     }
-            //     counter++;
-            // }
-            // for(var j=0;j<assets.length;j++){
-            //     var obj = assets[index];
-            //     $.each(obj,function(nodes,index1){
-                 
-            //     })
-            // }
-            // $.each(assets,function(asset,index){
-                
-            
-            // })
-            console.debug("parseMessage",data);
-            return result;
+            var result = {};
+            result.children = [];
+            for(var key1 in data.assets){
+                var tmp = key1.split('/');
+                var counter = tmp.length+1;
+                this.buildJson(tmp,data.assets[key1],result.children,counter)
+            }
+            return result.children;
         }
 
         this.createTree = function () {

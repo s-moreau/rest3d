@@ -199,6 +199,7 @@ define(['q'],
                         text: "Search"
                     }, ]
                 })
+
                 this.flagTrees = true;
                 this.treeCallback = function () {
                     if (stock.flagTrees) {
@@ -584,8 +585,10 @@ define(['q'],
                 this.parent.append("<br><hr><br>")
            if(!this.upload){
                     this.generateCoreTab();
-                                        this.parent.focusTab(function () {
+                     this.parent.focusTab(function () {
                         stock.treeCallback();
+                        stock.accor["sample_" + stock.name].openAccordion();
+                        stock.accor["search_" + stock.name].openAccordion();
                     });
                                     }
                 else{
@@ -613,6 +616,8 @@ define(['q'],
                     this.generateCoreTab();
                     this.parent.focusTab(function () {
                         stock.treeCallback();
+                        stock.accor["sample_" + stock.name].openAccordion();
+                        stock.accor["search_" + stock.name].openAccordion();
                     });
                 }
                 else{
