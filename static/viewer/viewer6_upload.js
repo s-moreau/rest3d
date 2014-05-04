@@ -1,6 +1,4 @@
-
 /*
-
 The MIT License (MIT)
 
 Copyright (c) 2013 Rémi Arnaud - Advanced Micro Devices, Inc.
@@ -22,10 +20,11 @@ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.*/
-//
 define(['jquery', 'rest3d', 'gltf', 'collada', 'viewer', 'q'], function ($, rest3d, glTF, COLLADA, viewer, Q) {
 
-    function setViewer6Upload($, upload, rest3d, viewer) {
+    function setViewer6Upload(upload) {
+        var tree = upload.tree;
+        var nodeRoot = upload.nodeRoot;
         var index;
         var id;
         var flag;
@@ -39,7 +38,7 @@ define(['jquery', 'rest3d', 'gltf', 'collada', 'viewer', 'q'], function ($, rest
                     this.idUser = _json.idUser;
                 }
                 this.generateHTML = function(){
-                    this.html = "<div id='"+this.id+"' class='container'>";
+                    this.html = "<div id='container_"+this.id+"' class='container'>";
                     this.html+="<input id='fileupload_"+this.id+"' style='display:none;' type='file' name='files[]' multiple>"
                 }
                 this.createWidget = function(){   
@@ -58,99 +57,7 @@ define(['jquery', 'rest3d', 'gltf', 'collada', 'viewer', 'q'], function ($, rest
                     //         content: "Drag&drop area",
                     //     });
                     // this[this.id].css("text-align","center");
-        
-                    var tmp = GUI.treeBis({
-                        id:'uploadTree',
-                        parent: this[this.id],
-                        json:  {
-                            "data":{
-                                "data":"Guest_repository","attr":{"id":"c_"+stock.idUser,"rel":"collection","path":"/rest3d/tmp/","file":stock.idUser,}},
-                            },
-                            "dnd" : {
-                                    "drop_finish" : function (data) { 
-                                      console.log('drop finish'+data);
-                            //this is where the actual call to the sever is made for rearranging the triples for drag n drop.
-                            //console.log(data);
-                            //console.log('target '+ data.r);
-                            
-                        },},
-                    "plugin": ["themes", "json_data", "ui", "types","sort","search","contextmenu"],
-                          "contextmenu" : {
-                    "items" : function (node) {
-                        var result = {};
-                        var rel =node.attr("rel");
-                        var up = node.attr("uploadstatus");
-                        if(rel=="collection"||rel=="model"||rel=="child"){
-                            result.icon = {'label':'Add files','action':stock.button,};}
-                        if((rel=="collada"||rel=="gltf")&&up=="true"){
-                            result.preview = {'label':'Preview','action':stock.preview,};
-                        }
-                        if(rel=="gltf"&&up=="true"){
-                            result.display = {'label':'Display','action':stock.displayGltf,};
-                        }
-                        if(rel=="collada"&&up=="true"){
-                            result.display = {'label':'Display','action':stock.displayCollada,};
-                            result.convert = {'label':'Convert','action':stock.convertMenu,};
-                        }
-                        return result;
-                    }
-                },
-                type:{ "types": {
-                    "child": {
-                        "icon" : {
-                            "image" : "../gui/images/folder.png",
-                        },
-                        },
-                    "collection": {
-                        "icon" : {
-                            "image" : "../gui/images/menu-scenes.png",
-                        },
-                        },
-                    "collada": {
-                        "icon" : {
-                            "image" : "../favicon.ico",
-                        },
-                        },
-                    "gltf": {
-                        "icon" : {
-                            "image" : "../favicon.ico",
-                        },
-                        },
-                    'shader': {
-                        "icon" : {
-                            "image" : "../gui/images/geometry.png",
-                        },
-                        },
-                    "file": {
-                        "icon" : {
-                            "image" : "../gui/images/file.png",
-                        },
-                        },
-                    "kml": {
-                        "icon" : {
-                            "image" : "../gui/images/kml.png",
-                        },
-                        },
-                     "texture": {
-                        "icon" : {
-                            "image" : "../gui/images/media-image.png",
-                        },
-                        },
-                    "model": {
-                        "icon" : {
-                            "image" : "../gui/images/bunny.png",
-                        },
-                        },
-                    "empty": {
-                        "icon" : {
-                            "image" : "../gui/images/cross.jpg",
-                        },
-                        },
-                }},
-                        themes:{
-                            "theme":"apple",
-                        },
-                    });
+                    
                     this.tree = tmp.uploadTree;
                     this[this.id].append("<hr>");//
 
@@ -237,7 +144,7 @@ define(['jquery', 'rest3d', 'gltf', 'collada', 'viewer', 'q'], function ($, rest
                 }
                 this.createNodeDatabase=function(file, parent) { //upload.createNodeDatabase file.name file.uuid file.collectionpath file.assetpath parent
                 var stock = this;
-                $("#uploadTree").jstree("create_node", parent, "inside", {
+                tree.jstree("create_node", parent, "inside", {
                     "data": file.name,
                     "attr": {
                         "id": "a_" + file.uuid,
@@ -249,7 +156,7 @@ define(['jquery', 'rest3d', 'gltf', 'collada', 'viewer', 'q'], function ($, rest
                         "uploadstatus": true,
                     }
                 }, false, true);
-                file.idToTarget = "#a_" + file.uuid
+                file.idToTarget = "#a_" + file.uuid;
                 if(file.hasOwnProperty("size"))
                 {
                     GUI.addTooltip({
@@ -263,12 +170,11 @@ define(['jquery', 'rest3d', 'gltf', 'collada', 'viewer', 'q'], function ($, rest
             this.createCollection =  function(file, parent) {
                 var id = this.encodeStringToId(file.collectionpath);
                 parent.data({});
-                console.debug(parent);
                 if (!parent.data().hasOwnProperty(file.collectionpath)) {
                     var flagCollection = {};
                     flagCollection[file.collectionpath] = true;
                     parent.data(flagCollection);
-                    $("#uploadTree").jstree("create_node", parent, "inside", {
+                    tree.jstree("create_node", parent, "inside", {
                         "data": file.collectionpath,
                         "attr": {
                             "id": id,
@@ -282,9 +188,7 @@ define(['jquery', 'rest3d', 'gltf', 'collada', 'viewer', 'q'], function ($, rest
             } 
                 this.jqueryUpload = function(){
                     var stock = this;  
-                    setTimeout(function(){
-                    stock.dropzone = $("#uploadTree"/*+stock.idUser +"> a"*/);
-                    },500);
+                    stock.dropzone = nodeRoot;
                     var json = {
                         url: stock.url,
                         dataType: 'json',
@@ -308,7 +212,7 @@ define(['jquery', 'rest3d', 'gltf', 'collada', 'viewer', 'q'], function ($, rest
 
                 }
                 this.createJqueryObject = function(){
-                    this[this.id]=$('#'+this.id);
+                    this[this.id]=$('#container_'+this.id);
                     this.upload1 = $('#fileupload_'+this.id);
                     this.filesArea = $('#fileArea_'+this.id);
                 }
@@ -506,6 +410,7 @@ define(['jquery', 'rest3d', 'gltf', 'collada', 'viewer', 'q'], function ($, rest
             }   
             var tmp = new Upload(_json);
             tmp.generateHTML();
+            tmp.createJqueryObject();
             tmp.createWidget();
             tmp.createJqueryObject();
             tmp.jqueryUpload();
@@ -574,53 +479,11 @@ define(['jquery', 'rest3d', 'gltf', 'collada', 'viewer', 'q'], function ($, rest
                 else {
                     var e = {};
                     e.idToDrop = "c_" + viewer.idUser;
-                    window.sortAssetDrop(e, buffer.result);
+                    sortAssetDrop(e, buffer.result);
                     window.visualize(buffer.result);
                 }
             }
         }
-
-        function preview(node) {
-            $("#dialog").dialog("close");
-            var gitHtml = '<div id="dialog"><iframe id="myIframe" src="" style="height:99% !important; width:99% !important; border:0px;"></iframe></div>';
-            gitPanel = $('body').append(gitHtml);
-            $("#dialog").dialog({
-                width: '600',
-                height: '500',
-                open: function (ev, ui) {
-                    $('#myIframe').attr('src', '/viewer/easy-viewer.html?file=/rest3d/tmp/' + node.attr("path"));
-                },
-            });
-        }
-        upload.preview = preview;
-
-        function displayCollada(node) {
-            window.pleaseWait(true);
-            COLLADA.load("/rest3d/tmp/" + node.attr("path"), viewer.parse_dae).then(
-                function (flag) {
-                    window.pleaseWait(false);
-                    buffer.notif(node.attr("name"));
-                })
-        }
-        upload.displayCollada = displayCollada;
-
-        function displayGltf(node) {
-            window.pleaseWait(true);
-            glTF.load("/rest3d/tmp/" + node.attr("path"), viewer.parse_gltf).then(
-                function (flag) {
-                    window.pleaseWait(false);
-                    window.notif(node.attr("name"));
-                })
-        }
-        upload.displayGltf = displayGltf;
-
-        function convertMenu(node) {
-            result = $("#" + node.attr("id")).data();
-            console.debug(result);
-            result.file.relativePath = "";
-            rest3d.convert(result, callbackConvert);
-        }
-        upload.convertMenu = convertMenu;
 
         function encodePathToId(path) {
             path = path.replace("/rest3d/upload/" + viewer.idUser + "/", "");
@@ -654,7 +517,7 @@ define(['jquery', 'rest3d', 'gltf', 'collada', 'viewer', 'q'], function ($, rest
                 if (stock.flag) {
                     for (var j = 0; j < stock.bufferNode.length; j++) {
                         if ($(stock.bufferNode[j]).attr("uploadstatus") !== "true") {
-                            $("#uploadTree").jstree("delete_node", $(stock.bufferNode[j]));
+                            tree.jstree("delete_node", $(stock.bufferNode[j]));
                         }
                     }
                 }
@@ -665,7 +528,7 @@ define(['jquery', 'rest3d', 'gltf', 'collada', 'viewer', 'q'], function ($, rest
             var stock = this;
         }
 
-        window.sortAssetDrop = function (e, data, mode) {
+        var sortAssetDrop = function (e, data, mode) {
             var defer = Q.defer();
             if (!upload.getOptionLog()) {
                 upload.filesArea.children("br").last().remove();
@@ -715,7 +578,7 @@ define(['jquery', 'rest3d', 'gltf', 'collada', 'viewer', 'q'], function ($, rest
                     var rmp = parent.attr('path') + "/" + name;
                     rmp = encodePathToId(rmp);
                     var id = index + "_" + rmp;
-                    rmp = $("#uploadTree").jstree("create_node", parent, "inside", {
+                    rmp = tree.jstree("create_node", parent, "inside", {
                         "data": name,
                         "attr": {
                             "id": id,
@@ -734,7 +597,7 @@ define(['jquery', 'rest3d', 'gltf', 'collada', 'viewer', 'q'], function ($, rest
                         var rmp = parent.attr('path') + "/" + name;
                         rmp = encodePathToId(rmp);
                         flag = index + "_" + rmp;
-                        rmp = $("#uploadTree").jstree("create_node", parent, "inside", {
+                        rmp = tree.jstree("create_node", parent, "inside", {
                             "data": name,
                             "attr": {
                                 "id": flag,
@@ -820,7 +683,6 @@ define(['jquery', 'rest3d', 'gltf', 'collada', 'viewer', 'q'], function ($, rest
                 var parent = $("#" + e.idToDrop);
             }
             if (mode || (!mode && e.idToDrop != undefined)) {
-                console.debug(data);
                 $.each(data.files, function (index, file) {
                     parent = parsePath(file, parent);
                 });
@@ -833,7 +695,7 @@ define(['jquery', 'rest3d', 'gltf', 'collada', 'viewer', 'q'], function ($, rest
                 }
             }
             defer.resolve();
-            $("#uploadTree").jstree('open_all');
+            tree.jstree('open_all');
             return defer.promise;
         }
 
@@ -861,10 +723,10 @@ define(['jquery', 'rest3d', 'gltf', 'collada', 'viewer', 'q'], function ($, rest
         }
 
         setTimeout(function () {
-            upload.object.fileupload('option', 'dropZone', $("#c_" + viewer.idUser));
+            upload.object.fileupload('option', 'dropZone', nodeRoot);
             upload.object.bind('fileuploaddrop', function (e, data) {
                 window.pleaseWait(true);
-                window.sortAssetDrop(e, data).then(function () {
+                sortAssetDrop(e, data).then(function () {
                     window.pleaseWait(false);
                 })
             });
@@ -874,7 +736,7 @@ define(['jquery', 'rest3d', 'gltf', 'collada', 'viewer', 'q'], function ($, rest
             this.object.off('fileuploadchange');
             this.object.on('fileuploadchange', function (e, data) {
                 window.pleaseWait(true);
-                window.sortAssetDrop(e, data, node).then(function () {
+                sortAssetDrop(e, data, node).then(function () {
                     window.pleaseWait(false);
                 })
             })
@@ -1060,7 +922,7 @@ define(['jquery', 'rest3d', 'gltf', 'collada', 'viewer', 'q'], function ($, rest
         });
 
         upload.object.fileupload("option", "beforeSend", function (xhr, data) {
-            console.debug(data);
+            // console.debug(data);
             var node = data.files[0].relativePath;
             node.attr("uploadstatus", true);
             node.parent().parent().attr("uploadstatus", true);
@@ -1068,12 +930,12 @@ define(['jquery', 'rest3d', 'gltf', 'collada', 'viewer', 'q'], function ($, rest
 
         upload.object.fileupload("option", "done", function (e, data) {
             // data.files[0].relativePath.attr("id", data.result.files[0].assetId);
-            console.debug(data.result[0]);
+            // console.debug(data.result[0]);
             var object = data.result;
             var e = {};
             e.idDatabase = "c_" + viewer.idUser;
             data.files[0].relativePath.remove();
-            window.sortAssetDrop(e, object);
+            sortAssetDrop(e, object);
             window.visualizeDatabase(object);
 
 
