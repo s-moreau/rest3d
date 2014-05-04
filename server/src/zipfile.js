@@ -1,7 +1,7 @@
 'use strict';
 
 
-module.exports = function (server) {
+
   var zip = require('zip');
   var fs = require('fs');
 
@@ -14,6 +14,7 @@ module.exports = function (server) {
   var Path = require('path')
 
   var zipFile = {};
+  zipFile.diskcache = null;
 
   // request file from url, with otional jar, 
   // then unzip, and then call cb with assetInfo
@@ -71,10 +72,12 @@ module.exports = function (server) {
     uploadAndUnzip(params);
   };
 
-  zipFile.uploadUrl = function (handler, url, jar, cb) {
+  // upload does not use handler at all
+
+  zipFile.uploadUrl = function (url, jar, cb) {
 
     var params = {};
-    params.handler = handler;
+
     params.cb = cb;
     params.url = url;
     params.jar = jar;
@@ -83,11 +86,11 @@ module.exports = function (server) {
 
     uploadAndUnzip(params);
   };
-
-  zipFile.uploadFile = function (handler, name, filename, jar, cb) {
+  
+  zipFile.uploadFile = function (name, filename, jar, cb) {
 
     var params = {};
-    params.handler = handler;
+
     params.cb = cb;
     params.name = name;
     params.filename = filename;
@@ -101,8 +104,9 @@ module.exports = function (server) {
 
 
   var uploadAndUnzip = function (params) {
-    if (params.url)
-      server.diskcache.hit(params.url, function (err, entry) {
+    if (params.url) {
+      if (!zipFile.diskcache) return params.cb('diskcache not set in zipFile');
+      zipFile.diskcache.hit(params.url, function (err, entry) {
         if (entry) {
           console.log('zip disk cache HIT!=' + entry.filename);
           getname(entry,params);
@@ -117,7 +121,7 @@ module.exports = function (server) {
           });
           buffer.on('end', function () {
             params.req.response.body = this.toBuffer();
-            server.diskcache.store(params.url, params.req.response, function (err, entry) {
+            zipFile.diskcache.store(params.url, params.req.response, function (err, entry) {
               if (err)
                 return params.cb(err);
 
@@ -144,7 +148,7 @@ module.exports = function (server) {
           }
         }
       });
-    else {
+    } else {
       // callers has to set params.name and params.filename
       params.donotmove=false;
       unzip(params);
@@ -219,7 +223,8 @@ module.exports = function (server) {
     var finish = function (err, rest3d_asset) {
       if (err) {
         console.log('ERROR IN ZIPFILE FINISH');
-        params.handler.handleError(err);
+        //params.handler.handleError(err);
+        cb(err);
         counter = -1;
         return;
       }
@@ -341,5 +346,4 @@ module.exports = function (server) {
     }
   }
 
-  return zipFile;
-};
+  module.exports = zipFile;

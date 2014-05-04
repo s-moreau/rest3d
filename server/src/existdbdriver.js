@@ -55,79 +55,33 @@ var options = {
 var connection = new Connection(options);
 
 
-//console.log('eXist host='+options.host+" port="+options.port+ " auth="+options.auth+" server="+options.rest);
 
 exports.name = "eXist"; 
 
- exports.getUrl = function(assetId){
-  return 'http://'+connection.config.auth+'@'+connection.config.host+':'+connection.config.port+connection.config.rest+'/db/apps/rest3d/data/'+assetId
- }
-exports.getData = function(assetId, callback) {
-	var cb=callback;
+ 
+exports.getData = function(asset, cb) {
 	
-    //http://127.0.0.1:8081/exist/rest//db/apps/rest3d/data/de613ff0-cc42-11e3-806e-4d9d627d5b75
-    /*
-    http://localhost:8081//exist/rest/db/apps/rest3d/data/de61
-    var options = {
-        host: this.config.host,
-        port: this.config.port,
-        method: "DELETE",
-        path: this.config.rest + path + params,
-        auth: this.config.auth || "guest:guest"
-    };
-    */
-    var url = 'http://'+connection.config.auth+'@'+connection.config.host+':'+connection.config.port+connection.config.rest+'/db/apps/rest3d/data/'+assetId
-zipFile.uploadUrl(tdvia,url,jar, function(error, result){
-                if (error)
-                  tdvia.handleError(error);
-                else {
-
-                  tdvia.res.setHeader('Content-Disposition', 'inline; filename='+result.name);
-                  tdvia.sendfile(result.filename);
-                  
-                }
-              });
-/*
-var buffer = new memoryStream(null, {
-            readable: false
-          });
-          buffer.on('error', function (error) {
-            cb(error);
-          });
-          buffer.on('end', function () {
-            var data = this.toBuffer();
-            cb(undefined,data);
-          });
-
-          var options = {
-            url: url
-          };
-         // if (params.jar) options.jar = params.jar;
-
-            var req = request.get(options);
-            req.pipe(buffer);
-            */
   
-  /*
-  request({ // 3d building collections ?
-    url: url,
-    },function(err, resp, body){
-      if (err){
-        console.log('ERROR asking exist rest url');
-        console.log(err)
-        cb('ERROR requesting data url='+url)
-      }
-      else if (resp.statusCode !== 200){
-        console.log('Error code='+resp.statusCode+'- url='+url);
-        cb('Error code='+resp.statusCode+'- url='+url)
-      } else
-        console.log('got data from url='+url)
-        cb(undefined,body);
-    });
-*/
+    // this will upload the url content into the diskcacke
 
-    // e.g. pipe all input directly to stdout
-    //res.pipe(process.stdout);
+    var url = 'http://'+connection.config.auth+'@'+connection.config.host+':'+connection.config.port+connection.config.rest+'/db/apps/rest3d/data/'+asset.uuid
+    // no jar
+    zipFile.uploadUrl(url,null, function(error, result){
+
+/*
+      return params.cb(null, {
+        path: params.filename,
+        name: params.name,
+        type: 'file'
+      });
+*/
+        if (error)
+          cb(error);
+        else {
+          cb(undefined,result.path);
+        }
+        
+      });
 };
 
 // this locks an asset, waiting forever for lock to be available

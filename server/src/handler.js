@@ -39,47 +39,36 @@ Handler.prototype.setNoCacheHeaders = function () {
 
 // FIX ME !!
 Handler.prototype.sendData = function(data,type,name) {
+  if (this.sentHeaders) {
+    console.log('caught repeated sent headers in sendData')
+    this.next()
+    return;
+  }
 
+  this.sentHeaders = true;
+
+  if (!(data instanceof Buffer)) return this.handleError('send Data need a Buffer');
+
+        
   if (type) this.res.setHeader('Content-Type', type);
   if (name) this.res.setHeader('Content-disposition', 'attachment; filename='+name);
-  //this.res.setHeader('Content-Type','application/octet-stream')
-  //res.setHeader('Content-Length', data.length);
-  
-  var stream=fs.createWriteStream("/tmp/test")
-  data.pipe(stream);
-
-
-  // After all the data is saved, respond with a simple html form so they can post more data
-  data.on('end', function () {
-    console.log('data on end')
-
-  console.log("wrote /tmp/test");
-    stream.end();
-      this.next();
-    
-  });
-  data.on('error',function(){
-    console.log('data on error')
-  })
-  // This is here incase any errors occur
-  writeStream.on('error', function (err) {
-    console.log('write stream on errror');
-  });
-
-
-
-
   /*
-  fs.writeFile("/tmp/test", data, function(err) {
-    if(err) {
-        console.log(err);
-    } else {
-        console.log("The file was saved!");
-    }
-  }); 
-
+            var data=[];
+  this.res.on("end", function() {
+    callback && callback(null, res.statusCode);
+  });
+  this.res.on("error", function(e) {
+    callback(e);
+  });
+  this.res.on("data", function(chunk) {
+    data.push(chunk);
+  });
 */
-//data.pipe(fs.createWriteStream("tmp/test"));
+
+  this.res.write(data);
+  this.res.end();
+  this.next();
+  
 /*
 this.req.pipe(data).pipe(this.res);
   this.res.writeHead(200);

@@ -13,7 +13,7 @@ module.exports = function (server) {
   var FileInfo = require('./fileinfo');
 
   var UploadHandler = require('./handler');
-  var zipFile = require('./zipfile')(server);
+  var zipFile = require('./zipfile');
 
   var Collection = require('./collection');
   var Resource = require('./resource');
@@ -321,26 +321,14 @@ module.exports = function (server) {
                 if (!asset) return handler.handleError('get '+handler.db.name+' could not find asset id =' + res.assetpath);
                 // we have the asset, now we just need its data
 
-                var url = handler.db.getUrl(asset.uuid);
-                zipFile.uploadUrl(handler,url,null, function(error, result){
-                  if (error)
-                    handler.handleError(error);
-                  else {
-
-                    //handler.res.setHeader('Content-Disposition', 'inline; filename='+result.name);
-                    console.log('sending asset'+toJSON(asset))
-                    handler.sendFile(result.path, asset.type, asset.name);
-                    
-                  }
-                });
-  /*
-                handler.db.getData(asset.uuid, function(err,data){
+                // this calls zipFile.uploadURL, and upload URL into cache, return filename in cache
+                handler.db.getData(asset, function(err,filename){
                   if (err)
                     handler.handleError(err);
                   else
-                    handler.sendData(data, asset.type, asset.name);
+                    handler.sendFile(filename, asset.type, asset.name);
                 })
-*/
+
               })
             }
           }

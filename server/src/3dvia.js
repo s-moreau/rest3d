@@ -32,7 +32,7 @@ module.exports = function (server) {
   var toJSON = require('./tojson');
 
   var handler = require('./handler');
-  var zipFile = require('./zipfile')(server);
+  var zipFile = require('./zipfile');
   var formidable = require('formidable');
   var Cookies = require('cookies');
   var FileInfo = require('./fileinfo');
@@ -280,7 +280,7 @@ module.exports = function (server) {
 
               //proxie with cache
               
-              zipFile.uploadUrl(tdvia,url,jar, function(error, result){
+              zipFile.uploadUrl(url,jar, function(error, result){
                 if (error)
                   tdvia.handleError(error);
                 else {
