@@ -179,7 +179,7 @@ THE SOFTWARE.
       <li>
         <form id='create-collection-1' action="/rest3d/db/" enctype="multipart/form-data" method="POST">
           [POST collection] /rest3d/db/
-          <input type="text" size="40" value="" onkeyup="document.getElementById('create-collection-1').action = '/rest3d/tmp/'+this.value;"/>
+          <input type="text" size="40" value="" onkeyup="document.getElementById('create-collection-1').action = '/rest3d/db/'+this.value;"/>
           <input id="collection" size="50" name="collection" value="tmp" />
           <input type="submit"/> create new collection at path
         </form>

@@ -73,7 +73,7 @@ module.exports = function (server) {
     return next(new Error('cannot find sid in upload::createTMP'))
     if (!req.session.tmpdir) {
       // create tmp folder for user
-      Collection.create(tmpdb,Path.join('/',req.session.sid),0, function(err,collection){
+      Collection.create(tmpdb,Path.join('/',req.session.sid), req.session.sid, function(err,collection){
         if (err){
           console.log('Could NOT create TMP folder for user='+req.session.sid)
           next(err);
@@ -189,8 +189,8 @@ module.exports = function (server) {
         // create a collection at path 
         counter++; // one more result to POST
         var newcollection = value;
-        if (value.contains('/')) return finish('collection name cannot include character /');
-        Collection.create(handler.db, Path.join(collectionpath,value), assetpath, function(err,col){
+
+        Collection.create(handler.db, Path.join(collectionpath,assetpath,value), handler.sid, function(err,col){
           if (err) return finish(err);
           var fileInfo = new FileInfo(undefined, collectionpath, assetpath);
           fileInfo.asset = col;

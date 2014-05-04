@@ -29,38 +29,29 @@ Collection.prototype.constructor = Collection;
 
 Collection.type = mime_type;
 
-Collection.create = function(_database,_path,_uid,_callback){
-  var cb=_callback;
-  var path=_path;
-  var uid=_uid;
-  Collection.getroot(_database,function(err,collection){
+Collection.create = function(database,path,uid,cb){
+
+  Collection.getroot(database,function(err,collection){
     collection.create(path,uid,cb);
   })
 };
 
-// recursive creation of collections, similar to mkdirp
-// non destructive, this will return existing collection if it exists
+// find the lowest collection in the chain
+// and then create a collection at remaining path
 
-Collection.prototype.create = function(_path,_uid,_callback){
-  var cb = _callback;
+Collection.prototype.create = function(path,uid,cb){
+
   var collection = this;
   // remove first / if needed.
-  if (!_path || _path==='/') return _callback(undefined,this);
-  if (_path[0] === '/') _path = _path.substr(1);
-  var rootPath = _path.stringBefore('/');
-  var assetPath = _path.stringAfter('/');
+  if (!path || path==='/') return _callback(undefined,this);
+  if (path[0] === '/') path = path.substr(1);
 
-  // recursive collection createion
-  if (!rootPath){
-    collection.mkdir(_path,_uid,cb);
-  } else {
-    collection.mkdir(rootPath, _uid, function(err, collection){
-      if (err) return callback(err);
-      else {
-        collection.create(assetPath, collection.userId, cb);
-      }
-    })
-  }
+  collection.find(path,function(err,result){
+    if (err) return cb(err)
+    if (!result.assetpath) cb(undefined,result.collection);
+    // found collection (at path) and need to add assetpath
+    result.collection.mkdir(result.assetpath,uid,cb)
+  })
 }
 
 
@@ -71,11 +62,9 @@ Collection.prototype.create = function(_path,_uid,_callback){
 
 // return -> child collection
 
-Collection.prototype.mkdir = function(_path,_uid,_callback) {
+Collection.prototype.mkdir = function(name,uid,cb) {
+  if (!name) cb(undefined,this);
   var collection= this;
-  var cb=_callback;
-  var name=_path;
-  var uid=_uid;
   var collection2; // this is what we return
 
   var next = function(err){
@@ -87,27 +76,44 @@ Collection.prototype.mkdir = function(_path,_uid,_callback) {
     })
   }
 
-  this.lock(
+  // no need to use lock here
+  var add_child = function(next){
+    Resource.load(collection.database,col.children[name], function(err,res){
+        collection2=res;
+        next(err,res);
+      });
+  }
+
+
+  // let's try without locking first
+  var col = collection.getResourceSync();
+  // collection already exists - we're done
+  if (col.children[name]) {
+    return add_child(cb);
+  } else if (col.assets[name]){
+    var error = new Error('conflict with existing asset = '+name);
+    error.statusCode = 403;
+    return cb(error);
+  } else  this.lock(
     function(err,asset,callback){
       if (err) return cb(err);
 
       // now that we locked the asset, get its correct value
       collection = asset;
 
-      var col = collection.getResourceSync();
+      col = collection.getResourceSync();
       if (col.children[name]) {
-        // this is a uuid, get the asset 
-        console.log('mkdir '+collection.name+'- children load at path='+name)
-        Resource.load(collection.database,col.children[name], function(err,res){
-          collection2=res;
-          next(err,res);
-        });
-      } else {
+        add_child(next);
+      }  else if (col.assets[name]){
+        var error = new Error('conflict with existing asset = '+name);
+        error.statusCode = 403;
+        return cb(error);
+      } else { // create new child collection
         var col2 = {children:{}, assets:{}};
-        collection2 = new Collection(collection.database, name, col2);
+        collection2 = new Collection(collection.database, name.slice(name.lastIndexOf('/')+1), col2);
         Asset.create(collection2, uid,function(err,collection2){
           if (err) return next(err);
-          addChild(collection,collection2,next);
+          addChild(collection,collection2,name,next);
         });
       }
   })
@@ -140,7 +146,8 @@ Collection.prototype.mkAsset = function(_path,_uid,_resource,_callback) {
     })
   }
 
-// TODO -> lock resource, instead of resource load, need resource lock
+// TODO -> lock resource, instead of resource load, need resource lock!!!
+// maybe move this to Asset.js, generic locked asset resource adding?
   var add_resource = function(cb) {
     var next=cb;
     Resource.load(collection.database,col.assets[name], function(err,res){
@@ -150,10 +157,16 @@ Collection.prototype.mkAsset = function(_path,_uid,_resource,_callback) {
   }
 
   var col = collection.getResourceSync();
+
+  // first try without locking the collection 
       
   if (col.assets[name]) {
     newasset=col.assets[name];
     add_resource(cb);
+  } else if (col.children[name]){
+    var error = new Error('conflict with existing collection = '+name);
+    error.statusCode = 403;
+    return cb(error);
   } else {
 
     this.lock(
@@ -170,6 +183,10 @@ Collection.prototype.mkAsset = function(_path,_uid,_resource,_callback) {
 
           add_resource(next);
 
+        }  else if (col.children[name]){
+          var error = new Error('conflict with existing collection = '+name);
+          error.statusCode = 403;
+          return cb(error);
         } else {
           // there is no asset at that path
           // create a new asset, with the resource attached
@@ -187,33 +204,69 @@ Collection.prototype.mkAsset = function(_path,_uid,_resource,_callback) {
 }
 
 // find as much path in the collection hierarchy
-Collection.find = function(_database,_path,_callback) {
-  var cb=_callback;
-  var path=_path;
-  Collection.getroot(_database,function(err,collection){
+Collection.find = function(database,path,cb) {
+  Collection.getroot(database,function(err,collection) {
     if (err) 
       return cb(err);
     collection.find(path,cb);
   })
 };
-// find os much path in hierarchy
+
+// find as much path in hierarchy
 // return matched path AND collection
-Collection.prototype.find = function(_path,_callback) {
-  find(this,'',_path,_callback);
+Collection.prototype.find = function(path,callback) {
+  find(this,'',path,callback);
 }
 
-var find = function(_collection,_match,_path,_callback) {
-  var collection=_collection;
-  var match=_match;
-  var cb = _callback;
+var find = function(collection,match,path,cb) {
 
-  if (_path==='/' || !_path) return cb(undefined,{path:_match,assetpath:'',collection:collection});
+  if (path==='/' || !path) return cb(undefined,{path:match,assetpath:'',collection:collection});
 
-  while (_path[0] === '/') _path = _path.substr(1);
+  while (path.startsWith('/')) path = path.slice(1);
+  while (path.endsWith('/')) path = path.slice(0, -1);
+
+  // search if there is a children which path match with the beginning of _path
+  // there can be only one ?
+  // path = toto/titi/tata
+  // (1) children[toto/titi] = collection
+  // (2) chuldren[toto/truc] = collection
+  // 
+  // (1) match=[toto/titi]
+  // (2) match=[toto]     
+  //  --> need to find the longest match
+  var col = collection.getResourceSync();
+  var found=null;
+  var length=0;
+  for (var key in col.children){
+    if (path.startsWith(key)){
+      if (key.length > length){
+        found = key;
+        length = key.length;
+        if (length === path.length)
+          break;
+      }
+    }
+  }
+
+  if (found){
+    // full or patrial path found
+    Resource.load(collection.database,col.children[found],function(err,collection) {
+      if (err) return cb(err);
+      if (length === path.length)
+        cb(undefined,{path:Path.join(match,path),assetpath:'',collection:collection})
+      else
+        find(collection,Path.join(match,key), path.substr(key.length), cb); 
+    }); 
+    
+  } else {
+    // no path
+    cb(undefined,{path:match,assetpath:path,collection:collection});
+  }
   
-  var rootPath = _path.stringBefore('/');
-  var assetPath = _path.stringAfter('/');
-  var path=_path;
+
+  /*
+  var rootPath = path.stringBefore('/');
+  var assetPath = path.stringAfter('/');
 
   var col = collection.getResourceSync();
 
@@ -236,6 +289,7 @@ var find = function(_collection,_match,_path,_callback) {
     } else
       cb(undefined,{path:match,assetpath:path,collection:collection});
   }
+  */
 }
 
 
@@ -271,14 +325,13 @@ Collection.getroot = function(database,callback){
 
 // add an asset to a collection
 // this is not using locks
-  var addAsset = function(_collection,_asset, _path, callback){
-  if (_asset.type === mime_type) 
+// does not even check if asset already exists
+  var addAsset = function(collection, asset, path, cb){
+  if (asset.type === mime_type) 
     return callback("collection.addAsset -> cannot add collection, use addChild")
 
-  var collection = _collection;
-  var cb=callback;
-  var asset=_asset;
-  var path=_path;
+  if (!asset.uuid)
+    return callback("Cannot add asset without uuid !!!")
 
   var col = collection.getResourceSync();
 
@@ -292,21 +345,14 @@ Collection.getroot = function(database,callback){
 
 // add a subcollection to a collection
 // this is not using locks
-var addChild = function(_collection,_newcollection, callback){
+// does not even checks if asset already exists
+var addChild = function(collection,newcollection, path, cb){
 
-  if (_newcollection.type !== mime_type) 
+  if (newcollection.type !== mime_type) 
     return callback("collection.addChild -> cannot only add collection, use addAsset instead")
 
-  if (!_newcollection.uuid)
+  if (!newcollection.uuid)
     return callback("Cannot add child without uuid !!!")
-
-  var collection = _collection;
-  var newcollection = _newcollection;
-  var cb=callback;
-  var path=newcollection.name;
-
-  if (path.contains('/')) return callback("collection.addChild cannot add a complex path ="+path)
-  
   
   var col = collection.getResourceSync();
 
