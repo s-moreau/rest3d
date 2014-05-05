@@ -37,7 +37,7 @@ Handler.prototype.setNoCacheHeaders = function () {
   //this.res.setHeader('Content-Disposition', 'inline; filename="files.json"');
 };
 
-// FIX ME !!
+// TEST ME !!
 Handler.prototype.sendData = function(data,type,name) {
   if (this.sentHeaders) {
     console.log('caught repeated sent headers in sendData')
@@ -69,14 +69,6 @@ Handler.prototype.sendData = function(data,type,name) {
   this.res.end();
   this.next();
   
-/*
-this.req.pipe(data).pipe(this.res);
-  this.res.writeHead(200);
- // data.pipe(this.res);
- // this.res.write(data);
-  this.res.end();
-  this.next();
-  */
 }
 
 
