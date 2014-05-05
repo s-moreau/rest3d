@@ -366,23 +366,22 @@ define(['rest3d', 'upload', 'viewer','database'], function (rest3d, setViewer6Up
                     "ajax": {
                         "type": 'GET',
                         "url": function (node) {
-                            var nodeId = "";
                             var url = "";
                             stock.nodeBuffer = node;
                             // var type = node.attr('type'); 
                             if (node == -1) {
                                 url = stock.url;
                             }
-                            else if (node.attr('rel') == "collection" || "model") {
-                                nodeId = node.attr('id');
-                                url = stock.url;
+                            else {
+                                url = node.attr('path');
+                                url = stock.url+url;
                             }
                             return url;
                         },
                         "success": function (new_data) {
                             stock.image.remove();
                             if(stock.image)stock.image.remove();
-                            if(stock.nodeBuffer==-1&&jQuery.isEmptyObject(new_data.assets)&&jQuery.isEmptyObject(new_data.assets)){
+                            if(stock.nodeBuffer==-1&&jQuery.isEmptyObject(new_data.assets)&&jQuery.isEmptyObject(new_data.children)){
                                 console.debug("in")
                                 stock.image = GUI.image(stock.tree['tree_' + stock.name], "img-emptybox", "../gui/images/empty_box.gif", 60, 60, "before");
                                 GUI.addTooltip({
