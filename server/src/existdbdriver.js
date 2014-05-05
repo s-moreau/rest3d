@@ -58,23 +58,19 @@ var connection = new Connection(options);
 
 exports.name = "eXist"; 
 
- 
+var getUrl = exports.getUrl = function(asset)
+{
+  return 'http://'+connection.config.auth+'@'+connection.config.host+':'+connection.config.port+connection.config.rest+'/db/apps/rest3d/data/'+asset.uuid
+    
+}
 exports.getData = function(asset, cb) {
-	
   
-    // this will upload the url content into the diskcacke
 
-    var url = 'http://'+connection.config.auth+'@'+connection.config.host+':'+connection.config.port+connection.config.rest+'/db/apps/rest3d/data/'+asset.uuid
-    // no jar
+    var url = getUrl(asset);
+
+    // this will upload the url content into the diskcacke
     zipFile.uploadUrl(url,null, function(error, result){
 
-/*
-      return params.cb(null, {
-        path: params.filename,
-        name: params.name,
-        type: 'file'
-      });
-*/
         if (error)
           cb(error);
         else {
@@ -96,11 +92,15 @@ var lockAsset = exports.lockAsset = function(_asset,_cb, _n){
     if (err){
       if (err.statusCode === 423){
         // try again later
-        if (n===100)
-          return cb(new Error('could not lock asset aftre 100 trials'))
-        else {
+        if (n===100){
+          // let's give it the lock, and try again
+          console.log('could not lock asset aftre 100 trials -> forcing unlock now')
+          unlockKey('assets',asset.uuid, function(err,res){
+            return setTimeout(lockAsset,1000,asset,cb,1);
+          })
+        } else {
           console.log('asset ['+asset.uuid+'] ='+asset.name+' is locked - trying again('+(n+1)+')');
-          return setTimeout(lockAsset,100,asset,cb,n+1);
+          return setTimeout(lockAsset,1000,asset,cb,n+1);
         }
       } 
       console.log('database[eXist] cannot find asset id='+asset.uuid);
