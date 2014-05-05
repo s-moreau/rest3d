@@ -21,7 +21,7 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.*/
 'use strict';
-define([], function () {
+define(['viewer'], function (viewer) {
     function scene_init(parent) {
         var treeScene = false;
         var treeJson = {};
@@ -311,7 +311,7 @@ define([], function () {
             var nodeBuffer;
             treeScene = GUI.treeBis({
                 id: 'Tree',
-                parent: parent,
+                parent: parent.scenes,
                 json: {
                     "ajax": {
                         "type": 'GET',
@@ -579,6 +579,9 @@ define([], function () {
                 }, 500);
             }
         }
+        parent.scenes.focusTab(function(){
+            treeScene.openAll();
+        })
     }
     return scene_init;
 });

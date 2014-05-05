@@ -164,7 +164,8 @@ define("console", function () {
 //
         window.onerror = function (message, url, linenumber) {
             //message = decodeJson(message);
-             window.pleaseWait(false);
+            errorCounter ++;
+            updateStatus();
             if (!url) {
                 url = "undefined";
             }
@@ -191,7 +192,6 @@ define("console", function () {
         alert = function (message) {
             errorCounter ++;
             updateStatus();
-             window.pleaseWait(false);
             message = decodeJson(message);
             var checkVisible = false;
             if (consoleObject.is(':hidden')) {
@@ -214,7 +214,6 @@ define("console", function () {
             debugCounter ++;
             updateStatus();
             message = decodeJson(message);
-            var checkVisible = false;
             if (consoleObject.is(':hidden')) {
                 checkVisible = true;
                 consoleObject.show();
@@ -234,7 +233,6 @@ define("console", function () {
         console.log = function (message) {
             logCounter ++;
             updateStatus();
-            window.pleaseWait(false);
             message = decodeJson(message);
             var checkVisible = false;
             if (consoleObject.is(':hidden')) {
@@ -256,7 +254,6 @@ define("console", function () {
         console.error = function (message) {
             errorCounter ++;
             updateStatus();
-            window.pleaseWait(false);
             message = decodeJson(message);
             var checkVisible = false;
             if (consoleObject.is(':hidden')) {
@@ -280,7 +277,6 @@ define("console", function () {
             warnCounter ++;
             updateStatus();
             message = decodeJson(message);
-            var checkVisible = false;
             if (consoleObject.is(':hidden')) {
                 checkVisible = true;
                 consoleObject.show();

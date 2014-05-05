@@ -250,6 +250,19 @@ define(['channel', 'codemirror', 'webglUtils', 'WebGLDebugUtils', 'pnotify', 'co
                 this.openAll = function(){
                     this[this.id].jstree('open_all');
                 }
+                this.openTillDepth = function(level){
+                    // $("#myTree").jstree({options}).bind('loaded.jstree', function (e, data) {
+                    //     /** 
+                    //      * Open nodes on load (until x'th level) 
+                    //      */
+                    //     var depth = 3;
+                    //     data.inst.get_container().find('li').each(function (i) {
+                    //         if (data.inst.get_path($(this)).length <= depth) {
+                    //             data.inst.open_node($(this));
+                    //         }
+                    //     });
+                    //      });
+                }
                 this.remove = function () {
                     this[this.id].remove();
                     delete this;
