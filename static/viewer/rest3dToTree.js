@@ -17,6 +17,7 @@ define(['rest3d', 'upload', 'viewer','database'], function (rest3d, setViewer6Up
         this.description = data.description;
         this.id = GUI.uniqueId();
         this.area = parent;
+        this.image = $();
         this.url = location.protocol + "//" + location.host + "/rest3d/" + this.name
            // window["tab_"+name]=function(data,name){
             //         window.renderMenu.addTab({
@@ -289,9 +290,10 @@ define(['rest3d', 'upload', 'viewer','database'], function (rest3d, setViewer6Up
                 }
             }
         this.images=[];
-        this.nodeArray = function(parent,name,id,uuid,type,path){
+        this.nodeArray = function(parent,name,id,uuid,type,path,close){
             var result = {};
             result.data = name.substr(0, 60);
+            if(close)result.state = "closed";
             result.attr = {
                 "id": id,
                 "uuid": uuid,
@@ -340,7 +342,7 @@ define(['rest3d', 'upload', 'viewer','database'], function (rest3d, setViewer6Up
                 this.buildJson(tmp,data.assets[key1],result.children,"");
             }
             for(var key in data.children){
-                this.nodeArray(result.children,key,this.encodeToId(key,data.children[key]),data.children[key],"collection",[key]);             
+                this.nodeArray(result.children,key,this.encodeToId(key,data.children[key]),data.children[key],"collection",[key],true);             
             }
             return result.children;
         }
@@ -378,6 +380,7 @@ define(['rest3d', 'upload', 'viewer','database'], function (rest3d, setViewer6Up
                             return url;
                         },
                         "success": function (new_data) {
+                            stock.image.remove();
                             if(stock.image)stock.image.remove();
                             if(stock.nodeBuffer==-1&&jQuery.isEmptyObject(new_data.assets)&&jQuery.isEmptyObject(new_data.assets)){
                                 console.debug("in")

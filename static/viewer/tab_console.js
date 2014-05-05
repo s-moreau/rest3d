@@ -55,7 +55,7 @@ define("console", function () {
             if(warnCounter!==0){
                 html+="<img src='../gui/images/console_warning.png' style='width:10px;height:10px;'>"+warnCounter+"</img>";
             }
-            html += "."
+            html += ""
             window.consoleStatus.html(html);
             // $.each(html,function(element,index){
             //     if(element.text())
@@ -431,13 +431,12 @@ define("console", function () {
             // toggle_button.removeClass('button-debug');
         }  
       
-        //GUI.addIcon(window.layout.jqueryObjectSouth, "ui-icon-alert", "float:left;margin:3px;", "before").attr('id', 'iconStatus');
         CONSOLE.terminal.echo("rest3d_TEST> test if this sentence is correctly render by the plugin. I get some graphic bugs sometimes :/");
         window.renderMenu.consoletab.css({"padding":0});
-        setTimeout(function(){window.test()},100);
+        CONSOLE.terminal.addClass("ui-widget-content");
+
         window.renderMenu.consoletab.focusTab(function(){
             CONSOLE.terminal.removeClass("ui-widget-header");
-            CONSOLE.terminal.addClass("ui-widget-content");
             setTimeout(function(){CONSOLE.terminal.resize();linesToColor();},100);
             });
         }

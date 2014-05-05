@@ -216,9 +216,9 @@ define(['q'],
                                         if (node == -1) {
                                             url = location.protocol + "//" + location.host + "/rest3d/" + stock.name + "/";
                                         }
-                                        else if (node.attr('rel') == "collection" || "model") {
-                                            nodeId = node.attr('id');
-                                            url = location.protocol + "//" + location.host + "/rest3d/" + stock.name + "/" + nodeId;
+                                        else {
+                                            path = node.attr('path');
+                                            url = location.protocol + "//" + location.host + "/rest3d/" + stock.name + nodeId;
                                         }
                                         return url;
                                     },
