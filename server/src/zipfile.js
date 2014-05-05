@@ -224,7 +224,7 @@
       if (err) {
         console.log('ERROR IN ZIPFILE FINISH');
         //params.handler.handleError(err);
-        cb(err);
+        params.cb(err);
         counter = -1;
         return;
       }
@@ -316,10 +316,8 @@
       });
 
     } catch (e) {
-      if (e.message && e.message.startsWith("cannot find header in zip") ||
-        e.message.startsWith("ZIP end of central directory record signature invalid")) {
-
-        console.log("this is not a zip file");
+ 
+        console.log("error in unzip - assuming this is not a zip file");
 
         var item = {
             name: params.name,
@@ -340,9 +338,6 @@
            });
         } else
           finish(undefined);
-      } else
-        params.cb(e);
-        there_was_an_error=true;
     }
   }
 
