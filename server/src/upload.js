@@ -116,7 +116,7 @@ module.exports = function (server) {
         files.forEach(function (fileInfo) {
           //fileInfo.initUrls(handler.req);
           var timeout = function (db) {
-            fileInfo.delete(db);
+            fileInfo.delete(db,function(){}); // no callback
             console.log('timeout !! ' + fileInfo.name + ' was deleted');
           }
           setTimeout(timeout, 60 * 60 * 1000, handler.db);
