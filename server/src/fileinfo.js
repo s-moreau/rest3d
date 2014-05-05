@@ -129,20 +129,22 @@
         });
     }
   };
-  FileInfo.prototype.delete = function(handler){
+  // note -> cb may be null if this is called through a timeout
+
+  FileInfo.prototype.delete = function(database,cb){
     console.log('********* DELETE *************')
     var fileInfo = this;
-    if (handler.db) {
+    if (database) {
       // remove asset file from database, and update assets info uppon success
       // NOTE -> should not do that ... should keep asset and move it to a recycle bin instead !!
-      handler.db.del(fileInfo.asset.assetId, function(err,assetId){
+      database.del(fileInfo.asset.assetId, function(err,assetId){
             if (err) {
               console.log('Error deleting asset='+assetId);
               cb && cb(err);
             } else {
               console.log('Success deleting asset='+assetId);
               var aid = assetId;
-              handler.db.removeKey('assets',aid, function (err,res){
+              database.removeKey('assets',aid, function (err,res){
               if (err) {
                 console.log('Error deleting asset key '+aid+' = '+err);
                 cb && cb(err);
@@ -164,12 +166,12 @@
         */
 
         if (ex) {
-          handler.handleError(ex);
+          cb && cb(ex);
         } else {
-          handler.handleResult(fileInfo.asset.assetId+" was succesfully deleted");
+          cb && cb(undefined,fileInfo.asset.assetId+" was succesfully deleted");
           delete FileInfo.tmpAssets[fileInfo.asset.assetId];
         }
-        handler.handleResult({success: !ex});
+
       });
     }
   };
