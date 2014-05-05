@@ -20,123 +20,91 @@ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.*/
-define("console", (function (global) {
+define("console", function () {
     CONSOLE = this.CONSOLE = {};
     CONSOLE.terminal = '';
     CONSOLE.window = 'all';
     CONSOLE.jqueryObject = "";
     CONSOLE.flagError = false;
     CONSOLE.statusOpen = false;
-    CONSOLE.open = function (object) {
-
+    window.test=function(){
+        var message = "test";
+        console.error(message);
+        console.debug(message);
+        console.warn(message);
+        console.log(message);
+    }
+    function console_init(parent){
+        if(!parent.hasOwnProperty("consoletab"))parent.consoletab = parent;
+        parent = parent.consoletab;
         var timer;
 
-        object.jqueryObjectWest.append('<div id="console" class="ui-layout-south"></div><div id="viewerFrame" class="ui-layout-center"></div>')
-        var newLayout = object.jqueryObjectWest.layout({
-            togglerLength_open: 0, // HIDE the toggler button
-
-            south: {
-                size: 140,
-
-            },
-            center: {
-                resizable: true,
-                onresize: GUI.resize,
-                resizerCursor: "move",
+        parent.append('<div id="console"></div>');
+        var errorCounter = 0, logCounter = 0, warnCounter = 0,  debugCounter = 0;
+        function updateStatus(){
+            var html="";
+            if(errorCounter!==0){
+                html+="<img src='../gui/images/console_error.png' style='width:10px;height:10px;'>"+errorCounter+"</img>";
             }
-        });
+            if(logCounter!==0){
+                html+="<img src='../gui/images/console_log.png' style='width:10px;height:10px;'>"+logCounter+"</img>";
+            }
+            if(debugCounter!==0){
+                html+="<img src='../gui/images/console_debug.png' style='width:10px;height:10px;'>"+debugCounter+"</img>";
+            }
+            if(warnCounter!==0){
+                html+="<img src='../gui/images/console_warning.png' style='width:10px;height:10px;'>"+warnCounter+"</img>";
+            }
+            html += "."
+            window.consoleStatus.html(html);
+            // $.each(html,function(element,index){
+            //     if(element.text())
+            // })
+        }
 
-        
-        var toggle_button = GUI.addStickyButton('buttonLayout', [""], object.jqueryObjectSouth);
-        toggle_button.width(35);
-        toggle_button.height(25);
         var consoleObject = $('#console');
         var modeConsoleObject = $('#mode_console');
         CONSOLE.jqueryObject = consoleObject;
-        consoleObject.hide();
-        GUI.image(toggle_button, "img-console", "../gui/images/console.png", '20', '30');
-        toggle_button.on('change', function (e) {
-            if ($(this).is(':checked')) {
-                consoleObject.show();
-                stopSignal();
-                $("#layout-console").click();
-                $("#layout-console").scrollTop(5000);
-                // if(!flagStatus){window.unbindEventToConduit()};
-                linesToColor();
-                var flagSelect = true;
-                $(".prompt").next().on("mouseup",function(e){
-                    if(flagSelect){
-                    var select = document.getSelection().toString();
-                    var value = $(".prompt").next().html();
-                    var res = value.replace(select,"");
-                    $('body').keydown(
-                          function(e){
-                          if (e.keyCode==8||e.keyCode==46){
-                                //console.debug(res)
-                                $(".prompt").next().text("");
-                                setTimeout(function(){$(".prompt").next().text(res)},100);
-                                // console.debug($(".prompt").next().text())
-                                e.preventDefault();
-                                $("body").unbind("keydown");};
-                         });
-
-                    flagSelect = false;}
-                        
-                });
-                // $(".prompt").next().on("mousedown",function(e){
-                //     $(this).off("mouseup");
-                //     flagSelect = true;
-                //  });
-                        CONSOLE.statusOpen = true;
-            } else {
-                consoleObject.hide();
-                stopSignal();
-                $("body").click();
-                // if(!flagStatus){window.bindEventToConduit()};
-                CONSOLE.flagError = false;
-                linesToColor();
-                CONSOLE.statusOpen = false;
-            }
-        });
-
-        newLayout.allowOverflow("south");
-
+    
         window.debug = function () {
             window.scriptGo();
             CONSOLE.windowFlag = 'debug';
             modeConsoleObject.remove();
-            title.remove();
-            title = GUI.label('mode_console', "debug", consoleObject);
+           // title.remove();
+           // title = GUI.label('mode_console', "debug", consoleObject);
             hideELements(1, 0, 1, 1);
             linesToColor();
         };
 
         window.log = function () {
+            logCounter++;
             window.scriptGo();
             CONSOLE.windowFlag = 'log';
             modeConsoleObject.remove();
-            title.remove();
-            title = GUI.label('mode_console', "log", consoleObject);
+           // title.remove();
+          //  title = GUI.label('mode_console', "log", consoleObject);
             hideELements(1, 1, 0, 1);
             linesToColor();
         };
 
         window.warn = function () {
+            warnCounter++;
             window.scriptGo();
             CONSOLE.windowFlag = 'warn';
             modeConsoleObject.remove();
-            title.remove();
-            title = GUI.label('mode_console', "warning", consoleObject);
+           // title.remove();
+           // title = GUI.label('mode_console', "warning", consoleObject);
             hideELements(1, 1, 1, 0);
             linesToColor();
         };
 
         window.error = function () {
             window.scriptGo();
+            errorCounter++;
             CONSOLE.windowFlag = 'error';
             modeConsoleObject.remove();
-            title.remove();
-            title = GUI.label('mode_console', "error", consoleObject);
+           // title.remove();
+           // title = GUI.label('mode_console', "error", consoleObject);
             hideELements(0, 1, 1, 1);
             linesToColor();
         };
@@ -145,10 +113,10 @@ define("console", (function (global) {
         window.scriptGo = function () {
             CONSOLE.windowFlag = 'all';
             modeConsoleObject.remove();
-            title.remove();
+           // title.remove();
             showELements(1, 1, 1, 1);
-            title = GUI.label('mode_console', "All", $('#console '));
-            CONSOLE.terminal = $('#layout-console').terminal(function (command, term) {
+           // title = GUI.label('mode_console', "All", $('#console '));
+            CONSOLE.terminal = $('#console').terminal(function (command, term) {
                 if (command !== '') {
                     try {
                         var result = window.eval(command);
@@ -169,32 +137,28 @@ define("console", (function (global) {
             }, {
                 greetings: 'Welcome to the rest3d console',
                 name: 'js_command',
-                width: 150,
+                width: '95%',
                 prompt: 'rest3d> ',
                 outputLimit: -1,
             });
-
         };
 
-
-        $("#viewerFrame").hide();
-        $("#support-layout").hide();
-        $(".ui-layout-resizer.ui-layout-resizer-south.ui-layout-resizer-open.ui-layout-resizer-south-open").hide();
+        // $(".ui-layout-resizer.ui-layout-resizer-south.ui-layout-resizer-open.ui-layout-resizer-south-open").hide();
         var linksTool = ["window.scriptGo();", "window.debug();", "window.error();", "window.log();", "window.warn();"];
         var itemTool = ["icon-comment", "icon-info-sign", "icon-remove-sign", "icon-ban-circle", "icon-warning-sign "];
-        var toolbar = GUI.toolBar("toolConsole", $('#console'), itemTool, linksTool, "top", $('#normal-button-bottom'));
-        GUI.label('title_console', "Console : ", $('#console'));
-        var title = GUI.label('mode_console', "All", $('#console '));
-        consoleObject.append("<div id='content-console'><div id='layout-console'></div></div>");
+        var toolbar = GUI.toolBar("toolConsole", $('#console'), itemTool, linksTool, "bottom");
+        //GUI.label('title_console', "Console : ", $('#console'));
+        //var title = GUI.label('mode_console', "All", $('#console '));
+        // consoleObject.append("<div id='content-console'><div id='layout-console'></div></div>");
         window.scriptGo();
 
-        $("#layout-console").on("mousewheel DOMMouseScroll", function (e) {
-            if (e.originalEvent.wheelDelta / 120 > 0) {
-                $(this).scrollTop($(this).scrollTop() + 20);
-            } else {
-                $(this).scrollTop($(this).scrollTop() - 20);
-            }
-        })
+        // $("#layout-console").on("mousewheel DOMMouseScroll", function (e) {
+        //     if (e.originalEvent.wheelDelta / 120 > 0) {
+        //         $(this).scrollTop($(this).scrollTop() + 20);
+        //     } else {
+        //         $(this).scrollTop($(this).scrollTop() - 20);
+        //     }
+        // })
         //handling errors,warnings,debugs,logs
         //catch error 
 //
@@ -214,7 +178,7 @@ define("console", (function (global) {
             }
             CONSOLE.terminal.echo("rest3d_ERROR> " + GUI.time() + ", line: " + linenumber + ", " + message + " url: " + url);
             if (checkVisible) {
-                consoleObject.hide();
+                // consoleObject.hide();
             }
             linesToColor();
             CONSOLE.flagError = true;
@@ -225,6 +189,8 @@ define("console", (function (global) {
         //catch debug from console firebug API
         //var oldAlert = alert;
         alert = function (message) {
+            errorCounter ++;
+            updateStatus();
              window.pleaseWait(false);
             message = decodeJson(message);
             var checkVisible = false;
@@ -234,7 +200,7 @@ define("console", (function (global) {
             }
             CONSOLE.terminal.echo("rest3d_ALERT> " + GUI.time() + ": " + message);
             if (checkVisible) {
-                consoleObject.hide();
+                // consoleObject.hide();
             }
             linesToColor();
             check();
@@ -245,6 +211,8 @@ define("console", (function (global) {
         //catch debug from console firebug API
         var oldDebug = console.debug;
         console.debug = function (message) {
+            debugCounter ++;
+            updateStatus();
             message = decodeJson(message);
             var checkVisible = false;
             if (consoleObject.is(':hidden')) {
@@ -253,7 +221,7 @@ define("console", (function (global) {
             }
             CONSOLE.terminal.echo("rest3d_DEBUG> " + GUI.time() + ": " + message);
             if (checkVisible) {
-                consoleObject.hide();
+                // consoleObject.hide();
             }
             linesToColor();
             check();
@@ -264,7 +232,9 @@ define("console", (function (global) {
         //catch log from console firebug API
         var oldLog = console.log;
         console.log = function (message) {
-             window.pleaseWait(false);
+            logCounter ++;
+            updateStatus();
+            window.pleaseWait(false);
             message = decodeJson(message);
             var checkVisible = false;
             if (consoleObject.is(':hidden')) {
@@ -273,7 +243,7 @@ define("console", (function (global) {
             }
             CONSOLE.terminal.echo("rest3d_LOG> " + GUI.time() + ": " + message);
             if (checkVisible) {
-                consoleObject.hide();
+                // consoleObject.hide();
             }
             linesToColor();
             check();
@@ -284,7 +254,9 @@ define("console", (function (global) {
         //catch error from console firebug API
         var oldError = console.error;
         console.error = function (message) {
-             window.pleaseWait(false);
+            errorCounter ++;
+            updateStatus();
+            window.pleaseWait(false);
             message = decodeJson(message);
             var checkVisible = false;
             if (consoleObject.is(':hidden')) {
@@ -293,7 +265,7 @@ define("console", (function (global) {
             }
             CONSOLE.terminal.echo("rest3d_ERROR> " + GUI.time() + ": " + message);
             if (checkVisible) {
-                consoleObject.hide();
+                // consoleObject.hide();
             }
             linesToColor();
             check();
@@ -305,6 +277,8 @@ define("console", (function (global) {
         //catch warning from console firebug API
         var oldWarn = console.warn;
         console.warn = function (message) {
+            warnCounter ++;
+            updateStatus();
             message = decodeJson(message);
             var checkVisible = false;
             if (consoleObject.is(':hidden')) {
@@ -313,7 +287,7 @@ define("console", (function (global) {
             }
             CONSOLE.terminal.echo("rest3d_WARNING> " + GUI.time() + ": " + message);
             if (checkVisible) {
-                consoleObject.hide();
+                // consoleObject.hide();
             }
             linesToColor();
             check();
@@ -340,7 +314,7 @@ define("console", (function (global) {
             $("div.terminal-output > div").each(function (index) {
                 var tmp = $(this).find('div').text();
                 if (tmp.match("rest3d_DEBUG")) {
-                    $(this).find('div').css('color', 'white');
+                    $(this).find('div').css('color', 'green');
                 }
                 if (tmp.match("rest3d_ERROR")) {
                     $(this).find('div').css('color', 'red');
@@ -349,9 +323,9 @@ define("console", (function (global) {
                     $(this).find('div').css('color', 'red');
                 }
                 if (tmp.match("rest3d_WARNING")) {
-                    $(this).find('div').css('color', 'yellow');
+                    $(this).find('div').css('color', 'purple');
                 }
-                if (tmp.match("rest3dLOG")) {
+                if (tmp.match("rest3d_LOG")) {
                     $(this).find('div').css('color', '#2e7db2');
                 }
             });
@@ -402,7 +376,14 @@ define("console", (function (global) {
         function decodeJson(entry) {
             if (entry == '[object Object]') {
                 try{var tmp = JSON.stringify(entry);}
-                catch(e){var tmp = entry;}
+                catch(e){
+                    try{
+                        var tmp = jQuery.parseJSON(entry);
+                    }
+                    catch(e){
+                       var tmp = entry; 
+                    }
+                }
                 return tmp;
             } else {
                 return entry
@@ -427,12 +408,12 @@ define("console", (function (global) {
             function Timer() {
                 set = 1;
                 if (x == 0 && set == 1) {
-                    toggle_button.addClass(classColor);
+                    // toggle_button.addClass(classColor);
                     x = 1;
                     set = 0;
                 }
                 if (x == 1 && set == 1) {
-                    toggle_button.removeClass(classColor);
+                    // toggle_button.removeClass(classColor);
                     x = 0;
                     set = 0;
                 }
@@ -444,16 +425,23 @@ define("console", (function (global) {
 
         function stopSignal() {
             clearInterval(timer);
-            toggle_button.removeClass('button-error');
-            toggle_button.removeClass('button-warn');
-            toggle_button.removeClass('button-log');
-            toggle_button.removeClass('button-debug');
+            // toggle_button.removeClass('button-error');
+            // toggle_button.removeClass('button-warn');
+            // toggle_button.removeClass('button-log');
+            // toggle_button.removeClass('button-debug');
+        }  
+      
+        //GUI.addIcon(window.layout.jqueryObjectSouth, "ui-icon-alert", "float:left;margin:3px;", "before").attr('id', 'iconStatus');
+        CONSOLE.terminal.echo("rest3d_TEST> test if this sentence is correctly render by the plugin. I get some graphic bugs sometimes :/");
+        window.renderMenu.consoletab.css({"padding":0});
+        setTimeout(function(){window.test()},100);
+        window.renderMenu.consoletab.focusTab(function(){
+            CONSOLE.terminal.removeClass("ui-widget-header");
+            CONSOLE.terminal.addClass("ui-widget-content");
+            setTimeout(function(){CONSOLE.terminal.resize();linesToColor();},100);
+            });
         }
 
-        return
-    };
-return function () {
-        return global.CONSOLE;
-    };
-}(this)));
+    return console_init;
+});
 

@@ -80,7 +80,7 @@ define(['jquery', 'rest3d', 'gltf', 'collada', 'viewer', 'q'], function ($, rest
                      else{
                             $("#fileArea_"+this.id).show();
                             ex.show();
-                     }      
+                    }      
                     });
                     this.optionLog.hide();
                     this.setting.hide();
@@ -709,7 +709,6 @@ define(['jquery', 'rest3d', 'gltf', 'collada', 'viewer', 'q'], function ($, rest
                 });
             });
         }
-
 
         window.visualizeDatabase = function (data) {
             for (var z = 0; z < data.length; z++) {

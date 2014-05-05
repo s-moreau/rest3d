@@ -17,6 +17,7 @@ define(['rest3d', 'upload', 'viewer','database'], function (rest3d, setViewer6Up
         this.description = data.description;
         this.id = GUI.uniqueId();
         this.area = parent;
+        this.url = location.protocol + "//" + location.host + "/rest3d/" + this.name
            // window["tab_"+name]=function(data,name){
             //         window.renderMenu.addTab({
             //             id: "tab_"+name,
@@ -235,24 +236,10 @@ define(['rest3d', 'upload', 'viewer','database'], function (rest3d, setViewer6Up
             string = string.split("%").join("z");
             return string;
         }
-        this.encodeToId = function(name,path){
-            name=name+'_'+path.split('/').join(":");
+        this.encodeToId = function(name,uuid){
+            name=name.split(".").join("a");
             return name;
         }
-        //  var asset = assets[i];
-        //                 result.data = asset.name.substr(0, 60);
-        //                 result.state = "closed";
-        //                 result.attr = {
-        //                     "id": asset.id,
-        //                     "rel": asset.type,
-        //                     "iconuri": asset.iconUri,
-        //                     "name": result.data,
-        //                     "previewuri": asset.previewUri,
-        //                     "asseturi": asset.assetUri
-        //                 };
-        //                 param_out.push(result);
-        //   
-        this.arrayId = [];
    
         this.extensionToType=function(ext) {
                     var result;
@@ -301,81 +288,24 @@ define(['rest3d', 'upload', 'viewer','database'], function (rest3d, setViewer6Up
                     return result;
                 }
             }
-      
-        // this.assets = function(path,uuid){
-        //     // var node = $("#a_"+uuid);
-        //     var tmp;
-        //     var parent;
-        //     var splitPath = path.split("/");
-        //     var buffer = "root";
-        //     for(var i=0;i<splitPath[i];i++){
-        //         var id = this.encodeToId(splitPath[i],uuid);
-        //         var ext = splitPath[i].match(/\.[^.]+$/);
-        //         var type = upload.extensionToType(ext);
-        //         if($.inArray(splitPath[i], this.arrayId)== -1){
-        //             if(ext==null||ext[0]==".kmz"){ // if asset folder
-        //                 var object = this.nodeArray(splitPath[i],id,uuid,type);
-        //                tmp[id] = [buffer,i];
-        //                 // tmp = tmp[tmp.length-1].children;
-        //             }   
-        //             else{ //if file
-        //                 var object = this.nodeArray(splitPath[i],id,uuid,type,path);
-        //                 tmp.push({obj:object,index:i});
-        //             }
-        //         }
-        //     }
-        //     return tmp;
-        // }
-        this.convertAssetsToTree = function(path,uuid){
-            var tmp;
-            var parent;
-            var splitPath = path.split("/");
-            var buffer = "root";
-            console.debug(splitPath);
-            for(var i=0;i<splitPath.length;i++){
-                console.debug("assets",this["assets_"+i])
-                if(!this["assets_"+i]){
-                    this["assets_"+i] = {};
-                    console.debug("new assetId",i);
-                }
-                if(!this["assets_"+i][splitPath[i]]){
-                    var id = this.encodeToId(splitPath[i],uuid);
-                    var ext = splitPath[i].match(/\.[^.]+$/);
-                    var type = this.extensionToType(ext);
-                    // if(ext==null||ext[0]==".kmz"){ // if asset folder
-                    //     this["assets_"+i][splitPath[i]]=this.nodeArray(splitPath[i],id,uuid,"");
-                    // }   
-                    // else{ //if file
-                    if(splitPath[i-1]!==undefined){
-                        if(!this["assets_"+i][splitPath[i-1]]){
-                            this["assets_"+i][splitPath[i-1]] = [];
-                        }
-                        this["assets_"+i][splitPath[i-1]].push(this.nodeArray(splitPath[i],id,uuid,type,path));
-                    }
-                    else{
-                        if(!this["assets_"+i][splitPath[i]]){
-                            this["assets_"+i][splitPath[i]] = [];
-                        }
-                        this["assets_"+i][splitPath[i]].push(this.nodeArray(splitPath[i],id,uuid,type,path));
-                    }
-                    // }
-                }
-            };
-        }
-
-        this.nodeArray = function(parent,name,id,uuid,type){
+        this.images=[];
+        this.nodeArray = function(parent,name,id,uuid,type,path){
             var result = {};
             result.data = name.substr(0, 60);
             result.attr = {
                 "id": id,
                 "uuid": uuid,
                 "rel":type,
+                "path":path,
             }
             result.children = [];
             parent.push(result);
+            if(type=="texture"){
+                this.images.push({"id":id,"path":path});
+            }
         }
 
-        var checkIfChildren = function(value,arbre){
+        var checkIfExist = function(value,arbre){
             for(var i=0;i<arbre.length;i++){
                 if(value==arbre[i].data){
                     return i;
@@ -384,22 +314,21 @@ define(['rest3d', 'upload', 'viewer','database'], function (rest3d, setViewer6Up
             return -1;
         }
 
-        this.buildJson= function(split,uuid,arbre,counter){
-            counter--;
-            if(counter==0){return;}
-            console.debug(split)
-            var check = checkIfChildren(split[0],arbre);
+        this.buildJson= function(split,uuid,arbre,path){
+            path+="/"+split[0]
+            if(split.length==0){return;}
+            var check = checkIfExist(split[0],arbre);
             var id = this.encodeToId(split[0],uuid);
             var ext = split[0].match(/\.[^.]+$/);
             var type = this.extensionToType(ext);
             if(check!==-1){
                 split.shift();
-                this.buildJson(split,uuid,arbre[check].children,counter);
+                this.buildJson(split,uuid,arbre[check].children,path);
             }
             else{
-                this.nodeArray(arbre, split[0], id, uuid, type);
+                this.nodeArray(arbre, split[0], id, uuid, type,path);
                 split.shift();
-                this.buildJson(split,uuid,arbre[arbre.length-1].children,counter);
+                this.buildJson(split,uuid,arbre[arbre.length-1].children,path);
             }
         }
 
@@ -408,39 +337,17 @@ define(['rest3d', 'upload', 'viewer','database'], function (rest3d, setViewer6Up
             result.children = [];
             for(var key1 in data.assets){
                 var tmp = key1.split('/');
-                var counter = tmp.length+1;
-                this.buildJson(tmp,data.assets[key1],result.children,counter)
+                this.buildJson(tmp,data.assets[key1],result.children,"");
+            }
+            for(var key in data.children){
+                this.nodeArray(result.children,key,this.encodeToId(key,data.children[key]),data.children[key],"collection",[key]);             
             }
             return result.children;
         }
 
         this.createTree = function () {
             var stock = this;
-            // json: {
-            //                     "ajax": {
-            //                         "type": 'GET',
-            //                         "url": function (node) {
-            //                             nodeBuffer = node;
-            //                             var nodeId = "";
-            //                             var url = "";
-            //                             // var type = node.attr('type'); 
-            //                             if (node == -1) {
-            //                                 url = location.protocol + "//" + location.host + "/rest3d/" + stock.name + "/search/" + searchInput.val();
-            //                             }
-            //                             else if (node.attr('rel') == "collection" || "model") {
-            //                                 nodeId = node.attr('id');
-            //                                 url = location.protocol + "//" + location.host + "/rest3d/" + stock.name + "/" + nodeId;
-            //                             }
-            //                             return url;
-            //                         },
-            //                         "success": function (new_data) {
-            //                             var result = [];
-            //                             $("#img-loadingWarehouse").remove();
-            //                             result = stock.parseDatabaseJson(new_data, result);
-            //                             return result;
-            //                         }
-            //                     }
-            //                 },
+            this.nodeBuffer;
             this.tree = GUI.treeBis({
                 id: 'tree_' + this.name,
                 parent: this.area,
@@ -459,19 +366,28 @@ define(['rest3d', 'upload', 'viewer','database'], function (rest3d, setViewer6Up
                         "url": function (node) {
                             var nodeId = "";
                             var url = "";
+                            stock.nodeBuffer = node;
                             // var type = node.attr('type'); 
                             if (node == -1) {
-                                url = location.protocol + "//" + location.host + "/rest3d/" + stock.name + "/";
+                                url = stock.url;
                             }
                             else if (node.attr('rel') == "collection" || "model") {
                                 nodeId = node.attr('id');
-                                url = location.protocol + "//" + location.host + "/rest3d/" + stock.name + "/";
+                                url = stock.url;
                             }
                             return url;
                         },
                         "success": function (new_data) {
-                            console.debug("IN")
-                            var result = [];//result.state = "closed";
+                            if(stock.image)stock.image.remove();
+                            if(stock.nodeBuffer==-1&&jQuery.isEmptyObject(new_data.assets)&&jQuery.isEmptyObject(new_data.assets)){
+                                console.debug("in")
+                                stock.image = GUI.image(stock.tree['tree_' + stock.name], "img-emptybox", "../gui/images/empty_box.gif", 60, 60, "before");
+                                GUI.addTooltip({
+                                    parent: stock.image,
+                                    content: "Any files found in "+stock.name,//"Any files found in "+stock.name
+                                });
+                            }
+                            var result = [];
                             result = stock.parseMessage(new_data);
                             return result;
                         }
@@ -581,6 +497,17 @@ define(['rest3d', 'upload', 'viewer','database'], function (rest3d, setViewer6Up
                     "theme": "apple",
                 },
             });
+            var stock = this;
+            setTimeout(function(){
+                for(var i=0;i<stock.images.length;i++){
+                    console.debug(stock.images[i].id,$("#"+stock.images[i].id).length)
+                    GUI.addTooltip({
+                        parent: $("#"+stock.images[i].id),
+                        content: "<img style='max-height:150px;max-width:150px' src="+stock.url+"/"+stock.images[i].path+" ></img>",
+                    })
+                    
+                }
+            },1000)
         }
         this.setUpload = function () {
             this.nodeRoot = $("#"+this.id)

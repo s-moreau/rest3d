@@ -21,8 +21,8 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.*/
 'use strict';
-define(['viewer', 'gui', 'rest3d', 'q', 'collada', 'gltf', 'renderer', 'state', 'channel', 'rest3dToTree', 'script', 'scene'],
-    function (viewer, gui, rest3d, Q, COLLADA, glTF, RENDERER, State, Channel, rest3dToTree, script_init, scene_init) {
+define(['viewer', 'gui', 'rest3d', 'q', 'collada', 'gltf', 'renderer', 'state', 'channel', 'rest3dToTree', 'script', 'scene', 'console'],
+    function (viewer, gui, rest3d, Q, COLLADA, glTF, RENDERER, State, Channel, rest3dToTree, script_init, scene_init, console_init) {
 
         viewer.databases = {};
         viewer.idUser = "User_" + Math.floor(Math.random() * 100000000000000) + 1;
@@ -54,11 +54,11 @@ define(['viewer', 'gui', 'rest3d', 'q', 'collada', 'gltf', 'renderer', 'state', 
                 }
                 else if (type == 'ERROR') {
                     GUI.label("defaultText", text, _parent);
-                    GUI.addIcon($("#mainLayout-south"), "ui-icon-circle-close", "float:left;margin:3px;", "before").attr('id', 'iconStatus');;
+                    GUI.addIcon(window.layout.jqueryObjectSouth, "ui-icon-circle-close", "float:left;margin:3px;", "before").attr('id', 'iconStatus');;
                 }
                 else if (type == 'WARNING') {
                     GUI.label("defaultText", text, _parent);
-                    GUI.addIcon($("#mainLayout-south"), "ui-icon-alert", "float:left;margin:3px;", "before").attr('id', 'iconStatus');;
+                    GUI.addIcon(window.layout.jqueryObjectSouth, "ui-icon-alert", "float:left;margin:3px;", "before").attr('id', 'iconStatus');
                 }
                 else {
                     var label = GUI.label("defaultTextBis", text, _parent);
@@ -111,7 +111,7 @@ define(['viewer', 'gui', 'rest3d', 'q', 'collada', 'gltf', 'renderer', 'state', 
             };
             window.pleaseWait = pleaseWait;
             var layout = GUI.Layout("mainLayout", 1);
-
+            window.layout = layout;
 
 
             var titleLabel = GUI.label("auteur", "@ rest3d.org", layout.jqueryObjectSouth);
@@ -133,7 +133,7 @@ define(['viewer', 'gui', 'rest3d', 'q', 'collada', 'gltf', 'renderer', 'state', 
                     "padding": "0",
                 })
             })
-            CONSOLE.open(layout);
+           
 
             ////////////
             //        GUI.button('rambler-min', accordion.collada, function () {
@@ -289,17 +289,17 @@ define(['viewer', 'gui', 'rest3d', 'q', 'collada', 'gltf', 'renderer', 'state', 
 
 
             //------------------------------ all menu icons ---------------------------------------------------------------------------------------------
-            GUI.image(menu.welcomeMenu.text, "img-settings", "../gui/images/particles.gif", 16, 16, "before");
-            GUI.image(menu.settings.text, "img-settings", "../gui/images/icon-cog.png", 16, 16, "before");
-            GUI.image(menu.support.text, "img-help", "../gui/images/menu-help.png", 15, 15, "before");
-            GUI.image(menu.themes.text, "img-themes", "../gui/images/jquery.png", 15, 15, "before");
+            GUI.image(menu.welcomeMenu.text, "img-settings", "../gui/images/home.png", 13, 13, "before");
+            GUI.image(menu.settings.text, "img-settings", "../gui/images/icon-cog.png", 14, 14, "before");
+            GUI.image(menu.support.text, "img-help", "../gui/images/menu-help.png", 13, 13, "before");
+            GUI.image(menu.themes.text, "img-themes", "../gui/images/jquery.png", 13, 13, "before");
             GUI.addIcon(menu.fullscreen.text, "ui-icon-arrow-4-diag", "position: relative !important; right:10px !important;bottom: 10px !important;", "before");
             menu.fullscreen.moveToRightFromLeft();
             menu.support.moveToRightFromLeft(40);
             menu.themes.moveToRightFromLeft(150);
             menu.settings.moveToRightFromLeft(275);
 
-            //------------------------------//render menu ---------------------------------------------------------------------------------------------
+            //------------------------------//render menu == TABS ---------------------------------------------------------------------------------------------
 
             var renderMenu = GUI.tab({
                 id: "renderMenus",
@@ -313,20 +313,557 @@ define(['viewer', 'gui', 'rest3d', 'q', 'collada', 'gltf', 'renderer', 'state', 
                     id: "script",
                     text: "  Script"
                 },
+                    {
+                    id: "consoletab",
+                    text:"  Console"
+                    },
                 ]
             })
             renderMenu.sortable();
             renderMenu.tabManager();
             window.renderMenu = renderMenu;
 
+            GUI.image(window.renderMenu.scenes.title, "img-render", "../gui/images/scene-root1.png", 12, 14, "before");
+            GUI.image(window.renderMenu.consoletab.title, "img-render", "../gui/images/console1.png", 12, 14, "before");
+
+            console_init(window.renderMenu);
             scene_init(window.renderMenu);
-            window.renderMenu.refresh();
             viewer.onload = window.refreshScenesTree;
             script_init(window.renderMenu);
             window.renderMenu.refresh();
 
+            // GUI.label("ddss", "| hihih",);
 
-            // function jumpLine() {
+            // -------------------  -----------------------------------------------------------------------------------------------------------------
+
+            var canvas = GUI.canvas(layout.jqueryObjectWest);
+            // layout.resetOverflow('west');
+
+            // initialize webGL
+            viewer.channel = Channel.create(canvas, false); // true for debug context
+
+            var button1 = GUI.button('Simulate Context Loss', renderMenu.render, function () {
+                if ($(this).find('.ui-button-text').text() == "Simulate Context Loss") {
+                    Channel.forceContextLoss();
+                    $(this).find('.ui-button-text').text("Simulate Restore Context");
+                }
+                else {
+                    Channel.forceContextRestore();
+                    $(this).find('.ui-button-text').text("Simulate Context Loss");
+                }
+            });
+            initCanvasUI();
+
+            // var currentZoom =0;
+            // var currentRotationX, currentRotationY = 0;
+
+            function initCanvasUI() {
+                var mouseDown = false;
+                var lastX, lastY = 0;
+                var downX, downY = 0;
+                // attach mouse events to canvas
+
+                function mouseDownHandler(ev) {
+                    if (!mouseDown) {
+                        mouseDown = true;
+                        downX = ev.screenX;
+                        downY = ev.screenY;
+                    }
+                    lastX = ev.screenX;
+                    lastY = ev.screenY;
+
+                    return true;
+                }
+
+                function mouseMoveHandler(ev) {
+                    if (!mouseDown) return false;
+
+                    viewer.currentZoom = 1;
+                    var mdelta = ev.screenX - lastX;
+                    lastX = ev.screenX;
+                    viewer.currentRotationX -= mdelta / 2.5;
+
+
+                    var mdelta = ev.screenY - lastY;
+                    lastY = ev.screenY;
+                    viewer.currentRotationY += mdelta / 2.5;
+
+
+                    viewer.draw();
+                    return true;
+                }
+
+                function mouseUpHandler(ev) {
+                    mouseDown = false;
+                    viewer.currentZoom = 1;
+                    // pick
+                    if ((downX === ev.screenX) && (downY === ev.screenY)) {
+
+                        var x = ev.layerX / ev.currentTarget.clientWidth;
+                        var y = 1.0 - (ev.layerY / ev.currentTarget.clientHeight);
+
+                        var id = viewer.pick(x, y);
+
+                        if (viewer.pickName[id] != "undefined" && viewer.pickName[id] != null) {
+                            if (!viewer.channel.selected) viewer.channel.selected = {};
+                            if (viewer.channel.selected[id]) {
+                                delete viewer.channel.selected[id];
+                                window.fl4reStatus("", $("#mainLayout-south"), "selected " + viewer.pickName[Object.keys(viewer.channel.selected)[0]]);
+                            }
+                            else {
+                                var realId = viewer.pickName[id].split("#").pop();
+                                realId = realId.split("[")[0];
+                                // console.debug("#"+realId+'__'+id+' '+$("#"+realId+'__'+id).length);
+                                // treeScene.Tree.jstree("select_node", "#" + realId + '__' + id);
+                                viewer.channel.selected[id] = true;
+                                window.fl4reStatus("", $("#mainLayout-south"), "selected " + viewer.pickName[id]);
+                            }
+                        }
+                        else {
+                            window.fl4reStatus("READY", $("#mainLayout-south"));
+                            // if (treeScene) {
+                            //     treeScene.Tree.jstree("deselect_all");
+                            // }
+                            delete viewer.channel.selected;
+                        }
+                        viewer.draw();
+                    }
+                }
+
+                function mouseWheelHandler(ev) {
+
+                    var mdelta = ev.wheelDelta;
+                    viewer.currentZoom = Math.exp(mdelta / 2500);
+
+                    viewer.draw();
+                    return true;
+                }
+
+                canvas.removeEventListener("mousedown", mouseDownHandler, false);
+                canvas.removeEventListener("mousemove", mouseMoveHandler, false);
+                canvas.removeEventListener("mouseup", mouseUpHandler, false);
+                canvas.removeEventListener("mousewheel", mouseWheelHandler, false);
+                canvas.addEventListener("mousedown", mouseDownHandler, false);
+                canvas.addEventListener("mousemove", mouseMoveHandler, false);
+                canvas.addEventListener("mouseup", mouseUpHandler, false);
+                canvas.addEventListener("mousewheel", mouseWheelHandler, false);
+
+                function touchHandler(event) {
+                    var touches = event.changedTouches,
+                        first = touches[0],
+                        type = "";
+                    switch (event.type) {
+                    case "touchstart":
+                        type = "mousedown";
+                        break;
+                    case "touchmove":
+                        type = "mousemove";
+                        break;
+                    case "touchend":
+                        type = "mouseup";
+                        break;
+                    default:
+                        return;
+                    }
+
+                    //initMouseEvent(type, canBubble, cancelable, view, clickCount, 
+                    //           screenX, screenY, clientX, clientY, ctrlKey, 
+                    //           altKey, shiftKey, metaKey, button, relatedTarget);
+
+                    var simulatedEvent = document.createEvent("MouseEvent");
+                    simulatedEvent.initMouseEvent(type, true, true, window, 1,
+                        first.screenX, first.screenY,
+                        first.clientX, first.clientY, false,
+                        false, false, false, 0 /*left*/ , null);
+
+                    first.target.dispatchEvent(simulatedEvent);
+                    event.preventDefault();
+                }
+
+
+                canvas.addEventListener("touchstart", touchHandler, true);
+                canvas.addEventListener("touchmove", touchHandler, true);
+                canvas.addEventListener("touchend", touchHandler, true);
+                canvas.addEventListener("touchcancel", touchHandler, true);
+
+
+                // redraw on resize
+
+                $(canvas).resize(function (evt) {
+                    viewer.draw();
+                });
+            };
+
+            button1.hide();
+
+            setTimeout(function () {
+                layout.jqueryObject.sizePane("west", $(window).width() - 549);
+            }, 1000);
+
+            layout.jqueryObject.resizeAll();
+            layout.jqueryObject.initContent("center");
+            layout.jqueryObject.initContent("west");
+
+            window.loadCss("excite-bike");
+
+            // $("#mainLayout-west").append('<div id="colorSelector"  style="z-index:9999!important;"><div style="background-color: #0000ff"></div></div>');
+            GUI.button("undefined", $("#mainLayout-west")).prop("id", "colorSelector");
+            var tmpPicker;
+            var flagColorPicker = 'show';
+            $('#colorSelector div').css('backgroundColor', '#ffffff');
+
+            $('#colorSelector').ColorPicker({
+                color: '#ffffff',
+                onShow: function (colpkr) {
+                    $(".colorpicker").css("margin-left", "-320px");
+                    $(colpkr).fadeIn(200);
+                    tmpPicker = $(colpkr);
+                    return false;
+                },
+                onHide: function (colpkr) {
+                    $(colpkr).fadeOut(200);
+                    tmpPicker = $(colpkr);
+                    return false;
+                },
+                onSubmit: function (hsb, hex, rgb) {
+                    $('#colorSelector div').css('backgroundColor', '#' + hex);
+                    $('#mainLayout-west').css('backgroundColor', '#' + hex);
+                    $("#mainLayout-west").css({
+                        "background-image": "none"
+                    });
+                    tmpPicker.fadeOut(200);
+                }
+            });
+            // $("#tmp, #colorSelector, .colorpicker").mouseover(function(){
+            //     $('#colorSelector').show();
+            // })
+            //   $("#tmp, #colorSelector, .colorpicker").mouseleave(function(){
+            //     $('#colorSelector').hide();
+            // })
+
+
+            // VIEWER TOOLS SETTING UP
+            var htmlFps = '<div class="yasuo" style="z-index: 999 !important;"><a id="fps" class="ui-widget-content" style="float:right;" >? FPS</a></div>';
+            $("#mainLayout-west").append(htmlFps);
+            var but1 = GUI.button('fullscreen', $("#mainLayout-west"), function () {
+                if (screenfull.enabled) {
+                    screenfull.request($("#mainLayout-west")[0]);
+                }
+            }).prop("id", "fullCanvas");
+            but1.html('');
+            GUI.addIcon(but1, "ui-icon-arrow-4-diag", "", "before");
+            GUI.addTooltip({
+                parent: but1,
+                content: "Fullscreen mode",
+            });
+            $('#colorSelector').html('');
+            GUI.addIcon($('#colorSelector'), "ui-icon-key", "", "before");
+            GUI.addTooltip({
+                parent: $('#colorSelector'),
+                content: "Set a color to the background",
+            });
+            $('#colorSelector').css({
+                "background": "none !important;"
+            })
+            var inputImage = GUI.input({
+                id: "loadImage",
+                parent: window.renderMenu.script,
+                hide: true,
+                extension: "image/*",
+                mode: "displayImage",
+            });
+            var button = GUI.button('', $("#mainLayout-west"), function () {
+                inputImage.click();
+            }).prop("id", "imageCanvas");
+            button.html('');
+            GUI.addIcon(button, "ui-icon-image", "", "before");
+            GUI.addTooltip({
+                parent: button,
+                content: "Load an image as background",
+            });
+            window.rest3dToTree=rest3dToTree;
+            //WELCOME PANEL, panel displayed when the user session is 'new'
+            function welcomePanel() {
+                $("#dialog").dialog("close");
+                var gitHtml = $('<div id="dialog"><img src="../gui/images/loading.gif"/></div>');
+                gitPanel = $('body').append(gitHtml);
+                function header(html, parent, text, draggableFlag, visibleFlag, button) {
+                    this.flag = true;
+                    this.html = html;
+                    this.text = text;
+                    this.parent = parent;
+                    this.draggableFlag = draggableFlag;
+                    this.visibleFlag = visibleFlag;
+                    this.button = button;
+                    this.createDraggable = function (flag) {
+                        this.draggableZone = $('<div class="draggableWelcome ui-widget-header" style="display:inline-block"></div>');
+                        this.header = this.header.append(this.draggableZone);
+                        this.draggableZone.width("100%").height(71);
+                        if (this.text == "Description&Features") {
+                            var plus = $('<div style="float:right;margin-top:12px;margin-right:10px;"></div>');
+                            this.draggableZone.append(plus);
+                            GUI.image(plus, "img-welcome", "../gui/images/green-plus.png", 70, 40, "before");
+                            GUI.addTooltip({
+                                parent: plus,
+                                content: "Add your own features",
+                            });
+                            plus.click(function () {
+                                GUI.messageDialog("yes", "", "Not yet implemented")
+                            })
+                        }
+                    }
+                    this.createHeader = function () {
+                        this.header = $("<div></div>");
+                        this.linkArea = $("<div style = 'display:inline;'></div>");
+                        this.link = $("<a style='float:right;'  href='#'>+" + this.text + "</a>");
+                        // else{this.button="";}
+                        this.parent.append(this.header)
+                        if (this.button) {
+                            this.button = $("<a style='float:left;'  href='#'>" + this.button + "</a>");
+                            this.linkArea.append(this.button)
+                        }
+                        this.parent.append(this.linkArea, '<br><hr>');
+                        this.linkArea.append(this.link);
+                        this.header.append(this.html, "<br></br>");
+                        this.header.css({
+                            "text-align": "justify",
+                            "text-justify": "inter-word"
+                        })
+                        this.header.hide();
+                    }
+                    this.createButton = function (name, data) {
+                        var button = GUI.button("", this.draggableZone)
+                        if (name == "") {
+                            // button.prop('disabled', true);
+                            var link = "../gui/images/upload_d.png";
+                            GUI.addTooltip({
+                                parent: button,
+                                content: "This is your own temporary repository hosted by our cloud and used for linking node/the database",
+                            });
+                        }
+                        else {
+                            var link = data[name].picture;
+                            GUI.addTooltip({
+                                parent: button,
+                                content: data[name].description,
+                            });
+                            button.data(data[name]);
+                        }
+                        // button.width(55).height(66);
+
+                        if (link == "../gui/images/exist.png") {
+                            GUI.image(button, "img-welcome", link, 77, 57, "before");
+                            // $("#img-welcome").width("57px")
+                        }
+                        else {
+                            GUI.image(button, "img-welcome", link, 77, 57, "before");
+                        }
+                        // button.width(57).height(77);
+                        // button.height(85.781)
+                        return button;
+                    }
+                    this.change = function () {
+                        if (this.flag == true) {
+                            this.header.show();
+                            if (this.button) this.button.show();
+                            this.link[0].innerText = "-" + this.text;
+                            this.flag = false;
+                        }
+                        else {
+                            this.header.hide();
+                            if (this.button) this.button.hide();
+                            this.link[0].innerText = "+" + this.text;
+                            this.flag = true;
+                        }
+                    }
+                    this.addDraggable = function () {
+                        this.createDraggable();
+                    }
+                    this.createHeader();
+                    var stock = this;
+                    this.link.on("click", function () {
+                        stock.change();
+                    });
+                    if (this.draggableFlag) {
+                        this.addDraggable();
+                        if (this.visibleFlag) {
+                            this.link.click();
+                        }
+                    }
+                }
+
+                var setDraggable = function (object, drop, zone) {
+                    object.draggable({
+                        revert: "invalid",
+                        cancel: false
+                    });
+                    drop.droppable({
+                        activeClass: "ui-state-default",
+                        hoverClass: "ui-state-hover",
+                        drop: function (event, ui) {
+                            var position = drop.find("button").last().position();
+                            if (position == undefined) {
+                                position = {
+                                    "top": 84.5,
+                                    "left": -50
+                                };
+                            }
+                            drop.append(ui.draggable);
+                            ui.draggable.css({
+                                position: "absolute",
+                                top: position.top,
+                                left: position.left + 63
+                            });
+                            var json = ui.draggable.data();
+                            if (!viewer.databases.hasOwnProperty(json.name)) {
+                                viewer.databases[json.name] = json
+                            }
+                            else {
+                                delete viewer.databases[json.name];
+                            }
+                            // object.remove(); 
+                            // object.draggable("destroy");
+                            // drop.droppable("destroy");
+                            setDraggable(ui.draggable, zone, drop);
+                        }
+                    });
+                }
+
+                var callback = function (data) {
+                    gitHtml.find("img").replaceWith("");
+                    var what = "<a>We are proposing a new version of our viewer elaborated with gui6. In addition of the basic functionnalites available in the last version, you are now able to display some model samples in COLLADA/glTF format, convert a COLLADA object to glTF and edit a scene. You can either explore some solutions listed below for editing models hosted by their databases, upload your models to your own project stocked in our cloud or just work statically.";
+                    what = new header(what, gitHtml, "Description&Features", true, true);
+                    var guest = "<a>This section is dedicated to users who wants to fastly use our application. The user session will be automatically removed once expired. Drag and drop the features you want to exploit and get started!</a>";
+                    guest = new header(guest, gitHtml, "Guest account", true, true, "Get started!");
+                    // guest.createButton("", data);
+                    var login = "<a>OAuth authentification not yet implemented</a>";
+                    login = new header(login, gitHtml, "Login via google", false, false);
+                    var about = "<a>AMD is sponsoring the main open-source (MIT licensed) prototype. It is a turn-key rest3d server composed of a XML database, a nodejs rest server, and viewer/loader code for the client. Source code available at https://github.com/amd/rest3d </a>";
+                    about = new header(about, gitHtml, "About", false, false);
+                    for(var key in data){
+                        if(key!=="tmp"){setDraggable(what.createButton(key, data), guest.draggableZone, what.draggableZone);}
+                        else{guest.createButton(key, data);}
+                    }
+                    // if (data.hasOwnProperty("dvia")) {
+                    //     // tmp.prop("disabled",true)
+                    //     // tmp.find('button').css({"pointer-events":"none"})
+                    //     setDraggable(what.createButton("dvia", data), guest.draggableZone, what.draggableZone);
+                    // }
+                    // if (data.hasOwnProperty("warehouse")) {
+                    //     setDraggable(what.createButton("warehouse", data), guest.draggableZone, what.draggableZone);
+                    // }
+                    // if (data.hasOwnProperty("db")) {
+                    //     setDraggable(what.createButton("db", data), guest.draggableZone, what.draggableZone);
+                    // }
+                    guest.button.click(function () {
+                        viewer.databases["tmp"]=data.tmp;
+                        for(var key in viewer.databases){
+                            var name = key;
+                            window.renderMenu.addTab({
+                                id: "tab_"+name,
+                                text: "  " + name,
+                            });
+                            var rest3dToTree = new window.rest3dToTree(viewer.databases[key],window.renderMenu["tab_"+name]);
+                            $("#dialog").dialog("close");
+                        }
+                        // rest3dToTree.
+                        // $("#dialog").dialog("close");
+                        // window.renderMenu = renderMenu;
+                        // if (viewer.databases.hasOwnProperty("warehouse")) {
+                        //     require(["database"], function (databaseTab) {
+                        //         var tmp = new databaseTab(viewer.databases.warehouse);
+                        //     });
+                        // }
+                        // if (viewer.databases.hasOwnProperty("3dvia")) {
+                        //     require(["database"], function (databaseTab) {
+                        //         var tmp = new databaseTab(viewer.databases["3dvia"]);
+                        //     });
+                        // }
+                        // if (data.hasOwnProperty("db")) {
+                        //     require(["database"], function (databaseTab) {
+                        //         var tmp = new databaseTab(data.db);
+                        //     });
+                        // }
+                    })
+                }
+
+                $("#dialog").dialog({
+                    width: '500',
+                    height: 'auto',
+                    position: ['middle', 20],
+                    title: 'Welcome to rest3d!',
+                    modal: true,
+                    create: function () {
+                        $(this).css("maxHeight", 450);
+                    },
+                    open: function (ev, ui) {
+                        rest3d.info(callback);
+                    },
+                    close: function () {
+                        gitHtml.remove();
+                    },
+                });
+
+                rest3d.info().then(callback);
+            }
+            //FPS counter
+            viewer.fpsCounter = new viewer.FPSCounter();
+            viewer.flagTick = false;
+            viewer.fpsCounter.createElement(document.getElementById("fps"));
+            viewer.fpsCounter.run();
+            $("#fps").hide();
+            viewer.tick();
+            //set background color to green
+            layout.jqueryObjectWest.css('backgroundColor', '#b9f09e');
+            //init bar status
+            window.fl4reStatus("READY", $("#mainLayout-south"));
+            //Init Tabs
+            GUI.container.resizeAll();
+            GUI.container.initContent("center");
+            GUI.container.initContent("west");
+            $("#defaultText").text($("#defaultText").text()+" | ");
+            window.consoleStatus = $("<a href='#'></a>");
+            $("#defaultText").append(window.consoleStatus);
+            window.consoleStatus.click(function(){
+                window.renderMenu.consoletab.focusTab();
+            });
+            var tmp = GUI.image(layout.jqueryObjectSouth, "img-settinfsfdsdsdsdsgs", "../gui/images/bundle_social.jpg", 100, 90);
+            tmp.css({"float":"right"})
+           
+                // $("a").mouseover(function(){
+                //     $("#defaultText").mouseover();
+                // })
+
+            //Linking UI to the rest3d API 
+             // welcomePanel();
+            rest3d.database({}, function(data){
+                 if (jQuery.isEmptyObject(data.children) && jQuery.isEmptyObject(data.assets)) { // If no activities on the tmp repository exist
+                    welcomePanel();
+                }
+                else { // else check databases enabled from the server and load their tabs
+                    // tmp.infoServer(); // lunch request
+                    rest3d.info(function(data){
+                        for(var key in data){
+                                var name = key;
+                                window.renderMenu.addTab({
+                                    id: "tab_"+name,
+                                    text: "  " + name,
+                                });
+                                var rest3dToTree = new window.rest3dToTree(data[key],window.renderMenu["tab_"+name]);
+                                $("#dialog").dialog("close");
+                            }
+                        });
+                    // setTimeout(function () {
+                    //     tmp.tree.jstree('open_all');
+                    // }, 1500); // open all nodes of the tab
+                }              
+            }, "/tmp");
+        }
+
+        return viewer;
+    });
+
+  // function jumpLine() {
             //     renderMenu.render.append("<br></br>");
             // }
 
@@ -360,7 +897,7 @@ define(['viewer', 'gui', 'rest3d', 'q', 'collada', 'gltf', 'renderer', 'state', 
             // GUI.image(accordion.collada.header, "img-settings", "../gui/images/collada.png", 40, 80, "before");
             // GUI.image(accordion.gltf.header, "img-settissngs1", "../gui/images/glTF.png", 40, 35, "before");
             //GUI.image(window.renderMenu.render.title, "img-render", "../gui/images/menu-render.png", 12, 14, "before");
-            GUI.image(window.renderMenu.scenes.title, "img-render", "../gui/images/scene-root.png", 12, 14, "before");
+            
             // // accordion.collada.header.append()
 
             // jumpLine();
@@ -623,535 +1160,4 @@ define(['viewer', 'gui', 'rest3d', 'q', 'collada', 'gltf', 'renderer', 'state', 
             //         })
             // }).width("90%");
 
-            var canvas = GUI.canvas(layout.jqueryObjectWest);
-            // layout.resetOverflow('west');
 
-            // initialize webGL
-            viewer.channel = Channel.create(canvas, false); // true for debug context
-
-            var button1 = GUI.button('Simulate Context Loss', renderMenu.render, function () {
-                if ($(this).find('.ui-button-text').text() == "Simulate Context Loss") {
-                    Channel.forceContextLoss();
-                    $(this).find('.ui-button-text').text("Simulate Restore Context");
-                }
-                else {
-                    Channel.forceContextRestore();
-                    $(this).find('.ui-button-text').text("Simulate Context Loss");
-                }
-            });
-            initCanvasUI();
-
-            // var currentZoom =0;
-            // var currentRotationX, currentRotationY = 0;
-
-            function initCanvasUI() {
-                var mouseDown = false;
-                var lastX, lastY = 0;
-                var downX, downY = 0;
-                // attach mouse events to canvas
-
-                function mouseDownHandler(ev) {
-                    if (!mouseDown) {
-                        mouseDown = true;
-                        downX = ev.screenX;
-                        downY = ev.screenY;
-                    }
-                    lastX = ev.screenX;
-                    lastY = ev.screenY;
-
-                    return true;
-                }
-
-                function mouseMoveHandler(ev) {
-                    if (!mouseDown) return false;
-
-                    viewer.currentZoom = 1;
-                    var mdelta = ev.screenX - lastX;
-                    lastX = ev.screenX;
-                    viewer.currentRotationX -= mdelta / 2.5;
-
-
-                    var mdelta = ev.screenY - lastY;
-                    lastY = ev.screenY;
-                    viewer.currentRotationY += mdelta / 2.5;
-
-
-                    viewer.draw();
-                    return true;
-                }
-
-                function mouseUpHandler(ev) {
-                    mouseDown = false;
-                    viewer.currentZoom = 1;
-                    // pick
-                    if ((downX === ev.screenX) && (downY === ev.screenY)) {
-
-                        var x = ev.layerX / ev.currentTarget.clientWidth;
-                        var y = 1.0 - (ev.layerY / ev.currentTarget.clientHeight);
-
-                        var id = viewer.pick(x, y);
-
-                        if (viewer.pickName[id] != "undefined" && viewer.pickName[id] != null) {
-                            if (!viewer.channel.selected) viewer.channel.selected = {};
-                            if (viewer.channel.selected[id]) {
-                                delete viewer.channel.selected[id];
-                                window.fl4reStatus("", $("#mainLayout-south"), "selected " + viewer.pickName[Object.keys(viewer.channel.selected)[0]]);
-                            }
-                            else {
-                                var realId = viewer.pickName[id].split("#").pop();
-                                realId = realId.split("[")[0];
-                                // console.debug("#"+realId+'__'+id+' '+$("#"+realId+'__'+id).length);
-                                // treeScene.Tree.jstree("select_node", "#" + realId + '__' + id);
-                                viewer.channel.selected[id] = true;
-                                window.fl4reStatus("", $("#mainLayout-south"), "selected " + viewer.pickName[id]);
-                            }
-                        }
-                        else {
-                            window.fl4reStatus("READY", $("#mainLayout-south"));
-                            // if (treeScene) {
-                            //     treeScene.Tree.jstree("deselect_all");
-                            // }
-                            delete viewer.channel.selected;
-                        }
-                        viewer.draw();
-                    }
-                }
-
-                function mouseWheelHandler(ev) {
-
-                    var mdelta = ev.wheelDelta;
-                    viewer.currentZoom = Math.exp(mdelta / 2500);
-
-                    viewer.draw();
-                    return true;
-                }
-
-                canvas.removeEventListener("mousedown", mouseDownHandler, false);
-                canvas.removeEventListener("mousemove", mouseMoveHandler, false);
-                canvas.removeEventListener("mouseup", mouseUpHandler, false);
-                canvas.removeEventListener("mousewheel", mouseWheelHandler, false);
-                canvas.addEventListener("mousedown", mouseDownHandler, false);
-                canvas.addEventListener("mousemove", mouseMoveHandler, false);
-                canvas.addEventListener("mouseup", mouseUpHandler, false);
-                canvas.addEventListener("mousewheel", mouseWheelHandler, false);
-
-                function touchHandler(event) {
-                    var touches = event.changedTouches,
-                        first = touches[0],
-                        type = "";
-                    switch (event.type) {
-                    case "touchstart":
-                        type = "mousedown";
-                        break;
-                    case "touchmove":
-                        type = "mousemove";
-                        break;
-                    case "touchend":
-                        type = "mouseup";
-                        break;
-                    default:
-                        return;
-                    }
-
-                    //initMouseEvent(type, canBubble, cancelable, view, clickCount, 
-                    //           screenX, screenY, clientX, clientY, ctrlKey, 
-                    //           altKey, shiftKey, metaKey, button, relatedTarget);
-
-                    var simulatedEvent = document.createEvent("MouseEvent");
-                    simulatedEvent.initMouseEvent(type, true, true, window, 1,
-                        first.screenX, first.screenY,
-                        first.clientX, first.clientY, false,
-                        false, false, false, 0 /*left*/ , null);
-
-                    first.target.dispatchEvent(simulatedEvent);
-                    event.preventDefault();
-                }
-
-
-                canvas.addEventListener("touchstart", touchHandler, true);
-                canvas.addEventListener("touchmove", touchHandler, true);
-                canvas.addEventListener("touchend", touchHandler, true);
-                canvas.addEventListener("touchcancel", touchHandler, true);
-
-
-                // redraw on resize
-
-                $(canvas).resize(function (evt) {
-                    viewer.draw();
-                });
-            };
-
-            button1.hide();
-
-            setTimeout(function () {
-                layout.jqueryObject.sizePane("west", $(window).width() - 549);
-            }, 1000);
-
-            layout.jqueryObject.resizeAll();
-            layout.jqueryObject.initContent("center");
-            layout.jqueryObject.initContent("west");
-
-            window.loadCss("hot-sneaks");
-
-            // $("#mainLayout-west").append('<div id="colorSelector"  style="z-index:9999!important;"><div style="background-color: #0000ff"></div></div>');
-            GUI.button("undefined", $("#mainLayout-west")).prop("id", "colorSelector");
-            var tmpPicker;
-            var flagColorPicker = 'show';
-            $('#colorSelector div').css('backgroundColor', '#ffffff');
-
-            $('#colorSelector').ColorPicker({
-                color: '#ffffff',
-                onShow: function (colpkr) {
-                    $(".colorpicker").css("margin-left", "-320px");
-                    $(colpkr).fadeIn(200);
-                    tmpPicker = $(colpkr);
-                    return false;
-                },
-                onHide: function (colpkr) {
-                    $(colpkr).fadeOut(200);
-                    tmpPicker = $(colpkr);
-                    return false;
-                },
-                onSubmit: function (hsb, hex, rgb) {
-                    $('#colorSelector div').css('backgroundColor', '#' + hex);
-                    $('#mainLayout-west').css('backgroundColor', '#' + hex);
-                    $("#mainLayout-west").css({
-                        "background-image": "none"
-                    });
-                    tmpPicker.fadeOut(200);
-                }
-            });
-            // $("#tmp, #colorSelector, .colorpicker").mouseover(function(){
-            //     $('#colorSelector').show();
-            // })
-            //   $("#tmp, #colorSelector, .colorpicker").mouseleave(function(){
-            //     $('#colorSelector').hide();
-            // })
-
-
-            // VIEWER TOOLS SETTING UP
-            var htmlFps = '<div class="yasuo" style="z-index: 999 !important;"><a id="fps" class="ui-widget-content" style="float:right;" >? FPS</a></div>';
-            $("#mainLayout-west").append(htmlFps);
-            var but1 = GUI.button('fullscreen', $("#mainLayout-west"), function () {
-                if (screenfull.enabled) {
-                    screenfull.request($("#mainLayout-west")[0]);
-                }
-            }).prop("id", "fullCanvas");
-            but1.html('');
-            GUI.addIcon(but1, "ui-icon-arrow-4-diag", "", "before");
-            GUI.addTooltip({
-                parent: but1,
-                content: "Fullscreen mode",
-            });
-            $('#colorSelector').html('');
-            GUI.addIcon($('#colorSelector'), "ui-icon-key", "", "before");
-            GUI.addTooltip({
-                parent: $('#colorSelector'),
-                content: "Set a color to the background",
-            });
-            $('#colorSelector').css({
-                "background": "none !important;"
-            })
-            var inputImage = GUI.input({
-                id: "loadImage",
-                parent: window.renderMenu.script,
-                hide: true,
-                extension: "image/*",
-                mode: "displayImage",
-            });
-            var button = GUI.button('', $("#mainLayout-west"), function () {
-                inputImage.click();
-            }).prop("id", "imageCanvas");
-            button.html('');
-            GUI.addIcon(button, "ui-icon-image", "", "before");
-            GUI.addTooltip({
-                parent: button,
-                content: "Load an image as background",
-            });
-            window.rest3dToTree=rest3dToTree;
-            //WELCOME PANEL, panel displayed when the user session is 'new'
-            function welcomePanel() {
-                $("#dialog").dialog("close");
-                var gitHtml = $('<div id="dialog"><img src="../gui/images/loading.gif"/></div>');
-                gitPanel = $('body').append(gitHtml);
-                function header(html, parent, text, draggableFlag, visibleFlag, button) {
-                    this.flag = true;
-                    this.html = html;
-                    this.text = text;
-                    this.parent = parent;
-                    this.draggableFlag = draggableFlag;
-                    this.visibleFlag = visibleFlag;
-                    this.button = button;
-                    this.createDraggable = function (flag) {
-                        this.draggableZone = $('<div class="draggableWelcome ui-widget-header" style="display:inline-block"></div>');
-                        this.header = this.header.append(this.draggableZone);
-                        this.draggableZone.width("100%").height(71);
-                        if (this.text == "Description&Features") {
-                            var plus = $('<div style="float:right;margin-top:12px;margin-right:10px;"></div>');
-                            this.draggableZone.append(plus);
-                            GUI.image(plus, "img-welcome", "../gui/images/green-plus.png", 70, 40, "before");
-                            GUI.addTooltip({
-                                parent: plus,
-                                content: "Add your own features",
-                            });
-                            plus.click(function () {
-                                GUI.messageDialog("yes", "", "Not yet implemented")
-                            })
-                        }
-                    }
-                    this.createHeader = function () {
-                        this.header = $("<div></div>");
-                        this.linkArea = $("<div style = 'display:inline;'></div>");
-                        this.link = $("<a style='float:right;'  href='#'>+" + this.text + "</a>");
-                        // else{this.button="";}
-                        this.parent.append(this.header)
-                        if (this.button) {
-                            this.button = $("<a style='float:left;'  href='#'>" + this.button + "</a>");
-                            this.linkArea.append(this.button)
-                        }
-                        this.parent.append(this.linkArea, '<br><hr>');
-                        this.linkArea.append(this.link);
-                        this.header.append(this.html, "<br></br>");
-                        this.header.css({
-                            "text-align": "justify",
-                            "text-justify": "inter-word"
-                        })
-                        this.header.hide();
-                    }
-                    this.createButton = function (name, data) {
-                        var button = GUI.button("", this.draggableZone)
-                        if (name == "") {
-                            // button.prop('disabled', true);
-                            var link = "../gui/images/upload_d.png";
-                            GUI.addTooltip({
-                                parent: button,
-                                content: "This is your own temporary repository hosted by our cloud and used for linking node/the database",
-                            });
-                        }
-                        else {
-                            var link = data[name].picture;
-                            GUI.addTooltip({
-                                parent: button,
-                                content: data[name].description,
-                            });
-                            button.data(data[name]);
-                        }
-                        // button.width(55).height(66);
-
-                        if (link == "../gui/images/exist.png") {
-                            GUI.image(button, "img-welcome", link, 77, 57, "before");
-                            // $("#img-welcome").width("57px")
-                        }
-                        else {
-                            GUI.image(button, "img-welcome", link, 77, 57, "before");
-                        }
-                        // button.width(57).height(77);
-                        // button.height(85.781)
-                        return button;
-                    }
-                    this.change = function () {
-                        if (this.flag == true) {
-                            this.header.show();
-                            if (this.button) this.button.show();
-                            this.link[0].innerText = "-" + this.text;
-                            this.flag = false;
-                        }
-                        else {
-                            this.header.hide();
-                            if (this.button) this.button.hide();
-                            this.link[0].innerText = "+" + this.text;
-                            this.flag = true;
-                        }
-                    }
-                    this.addDraggable = function () {
-                        this.createDraggable();
-                    }
-                    this.createHeader();
-                    var stock = this;
-                    this.link.on("click", function () {
-                        stock.change();
-                    });
-                    if (this.draggableFlag) {
-                        this.addDraggable();
-                        if (this.visibleFlag) {
-                            this.link.click();
-                        }
-                    }
-                }
-
-                var setDraggable = function (object, drop, zone) {
-                    object.draggable({
-                        revert: "invalid",
-                        cancel: false
-                    });
-                    drop.droppable({
-                        activeClass: "ui-state-default",
-                        hoverClass: "ui-state-hover",
-                        drop: function (event, ui) {
-                            var position = drop.find("button").last().position();
-                            if (position == undefined) {
-                                position = {
-                                    "top": 84.5,
-                                    "left": -50
-                                };
-                            }
-                            drop.append(ui.draggable);
-                            ui.draggable.css({
-                                position: "absolute",
-                                top: position.top,
-                                left: position.left + 63
-                            });
-                            var json = ui.draggable.data();
-                            if (!viewer.databases.hasOwnProperty(json.name)) {
-                                viewer.databases[json.name] = json
-                            }
-                            else {
-                                delete viewer.databases[json.name];
-                            }
-                            // object.remove(); 
-                            // object.draggable("destroy");
-                            // drop.droppable("destroy");
-                            setDraggable(ui.draggable, zone, drop);
-                        }
-                    });
-                }
-
-                var callback = function (data) {
-                    console.debug("callback")
-                    gitHtml.find("img").replaceWith("");
-                    var what = "<a>We are proposing a new version of our viewer elaborated with gui6. In addition of the basic functionnalites available in the last version, you are now able to display some model samples in COLLADA/glTF format, convert a COLLADA object to glTF and edit a scene. You can either explore some solutions listed below for editing models hosted by their databases, upload your models to your own project stocked in our cloud or just work statically.";
-                    what = new header(what, gitHtml, "Description&Features", true, true);
-                    var guest = "<a>This section is dedicated to users who wants to fastly use our application. The user session will be automatically removed once expired. Drag and drop the features you want to exploit and get started!</a>";
-                    guest = new header(guest, gitHtml, "Guest account", true, true, "Get started!");
-                    // guest.createButton("", data);
-                    var login = "<a>OAuth authentification not yet implemented</a>";
-                    login = new header(login, gitHtml, "Login via google", false, false);
-                    var about = "<a>AMD is sponsoring the main open-source (MIT licensed) prototype. It is a turn-key rest3d server composed of a XML database, a nodejs rest server, and viewer/loader code for the client. Source code available at https://github.com/amd/rest3d </a>";
-                    about = new header(about, gitHtml, "About", false, false);
-                    for(var key in data){
-                        if(key!=="tmp"){setDraggable(what.createButton(key, data), guest.draggableZone, what.draggableZone);}
-                        else{guest.createButton(key, data);}
-                    }
-                    // if (data.hasOwnProperty("dvia")) {
-                    //     // tmp.prop("disabled",true)
-                    //     // tmp.find('button').css({"pointer-events":"none"})
-                    //     setDraggable(what.createButton("dvia", data), guest.draggableZone, what.draggableZone);
-                    // }
-                    // if (data.hasOwnProperty("warehouse")) {
-                    //     setDraggable(what.createButton("warehouse", data), guest.draggableZone, what.draggableZone);
-                    // }
-                    // if (data.hasOwnProperty("db")) {
-                    //     setDraggable(what.createButton("db", data), guest.draggableZone, what.draggableZone);
-                    // }
-                    guest.button.click(function () {
-                        viewer.databases["tmp"]=data.tmp;
-                        for(var key in viewer.databases){
-                            var name = key;
-                            window.renderMenu.addTab({
-                                id: "tab_"+name,
-                                text: "  " + name,
-                            });
-                            var rest3dToTree = new window.rest3dToTree(viewer.databases[key],window.renderMenu["tab_"+name]);
-                            $("#dialog").dialog("close");
-                        }
-                        // rest3dToTree.
-                        // $("#dialog").dialog("close");
-                        // window.renderMenu = renderMenu;
-                        // if (viewer.databases.hasOwnProperty("warehouse")) {
-                        //     require(["database"], function (databaseTab) {
-                        //         var tmp = new databaseTab(viewer.databases.warehouse);
-                        //     });
-                        // }
-                        // if (viewer.databases.hasOwnProperty("3dvia")) {
-                        //     require(["database"], function (databaseTab) {
-                        //         var tmp = new databaseTab(viewer.databases["3dvia"]);
-                        //     });
-                        // }
-                        // if (data.hasOwnProperty("db")) {
-                        //     require(["database"], function (databaseTab) {
-                        //         var tmp = new databaseTab(data.db);
-                        //     });
-                        // }
-                    })
-                }
-
-                $("#dialog").dialog({
-                    width: '500',
-                    height: 'auto',
-                    position: ['middle', 20],
-                    title: 'Welcome to rest3d!',
-                    modal: true,
-                    create: function () {
-                        $(this).css("maxHeight", 450);
-                    },
-                    open: function (ev, ui) {
-                        rest3d.info(callback);
-                    },
-                    close: function () {
-                        gitHtml.remove();
-                    },
-                });
-
-                rest3d.info().then(callback);
-            }
-            //FPS counter
-            viewer.fpsCounter = new viewer.FPSCounter();
-            viewer.flagTick = false;
-            viewer.fpsCounter.createElement(document.getElementById("fps"));
-            viewer.fpsCounter.run();
-            $("#fps").hide();
-            viewer.tick();
-            //set background color to green
-            layout.jqueryObjectWest.css('backgroundColor', '#b9f09e');
-            //init bar status
-            window.fl4reStatus("READY", $("#mainLayout-south"));
-            //Init Tabs
-            GUI.container.resizeAll();
-            GUI.container.initContent("center");
-            GUI.container.initContent("west");
-
-            //Linking UI to the rest3d API 
-             // welcomePanel();
-            rest3d.database({}, function(data){
-                 if (jQuery.isEmptyObject(data.children) && jQuery.isEmptyObject(data.assets)) { // If no activities on the tmp repository exist
-                    welcomePanel();
-                }
-                else { // else check databases enabled from the server and load their tabs
-                    // tmp.infoServer(); // lunch request
-                    rest3d.info(function(data){
-                        for(var key in data){
-                                var name = key;
-                                window.renderMenu.addTab({
-                                    id: "tab_"+name,
-                                    text: "  " + name,
-                                });
-                                var rest3dToTree = new window.rest3dToTree(data[key],window.renderMenu["tab_"+name]);
-                                $("#dialog").dialog("close");
-                            }
-                        });
-                    // setTimeout(function () {
-                    //     tmp.tree.jstree('open_all');
-                    // }, 1500); // open all nodes of the tab
-                }              
-            }, "/tmp");
-            // //LOADING OF TMP DATABASE BY DEFAULT
-            // window.renderMenu = renderMenu;
-            // var tmp = new rest3dToTree("tmp"); //Object instancied from the new database(tmp). It creates automatically his tree;
-            // tmp.refresh(function (data) { //refresh the tab, convert rest3d messages to nodes into the tree associated
-            //     if (jQuery.isEmptyObject(data.children) && jQuery.isEmptyObject(data.assets)) { // If no activities on the tmp repository exist
-            //         welcomePanel();
-            //     }
-            //     else { // else check databases enabled from the server and load their tabs
-            //         tmp.infoServer(); // lunch request
-
-            //         setTimeout(function () {
-            //             tmp.tree.jstree('open_all');
-            //         }, 1500); // open all nodes of the tab
-            //     }
-            // })
-
-
-        }
-
-        return viewer;
-    });

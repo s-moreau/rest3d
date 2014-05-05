@@ -1918,9 +1918,16 @@ define(['channel', 'codemirror', 'webglUtils', 'WebGLDebugUtils', 'pnotify', 'co
 
 
         GUI.toolBar = function (_id, _parent, _icones, _links, _position) {
-            var tomp = '<div id="icon-' + _id + '" class="settings-button" style="width:20px;height:20px;border-radius: 1px;">' + GUI.addIcon("0", "ui-icon-gear") + '</div>';
-            var $tomp = $(tomp);
-            _parent.append($tomp);
+            // var tomp = '<button id="icon-' + _id + '" style="border-radius: 1px;float:right;">' + GUI.addIcon("0", "ui-icon-gear") + '</button>';
+            // var $tomp = $(tomp);
+            // _parent.append($tomp);
+
+            var play = GUI.button("set", _parent, function () {});
+            play.html('');
+            GUI.addIcon(play, "ui-icon-gear", "", "before");
+            play.css({'float':'right'});
+            play.find('span').css({'right':'1px','position':'relative'})
+
             var size_toolbar = _icones.length;
             var toolbar = '<div id="' + _id + '" class="toolbar-icons" style="display:none;">';
             for (var i = 0; i < size_toolbar; i++) {
@@ -1929,12 +1936,12 @@ define(['channel', 'codemirror', 'webglUtils', 'WebGLDebugUtils', 'pnotify', 'co
             toolbar += '</div>';
             var $toolbar = $(toolbar);
             _parent.append($toolbar);
-            var result = $tomp.toolbar({
+            var result = play.toolbar({
                 content: '#' + _id,
                 position: _position,
                 hideOnClick: true
             });
-            $tomp.onmouseover = "this.style.cursor='pointer'";
+            play.onmouseover = "this.style.cursor='pointer'";
             //$("div.tool-items a:first-child").remove();
             return result;
         };
@@ -2083,7 +2090,13 @@ define(['channel', 'codemirror', 'webglUtils', 'WebGLDebugUtils', 'pnotify', 'co
         GUI.destroyCurrentCssTheme = function () {
             $("link[href='" + GUI.currentCssTheme + "']").remove();
         }
-
+        $.widget("ui.tooltip", $.ui.tooltip, {
+        options: {
+        content: function () {
+        return $(this).prop('title');
+        }
+        }
+        });
         GUI.addTooltip = function (_json) {
             var content = _json.content;
             var parent = _json.parent;

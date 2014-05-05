@@ -150,7 +150,7 @@ define(['q'],
             this.preview = function (node) {
                 $("#dialog").dialog("close");
                 var gitHtml = $('<div id="dialog"><iframe id="myIframe" src="" style="height:100% !important; width:100% !important; border:0px;"></div>');
-                gitPanel = $('body').append(gitHtml);
+                $('body').append(gitHtml);
                 $("#dialog").dialog({
                     title: node.attr('name'),
                     width: '600',
@@ -596,9 +596,10 @@ define(['q'],
                     var flag = true;
                     this.parent.focusTab(function(){
                         if(flag){
-                            stock.rest3dToTree.createTree();
+                        stock.rest3dToTree.createTree();
                         setTimeout(function(){
                               stock.rest3dToTree.setUpload();
+                              stock.rest3dToTree.tree.openAll();
                         },50);   
                         }
                         flag=false;               
@@ -628,6 +629,7 @@ define(['q'],
                             stock.rest3dToTree.createTree();
                         setTimeout(function(){
                               stock.rest3dToTree.setUpload();
+                              stock.rest3dToTree.tree.openAll();
                         },50);   
                         }
                         flag=false;               
