@@ -129,8 +129,8 @@
         });
     }
   };
-  // note -> cb may be null if this is called through a timeout
-
+  
+// FIXME -> Need to remove resource from all assets !!
   FileInfo.prototype.delete = function(database,cb){
     console.log('********* DELETE *************')
     var fileInfo = this;
@@ -138,23 +138,15 @@
       // remove asset file from database, and update assets info uppon success
       // NOTE -> should not do that ... should keep asset and move it to a recycle bin instead !!
       database.del(fileInfo.asset.assetId, function(err,assetId){
-            if (err) {
-              console.log('Error deleting asset='+assetId);
-              cb && cb(err);
-            } else {
-              console.log('Success deleting asset='+assetId);
-              var aid = assetId;
-              database.removeKey('assets',aid, function (err,res){
-              if (err) {
-                console.log('Error deleting asset key '+aid+' = '+err);
-                cb && cb(err);
-              } else {
-                console.log('asset ['+aid+'] entry deleted')
-                cb && cb(undefined, res);
-              }
-            })
-          }
-        })
+        if (err) {
+          console.log('Error deleting asset='+assetId);
+          cb(err);
+        } else {
+          console.log('Success deleting asset='+assetId);
+          cb(undefined, res);
+        }
+
+      })
     } else {
       fs.unlink(pah.join(FileInfo.options.uploadDir,fileInfo.asset.assetId), function (ex) {
 
@@ -166,10 +158,10 @@
         */
 
         if (ex) {
-          cb && cb(ex);
+          cb(ex);
         } else {
-          cb && cb(undefined,fileInfo.asset.assetId+" was succesfully deleted");
           delete FileInfo.tmpAssets[fileInfo.asset.assetId];
+          cb(undefined,fileInfo.asset.assetId+" was succesfully deleted");
         }
 
       });

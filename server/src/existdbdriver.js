@@ -81,9 +81,8 @@ exports.getData = function(asset, cb) {
 };
 
 // this locks an asset, waiting forever for lock to be available
-var lockAsset = exports.lockAsset = function(_asset,_cb, _n){
-  var asset=_asset;
-  var cb=_cb;
+var lockAsset = exports.lockAsset = function(asset,cb, _n){
+
   var n=_n || 0;
 
   console.log('++ lock asset name['+asset.uuid+']='+asset.name);
@@ -125,9 +124,7 @@ var lockAsset = exports.lockAsset = function(_asset,_cb, _n){
   })
 }
 // unlock asset
-var unlockAsset = exports.unlockAsset = function(_asset,_cb){
-  var asset=_asset;
-  var cb=_cb;
+var unlockAsset = exports.unlockAsset = function(asset,cb){
 
   console.log('++ unlock asset['+asset.uuid+'] name='+asset.name);
 
@@ -140,9 +137,7 @@ var unlockAsset = exports.unlockAsset = function(_asset,_cb){
 // If the asset cannot be saved, because it is locked or otherwise
 //  return to callers, as it has to do something about it
 
-var saveAsset = exports.saveAsset = function(_asset,_cb){
-  var asset=_asset;
-  var cb=_cb;
+var saveAsset = exports.saveAsset = function(asset,cb){
 
   console.log('-- saveAsset ['+asset.uuid+'] name='+asset.name)
 
@@ -158,13 +153,22 @@ var saveAsset = exports.saveAsset = function(_asset,_cb){
 
 }
 
-// TODO - database is not necessary as 'exports' contains existdb already
-var loadAsset = exports.loadAsset = function(_database,_id,_cb){
-  var id=_id;
-  var cb=_cb;
-  var database=_database;
-  var value;
+// cookies 
+var saveCookie = exports.saveCookie = function( sid, data, cb)
+{
+  insertKeyPair('cookies',sid, data, cb);
+}
+var loadCookie = exports.loadCookie = function(sid,cb){
+  getKey('cookies',sid, cb);
+}
+var delCookie = exports.delCookie = function(sid,cb){
+  removeKey('cookies',sid, cb);
+}
 
+// TODO - database is not necessary as 'exports' contains existdb already
+var loadAsset = exports.loadAsset = function(database,id,cb){
+
+  var value;
 
   console.log('-- loadAsset id='+id)
 
@@ -208,24 +212,36 @@ var store = exports.store = function(asset,filename_or_buffer, callback) {
 	});
 }
 
-// delete an asset (note: delete is a reserved keyword)
-var del = exports.del = function(asset, callback) {
+// delete an resource (note: delete is a reserved keyword)
+// also delete its item in asset.xml
+// FIXME -> need to update all references to that resource in all assets
 
-  var cb = callback;
-  var path = '/apps/rest3d/data/'+asset;
+var del = exports.del = function(assetId, cb) {
+
+  var path = '/apps/rest3d/data/'+assetId;
   // other optional arg: destination filename
   connection.del(path, function(err,res) {
     if (err) {
-      console.log("eXist.store(): An error occurred: " + err);
+      console.log("eXist.delete(): An error occurred: " + err);
       cb(err,null);
     } else {
-      cb(undefined,"eXist: "+path+" Upload completed!")
+      console.log("eXist.delete(): removed asset "+assetId);
+      cb(undefined,res);
+      removeKey('assets',assetId, function (err,res){
+        if (err) {
+          console.log('Error deleting asset key '+assetId+' = '+err);
+          cb(err);
+        } else {
+          console.log('asset ['+assetId+'] entry deleted')
+          cb(undefined, res);
+        }
+      })
     }
   });
 }
 // insert an object in a key/pair database
 // Warning -> this returns garbage in res
-var insertKeyPair = exports.insertKeyPair = function(collection, id, value, callback) {
+var insertKeyPair = function(collection, id, value, callback) {
 
   var cb=callback;
   var text = value;
@@ -248,7 +264,19 @@ var insertKeyPair = exports.insertKeyPair = function(collection, id, value, call
 
   //var text = xmlbuilder.buildObject(value);
   var xquery = 'xquery version "3.0";\
-                let $db := doc("/db/apps/rest3d/data/'+collection+'.xml")/items \
+                declare namespace xh="http://www.w3.org/1999/html";\
+                declare function xh:items() as node()*\
+                {\
+                  let $db := doc("/db/apps/rest3d/data/'+collection+'.xml")\
+                  return\
+                    if ($db) then\
+                      $db/items\
+                    else\
+                      let $test := xmldb:store("/apps/rest3d/data","'+collection+'.xml", <items/>)\
+                      return\
+                        doc("/db/apps/rest3d/data/'+collection+'.xml")/items\
+                };\
+                let $db := xh:items()\
                 let $item := $db/item[@id="'+id+'"]\
                 let $newitem := element item {$item/(@* except @id), attribute id {"'+id+'"} ,"'+text+'"}\
 							  return\
@@ -271,7 +299,7 @@ var insertKeyPair = exports.insertKeyPair = function(collection, id, value, call
   });
 }
 
-var saveRoot = exports.saveRoot = function(collection, callback){
+var saveRoot = exports.saveRoot = function(collection, cb){
   console.log('set root ['+collection.uuid+'] name = '+collection.name+' ');
   var text = toJSON(collection);
   var id = collection.uuid;
@@ -284,25 +312,33 @@ var saveRoot = exports.saveRoot = function(collection, callback){
 
   //var text = xmlbuilder.buildObject(value);
   var xquery = 'xquery version "3.0";\
-                let $db := doc("/db/apps/rest3d/data/assets.xml")/items \
+                declare namespace xh="http://www.w3.org/1999/html";\
+                declare function xh:items() as node()*\
+                {\
+                  let $db := doc("/db/apps/rest3d/data/assets.xml")\
+                  return\
+                    if ($db) then\
+                      $db/items\
+                    else\
+                      let $test := xmldb:store("/apps/rest3d/data","assets.xml", <items/>)\
+                      return\
+                        doc("/db/apps/rest3d/data/assets.xml")/items\
+                };\
+                let $db := xh:items()\
                 let $item := $db/item[@id="'+id+'"]\
                 let $newitem := element item {$item/(@* except (@id,@root)), attribute root {"true"}, attribute id {"'+id+'"}, "'+text+'"}\
                 return\
-                if ($db)\
-                then\
                   if ($item)\
                   then \
                    update replace $item with $newitem\
                   else \
-                   update insert $newitem into $db\
-                else\
-                  (response:set-status-code( 404 ), "cannot find '+collection+'.xml")';
-   query(xquery, callback);
+                   update insert $newitem into $db';
+   query(xquery, cb);
 }
 
 
-var getRoot = exports.getRoot = function(callback) {
-  var cb=callback;
+var getRoot = exports.getRoot = function(cb) {
+
  console.log('getRoot');
  var xquery='xquery version "3.0";\
              let $db := doc("/db/apps/rest3d/data/assets.xml")/items \
@@ -331,27 +367,39 @@ var getRoot = exports.getRoot = function(callback) {
     });
 }
 
-var lockKey = exports.lockKey = function(collection, id, callback) {
-  var cb = callback;
+var lockKey = function(collection, id, cb) {
+
   console.log('lock key['+id+']')
   var xquery = 'xquery version "3.0";\
-              declare namespace xh="http://www.w3.org/1999/html";\
-              declare function xh:lock($db, $item) as xs:string\
-              {\
-                let $lock := $item/@lock\
-                let $newitem := element item {$item/(@* except (@lock,@id)), attribute lock {"true"}, attribute id {"'+id+'"}, $item/text()}\
-                return\
-                  if ($lock) then\
-                    (response:set-status-code(423), "key is locked")\
-                  else\
-                    if ($item) then\
-                      (update replace $item with $newitem, $newitem/text())\
+                declare namespace xh="http://www.w3.org/1999/html";\
+                declare function xh:lock($db, $item) as xs:string\
+                {\
+                  let $lock := $item/@lock\
+                  let $newitem := element item {$item/(@* except (@lock,@id)), attribute lock {"true"}, attribute id {"'+id+'"}, $item/text()}\
+                  return\
+                    if ($lock) then\
+                      (response:set-status-code(423), "key is locked")\
                     else\
-                      (update insert $newitem into $db, $newitem/text())\
-               };\
-              let $db := doc("/db/apps/rest3d/data/'+collection+'.xml")/items \
-              let $item := $db/item[@id="'+id+'"]\
-              return util:exclusive-lock($item, xh:lock($db, $item))';
+                      if ($item) then\
+                        (update replace $item with $newitem, $newitem/text())\
+                      else\
+                        (update insert $newitem into $db, $newitem/text())\
+                };\
+                declare function xh:items() as node()*\
+                {\
+                  let $db := doc("/db/apps/rest3d/data/'+collection+'.xml")\
+                  return\
+                    if ($db) then\
+                      $db/items\
+                    else\
+                      let $test := xmldb:store("/apps/rest3d/data","'+collection+'.xml", <items/>)\
+                      return\
+                        doc("/db/apps/rest3d/data/'+collection+'.xml")/items\
+                };\
+                let $db := xh:items()\
+                let $item := $db/item[@id="'+id+'"]\
+                return\
+                  util:exclusive-lock($item, xh:lock($db, $item))';
 
    query(xquery,function(err,res){
       if (err){
@@ -370,34 +418,35 @@ var lockKey = exports.lockKey = function(collection, id, callback) {
     });
 }
 
-var unlockKey = exports.unlockKey = function(collection, id, callback) {
+var unlockKey = function(collection, id, cb) {
 
   console.log('unlock key['+id+']')
 
   var xquery = 'xquery version "3.0";\
-              declare namespace xh="http://www.w3.org/1999/html";\
-              declare function xh:unlock($item) as xs:string\
-              {\
-                let $lock := $item/@lock\
-                let $newitem := element item {$item/(@* except @lock), $item/text()}\
-                return\
-                  if ($lock) then\
-                    (update replace $item with $newitem , $newitem/text())\
-                  else\
-                    if ($item) then\
-                      $item/text()\
+                declare namespace xh="http://www.w3.org/1999/html";\
+                declare function xh:unlock($item) as xs:string\
+                {\
+                  let $lock := $item/@lock\
+                  let $newitem := element item {$item/(@* except @lock), $item/text()}\
+                  return\
+                    if ($lock) then\
+                      (update replace $item with $newitem , $newitem/text())\
                     else\
-                      (response:set-status-code(404), "key not found")\
-               };\
-              let $db := doc("/db/apps/rest3d/data/'+collection+'.xml")/items \
-              let $item := $db/item[@id="'+id+'"]\
-              return util:exclusive-lock($item, xh:unlock($item))';
+                      if ($item) then\
+                        $item/text()\
+                      else\
+                        (response:set-status-code(404), "key not found")\
+                 };\
+                let $db := doc("/db/apps/rest3d/data/'+collection+'.xml")/items \
+                let $item := $db/item[@id="'+id+'"]\
+                return \
+                  util:exclusive-lock($item, xh:unlock($item))';
 
-  query(xquery, callback);
+  query(xquery, cb);
 }
 
 // delete an object in a key/pair database
-var removeKey = exports.removeKey = function(collection,id, callback) {
+var removeKey =  function(collection,id, cb) {
 
   console.log('removeKey['+id+']')
 
@@ -405,16 +454,18 @@ var removeKey = exports.removeKey = function(collection,id, callback) {
                 let $db := doc("/db/apps/rest3d/data/'+collection+'.xml")/items \
 							  for $item in $db/item[@id="'+id+'"]\
 							   return\
-							    update delete $item';
+                 if ($item)\
+							     update delete $item\
+                 else\
+                   (response:set-status-code(404), "key not found")';
 
-
-  query(xquery, callback);
+  query(xquery, cb);
 }
 
 
 // get a Key value, retry until it is unlocked
-var getKey = exports.getKey = function(collection,id, callback) {
- var cb=callback;
+var getKey = function(collection,id, cb) {
+
  console.log('getKey['+id+']')
 
  var xquery='xquery version "3.0";\
@@ -441,8 +492,8 @@ var getKey = exports.getKey = function(collection,id, callback) {
     });
 }
 
-var query = exports.query = function(xquery, callback) {
-	var cb = callback;
+var query = exports.query = function(xquery, cb) {
+
 	var query = connection.query(xquery, { chunkSize: 100 });
   var data =[];
 
@@ -479,8 +530,7 @@ var query = exports.query = function(xquery, callback) {
 
 }
 
-var info = exports.info = function (callback) {
-  var cb=callback;
+var info = exports.info = function (cb) {
 
 	  connection.call('/exist/apps/rest3d/hello.xql', function(res){
 	    var data = [];
@@ -502,7 +552,6 @@ var info = exports.info = function (callback) {
 
 // test and initiallize database
 var init = exports.init = function (cb){
-
 
   request({ // 3d building collections ?
 		url: 'http://'+connection.config.host+':'+connection.config.port+'/'+connection.config.rest
@@ -527,8 +576,10 @@ var init = exports.init = function (cb){
 			  console.log(err);
 			  return cb(false);
 			} else if (res[0]==="true") {
+        console.log('assets.xml already exists')
 				return check_existdb_1(cb);
 			} else {
+        /*
 				console.log('creating assets.xml');
 				xquery = 'xquery version "3.0";\
                   let $my-doc := <items/> \
@@ -544,6 +595,8 @@ var init = exports.init = function (cb){
         		return check_existdb_1(cb);
         	}
         })
+        */
+        console.log('assets.xml does not exists');
 			}
 		})
 	})
@@ -561,7 +614,8 @@ var check_existdb_1 = function (cb) {
         console.log(err);
         return cb(false);
     } 
-    console.log('cookies deleted, creating new jar');
+    console.log('cookies deleted');
+    /*
     var xquery = 'xquery version "3.0";\
                 let $my-doc := <items/> \
                 return\
@@ -573,6 +627,7 @@ var check_existdb_1 = function (cb) {
         return cb(false)
       } 
       console.log('cookies.xml created')
+      */
 
       // root is created automatically by the first call to rest3d/db
       // but it would be more efficient to create it here
@@ -608,7 +663,7 @@ var check_existdb_1 = function (cb) {
         })
       
 
-    })
+    //})
   });
 
 /* TEST FUNCTIONS -> do not remove

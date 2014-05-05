@@ -56,7 +56,8 @@ module.exports = function (server) {
     var params = req.url.stringAfter("db");
 
     Collection.find(existdb,  params, function (err, result) {
-      if (result.collection.name==='/') return handler.handleError({message:'cannot put Assets at root',statusCode:400});
+      // don't do that, especially if we are creating a new collecton
+      //if (result.collection.name==='/') return handler.handleError({message:'cannot put Assets at root',statusCode:400});
       if (err) return handler.handleError(err);
       handler.post(result.path, result.assetpath); // see upload.js
 
