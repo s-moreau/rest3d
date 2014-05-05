@@ -382,13 +382,13 @@ define(['rest3d', 'upload', 'viewer','database'], function (rest3d, setViewer6Up
                             stock.image.remove();
                             if(stock.image)stock.image.remove();
                             if(stock.nodeBuffer==-1&&jQuery.isEmptyObject(new_data.assets)&&jQuery.isEmptyObject(new_data.children)){
-                                console.debug("in")
                                 stock.image = GUI.image(stock.tree['tree_' + stock.name], "img-emptybox", "../gui/images/empty_box.gif", 60, 60, "before");
                                 GUI.addTooltip({
                                     parent: stock.image,
                                     content: "Any files found in "+stock.name,//"Any files found in "+stock.name
                                 });
                             }
+                            setTimeout(function(){this.tree.openAll();},300);
                             var result = [];
                             result = stock.parseMessage(new_data);
                             return result;
