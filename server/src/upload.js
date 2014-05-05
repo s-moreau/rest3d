@@ -13,7 +13,7 @@ module.exports = function (server) {
   var FileInfo = require('./fileinfo');
 
   var UploadHandler = require('./handler');
-  var zipFile = require('./zipfile')(server);
+  var zipFile = require('./zipfile');
 
   var Collection = require('./collection');
   var Resource = require('./resource');
@@ -73,7 +73,7 @@ module.exports = function (server) {
     return next(new Error('cannot find sid in upload::createTMP'))
     if (!req.session.tmpdir) {
       // create tmp folder for user
-      Collection.create(tmpdb,Path.join('/',req.session.sid),0, function(err,collection){
+      Collection.create(tmpdb,Path.join('/',req.session.sid), req.session.sid, function(err,collection){
         if (err){
           console.log('Could NOT create TMP folder for user='+req.session.sid)
           next(err);
@@ -112,14 +112,14 @@ module.exports = function (server) {
         var results = [];
         counter = files.length;
         if (!counter)
-          return handler.handleError('post did not return any files')
+          return handler.handleError({message:'post did not send any files', statusCode:400})
         files.forEach(function (fileInfo) {
           //fileInfo.initUrls(handler.req);
-          var timeout = function (handler) {
-            fileInfo.delete(handler);
+          var timeout = function (db) {
+            fileInfo.delete(db);
             console.log('timeout !! ' + fileInfo.name + ' was deleted');
           }
-          setTimeout(timeout, 60 * 60 * 1000, handler);
+          setTimeout(timeout, 60 * 60 * 1000, handler.db);
 
           fileInfo.asset.get(function (err, res) {
             if (err) {
@@ -189,8 +189,8 @@ module.exports = function (server) {
         // create a collection at path 
         counter++; // one more result to POST
         var newcollection = value;
-        if (value.contains('/')) return finish('collection name cannot include character /');
-        Collection.create(handler.db, Path.join(collectionpath,value), assetpath, function(err,col){
+
+        Collection.create(handler.db, Path.join(collectionpath,assetpath,value), handler.sid, function(err,col){
           if (err) return finish(err);
           var fileInfo = new FileInfo(undefined, collectionpath, assetpath);
           fileInfo.asset = col;
@@ -200,6 +200,10 @@ module.exports = function (server) {
       }
     }).on('file', function (name, file) {
 
+      if (file.size ===0) {
+        // form did not send a valid file
+        return;
+      }
       var fileInfo = map[file.path];
       fileInfo.size = file.size;
       fileInfo.type = Mime.lookup(fileInfo.name);
@@ -209,12 +213,12 @@ module.exports = function (server) {
       //                                                              no jar
       zipFile.unzipFile(handler, collectionpath, assetpath, fileInfo.name, fileInfo.path, null, function(error,result) {
         if (error)
-          handler.handleError(error);
+          finish(error);
         else {
           // turn {asset} into fileInfos
           var getFileInfos = function (results) {
 
-            if (results.fileInfo) 
+            if (results.fileInfo && results.fileInfo.asset) 
               files.push(results.fileInfo);
 
             if (results.children) {
@@ -233,7 +237,7 @@ module.exports = function (server) {
         fs.unlinkSync(file);
       });
     }).on('error', function (e) {
-      handler.handleError(e);
+      finish({message:'Could not parse form', statusCode:400});
     }).on('progress', function (bytesReceived, bytesExpected) {
       if (bytesReceived > FileInfo.options.maxPostSize) {
         handler.req.connection.destroy();
@@ -321,26 +325,17 @@ module.exports = function (server) {
                 if (!asset) return handler.handleError('get '+handler.db.name+' could not find asset id =' + res.assetpath);
                 // we have the asset, now we just need its data
 
-                var url = handler.db.getUrl(asset.uuid);
-                zipFile.uploadUrl(handler,url,null, function(error, result){
-                  if (error)
-                    handler.handleError(error);
-                  else {
-
-                    //handler.res.setHeader('Content-Disposition', 'inline; filename='+result.name);
-                    console.log('sending asset'+toJSON(asset))
-                    handler.sendFile(result.path, asset.type, asset.name);
-                    
-                  }
-                });
-  /*
-                handler.db.getData(asset.uuid, function(err,data){
+                // this calls zipFile.uploadURL, and upload URL into cache, return filename in cache
+                /*
+                handler.db.getData(asset, function(err,filename){
                   if (err)
                     handler.handleError(err);
                   else
-                    handler.sendData(data, asset.type, asset.name);
+                    handler.sendFile(filename, asset.type, asset.name);
                 })
-*/
+                */
+                handler.redirect(handler.db.getUrl(asset));
+
               })
             }
           }

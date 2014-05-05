@@ -51,9 +51,6 @@ var cache = require('./src/diskcache');
 
 var request = require('request');
 
-// get content from zip files
-var zip = require("zip");
-
 var formidable = require('formidable');
 
 var rmdirSync = require('./src/rmdir');
@@ -147,7 +144,7 @@ server.sessionManager = session;
 server.use(session.sessionManager);
 
 // call passport after we have set the session manager
-var passport = require('./src/passport')
+var passport = require('./src/passport');
 passport.init(server);
 
 // include routes
@@ -158,6 +155,10 @@ require('./src/upload')(server);
 
 // create diskcache (no mem caching, no gzip)
 server.diskcache = new cache('cache', true, false, false);
+
+// init zipFile with same diskcache
+var zipFile = require('./src/zipfile');
+zipFile.diskcache = server.diskcache;
 
 function unknownMethodHandler(req, res) {
     console.log('unkownMethodHandler method=' + req.method.toLowerCase());

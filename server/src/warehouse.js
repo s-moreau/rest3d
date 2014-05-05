@@ -32,7 +32,7 @@ module.exports = function (server) {
   var toJSON = require('./tojson');
 
   var handler = require('./handler');
-  var zipFile = require('./zipfile')(server);
+  var zipFile = require('./zipfile');
 
   
   server.get(/^\/rest3d\/warehouse.*/,function(req, res, next) {
