@@ -501,9 +501,8 @@ var info = exports.info = function (callback) {
 
 
 // test and initiallize database
-var init = exports.init = function (callback){
+var init = exports.init = function (cb){
 
- var cb=callback;
 
   request({ // 3d building collections ?
 		url: 'http://'+connection.config.host+':'+connection.config.port+'/'+connection.config.rest
@@ -553,8 +552,8 @@ var init = exports.init = function (callback){
 
 
 // next step in check existdb - 
-var check_existdb_1 = function (callback) {
-  var cb = callback;
+var check_existdb_1 = function (cb) {
+
   // empty cookie jar
   connection.del('/apps/rest3d/data/cookies.xml', function(err) {
     if (err) {
@@ -575,17 +574,38 @@ var check_existdb_1 = function (callback) {
       } 
       console.log('cookies.xml created')
 
-      // Ok, lets create root if it does not exists
+      // root is created automatically by the first call to rest3d/db
+      // but it would be more efficient to create it here
       getRoot(function(err,res){
         if (err) {
           console.log('root does not exists');
           console.log(' -->'+err);
-          cb(true);
+
         } else {
           console.log('root already exists')
-          cb(true);
+
         }
-      })
+
+        // let's unlock the database
+        // some items may have been left locked by previous crash
+          var xquery='xquery version "3.0";\
+                      for $item in collection("/db/apps/rest3d/data/")/items\
+                      return\
+                        if ($item/@lock) then\
+                          (update replace $item with element item {$item/(@* except @lock), $item/text()})\
+                        else\
+                          ()';
+          query(xquery, function(err,res) {
+            if (err) {
+              console.log('Error removing locks cookies.xml');
+              console.log(err);
+              return cb(false)
+            } 
+            console.log('locks were removed')
+            cb(true)
+          })
+
+        })
       
 
     })
