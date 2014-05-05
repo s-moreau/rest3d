@@ -255,7 +255,7 @@ var find = function(collection,match,path,cb) {
       if (length === path.length)
         cb(undefined,{path:Path.join(match,path),assetpath:'',collection:collection})
       else
-        find(collection,Path.join(match,key), path.substr(key.length), cb); 
+        find(collection,Path.join(match,found), path.substr(length), cb); 
     }); 
     
   } else {
