@@ -112,14 +112,14 @@ module.exports = function (server) {
         var results = [];
         counter = files.length;
         if (!counter)
-          return handler.handleError('post did not return any files')
+          return handler.handleError({message:'post did not send any files', statusCode:400})
         files.forEach(function (fileInfo) {
           //fileInfo.initUrls(handler.req);
-          var timeout = function (handler) {
-            fileInfo.delete(handler);
+          var timeout = function (db) {
+            fileInfo.delete(db);
             console.log('timeout !! ' + fileInfo.name + ' was deleted');
           }
-          setTimeout(timeout, 60 * 60 * 1000, handler);
+          setTimeout(timeout, 60 * 60 * 1000, handler.db);
 
           fileInfo.asset.get(function (err, res) {
             if (err) {
@@ -200,6 +200,10 @@ module.exports = function (server) {
       }
     }).on('file', function (name, file) {
 
+      if (file.size ===0) {
+        // form did not send a valid file
+        return;
+      }
       var fileInfo = map[file.path];
       fileInfo.size = file.size;
       fileInfo.type = Mime.lookup(fileInfo.name);
@@ -209,12 +213,12 @@ module.exports = function (server) {
       //                                                              no jar
       zipFile.unzipFile(handler, collectionpath, assetpath, fileInfo.name, fileInfo.path, null, function(error,result) {
         if (error)
-          handler.handleError(error);
+          finish(error);
         else {
           // turn {asset} into fileInfos
           var getFileInfos = function (results) {
 
-            if (results.fileInfo) 
+            if (results.fileInfo && results.fileInfo.asset) 
               files.push(results.fileInfo);
 
             if (results.children) {
@@ -233,7 +237,7 @@ module.exports = function (server) {
         fs.unlinkSync(file);
       });
     }).on('error', function (e) {
-      handler.handleError(e);
+      finish({message:'Could not parse form', statusCode:400});
     }).on('progress', function (bytesReceived, bytesExpected) {
       if (bytesReceived > FileInfo.options.maxPostSize) {
         handler.req.connection.destroy();
@@ -322,12 +326,15 @@ module.exports = function (server) {
                 // we have the asset, now we just need its data
 
                 // this calls zipFile.uploadURL, and upload URL into cache, return filename in cache
+                /*
                 handler.db.getData(asset, function(err,filename){
                   if (err)
                     handler.handleError(err);
                   else
                     handler.sendFile(filename, asset.type, asset.name);
                 })
+                */
+                handler.redirect(handler.db.getUrl(asset));
 
               })
             }
