@@ -388,7 +388,7 @@ define(['rest3d', 'upload', 'viewer','database'], function (rest3d, setViewer6Up
                                     content: "Any files found in "+stock.name,//"Any files found in "+stock.name
                                 });
                             }
-                            setTimeout(function(){this.tree.openAll();},300);
+                            setTimeout(function(){stock.tree.openAll();},600);
                             var result = [];
                             result = stock.parseMessage(new_data);
                             return result;
