@@ -140,6 +140,15 @@ var unlockAsset = exports.unlockAsset = function(asset,cb){
 var saveAsset = exports.saveAsset = function(asset,cb){
 
   console.log('-- saveAsset ['+asset.uuid+'] name='+asset.name)
+  if (asset instanceof Collection){
+    console.log('asset is a Collection')
+  } else if (asset instanceof Asset){
+    console.log('asset is a Asset')
+  } else if (asset instanceof Resource){
+    console.log ('asset is a Resource')
+  } else {
+    console.log ('asset is unknown')
+  }
 
   if (asset.name === '/') 
     saveRoot(asset, function(err,res){
@@ -454,7 +463,7 @@ var removeKey =  function(collection,id, cb) {
                 let $db := doc("/db/apps/rest3d/data/'+collection+'.xml")/items \
 							  for $item in $db/item[@id="'+id+'"]\
 							   return\
-                 if ($item)\
+                 if ($item) then\
 							     update delete $item\
                  else\
                    (response:set-status-code(404), "key not found")';

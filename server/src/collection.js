@@ -15,9 +15,9 @@ var Resource = require('./resource')
 
 var mime_type = 'model/rest3d-collection+json';
 
-var Collection = function (database,name, resource){
+var Collection = function (database, parentId ,name, resource){
   if (arguments.length) {
-    Asset.call(this,database,name,resource);
+    Asset.call(this,database, parentId ,name,resource);
     this.type=mime_type;
   }
 }
@@ -110,7 +110,7 @@ Collection.prototype.mkdir = function(name,uid,cb) {
         return cb(error);
       } else { // create new child collection
         var col2 = {children:{}, assets:{}};
-        collection2 = new Collection(collection.database, name.slice(name.lastIndexOf('/')+1), col2);
+        collection2 = new Collection(collection.database, collection.uuid, name.slice(name.lastIndexOf('/')+1), col2);
         Asset.create(collection2, uid,function(err,collection2){
           if (err) return next(err);
           addChild(collection,collection2,name,next);
@@ -190,7 +190,7 @@ Collection.prototype.mkAsset = function(_path,_uid,_resource,_callback) {
         } else {
           // there is no asset at that path
           // create a new asset, with the resource attached
-          var asset = new Asset(resource.database,resource.name,resource);
+          var asset = new Asset(asset.database, asset.parentId, resource.name,resource);
           Asset.create(asset, resource.userId, function(err,asset){
             if (err) return next(err);
             newasset=asset;
@@ -301,18 +301,17 @@ Collection.prototype.get = function(callback) {
   var col = this.getResourceSync();
   extend(result,col);
   result.database && result.database.name && (result.database = result.database.name);
+
   cb(undefined,result);
 }
 
 // return the root collection for a database
-Collection.getroot = function(database,callback){
-  var cb=callback;
-  var db=database;
+Collection.getroot = function(db,cb){
 
   db.getRoot(function(err,root){
     if (!root || (err && err.statusCode === 404)) {
       var col = {children:{}, assets:{}};
-      var collection = new Collection(db, '/', col);
+      var collection = new Collection(db, null, '/', col);
       // 'save' will save the asset, which will be detected as root
       Asset.create(collection, 0, function(err, collection){
           // TODO - it is possible that 2 users will create a root at same time !

@@ -3,8 +3,9 @@
 var uuid = require('node-uuid');
 var extend = require('./extend')
 
-var Resource = function (database,name,type){
+var Resource = function (database,parentId,name,type){
   if (arguments.length) {
+    this.parentId = parentId; // who owns this asset
     this.database = database;
     this.name = name;
     this.type = type;

@@ -189,7 +189,7 @@
  
       // upload data
       var collection=result.collection;
-      var resource = new Resource(collection.database, fileInfo.name, fileInfo.type);
+      var resource = new Resource(database, collection.uuid, fileInfo.name, fileInfo.type);
       resource.size = fileInfo.size;
       fileInfo.resource = resource;
       Resource.create(resource, userid, function(err,resource){
