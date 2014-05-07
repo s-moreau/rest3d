@@ -599,7 +599,7 @@ define(['q'],
                         stock.rest3dToTree.createTree();
                         setTimeout(function(){
                               stock.rest3dToTree.setUpload();
-                              stock.rest3dToTree.tree.openAll();
+                              //stock.rest3dToTree.tree.openAll();
                         },50);   
                         }
                         flag=false;               
@@ -629,7 +629,7 @@ define(['q'],
                             stock.rest3dToTree.createTree();
                         setTimeout(function(){
                               stock.rest3dToTree.setUpload();
-                              stock.rest3dToTree.tree.openAll();
+                              //stock.rest3dToTree.tree.openAll();
                         },50);   
                         }
                         flag=false;               
