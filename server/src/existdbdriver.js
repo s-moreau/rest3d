@@ -60,9 +60,11 @@ exports.name = "eXist";
 
 var getUrl = exports.getUrl = function(asset)
 {
-  return 'http://'+connection.config.auth+'@'+connection.config.host+':'+connection.config.port+connection.config.rest+'/db/apps/rest3d/data/'+asset.uuid
+  return 'http://'+connection.config.auth+'@'+connection.config.host+':'+connection.config.port+connection.config.rest+
+  '/db/apps/rest3d/data/'+(asset.parentId ? asset.parentId+'/' : '') + asset.uuid;
     
 }
+
 exports.getData = function(asset, cb) {
   
 
@@ -87,14 +89,14 @@ var lockAsset = exports.lockAsset = function(asset,cb, _n){
 
   console.log('++ lock asset name['+asset.uuid+']='+asset.name);
 
-  lockKey('assets',asset.uuid, function(err,res){
+  lockKey(asset.parentId,'assets',asset.uuid, function(err,res){
     if (err){
       if (err.statusCode === 423){
         // try again later
         if (n===100){
           // let's give it the lock, and try again
           console.log('could not lock asset aftre 100 trials -> forcing unlock now')
-          unlockKey('assets',asset.uuid, function(err,res){
+          unlockKey(asset.parentId,'assets',asset.uuid, function(err,res){
             return setTimeout(lockAsset,1000,asset,cb,1);
           })
         } else {
@@ -128,7 +130,7 @@ var unlockAsset = exports.unlockAsset = function(asset,cb){
 
   console.log('++ unlock asset['+asset.uuid+'] name='+asset.name);
 
-  unlockKey('assets',asset.uuid, function(err,garbage){
+  unlockKey(asset.parentId,'assets',asset.uuid, function(err,garbage){
     if (err) return cb(err);
     cb(undefined,asset);
   });
@@ -156,32 +158,30 @@ var saveAsset = exports.saveAsset = function(asset,cb){
       cb(undefined,asset);
     });
   else
-    insertKeyPair('assets',asset.uuid, asset, function(err,garbage){
+    insertKeyPair(asset.parentId,'assets',asset.uuid, asset, function(err,garbage){
       cb(err,asset);
     });
-
 }
 
 // cookies 
 var saveCookie = exports.saveCookie = function( sid, data, cb)
 {
-  insertKeyPair('cookies',sid, data, cb);
+  insertKeyPair(null,'cookies',sid, data, cb);
 }
 var loadCookie = exports.loadCookie = function(sid,cb){
-  getKey('cookies',sid, cb);
+  getKey(sid, cb);
 }
 var delCookie = exports.delCookie = function(sid,cb){
-  removeKey('cookies',sid, cb);
+  removeKey(null,'cookies',sid, cb);
 }
 
-// TODO - database is not necessary as 'exports' contains existdb already
-var loadAsset = exports.loadAsset = function(database,id,cb){
+var loadAsset = exports.loadAsset = function(id,cb){
 
   var value;
 
   console.log('-- loadAsset id='+id)
 
-  getKey('assets',id, function (err,res){
+  getKey(id, function (err,res){
     if (err) return cb(err);
     if (res) {
       if (res.type === Collection.type)
@@ -190,7 +190,7 @@ var loadAsset = exports.loadAsset = function(database,id,cb){
         res = extend(new Asset(),res);
       else
         res = extend(new Resource(),res);
-      res.database=database;
+      res.database=exports;
       cb(undefined,res);
     }
     else {
@@ -202,7 +202,7 @@ var loadAsset = exports.loadAsset = function(database,id,cb){
 
 // FIXME !!
 var delAsset = exports.delAsset = function(asset,cb){
-  removeKey('assets',asset.uuid, cb);
+  removeKey(asset.parentId,'assets',asset.uuid, cb);
 }
 
 // store an asset
@@ -210,12 +210,12 @@ var store = exports.store = function(asset,filename_or_buffer, callback) {
 
   var cb = callback;
   // other optional arg: destination filename
-	connection.store(filename_or_buffer, '/apps/rest3d/data/', asset, function(err) {
+	connection.store(filename_or_buffer, '/apps/rest3d/data'+(asset.parentId ? '/'+asset.parentId : '/'), asset.uuid, function(err) {
     if (err) {
       console.log("eXist.store(): An error occurred: " + err);
       cb(err,asset);
     } else {
-      console.log("eXist: "+asset+" Upload completed!")
+      console.log("eXist: "+asset.name+"["+asset.uuid+"] Upload completed!")
     	cb(undefined,asset)
     }
 	});
@@ -226,7 +226,7 @@ var store = exports.store = function(asset,filename_or_buffer, callback) {
 // FIXME -> need to update all references to that resource in all assets
 
 var del = exports.del = function(assetId, cb) {
-
+/*
   var path = '/apps/rest3d/data/'+assetId;
   // other optional arg: destination filename
   connection.del(path, function(err,res) {
@@ -247,10 +247,12 @@ var del = exports.del = function(assetId, cb) {
       })
     }
   });
+*/
+console.log('TODO -> del ')
 }
 // insert an object in a key/pair database
 // Warning -> this returns garbage in res
-var insertKeyPair = function(collection, id, value, callback) {
+var insertKeyPair = function(collection, file, id, value, callback) {
 
   var cb=callback;
   var text = value;
@@ -260,7 +262,6 @@ var insertKeyPair = function(collection, id, value, callback) {
   if (typeof text != String) {
     text = toJSON(text);
   }
-
 
   console.log('insertKeyPair['+id+'] name='+value.name);
   // encode characters for xQuery 
@@ -274,17 +275,27 @@ var insertKeyPair = function(collection, id, value, callback) {
   //var text = xmlbuilder.buildObject(value);
   var xquery = 'xquery version "3.0";\
                 declare namespace xh="http://www.w3.org/1999/html";\
+                declare function xh:col() \
+                {\
+                    let $col := collection("/db/apps/rest3d/data/'+(collection?collection:'')+'")\
+                    return\
+                      if ($col) then\
+                         ()\
+                      else\
+                        xmldb:create-collection("/db/apps/rest3d/data", "'+(collection?collection:'')+'")\
+                };\
                 declare function xh:items() as node()*\
                 {\
-                  let $db := doc("/db/apps/rest3d/data/'+collection+'.xml")\
+                  let $db := doc("/db/apps/rest3d/data'+(collection ? '/'+collection+'/' : '/')+file+'.xml")\
                   return\
                     if ($db) then\
                       $db/items\
                     else\
-                      let $test := xmldb:store("/apps/rest3d/data","'+collection+'.xml", <items/>)\
+                      let $test := xmldb:store("/apps/rest3d/data'+(collection ? '/'+collection : '/')+'","'+file+'.xml", <items/>)\
                       return\
-                        doc("/db/apps/rest3d/data/'+collection+'.xml")/items\
+                        doc("/db/apps/rest3d/data'+(collection ? '/'+collection+'/' : '/')+file+'.xml")/items\
                 };\
+                let $col := xh:col()\
                 let $db := xh:items()\
                 let $item := $db/item[@id="'+id+'"]\
                 let $newitem := element item {$item/(@* except @id), attribute id {"'+id+'"} ,"'+text+'"}\
@@ -297,7 +308,7 @@ var insertKeyPair = function(collection, id, value, callback) {
                   else \
                    update insert $newitem into $db\
                 else\
-                  (response:set-status-code( 404 ), "cannot find '+collection+'.xml")';
+                  (response:set-status-code( 404 ), "cannot find '+(collection ? '/'+collection+'/' : '/')+file+'.xml")';
   /*
   console.log('*************');
   console.log(xquery)
@@ -376,7 +387,7 @@ var getRoot = exports.getRoot = function(cb) {
     });
 }
 
-var lockKey = function(collection, id, cb) {
+var lockKey = function(collection, file, id, cb) {
 
   console.log('lock key['+id+']')
   var xquery = 'xquery version "3.0";\
@@ -396,14 +407,14 @@ var lockKey = function(collection, id, cb) {
                 };\
                 declare function xh:items() as node()*\
                 {\
-                  let $db := doc("/db/apps/rest3d/data/'+collection+'.xml")\
+                  let $db := doc("/db/apps/rest3d/data'+(collection ? '/'+collection+'/' :'/')+file+'.xml")\
                   return\
                     if ($db) then\
                       $db/items\
                     else\
-                      let $test := xmldb:store("/apps/rest3d/data","'+collection+'.xml", <items/>)\
+                      let $test := xmldb:store("/apps/rest3d/data'+(collection ? '/'+collection : '/')+'","'+file+'.xml", <items/>)\
                       return\
-                        doc("/db/apps/rest3d/data/'+collection+'.xml")/items\
+                        doc("/db/apps/rest3d/data'+(collection ? '/'+collection+'/' : '/')+file+'.xml")/items\
                 };\
                 let $db := xh:items()\
                 let $item := $db/item[@id="'+id+'"]\
@@ -427,7 +438,7 @@ var lockKey = function(collection, id, cb) {
     });
 }
 
-var unlockKey = function(collection, id, cb) {
+var unlockKey = function(collection, file, id, cb) {
 
   console.log('unlock key['+id+']')
 
@@ -446,7 +457,7 @@ var unlockKey = function(collection, id, cb) {
                       else\
                         (response:set-status-code(404), "key not found")\
                  };\
-                let $db := doc("/db/apps/rest3d/data/'+collection+'.xml")/items \
+                let $db := doc("/db/apps/rest3d/data'+(collection ? '/'+collection+'/' : '/')+file+'.xml")/items\
                 let $item := $db/item[@id="'+id+'"]\
                 return \
                   util:exclusive-lock($item, xh:unlock($item))';
@@ -455,12 +466,12 @@ var unlockKey = function(collection, id, cb) {
 }
 
 // delete an object in a key/pair database
-var removeKey =  function(collection,id, cb) {
+var removeKey =  function(collection,file,id, cb) {
 
   console.log('removeKey['+id+']')
 
   var xquery = 'xquery version "3.0";\
-                let $db := doc("/db/apps/rest3d/data/'+collection+'.xml")/items \
+                let $db := doc("/db/apps/rest3d/data'+(collection ?  '/'+collection+'/' : '/')+file+'.xml")\
 							  for $item in $db/item[@id="'+id+'"]\
 							   return\
                  if ($item) then\
@@ -473,12 +484,12 @@ var removeKey =  function(collection,id, cb) {
 
 
 // get a Key value, retry until it is unlocked
-var getKey = function(collection,id, cb) {
+var getKey = function(id, cb) {
 
  console.log('getKey['+id+']')
 
  var xquery='xquery version "3.0";\
-             let $db := doc("/db/apps/rest3d/data/'+collection+'.xml")/items\
+             let $db := collection("/db/apps/rest3d/data")/items\
              let $item := $db/item[@id="'+id+'"] \
              return\
              if ($item) then\
@@ -676,14 +687,14 @@ var check_existdb_1 = function (cb) {
   });
 
 /* TEST FUNCTIONS -> do not remove
-  insertKeyPair('cookies','tagada', 'a json string', function(err, res) {
+  insertKeyPair(null,'cookies','tagada', 'a json string', function(err, res) {
 	  if (err) {
   		console.log('Error inserting cookie');
   		console.log(err);
   		return
   	} else {
 
-  		removeKey('cookies','tagada', function(err,res){
+  		removeKey(null,'cookies','tagada', function(err,res){
 	  	  if (err) {
 		  		console.log('Error removing cookie');
 		  		console.log(err);
@@ -694,13 +705,13 @@ var check_existdb_1 = function (cb) {
 	   })
   	}
   }) 
-  insertKeyPair('cookies','olala', {name:'toto', price:5}, function(err, res) {
+  insertKeyPair(null,'cookies','olala', {name:'toto', price:5}, function(err, res) {
 	  if (err) {
   		console.log('Error inserting cookie');
   		console.log(err);
   		return
   	} else {
-  		getKey('cookies','olala', function (err,res){
+  		getKey('olala', function (err,res){
   			console.log('olalalal')
   			if (err) {
 		  		console.log('Error getKey ');

@@ -48,9 +48,9 @@ module.exports = function (server) {
     cb(undefined,asset);
   }
 
-  tmpdb.loadAsset = function(database,id,cb){
+  tmpdb.loadAsset = function(id,cb){
     var result = tmpdb.assets[id];
-    result.database=database;
+    result.database=tmpdb;
     if (result)
       cb(undefined, result)
     else
@@ -326,15 +326,15 @@ module.exports = function (server) {
                 // we have the asset, now we just need its data
 
                 // this calls zipFile.uploadURL, and upload URL into cache, return filename in cache
-                /*
+                
                 handler.db.getData(asset, function(err,filename){
                   if (err)
                     handler.handleError(err);
                   else
                     handler.sendFile(filename, asset.type, asset.name);
                 })
-                */
-                handler.redirect(handler.db.getUrl(asset));
+                
+                //handler.redirect(handler.db.getUrl(asset));
 
               })
             }

@@ -170,12 +170,10 @@
 
   // create an asset out of this fileInfo
   // folder is a subcollection path. 
-  // returns the uuid for the fileInfo (resource)
+  // returns the new resource
   // TODO - separate sid from userid 
-  FileInfo.prototype.toAsset = function(database,userid,callback) {
+  FileInfo.prototype.toAsset = function(database,userid,cb) {
     var fileInfo = this;
-    var cb=callback;
-    var uid=userid;
 
     var collectionpath = this.collectionpath;
     var assetpath = this.assetpath;
@@ -194,9 +192,9 @@
       fileInfo.resource = resource;
       Resource.create(resource, userid, function(err,resource){
         if (err) return cb(err);
-        collection.mkAsset(Path.join(assetpath,resource.name), uid, resource, function(err,asset){
+        collection.mkAsset(Path.join(assetpath,resource.name), userid, resource, function(err,asset){
           fileInfo.asset = asset;
-          cb(undefined,fileInfo.resource.uuid);
+          cb(undefined,resource);
         });
 
 
@@ -209,8 +207,8 @@
   // need the path where to upload the file
   // and if it is a fileSystem or a database
   // This will be stored in the handler
-  FileInfo.prototype.upload = function (handler, callback) {
-    var cb=callback;
+  FileInfo.prototype.upload = function (handler, cb) {
+
     var fileInfo = this;
     var finish = function(err) {
       if (err) {
@@ -233,13 +231,13 @@
         error.statusCode=403;
         return cb(error)
       }
-      fileInfo.toAsset(handler.db,handler.sid, function(err,assetId) {
+      fileInfo.toAsset(handler.db,handler.sid, function(err,asset) {
         if (err) return cb(err);
 
         if (fileInfo.buffer) {
-           handler.db.store(assetId,fileInfo.buffer, finish);
+           handler.db.store(asset,fileInfo.buffer, finish);
         } else 
-           handler.db.store(assetId,fileInfo.path, finish);
+           handler.db.store(asset,fileInfo.path, finish);
            /*
         if (!fileInfo.donotmove){ // this can be done whenever - don't care if it does not work
           fs.unlink(fileInfo.path);
@@ -252,15 +250,15 @@
       // make an asset out of this fileInfo, in database 'tmp'
       // TODO -> replace handler.sid with hander.uid (user id)
 
-      fileInfo.toAsset(handler.db,handler.sid,function(err,assetId) {
+      fileInfo.toAsset(handler.db,handler.sid,function(err,asset) {
         if (err) return cb(err);
         
         if (fileInfo.buffer) {
-          fs.writeFile(Path.join(FileInfo.options.uploadDir,assetId), fileInfo.buffer, 'binary', finish);
+          fs.writeFile(Path.join(FileInfo.options.uploadDir,asset.uuid), fileInfo.buffer, 'binary', finish);
         } else if (fileInfo.donotmove){
-          copyFile(fileInfo.path, Path.join(FileInfo.options.uploadDir,assetId), finish);
+          copyFile(fileInfo.path, Path.join(FileInfo.options.uploadDir,asset.uuid), finish);
         } else {
-          fs.rename(fileInfo.path, Path.join(FileInfo.options.uploadDir,assetId), finish);
+          fs.rename(fileInfo.path, Path.join(FileInfo.options.uploadDir,asset.uuid), finish);
         }
       })
     }

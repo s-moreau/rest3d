@@ -45,13 +45,14 @@ Resource.prototype.save = function(callback) {
 }
 
 Resource.load = function(database,id,callback){
-  database.loadAsset(database,id,callback);
+  database.loadAsset(id,callback);
 }
 
 // get resource for REST API output
 Resource.prototype.get = function(callback) {
   var result=extend({},this);
   result.database && result.database.name && (result.database = result.database.name);
+  delete result.parentId;
   callback(undefined,result);
 }
 
