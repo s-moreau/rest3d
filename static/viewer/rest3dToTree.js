@@ -273,7 +273,7 @@ define(['rest3d', 'upload', 'viewer','database', 'collada','gltf'], function (re
             var result = {};
             result.data = name.substr(0, 60);
             if(close)result.state = "closed";
-            else{result.state = "open"}
+            else if(name.split(".").length>==2){result.state = "open"}
             result.attr = {
                 "id": id,
                 "uuid": uuid,
