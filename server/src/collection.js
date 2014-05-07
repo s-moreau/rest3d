@@ -129,12 +129,8 @@ Collection.prototype.mkdir = function(name,uid,cb) {
 
 // return -> child Asset
 
-Collection.prototype.mkAsset = function(_path,_uid,_resource,_callback) {
+Collection.prototype.mkAsset = function(name,uid,resource,cb) {
   var collection= this;
-  var resource = _resource;
-  var cb=_callback;
-  var name=_path;
-  var uid=_uid;
   var newasset; // this is what we return
 
   var next = function(err){
@@ -161,7 +157,6 @@ Collection.prototype.mkAsset = function(_path,_uid,_resource,_callback) {
   // first try without locking the collection 
       
   if (col.assets[name]) {
-    newasset=col.assets[name];
     add_resource(cb);
   } else if (col.children[name]){
     var error = new Error('conflict with existing collection = '+name);
@@ -174,7 +169,8 @@ Collection.prototype.mkAsset = function(_path,_uid,_resource,_callback) {
         if (err) return cb(err);
 
         // now that we have a lock, let's update the value
-        collection =asset;
+        collection = asset;
+
         var col = collection.getResourceSync();
         if (col.assets[name]) {
           // there is already an asset at that path
@@ -190,10 +186,9 @@ Collection.prototype.mkAsset = function(_path,_uid,_resource,_callback) {
         } else {
           // there is no asset at that path
           // create a new asset, with the resource attached
-          var asset = new Asset(asset.database, asset.parentId, resource.name,resource);
-          Asset.create(asset, resource.userId, function(err,asset){
+          newasset = new Asset(collection.database, collection.uuid, resource.name,resource);
+          Asset.create(newasset, resource.userId, function(err,newasset){
             if (err) return next(err);
-            newasset=asset;
             // add new asset, no need to lock this new asset
             addAsset(collection, newasset, name, next);
           })
@@ -262,34 +257,6 @@ var find = function(collection,match,path,cb) {
     // no path
     cb(undefined,{path:match,assetpath:path,collection:collection});
   }
-  
-
-  /*
-  var rootPath = path.stringBefore('/');
-  var assetPath = path.stringAfter('/');
-
-  var col = collection.getResourceSync();
-
-  if (!rootPath) {
-    // this is the end
-    if (col.children[path]) {
-      console.log('find '+collection.name+' - load children at path='+path)
-      Resource.load(collection.database,col.children[path],function(err,collection) {
-        cb(undefined,{path:Path.join(match,path),assetpath:'',collection:collection})
-      });   
-    } else 
-      cb(undefined,{path:match,assetpath:path,collection:collection});
-  } else {
-
-    if (col.children[rootPath]) {
-      console.log('find '+collection.name+' - load children at path='+rootPath)
-      Resource.load(collection.database,col.children[rootPath],function(err,collection) {
-        find(collection,Path.join(match,rootPath), assetPath, cb); 
-      });
-    } else
-      cb(undefined,{path:match,assetpath:path,collection:collection});
-  }
-  */
 }
 
 
@@ -298,6 +265,7 @@ Collection.prototype.get = function(callback) {
   var result=extend({},this);
   var cb=callback;
   delete result.resources;
+  delete result.parentId;
   var col = this.getResourceSync();
   extend(result,col);
   result.database && result.database.name && (result.database = result.database.name);
