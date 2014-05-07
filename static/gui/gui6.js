@@ -2395,7 +2395,6 @@ define(['channel', 'codemirror', 'webglUtils', 'WebGLDebugUtils', 'pnotify', 'co
                 else {}
             }
             obj.jqueryObject.sizePane("west", $(window).width() - 550);
-            obj.jqueryObjectWest.append("<div id='support-layout' class='ui-layout-center' style='height:100%;width:100%'></div>");
             obj.jqueryObject.sizePane("north", 37);
             obj.jqueryObject.allowOverflow("north");
             obj.jqueryObject.sizePane("south", 25);

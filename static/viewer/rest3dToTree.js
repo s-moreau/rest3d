@@ -5,7 +5,7 @@
        //  this.description;
        //  this.signin;///It's an url. if array, redirection with new window. If not, iframe used
        //  this.upload;/// Set whether or not the upload feature is available
-define(['rest3d', 'upload', 'viewer','database', 'collada'], function (rest3d, setViewer6Upload, viewer,databaseTab,COLLADA) {
+define(['rest3d', 'upload', 'viewer','database', 'collada','gltf'], function (rest3d, setViewer6Upload, viewer,databaseTab,COLLADA,glTF) {
     var rest3dToTree = function (data,parent) {
         var upload = "";
         this.data = data;
@@ -273,6 +273,7 @@ define(['rest3d', 'upload', 'viewer','database', 'collada'], function (rest3d, s
             var result = {};
             result.data = name.substr(0, 60);
             if(close)result.state = "closed";
+            else{result.state = "open"}
             result.attr = {
                 "id": id,
                 "uuid": uuid,
@@ -371,10 +372,11 @@ define(['rest3d', 'upload', 'viewer','database', 'collada'], function (rest3d, s
                                     content: "Any files found in "+stock.name,//"Any files found in "+stock.name
                                 });
                             }
-                            // setTimeout(function(){stock.tree.openAll();},600);
+                            
                             var result = [];
                             if(!stock.firstFlag){
                                 result = stock.parseMessage(new_data,stock.nodeBuffer.attr('path'));
+                                setTimeout(function(){stock.tree.openAll();},600);
                             }
                             else{
                                 result = stock.parseMessage(new_data);

@@ -97,6 +97,7 @@ define(['viewer'], function (viewer) {
                         else {
                             var id = material.data + "_" + (Math.floor(Math.random() * 1000000) + 1);
                         }
+                        material.state = "open";
                         material.attr = {
                             "rel": "children",
                             "id": id
@@ -138,12 +139,14 @@ define(['viewer'], function (viewer) {
                         var id = title + "__" + pickID;
                         var subchild = {
                             "data": title,
+                            "state": "open",
                             "attr": {
                                 "rel": "geometry",
                                 "id": id
                             },
                             "children": [{
                                 "data": "materials",
+                                "state": "open",
                                 "attr": {
                                     "rel": "children",
                                     "id": "material" + "__" + pickID
