@@ -297,7 +297,7 @@ define(['rest3d', 'upload', 'viewer','database', 'collada'], function (rest3d, s
         }
 
         this.buildJson= function(split,uuid,arbre,path){
-            path=path+"/"+split[0];
+            var true_path=path+"/"+split[0];
             if(split.length==0){return;}
             var check = checkIfExist(split[0],arbre);
             var id = this.encodeToId(split[0],uuid);
@@ -305,12 +305,12 @@ define(['rest3d', 'upload', 'viewer','database', 'collada'], function (rest3d, s
             var type = this.extensionToType(ext);
             if(check!==-1){
                 split.shift();
-                this.buildJson(split,uuid,arbre[check].children,path);
+                this.buildJson(split,uuid,arbre[check].children,true_path);
             }
             else{
-                this.nodeArray(arbre, split[0], id, uuid, type,path,true);
+                this.nodeArray(arbre, split[0], id, uuid, type,true_path,true);
                 split.shift();
-                this.buildJson(split,uuid,arbre[arbre.length-1].children,path);
+                this.buildJson(split,uuid,arbre[arbre.length-1].children,true_path);
             }
         }
 
