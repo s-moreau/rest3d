@@ -371,7 +371,7 @@ define(['rest3d', 'upload', 'viewer','database', 'collada'], function (rest3d, s
                                     content: "Any files found in "+stock.name,//"Any files found in "+stock.name
                                 });
                             }
-                            setTimeout(function(){stock.tree.openAll();},600);
+                            // setTimeout(function(){stock.tree.openAll();},600);
                             var result = [];
                             if(!stock.firstFlag){
                                 result = stock.parseMessage(new_data,stock.nodeBuffer.attr('path'));
