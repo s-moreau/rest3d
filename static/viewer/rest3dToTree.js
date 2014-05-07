@@ -297,7 +297,7 @@ define(['rest3d', 'upload', 'viewer','database', 'collada'], function (rest3d, s
         }
 
         this.buildJson= function(split,uuid,arbre,path){
-            path+="/"+split[0]
+            path=path+"/"+split[0];
             if(split.length==0){return;}
             var check = checkIfExist(split[0],arbre);
             var id = this.encodeToId(split[0],uuid);
