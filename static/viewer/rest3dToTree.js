@@ -5,7 +5,7 @@
        //  this.description;
        //  this.signin;///It's an url. if array, redirection with new window. If not, iframe used
        //  this.upload;/// Set whether or not the upload feature is available
-define(['rest3d', 'upload', 'viewer','database'], function (rest3d, setViewer6Upload, viewer,databaseTab) {
+define(['rest3d', 'upload', 'viewer','database', 'collada','gltf'], function (rest3d, setViewer6Upload, viewer,databaseTab,COLLADA,glTF) {
     var rest3dToTree = function (data,parent) {
         var upload = "";
         this.data = data;
@@ -17,29 +17,8 @@ define(['rest3d', 'upload', 'viewer','database'], function (rest3d, setViewer6Up
         this.description = data.description;
         this.id = GUI.uniqueId();
         this.area = parent;
-        this.url = location.protocol + "//" + location.host + "/rest3d/" + this.name
-           // window["tab_"+name]=function(data,name){
-            //         window.renderMenu.addTab({
-            //             id: "tab_"+name,
-            //              text: "  " + name,
-            //         });
-            //         var tmp = new databaseTab(data[name],window.renderMenu["tab_"+name]);
-        // this.infoServer = function (cb) {
-        //     //  rest3d.info(
-        //     //     //function (data) {
-
-        //     //     // if (data.hasOwnProperty("warehouse")) {
-        //     //     //     window.tab_warehouse(data.warehouse,"warehouse")
-        //     //     // }
-        //     //     // if (data.hasOwnProperty("dvia")) {
-        //     //     // }
-        //     //     // if (data.hasOwnProperty("db")) {
-        //     //     // }
-        //     //     // if (data.hasOwnProperty("tmp")) {
-        //     //     // }
-        //     //     //}
-        //     // ).then(cb);
-        // }
+        this.image = $();
+        this.url = location.protocol + "//" + location.host + "/rest3d/" + this.name;
         this.init = function(){
             var tmp = new databaseTab(this,this.data,this.area);        
         }
@@ -191,20 +170,21 @@ define(['rest3d', 'upload', 'viewer','database'], function (rest3d, setViewer6Up
         this.preview = function (node) {
             $("#dialog").dialog("close");
             var gitHtml = '<div id="dialog"><iframe id="myIframe" src="" style="height:99% !important; width:99% !important; border:0px;"></iframe></div>';
-            gitPanel = $('body').append(gitHtml);
+            $('body').append(gitHtml);
             $("#dialog").dialog({
+                title: "Preview",
                 width: '600',
                 height: '500',
                 open: function (ev, ui) {
-                    $('#myIframe').attr('src', '/viewer/easy-viewer.html?file=/rest3d/tmp/' + node.attr("path"));
+                    $('#myIframe').attr('src', '/viewer/easy-viewer.html?file=/rest3d/'+stock.name + node.attr("path"));
                 },
             });
         }
         upload.preview = this.preview;
-
+        var stock = this;
         this.displayCollada = function (node) {
             window.pleaseWait(true);
-            COLLADA.load("/rest3d/tmp/" + node.attr("path"), viewer.parse_dae).then(
+            COLLADA.load("/rest3d/"+stock.name + node.attr("path"), viewer.parse_dae).then(
                 function (flag) {
                     window.pleaseWait(false);
                     buffer.notif(node.attr("name"));
@@ -214,7 +194,7 @@ define(['rest3d', 'upload', 'viewer','database'], function (rest3d, setViewer6Up
 
         this.displayGltf = function (node) {
             window.pleaseWait(true);
-            glTF.load("/rest3d/tmp/" + node.attr("path"), viewer.parse_gltf).then(
+            glTF.load("/rest3d/"+this.name + node.attr("path"), viewer.parse_gltf).then(
                 function (flag) {
                     window.pleaseWait(false);
                     window.notif(node.attr("name"));
@@ -237,12 +217,12 @@ define(['rest3d', 'upload', 'viewer','database'], function (rest3d, setViewer6Up
             return string;
         }
         this.encodeToId = function(name,uuid){
-            name=name.split(".").join("a");
+            name=name.split(".").join("_");
             return name;
         }
    
         this.extensionToType=function(ext) {
-                    var result;
+            var result;
             if(ext==null){
                 return "folder";
             }
@@ -289,14 +269,17 @@ define(['rest3d', 'upload', 'viewer','database'], function (rest3d, setViewer6Up
                 }
             }
         this.images=[];
-        this.nodeArray = function(parent,name,id,uuid,type,path){
+        this.nodeArray = function(parent,name,id,uuid,type,path,up,close){
             var result = {};
             result.data = name.substr(0, 60);
+            if(close)result.state = "closed";
+            else{result.state = "open"}
             result.attr = {
                 "id": id,
                 "uuid": uuid,
                 "rel":type,
                 "path":path,
+                "up":up,
             }
             result.children = [];
             parent.push(result);
@@ -315,7 +298,7 @@ define(['rest3d', 'upload', 'viewer','database'], function (rest3d, setViewer6Up
         }
 
         this.buildJson= function(split,uuid,arbre,path){
-            path+="/"+split[0]
+            var true_path=path+"/"+split[0];
             if(split.length==0){return;}
             var check = checkIfExist(split[0],arbre);
             var id = this.encodeToId(split[0],uuid);
@@ -323,24 +306,25 @@ define(['rest3d', 'upload', 'viewer','database'], function (rest3d, setViewer6Up
             var type = this.extensionToType(ext);
             if(check!==-1){
                 split.shift();
-                this.buildJson(split,uuid,arbre[check].children,path);
+                this.buildJson(split,uuid,arbre[check].children,true_path);
             }
             else{
-                this.nodeArray(arbre, split[0], id, uuid, type,path);
+                this.nodeArray(arbre, split[0], id, uuid, type,true_path,true);
                 split.shift();
-                this.buildJson(split,uuid,arbre[arbre.length-1].children,path);
+                this.buildJson(split,uuid,arbre[arbre.length-1].children,true_path);
             }
         }
 
-        this.parseMessage = function(data){
+        this.parseMessage = function(data,path){
+            if(!path){var path = "";}
             var result = {};
             result.children = [];
             for(var key1 in data.assets){
                 var tmp = key1.split('/');
-                this.buildJson(tmp,data.assets[key1],result.children,"");
+                this.buildJson(tmp,data.assets[key1],result.children,path);
             }
             for(var key in data.children){
-                this.nodeArray(result.children,key,this.encodeToId(key,data.children[key]),data.children[key],"collection",[key]);             
+                this.nodeArray(result.children,key,this.encodeToId(key,data.children[key]),data.children[key],"collection",path+'/'+key,true,true);             
             }
             return result.children;
         }
@@ -364,31 +348,39 @@ define(['rest3d', 'upload', 'viewer','database'], function (rest3d, setViewer6Up
                     "ajax": {
                         "type": 'GET',
                         "url": function (node) {
-                            var nodeId = "";
                             var url = "";
                             stock.nodeBuffer = node;
                             // var type = node.attr('type'); 
                             if (node == -1) {
                                 url = stock.url;
+                                stock.firstFlag = true;
                             }
-                            else if (node.attr('rel') == "collection" || "model") {
-                                nodeId = node.attr('id');
-                                url = stock.url;
+                            else {
+                                var url= node.attr('path');
+                                url = stock.url+url;
+                                stock.firstFlag = false;
                             }
                             return url;
                         },
                         "success": function (new_data) {
+                            stock.image.remove();
                             if(stock.image)stock.image.remove();
-                            if(stock.nodeBuffer==-1&&jQuery.isEmptyObject(new_data.assets)&&jQuery.isEmptyObject(new_data.assets)){
-                                console.debug("in")
+                            if(stock.nodeBuffer==-1&&jQuery.isEmptyObject(new_data.assets)&&jQuery.isEmptyObject(new_data.children)){
                                 stock.image = GUI.image(stock.tree['tree_' + stock.name], "img-emptybox", "../gui/images/empty_box.gif", 60, 60, "before");
                                 GUI.addTooltip({
                                     parent: stock.image,
                                     content: "Any files found in "+stock.name,//"Any files found in "+stock.name
                                 });
                             }
+                            
                             var result = [];
-                            result = stock.parseMessage(new_data);
+                            if(!stock.firstFlag){
+                                result = stock.parseMessage(new_data,stock.nodeBuffer.attr('path'));
+                                setTimeout(function(){stock.tree.openAll();},600);
+                            }
+                            else{
+                                result = stock.parseMessage(new_data);
+                            }
                             return result;
                         }
                     }
@@ -407,8 +399,8 @@ define(['rest3d', 'upload', 'viewer','database'], function (rest3d, setViewer6Up
                     "items": function (node) {
                         var result = {};
                         var rel = node.attr("rel");
-                        var up = node.attr("uploadstatus");
-                        if (rel == "collection" || rel == "model" || rel == "child") {
+                        var up = node.attr("up");
+                        if (rel == "collection" || rel == "model" || rel == "child" || rel == "folder") {
                             result.icon = {
                                 'label': 'Add files',
                                 'action': stock.button,

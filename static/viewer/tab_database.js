@@ -5,7 +5,7 @@ define(['q'],
             this.rest3dToTree = rest3dToTree;
             console.debug(this.rest3dToTree)
             this.name = data.name;
-            this.login = data.login;
+            this.indexLogin = data.indexLogin;
             this.picture = data.picture;
             this.description = data.description;
             this.upload = data.upload;
@@ -216,9 +216,9 @@ define(['q'],
                                         if (node == -1) {
                                             url = location.protocol + "//" + location.host + "/rest3d/" + stock.name + "/";
                                         }
-                                        else if (node.attr('rel') == "collection" || "model") {
-                                            nodeId = node.attr('id');
-                                            url = location.protocol + "//" + location.host + "/rest3d/" + stock.name + "/" + nodeId;
+                                        else {
+                                            path = node.attr('path');
+                                            url = location.protocol + "//" + location.host + "/rest3d/" + stock.name + nodeId;
                                         }
                                         return url;
                                     },
@@ -569,10 +569,10 @@ define(['q'],
             }
             // this.generateCoreTab();
 
-            switch (this.login) {
+            switch (this.indexLogin) {
             case 0:
             case 3:
-                if (this.login == 0) {
+                if (this.indexLogin == 0) {
                     var text = '(no authentification required)';
                 }
                 else {
@@ -599,7 +599,7 @@ define(['q'],
                         stock.rest3dToTree.createTree();
                         setTimeout(function(){
                               stock.rest3dToTree.setUpload();
-                              stock.rest3dToTree.tree.openAll();
+                              //stock.rest3dToTree.tree.openAll();
                         },50);   
                         }
                         flag=false;               
@@ -629,7 +629,7 @@ define(['q'],
                             stock.rest3dToTree.createTree();
                         setTimeout(function(){
                               stock.rest3dToTree.setUpload();
-                              stock.rest3dToTree.tree.openAll();
+                              //stock.rest3dToTree.tree.openAll();
                         },50);   
                         }
                         flag=false;               

@@ -21,9 +21,10 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.*/
 'use strict';
-define([], function () {
+define(['viewer'], function (viewer) {
     function scene_init(parent) {
         var treeScene = false;
+        window.treeScene = treeScene;
         var treeJson = {};
         var callbackArray = [];
         var $flagScene = $("<h3 style='text-align:center !important;'>No scenes loaded yet</h3>");
@@ -96,6 +97,7 @@ define([], function () {
                         else {
                             var id = material.data + "_" + (Math.floor(Math.random() * 1000000) + 1);
                         }
+                        material.state = "open";
                         material.attr = {
                             "rel": "children",
                             "id": id
@@ -137,12 +139,14 @@ define([], function () {
                         var id = title + "__" + pickID;
                         var subchild = {
                             "data": title,
+                            "state": "open",
                             "attr": {
                                 "rel": "geometry",
                                 "id": id
                             },
                             "children": [{
                                 "data": "materials",
+                                "state": "open",
                                 "attr": {
                                     "rel": "children",
                                     "id": "material" + "__" + pickID
@@ -309,9 +313,9 @@ define([], function () {
             }
 
             var nodeBuffer;
-            treeScene = GUI.treeBis({
+            window.treeScene = GUI.treeBis({
                 id: 'Tree',
-                parent: parent,
+                parent: parent.scenes,
                 json: {
                     "ajax": {
                         "type": 'GET',
@@ -414,6 +418,7 @@ define([], function () {
                     "theme": "apple",
                 },
             });
+             window.treeScene.openAll();
 
             // treeScene.Tree.bind(
             // "select_node.jstree", function(evt, data){
@@ -579,6 +584,8 @@ define([], function () {
                 }, 500);
             }
         }
+    
+
     }
     return scene_init;
 });
