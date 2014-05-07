@@ -133,7 +133,7 @@ module.exports = function(config) {
     } else {
       if (cfg.db) {
         console.log('createSid - check for sid='+sid)
-        cfg.db.getKey('cookies',sid, function (err,res){
+        cfg.db.loadCookie(sid, function (err,res){
           if (err) {
             console.log('createSid new Key='+sid);
             session.sessions[sid]={};
@@ -171,12 +171,11 @@ module.exports = function(config) {
     }
     session.sessions[sid]=data;
     if (cfg.db) {
-      cfg.db.insertKeyPair('cookies',sid, data, function (err,res){
+      cfg.db.saveCookie(sid,data, function (err,res){
         if (err) {
-          console.log('Error insertKeyPair ='+err);
+          console.log('Error save Cookie ='+err);
           return callback.call(session, err, null);
         } else {
-          console.log('insertKeyPair OK ')
           session.refresh(sid,function(err,res) {
             if (err) {
               console.log('session.save -> refresh error='+err)
@@ -221,16 +220,16 @@ module.exports = function(config) {
 
     if (data === undefined) {
       if (cfg.db) {
-        cfg.db.getKey('cookies',sid, function (err,res){
+        cfg.db.loadCookie(sid, function (err,res){
           if (err) {
-            console.log('session.load Error getKey ['+err+']');
+            console.log('session.load Error load Cookie ['+err+']');
             return cb.call(session, err, null);
           } else if (!res) {
-            err = 'session.load getKey returned empty cookie';
+            err = 'session.load load Cookie returned empty cookie';
             console.log(err);
             return cb.call(session, err, null);
           } else {
-            console.log('session.load getKey returned ['+toJSON(res)+']')
+            console.log('session.load load Cookie returned ['+toJSON(res)+']')
             
             cb.call(session, undefined, res);
           }
@@ -323,12 +322,12 @@ module.exports = function(config) {
       delete session.timeouts[sid];
     }
     if (cfg.db) {
-      cfg.db.removeKey('cookies',sid, function (err,res){
+      cfg.db.delCookie(sid, function (err,res){
         if (err) {
-          console.log('Error remove key ='+err);
+          console.log('Error delete Cookie ='+err);
           cb && cb.call(session, err, null);
         } else {
-          console.log('key removed ['+res+']')
+          console.log('key removed cookie ['+res+']')
           cb && cb.call(session, undefined, null);
         }
       })

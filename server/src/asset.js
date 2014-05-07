@@ -6,9 +6,9 @@ var extend = require('./extend')
 
 var mime_type = 'model/rest3d-asset+json';
 
-var Asset = function (database,name, resource){
+var Asset = function (database, parentId ,name, resource){
   if (arguments.length) {
-    Resource.call(this, database, name,mime_type); // call parent constructor
+    Resource.call(this, database, parentId, name,mime_type); // call parent constructor
     this.resources = [resource];
   }
 };
