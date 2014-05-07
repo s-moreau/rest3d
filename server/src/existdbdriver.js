@@ -174,6 +174,42 @@ var loadCookie = exports.loadCookie = function(sid,cb){
 var delCookie = exports.delCookie = function(sid,cb){
   removeKey(null,'cookies',sid, cb);
 }
+// workers 
+
+var getWorker = exports.getWorker = function(sid,cb){
+  getKey(sid, cb);
+};
+
+var setWorker = exports.setWorker = function( sid, data, cb)
+{
+  insertKeyPair(null,'workers',sid, data, cb);
+};
+
+// add worker to the set in key sid
+var addWorkerId = exports.addWorker = function(sid, workerId, cb)
+{
+  getKey(sid,function(err,res){
+    if (err) return cb(err);
+    res.push(workerId);
+    insertKeyPair(null,'workers',sid, res, cb);
+  })
+};
+
+var removeWorker = exports.removeWorker = function(sid,cb){
+  removeKey(null,'worker',sid, cb);
+};
+
+var removeWorkerId = exports.removeWorkerId = function(sid,workerId,cb){
+  getKey(sid,function(err,res){
+    if (err) return cb(err);
+    var index = res.indexOf(workerId);
+    if (index > -1) {
+       res.splice(index, 1);
+    }
+    insertKeyPair(null,'workers',sid, res, cb);
+  })
+};
+
 
 var loadAsset = exports.loadAsset = function(id,cb){
 
