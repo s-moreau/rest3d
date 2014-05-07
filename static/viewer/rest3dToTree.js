@@ -376,6 +376,9 @@ define(['rest3d', 'upload', 'viewer','database', 'collada'], function (rest3d, s
                             if(!stock.firstFlag){
                                 result = stock.parseMessage(new_data,stock.nodePath);
                             }
+                            else{
+                                result = stock.parseMessage(new_data);
+                            }
                             return result;
                         }
                     }
