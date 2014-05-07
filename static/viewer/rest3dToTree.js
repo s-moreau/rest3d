@@ -320,7 +320,7 @@ define(['rest3d', 'upload', 'viewer','database', 'collada'], function (rest3d, s
             result.children = [];
             for(var key1 in data.assets){
                 var tmp = key1.split('/');
-                this.buildJson(tmp,data.assets[key1],result.children,"",path);
+                this.buildJson(tmp,data.assets[key1],result.children,path);
             }
             for(var key in data.children){
                 this.nodeArray(result.children,key,this.encodeToId(key,data.children[key]),data.children[key],"collection",path+'/'+key,true,true);             
