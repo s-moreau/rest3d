@@ -257,7 +257,7 @@ server.get(/^\/rest3d\/info/, function (req, res, next) {
         this.parse_routes_PUT = function(route){};
         this.parse_routes_POST = function(route){ 
             for(var i=0;i<route.length;i++){
-                if(route[i].name.split(this.name)!==null){
+                if(route[i].name.split(this.name).length==2){
                     if(route[i].name.split('db').length==2&&server.db==null){
                          route.splice(i, 1); //delete db post routes because the database haven't been detected
                     }  
@@ -327,10 +327,9 @@ server.get(/^\/rest3d\/info/, function (req, res, next) {
 
         this.parse_routes_GET(server.router.routes.GET);
     }
+
+
     var result = new Parser_routes();
-    // console.log(result.object);
-    //if(get.prototype)handler.handleResult("database not connected")
-    console.log(server.router.routes)
     handler.handleResult(result.object);
 });
 

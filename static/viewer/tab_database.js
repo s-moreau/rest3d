@@ -5,7 +5,7 @@ define(['q'],
             this.rest3dToTree = rest3dToTree;
             console.debug(this.rest3dToTree)
             this.name = data.name;
-            this.login = data.login;
+            this.indexLogin = data.indexLogin;
             this.picture = data.picture;
             this.description = data.description;
             this.upload = data.upload;
@@ -569,10 +569,10 @@ define(['q'],
             }
             // this.generateCoreTab();
 
-            switch (this.login) {
+            switch (this.indexLogin) {
             case 0:
             case 3:
-                if (this.login == 0) {
+                if (this.indexLogin == 0) {
                     var text = '(no authentification required)';
                 }
                 else {

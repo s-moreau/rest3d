@@ -217,7 +217,7 @@ define(['rest3d', 'upload', 'viewer','database', 'collada'], function (rest3d, s
             return string;
         }
         this.encodeToId = function(name,uuid){
-            name=name.split(".").join("_")+"_"+uuid.split("-")[0];
+            name=name.split(".").join("_");
             return name;
         }
    
