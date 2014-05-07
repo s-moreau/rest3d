@@ -355,8 +355,8 @@ define(['rest3d', 'upload', 'viewer','database', 'collada'], function (rest3d, s
                                 stock.firstFlag = true;
                             }
                             else {
-                                stock.nodePath = node.attr('path');
-                                url = stock.url+stock.path;
+                                var url= node.attr('path');
+                                url = stock.url+url;
                                 stock.firstFlag = false;
                             }
                             return url;
@@ -374,7 +374,7 @@ define(['rest3d', 'upload', 'viewer','database', 'collada'], function (rest3d, s
                             setTimeout(function(){stock.tree.openAll();},600);
                             var result = [];
                             if(!stock.firstFlag){
-                                result = stock.parseMessage(new_data,stock.nodePath);
+                                result = stock.parseMessage(new_data,stock.nodeBuffer.attr('path'));
                             }
                             else{
                                 result = stock.parseMessage(new_data);
