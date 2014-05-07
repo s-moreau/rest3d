@@ -222,7 +222,7 @@ define(['rest3d', 'upload', 'viewer','database', 'collada'], function (rest3d, s
         }
    
         this.extensionToType=function(ext) {
-                    var result;
+            var result;
             if(ext==null){
                 return "folder";
             }
@@ -314,15 +314,16 @@ define(['rest3d', 'upload', 'viewer','database', 'collada'], function (rest3d, s
             }
         }
 
-        this.parseMessage = function(data){
+        this.parseMessage = function(data,path){
+            if(!path){var path = "";}
             var result = {};
             result.children = [];
             for(var key1 in data.assets){
                 var tmp = key1.split('/');
-                this.buildJson(tmp,data.assets[key1],result.children,"");
+                this.buildJson(tmp,data.assets[key1],result.children,"",path);
             }
             for(var key in data.children){
-                this.nodeArray(result.children,key,this.encodeToId(key,data.children[key]),data.children[key],"collection",[key],true,true);             
+                this.nodeArray(result.children,key,this.encodeToId(key,data.children[key]),data.children[key],"collection",path+'/'+key,true,true);             
             }
             return result.children;
         }
@@ -351,10 +352,12 @@ define(['rest3d', 'upload', 'viewer','database', 'collada'], function (rest3d, s
                             // var type = node.attr('type'); 
                             if (node == -1) {
                                 url = stock.url;
+                                stock.firstFlag = true;
                             }
                             else {
-                                url = node.attr('path');
-                                url = stock.url+url;
+                                stock.nodePath = node.attr('path');
+                                url = stock.url+stock.path;
+                                stock.firstFlag = false;
                             }
                             return url;
                         },
@@ -370,7 +373,9 @@ define(['rest3d', 'upload', 'viewer','database', 'collada'], function (rest3d, s
                             }
                             setTimeout(function(){stock.tree.openAll();},600);
                             var result = [];
-                            result = stock.parseMessage(new_data);
+                            if(!stock.firstFlag){
+                                result = stock.parseMessage(new_data,stock.nodePath);
+                            }
                             return result;
                         }
                     }
