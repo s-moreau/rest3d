@@ -24,6 +24,7 @@ THE SOFTWARE.*/
 define(['viewer'], function (viewer) {
     function scene_init(parent) {
         var treeScene = false;
+        window.treeScene = treeScene;
         var treeJson = {};
         var callbackArray = [];
         var $flagScene = $("<h3 style='text-align:center !important;'>No scenes loaded yet</h3>");
@@ -309,7 +310,7 @@ define(['viewer'], function (viewer) {
             }
 
             var nodeBuffer;
-            treeScene = GUI.treeBis({
+            window.treeScene = GUI.treeBis({
                 id: 'Tree',
                 parent: parent.scenes,
                 json: {
@@ -414,6 +415,7 @@ define(['viewer'], function (viewer) {
                     "theme": "apple",
                 },
             });
+             window.treeScene.openAll();
 
             // treeScene.Tree.bind(
             // "select_node.jstree", function(evt, data){
@@ -579,9 +581,8 @@ define(['viewer'], function (viewer) {
                 }, 500);
             }
         }
-        parent.scenes.focusTab(function(){
-            treeScene.openAll();
-        })
+    
+
     }
     return scene_init;
 });
