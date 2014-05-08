@@ -30,7 +30,8 @@
     "walk":"",
     "ncp":"",
     "passport":"",
-    "passport-google":""
+    "passport-google":"",
+    "existdb-node": "git+https://github.com/amd/existdb-node.git"
   },
   "devDependencies": {
     "mocha": "1.7.4",
@@ -45,7 +46,6 @@
   "license": "MIT",
   "scripts": {
     "start": "node rest3d-server.js",
-    "test": "mocha tests/*.tests.js",
-    "preinstall": "npm install https://github.com/amd/existdb-node/raw/master/package/existdb-node-0.0.1.tgz"
+    "test": "mocha tests/*.tests.js"
   }
 }
