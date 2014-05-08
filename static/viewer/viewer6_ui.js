@@ -39,30 +39,34 @@ define(['viewer', 'gui', 'rest3d', 'q', 'collada', 'gltf', 'renderer', 'state', 
             var url = "http://www.google.com/custom?q=fl4re&btnG=Search";
             var bufferGen = $("");
 
-            window.fl4reStatus = function (type, _parent, text) {
+            window.fl4reStatus = function (type, text) {
                 $('#copyButton').remove();
                 $('#iconStatus').remove();
                 $('#defaultText').remove();
                 $('#defaultTextBis').remove();
                 if (type == 'CLEAR' || type == 'READY') {
-                    GUI.label("defaultText", "ready", _parent);
-                    GUI.addIcon(_parent, "ui-icon-circle-check", "float:left;margin:3px;", "before").attr('id', 'iconStatus');
+                    GUI.label("defaultText", "ready", window.layout.jqueryObjectSouth);
+                    GUI.addIcon(window.layout.jqueryObjectSouth, "ui-icon-circle-check", "float:left;margin:3px;", "before").attr('id', 'iconStatus');
                 }
                 else if (type == 'BUSY') {
-                    GUI.label("defaultText", text, _parent);
-                    GUI.addIcon(_parent, "ui-icon-clock", "float:left;margin:3px;", "before").attr('id', 'iconStatus');;
+                    GUI.label("defaultText", text, window.layout.jqueryObjectSouth);
+                    GUI.addIcon(window.layout.jqueryObjectSouth, "ui-icon-clock", "float:left;margin:3px;", "before").attr('id', 'iconStatus');;
+                }
+                else if (type == 'UPLOAD') {
+                    GUI.label("defaultText", "Uploading... ", window.layout.jqueryObjectSouth).append(text);
+                    GUI.addIcon(window.layout.jqueryObjectSouth, "ui-icon-info", "float:left;margin:3px;", "before").attr('id', 'iconStatus');
                 }
                 else if (type == 'ERROR') {
-                    GUI.label("defaultText", text, _parent);
-                    GUI.addIcon(window.layout.jqueryObjectSouth, "ui-icon-circle-close", "float:left;margin:3px;", "before").attr('id', 'iconStatus');;
+                    GUI.label("defaultText", text, window.layout.jqueryObjectSouth);
+                    GUI.addIcon(window.layout.jqueryObjectSouth, "ui-icon-circle-close", "float:left;margin:3px;", "before").attr('id', 'iconStatus');
                 }
                 else if (type == 'WARNING') {
-                    GUI.label("defaultText", text, _parent);
+                    GUI.label("defaultText", text, window.layout.jqueryObjectSouth);
                     GUI.addIcon(window.layout.jqueryObjectSouth, "ui-icon-alert", "float:left;margin:3px;", "before").attr('id', 'iconStatus');
                 }
                 else {
-                    var label = GUI.label("defaultTextBis", text, _parent);
-                    GUI.addIcon(_parent, "ui-icon-info", "float:left;margin:3px;", "before").attr('id', 'iconStatus');
+                    var label = GUI.label("defaultTextBis", text, window.layout.jqueryObjectSouth);
+                    GUI.addIcon(window.layout.jqueryObjectSouth, "ui-icon-info", "float:left;margin:3px;", "before").attr('id', 'iconStatus');
                     var clear = GUI.button("Clear", label, function () {
                         GUI.copyToClipboard(text.slice(15, -1));
                         GUI.addTooltip({
@@ -412,7 +416,7 @@ define(['viewer', 'gui', 'rest3d', 'q', 'collada', 'gltf', 'renderer', 'state', 
                             if (!viewer.channel.selected) viewer.channel.selected = {};
                             if (viewer.channel.selected[id]) {
                                 delete viewer.channel.selected[id];
-                                window.fl4reStatus("", $("#mainLayout-south"), "selected " + viewer.pickName[Object.keys(viewer.channel.selected)[0]]);
+                                window.fl4reStatus("", "selected " + viewer.pickName[Object.keys(viewer.channel.selected)[0]]);
                             }
                             else {
                                 var realId = viewer.pickName[id].split("#").pop();
@@ -420,11 +424,11 @@ define(['viewer', 'gui', 'rest3d', 'q', 'collada', 'gltf', 'renderer', 'state', 
                                 // console.debug("#"+realId+'__'+id+' '+$("#"+realId+'__'+id).length);
                                 // treeScene.Tree.jstree("select_node", "#" + realId + '__' + id);
                                 viewer.channel.selected[id] = true;
-                                window.fl4reStatus("", $("#mainLayout-south"), "selected " + viewer.pickName[id]);
+                                window.fl4reStatus("", "selected " + viewer.pickName[id]);
                             }
                         }
                         else {
-                            window.fl4reStatus("READY", $("#mainLayout-south"));
+                            window.fl4reStatus("READY");
                             // if (treeScene) {
                             //     treeScene.Tree.jstree("deselect_all");
                             // }
@@ -820,7 +824,7 @@ define(['viewer', 'gui', 'rest3d', 'q', 'collada', 'gltf', 'renderer', 'state', 
             //set background color to green
             layout.jqueryObjectWest.css('backgroundColor', '#b9f09e');
             //init bar status
-            window.fl4reStatus("READY", $("#mainLayout-south"));
+            window.fl4reStatus("READY");
             //Init Tabs
             GUI.container.resizeAll();
             GUI.container.initContent("center");
