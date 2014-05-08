@@ -143,7 +143,7 @@ var session = require('./src/session')();
 server.sessionManager = session;
 server.use(session.sessionManager);
 
-// call passport after we have set the session manager
+// call passport init after we have set the session manager
 var passport = require('./src/passport');
 passport.init(server);
 
@@ -213,9 +213,20 @@ server.db.init(function (b) {
         server.db = null;
     }
 
-    // session mnager -> requires database
+    // session manager -> requires database
     session.config.db = server.db;
 
+});
+
+// job manager
+var neuron=require('./src/jobs');
+session.jobManager = new neuron.JobManager({
+    /*
+     TODO -> option cache is programmed but not tested !!
+    cache: {
+      db: server.db
+    },
+    */
 });
 
 // rest3d API

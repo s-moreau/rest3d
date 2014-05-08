@@ -169,10 +169,150 @@ var saveCookie = exports.saveCookie = function( sid, data, cb)
   insertKeyPair(null,'cookies',sid, data, cb);
 }
 var loadCookie = exports.loadCookie = function(sid,cb){
-  getKey(sid, cb);
+  getKey('cookies', sid, cb);
 }
 var delCookie = exports.delCookie = function(sid,cb){
   removeKey(null,'cookies',sid, cb);
+}
+// workers 
+
+var getWorker = exports.getWorker = function(sid,cb){
+  getKey('workers', sid, cb);
+};
+
+var setWorker = exports.setWorker = function( sid, data, cb)
+{
+  insertKeyPair(null,'workers',sid, data, cb);
+};
+
+// add worker to the set in key sid
+var addWorkerId = exports.addWorker = function(sid, workerId, cb)
+{
+  getKey('workers',sid,function(err,res){
+    if (err) return cb(err);
+    res.push(workerId);
+    insertKeyPair(null,'workers',sid, res, cb);
+  })
+};
+
+var removeWorker = exports.removeWorker = function(sid,cb){
+  removeKey(null,'worker',sid, cb);
+};
+
+var removeWorkerId = exports.removeWorkerId = function(sid,workerId,cb){
+  getKey('workers',sid,function(err,res){
+    if (err) return cb(err);
+    var index = res.indexOf(workerId);
+    if (index > -1) {
+       res.splice(index, 1);
+    }
+    insertKeyPair(null,'workers',sid, res, cb);
+  })
+};
+
+// users
+
+// <users>
+//   <user id='xxxx'> -> one per user
+//     <profile name='google' id='https ...'> google profile for that user
+//         {lots of json text}
+//     </profile>
+//     <profile name='facebook' id='....'> facebook profile
+// ...
+
+// this returs the new profile as json
+
+var createUser = exports.createUser = function(userId,profile,id,data,cb){
+  var text = toJSON(data);
+  text = text.replace(/&/g, '&amp;')
+         .replace(/</g,'&lt;').replace(/>/g,'&gt;')
+         .replace(/\r/g,'&#xA;').replace(/\n/g,'&#xD;').replace(/ /g,'&#160;').replace(/\t/g,'&#009;')
+         .replace(/'/g, '&apos;').replace(/"/g, '&quot;')
+         .replace(/{/g, '&#123;').replace(/}/g, '&#125;');
+    
+
+  var xquery = 'xquery version "3.0";\
+                declare namespace xh="http://www.w3.org/1999/html";\
+                declare function xh:users() as node()* \
+                {\
+                  let $db := doc("/db/apps/rest3d/data/users.xml")/users\
+                    return\
+                      if ($db) then\
+                        $db\
+                      else\
+                       let $test := xmldb:store("/apps/rest3d/data","users.xml", <users/>)\
+                       return\
+                         doc("/db/apps/rest3d/data/users.xml")/users\
+                };\
+                declare function xh:user($users as node()*)\
+                { \
+                  let $user := $users/user[@id="'+userId+'"]\
+                  return\
+                    if ($user) then\
+                      $user\
+                    else\
+                      let $newuser := <user id="'+userId+'"/>\
+                      return\
+                       (update insert $newuser into $users, $users/user[@id="'+userId+'"] )\
+                }; \
+                let $users := xh:users()\
+                let $user := xh:user($users)\
+                let $profile := $user/profile[@name="'+profile+'"]\
+                let $match := $user/profile[@name="'+profile+'" and @id="'+id+'"]\
+                let $newprofile := element profile {attribute name {"'+profile+'"}, attribute id {"'+id+'"}, "'+text+'"}\
+                return\
+                  if ($match) then\
+                    (update replace $match with $newprofile, $newprofile/text())\
+                  else if ($profile) then\
+                    (update replace $profile with $newprofile, $newprofile/text())\
+                  else\
+                    (update insert $newprofile into $user, $newprofile/text())';
+
+   query(xquery,function(err,res){
+      if (err) return cb(err);
+      
+      var result=res;
+      try  {
+        result=JSON.parse(res[0]);
+      } catch (e) {
+        console.log('could not parse result of query in eXist:createUser');
+      }
+      cb(undefined,result);
+    });
+}
+
+var findUser = exports.findUser = function(strategy,id,cb){
+  // find id in strategy, return user if found
+  var xquery='xquery version "3.0";\
+             let $db := doc("/db/apps/rest3d/data/users.xml")/users\
+             let $user := $db/user/profile[@strategy="'+strategy+'", @id="'+id+'"] \
+             return\
+             if ($user) then\
+                 $user/text()\
+             else\
+               (response:set-status-code(404), "user not found")';
+
+   query(xquery,function(err,res){
+      if (err)
+          return cb(err);
+
+      var result=res;
+      try  {
+        result=JSON.parse(res[0]);
+      } catch (e) {
+        console.log('could not parse result of query in eXist:findUser');
+      }
+      cb(undefined,result);
+    });
+
+}
+var delUser = exports.delUser = function(id,cb) {
+  console.log('TODO - delUser')
+  cb('TODO');
+}
+var getUser = exports.getUser = function(id,cb){
+  console.log('TODO - getUser from id')
+  cb('TODO')
 }
 
 var loadAsset = exports.loadAsset = function(id,cb){
@@ -181,7 +321,7 @@ var loadAsset = exports.loadAsset = function(id,cb){
 
   console.log('-- loadAsset id='+id)
 
-  getKey(id, function (err,res){
+  getKey(null,id, function (err,res){
     if (err) return cb(err);
     if (res) {
       if (res.type === Collection.type)
@@ -484,12 +624,12 @@ var removeKey =  function(collection,file,id, cb) {
 
 
 // get a Key value, retry until it is unlocked
-var getKey = function(id, cb) {
+var getKey = function(file, id, cb) {
 
  console.log('getKey['+id+']')
 
  var xquery='xquery version "3.0";\
-             let $db := collection("/db/apps/rest3d/data")/items\
+             let $db := collection("/db/apps/rest3d/data'+(file?'/'+file+'.xml':'')+'")/items\
              let $item := $db/item[@id="'+id+'"] \
              return\
              if ($item) then\
@@ -711,7 +851,7 @@ var check_existdb_1 = function (cb) {
   		console.log(err);
   		return
   	} else {
-  		getKey('olala', function (err,res){
+  		getKey(null,'olala', function (err,res){
   			console.log('olalalal')
   			if (err) {
 		  		console.log('Error getKey ');

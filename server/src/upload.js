@@ -80,7 +80,7 @@ module.exports = function (server) {
         } 
         else {
           console.log('Created TMP for user='+req.session.sid)
-          req.session.tmpdir=collection;
+          req.session.tmpdir=collection.uuid;
           server.sessionManager.save(req.session.sid, req.session, next)
         }
       })
