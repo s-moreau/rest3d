@@ -5,36 +5,7 @@
 
   var Handler = require('./handler')
  
-  passport.serializeUser(function(user, done) {
-    done(null, user);
-  });
-
-  passport.deserializeUser(function(obj, done) {
-    done(null, obj);
-  });
-
-  passport.use(new GoogleStrategy({
-    returnURL: 'http://localhost:3000/auth/google/return',
-    realm: 'http://localhost:3000/'
-  },
-  function(identifier, profile, done) {
-    // asynchronous verification, for effect...
-    process.nextTick(function () {
-      
-      // To keep the example simple, the user's Google profile is returned to
-      // represent the logged-in user.  In a typical application, you would want
-      // to associate the Google account with a user record in your database,
-      // and return that user instead.
-      profile.identifier = identifier;
-      return done(null, profile);
-    });
-  }))
-
-
-
   var Passport = {};
-  
-
 
   Passport.ensureAuthenticated = function ensureAuthenticated(handler,cb) {
     if (!handler.req.isAuthenticated())
@@ -47,9 +18,11 @@
   Passport.init = function(server) {
       
     server.use(passport.initialize());
-    server.use(passport.session());
+    server.use(passport.session()); // not sure we need that at all
     
     server.get('/rest3d/login', function(req, res, next){
+      var handler = new Handler(req,res,next);
+      handler.db = server.db;
         
       if (!Passport.initialized) {
           Passport.initialized = true;
@@ -59,31 +32,41 @@
             realm: protocol + '://' + req.headers.host +'/',
           },
           function(identifier, profile, done) {
-            // asynchronous verification, for effect...
-            process.nextTick(function () {
-              
-              // To keep the example simple, the user's Google profile is returned to
-              // represent the logged-in user.  In a typical application, you would want
-              // to associate the Google account with a user record in your database,
-              // and return that user instead.
-              profile.identifier = identifier;
-              return done(null, profile);
-            });
-          }))
+            var handler = this;
+            profile.identifier = identifier;
+            // here we save the user info in the database
+            if (handler.db)
+              handler.db.findUser('google',identifier, function (err,user){
+                if (user) return done(null,user);
+                // lock this sid as user id
+                profile.sid = handler.sid;
+
+                handler.db.createUser(profile.sid,'google',identifier,profile, function (err,user){
+                  if (err) return handler.handlerError(err);
+                  done(null,user);
+                })
+              })
+            else
+              done(null,profile);
+
+          }.bind(handler)));
+
+          passport.serializeUser(function(user, done) {
+            done(null, user);
+          }.bind(handler));
+
+          passport.deserializeUser(function(obj, done) {
+            done(null, obj);
+          }.bind(handler));
       }
 
-      passport.authenticate('google', function(err, user, info) {
-        if (err) { return next(err); }
-        if (!user) { return res.redirect('/login'); }
-        req.logIn(user, function(err) {
-          if (err) { return next(err); }
-          return res.redirect('/users/' + user.username);
-        });
-      })(req, res, function(req, res, next){
 
+      passport.authenticate('google')(req, res, function(req, res, next){
+        // when exactly do we get there?
+        console.log('in the mysterious function')
         var handler = new Handler(req, res, next)
         handler.redirect('/');
-        //res.redirect('/');
+
       });
     });
     // GET /auth/google/return
@@ -97,7 +80,7 @@
       
 
       handler.redirect('/rest3d/user');
-      //res.redirect('/');
+
     });
 
     server.get('/rest3d/logout', function(req, res, next){
