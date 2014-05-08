@@ -251,49 +251,49 @@ define(['rest3d', 'upload', 'viewer','database', 'collada','gltf'], function (re
                     },
                 },
                 "plugin": ["themes", "json_data", "ui", "types", "sort", "search", "contextmenu"],
-                // "contextmenu": {
-                //     "items": function (node) {
-                //         var result = {};
-                //         var rel = node.attr("rel");
-                //         var up = node.attr("up");
-                //         result.create = {
-                //             'label': 'create',
-                //             'action': function (obj) {
-                //                 // stock.tree["tree_"+stock.name].jstree("rename");
-                //                this.rename(obj); 
-                //             }
-                //         };
-                //         if (rel == "collection" || rel == "model" || rel == "zip" || rel == "folder") {
-                //             result.icon = {
-                //                 'label': 'Add files',
-                //                 'action': stock.addFiles_contextMenu,
-                //             };
-                //         }
-                //         if ((rel == "collada" || rel == "gltf")) {
-                //             result.preview = {
-                //                 'label': 'Preview',
-                //                 'action': stock.preview,
-                //             };
-                //         }
-                //         if (rel == "gltf" ) {
-                //             result.display = {
-                //                 'label': 'Display',
-                //                 'action': stock.displayGltf,
-                //             };
-                //         }
-                //         if (rel == "collada" ) {
-                //             result.display = {
-                //                 'label': 'Display',
-                //                 'action': stock.displayCollada,
-                //             };
-                //             result.convert = {
-                //                 'label': 'Convert',
-                //                 'action': stock.convertMenu,
-                //             };
-                //         }
-                //         return result;
-                //     }
-                // },
+                "contextmenu": {
+                    "items": function (node) {
+                        var result = {};
+                        var rel = node.attr("rel");
+                        var up = node.attr("up");
+                        result.create = {
+                            'label': 'create',
+                            'action': function (obj) {
+                                // stock.tree["tree_"+stock.name].jstree("rename");
+                               this.rename(obj); 
+                            }
+                        };
+                        if (rel == "collection" || rel == "model" || rel == "zip" || rel == "folder") {
+                            result.icon = {
+                                'label': 'Add files',
+                                'action': stock.addFiles_contextMenu,
+                            };
+                        }
+                        if ((rel == "collada" || rel == "gltf")) {
+                            result.preview = {
+                                'label': 'Preview',
+                                'action': stock.preview,
+                            };
+                        }
+                        if (rel == "gltf" ) {
+                            result.display = {
+                                'label': 'Display',
+                                'action': stock.displayGltf,
+                            };
+                        }
+                        if (rel == "collada" ) {
+                            result.display = {
+                                'label': 'Display',
+                                'action': stock.displayCollada,
+                            };
+                            result.convert = {
+                                'label': 'Convert',
+                                'action': stock.convertMenu,
+                            };
+                        }
+                        return result;
+                    }
+                },
                 type: {
                     "types": {
                         "child": {
