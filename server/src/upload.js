@@ -66,7 +66,8 @@ module.exports = function (server) {
   tmpdb.getRoot = function(cb){
     cb(undefined, tmpdb.root);
   }
-
+  
+  server.tmpBuffer = tmpdb;
   // make sure we have a tmp folder for this user
   server.use(function(req,res,next){
     if (!req.session || !req.session.sid)
@@ -87,7 +88,6 @@ module.exports = function (server) {
     } else
     next();
   })
-
 
   // upload one or more files
   UploadHandler.prototype.post = function (collectionpath, assetpath) {

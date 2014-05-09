@@ -58,9 +58,13 @@ define(['rest3d', 'upload', 'viewer','database', 'collada','gltf'], function (re
         }
 
         this.convertMenu = function (node) {
-            result = $("#" + node.attr("id")).data();
-            result.file.relativePath = "";
-            rest3d.convert(result, callbackConvert);
+            // result = $("#" + node.attr("id")).data();
+            // result.file.relativePath = "";
+            var tmp = {};
+            tmp.files = node.uhgt8ttt7
+            rest3d.convert({}, function(){
+                console.debug("in")
+            });
         }
 
         this.encodeToId = function(name,uuid){
@@ -257,7 +261,7 @@ define(['rest3d', 'upload', 'viewer','database', 'collada','gltf'], function (re
                         var rel = node.attr("rel");
                         var up = node.attr("up");
                         result.create = {
-                            'label': 'create',
+                            'label': 'Create collection',
                             'action': function (obj) {
                                 // stock.tree["tree_"+stock.name].jstree("rename");
                                this.rename(obj); 
@@ -383,12 +387,11 @@ define(['rest3d', 'upload', 'viewer','database', 'collada','gltf'], function (re
                   stock.tree["tree_"+stock.name].jstree("refresh");
             })
             this.uploadPlugin.jquery.bind('fileuploaddrop', function (e, data) {
-                console.debug(e.idToDrop);
                 if(e.idToDrop==""){
-                    data.submit().abort();
+                    stock.parentTree = false;
                 }
                 else if($('#'+e.idToDrop).length==0){
-                     data.submit().abort();
+                    stock.parentTree = false;
                 }
                 else if($('#'+e.idToDrop).attr('rel')!==undefined){
                     var rel = $('#'+e.idToDrop).attr('rel')
@@ -415,7 +418,7 @@ define(['rest3d', 'upload', 'viewer','database', 'collada','gltf'], function (re
                     }
                 }
                 else{
-                    data.submit().abort();
+                    stock.parentTree = false;
                 }
             })
             this.uploadPlugin.jquery.bind('fileuploadadd', function (e, data) {
@@ -435,7 +438,10 @@ define(['rest3d', 'upload', 'viewer','database', 'collada','gltf'], function (re
                 $("#"+id).append(checkbox);
                 stock.uploadPlugin.setting.click(function(){
                     if($("#"+id).find('input').is(':checked')){
-                        data.submit();
+                        var request = data.submit();
+                        if(stock.parentTree==false){
+                            request.abort();
+                        }
                     }
                 })
                 if(flagRoot){stock.image.remove();}       

@@ -53,7 +53,6 @@ define(['jquery', 'rest3d', 'gltf', 'collada', 'viewer', 'q'], function ($, rest
                     this.createJqueryObject();
                     this.setting = GUI.button("Upload", this.filesArea);
                     this.refresh = GUI.button("Refresh", this.filesArea);
-                    this.collection = GUI.button("Create collection", this.filesArea);
                     this.setting.css({"float":"right"})
                 }
 
