@@ -24,30 +24,25 @@ Asset.create = function(asset,userid,callback){
 }
 
 Asset.prototype.addResource = function(resource,callback){
-  // LIFO -> add at begining of array
-  // TODO -> some resources are not to be versioned ? 
-  this.resources.unshift(resource);
+  // LIFO -> add at end of array
+  if (this.database.noversioning)
+    this.resources = [resource];
+  else
+    this.resources.push(resource);
   this.save(callback);
 }
 
-// TODO -> do something clever to get the right resource back
 Asset.prototype.lock = function(callback){
-  if (this.database.lockAsset) {
-      this.database.lockAsset(this, callback);
-  } else{
-    callback(undefined,this);
-  }
+  this.database.lockAsset(this, callback);
 }
 
 Asset.prototype.unlock = function(callback){
-  if (this.database.unlockAsset) {
-    this.database.unlockAsset(this,callback);
-  } else
-    callback(undefined, this);
+  this.database.unlockAsset(this,callback);
 }
 
 Asset.prototype.getResourceSync = function(){
-  return this.resources[0];
+  // last element is most recent
+  return this.resources[this.resources.length-1];
 }
 
 // get resource for REST API output
