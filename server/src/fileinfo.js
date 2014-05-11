@@ -2,7 +2,6 @@
 
   var fs = require('fs');
   var Path = require('path');
-  var mkdirp = require('mkdirp');
 
   var Asset = require('./asset');
   var Collection = require('./collection');
@@ -224,13 +223,6 @@
       // make an asset out of this fileInfo
       // create a uuid
 
-      // We do not accept files in the root
-      if (fileInfo.collectionpath === ''){
-        var error = {};
-        error.message='missing collection path';
-        error.statusCode=403;
-        return cb(error)
-      }
       fileInfo.toAsset(handler.db,handler.sid, function(err,asset) {
         if (err) return cb(err);
 
@@ -252,13 +244,16 @@
 
       fileInfo.toAsset(handler.db,handler.sid,function(err,asset) {
         if (err) return cb(err);
+        var filename = Path.resolve(FileInfo.options.uploadDir, handler.req.session.tmpdir ,asset.uuid);
+
+        // Note: folder was created in upload.js makeTMP
         
         if (fileInfo.buffer) {
-          fs.writeFile(Path.join(FileInfo.options.uploadDir,asset.uuid), fileInfo.buffer, 'binary', finish);
+          fs.writeFile(filename, fileInfo.buffer, 'binary', finish);
         } else if (fileInfo.donotmove){
-          copyFile(fileInfo.path, Path.join(FileInfo.options.uploadDir,asset.uuid), finish);
+          copyFile(fileInfo.path, filename, finish);
         } else {
-          fs.rename(fileInfo.path, Path.join(FileInfo.options.uploadDir,asset.uuid), finish);
+          fs.rename(fileInfo.path, filename, finish);
         }
       })
     }
