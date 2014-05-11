@@ -81,7 +81,7 @@ module.exports = function (server) {
   tmpdb.getRoot = function(cb){
     cb(undefined, tmpdb.root);
   }
-
+  
   var createTMP = function(req,res,next){
     // create tmp folder for user
     Collection.create(tmpdb,Path.join('/',req.session.sid), req.session.sid, function(err,collection){

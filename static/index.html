@@ -296,6 +296,38 @@ THE SOFTWARE.
       </ul>
     </div>
 
+    <h3> Convert </h3>
+    <h4> tmp </h4>
+      <li>
+          <form id='convert-tmp-file' action="/rest3d/convert/tmp" enctype="application/x-www-form-urlencoded" method="POST">
+            [POST URL] /rest3d/convert/tmp
+            <input id="url" size="150" name="url" value="http://timenewsfeed.files.wordpress.com/2013/05/duckband.jpg?w=753" />
+            <input type="submit"  />send url to convert(single file example)
+          </form>
+        </li>
+        <li>
+        <form id='convert-tmp-zip' action="/rest3d/convert/tmp" enctype="application/x-www-form-urlencoded" method="POST">
+          [POST URL] /rest3d/convert/tmp
+          <input id="url" size="150" name="url" value="https://3dwarehouse.sketchup.com/3dw/getbinary?subjectId=ac9c3413d59e8e4a7f7fbfb94ac070c5&subjectClass=entity&name=k2" />
+          <input type="submit"  />send url to convert(zip file example)
+        </form>
+       </li>
+       <hr>
+       <h4> db </h4>
+       <li>
+        <form id='convert-db-file' action="/rest3d/convert/db" enctype="application/x-www-form-urlencoded" method="POST">
+            [POST URL] /rest3d/convert/db
+            <input id="url" size="150" name="url" value="http://timenewsfeed.files.wordpress.com/2013/05/duckband.jpg?w=753" />
+            <input type="submit"  />send url to convert(single file example)
+          </form>
+        </li>
+        <li>
+        <form id='convert-db-zip' action="/rest3d/convert/db" enctype="application/x-www-form-urlencoded" method="POST">
+          [POST URL] /rest3d/convert/db
+          <input id="url" size="150" name="url" value="https://3dwarehouse.sketchup.com/3dw/getbinary?subjectId=ac9c3413d59e8e4a7f7fbfb94ac070c5&subjectClass=entity&name=k2" />
+          <input type="submit"  />send url to convert(zip file example)
+        </form>
+         </li>
     <div style="display: hidden" />
   </div>
 
