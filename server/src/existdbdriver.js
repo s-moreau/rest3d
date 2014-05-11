@@ -101,7 +101,9 @@ var lockAsset = exports.lockAsset = function(asset,cb, _n){
           })
         } else {
           console.log('asset ['+asset.uuid+'] ='+asset.name+' is locked - trying again('+(n+1)+')');
-          return setTimeout(lockAsset,1000,asset,cb,n+1);
+          var delta = Math.random() * (n/10) + 1;
+          console.log('trying again in '+delta+' seconds')
+          return setTimeout(function() {lockAsset(asset,cb,n+1)},1000*delta);
         }
       } 
       console.log('database[eXist] cannot find asset id='+asset.uuid);

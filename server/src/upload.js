@@ -139,15 +139,15 @@ module.exports = function (server) {
     var form = new formidable.IncomingForm();
     var tmpFiles = [];
     var files = [];
-    var map = {}
+    //var map = {}
     var counter = 1;
 
   
     var finish = function (err, asset) {
       if (err) {
-        console.log('ERROR IN FINISH');
-        handler.handleError(err);
+        console.log('ERROR IN UPLOAD FINISH');
         counter = -1;
+        handler.handleError(err);
         return;
       }
       counter -= 1;
@@ -190,10 +190,11 @@ module.exports = function (server) {
     //form.uploadDir = FileInfo.options.tmpDir;
     form.on('fileBegin', function (name, file) {
 
+      // in case there is an abort, we can delete tmpFiles
       tmpFiles.push(file.path);
-      var fileInfo = new FileInfo(file, collectionpath, assetpath);
+      //var fileInfo = new FileInfo(file, collectionpath, assetpath);
       //fileInfo.safeName();
-      map[file.path] = fileInfo;
+      //map[file.path] = fileInfo;
       //files.push(fileInfo); -> this will happen later
 
     }).on('field', function (name, value) {
@@ -241,14 +242,15 @@ module.exports = function (server) {
         // form did not send a valid file
         return;
       }
-      var fileInfo = map[file.path];
-      fileInfo.size = file.size;
-      fileInfo.type = Mime.lookup(fileInfo.name);
+      //var fileInfo = map[file.path];
+      //var fileInfo = new FileInfo(file, collectionpath, assetpath);
+      //fileInfo.size = file.size;
+      //fileInfo.type = Mime.lookup(fileInfo.name);
 
 
       counter++; // so that 'end' does not finish
       //                                                              no jar
-      zipFile.unzipFile(handler, collectionpath, assetpath, fileInfo.name, fileInfo.path, null, function(error,result) {
+      zipFile.unzipFile(handler, collectionpath, assetpath, file.name, file.path, null, function(error,result) {
         if (error)
           finish(error);
         else {
@@ -456,7 +458,7 @@ module.exports = function (server) {
     handler.allowOrigin();
     handler.db = tmpdb;
 
-    var params = req.url.split("/tmp")[1];
+    var params = req.url.stringAfter("/tmp");
 
 
     Collection.find(handler.db, Path.join('/', handler.sid, params), function (err, result) {
@@ -476,7 +478,7 @@ module.exports = function (server) {
     handler.allowOrigin();
     handler.db = tmpdb;
 
-    var params = req.url.split("/tmp")[1];
+    var params = req.url.stringAfter('/tmp');
     if (params.contains('?'))
       params = params.stringBefore('?');
     while (params.slice(-1) === '/') params = params.slice(0, -1);
