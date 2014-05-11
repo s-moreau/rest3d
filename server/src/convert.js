@@ -71,9 +71,9 @@ UploadHandler.prototype.convert = function (collectionpath, assetpath) {
         var finish = function (err, asset) {
       console.log('FINISH',err,asset,files);
       if (err) {
-        console.log('ERROR IN FINISH');
-        handler.handleError(err);
+        console.log('ERROR IN CONVERT FINISH');
         counter = -1;
+        handler.handleError(err);
         return;
       }
       counter -= 1;
@@ -218,8 +218,7 @@ UploadHandler.prototype.convert = function (collectionpath, assetpath) {
     handler.allowOrigin();
     handler.db = server.tmpBuffer;
 
-    var params = req.url.split("/tmp")[1];
-
+    var params = req.url.stringAfter('/tmp');
 
     Collection.find(handler.db, Path.join('/', handler.sid, params), function (err, result) {
 

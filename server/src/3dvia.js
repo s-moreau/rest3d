@@ -137,7 +137,7 @@ module.exports = function (server) {
         {
 
           var url = link.attribs.href;
-          var uid=url.split('/')[1];
+          var uid = url.stringAfter('/');
 
 
           var file_size = link.parent.parent.children[9].children[0].data;
@@ -213,7 +213,7 @@ module.exports = function (server) {
     
     var tdvia = new tdviahandler(req,res,next);
 
-    var uid = req.url.split("/3dvia/")[1];
+    var uid = req.url.stringAfter('/3dvia/');
     console.log('[3dvia]' + uid);
 
     var jar = null;
@@ -256,7 +256,8 @@ module.exports = function (server) {
         });
 
       } else if (uid.startsWith('data/')) {
-        var id = uid.split('data/')[1];
+
+        var id = uid.stringAfter('data/')
  
         if (id) {
           var url = "http://www.3dvia.com/3dsearch/FileInfo?FileId="+id+"&_format=json";
@@ -305,7 +306,9 @@ module.exports = function (server) {
         }
         // return the asset 
       } else if (uid.startsWith('search/')) {
-        var search = uid.split('search/')[1];
+
+        var search = uid.stringAfter('search/');
+
         var query = null;
         console.log ('search tdvia for ['+search+']')
         // this returns a json with all collections
@@ -339,7 +342,7 @@ module.exports = function (server) {
         });
       } else if (uid.startsWith('info/')) {
 
-        var id = uid.split('info/')[1];
+        var id = uid.stringAfter('info/')
  
         if (id) {
 
@@ -364,7 +367,8 @@ module.exports = function (server) {
         
      
       } else if (uid.startsWith('copy/')) {
-        var id = uid.split('copy/')[1];
+
+        var id = uid.stringAfter('copy/');
         var url = "http://www.3dvia.com/3dsearch/FileInfo?FileId="+id+"&_format=json";
         console.log ('copy 3dvia asset  ID =['+id+']');
         request({ 

@@ -39,7 +39,7 @@ module.exports = function (server) {
     
     var warehouseHandler = new handler(req,res,next);
 
-    var uid = req.url.split("/warehouse/")[1];
+    var uid = req.url.stringAfter('/warehouse/');
     console.log('[warehouse]' + uid);
 
     // just browsing
@@ -108,7 +108,7 @@ module.exports = function (server) {
        
     } else if (uid.startsWith('search/'))
     {
-      var search = uid.split('search/')[1];
+      var search = uid.stringAfter('search/');
       console.log ('search warehouse for ['+search+']')
       if (search === '')
       {
