@@ -207,7 +207,7 @@
       return params.cb(null, {
         path: params.filename,
         name: params.name,
-        type: 'file'
+        type: Mime.lookup(params.name)
       });
 
     var asset = {
@@ -284,9 +284,9 @@
           var fullpath = currentpath + '/' + path;
           if (currentpath === '') fullpath = path;
           var item = {
-            name: path,
-            size: entry._header.uncompressed_size,
-            type: 'file'
+            name: path
+            //size: entry._header.uncompressed_size,
+            //type: Mime.looku
           };
          
           if (!folder.children) folder.children = [];
@@ -297,6 +297,7 @@
           // file -> name, path, optional:size, type, not used: hash, lastModifiedDate)
 
           var fileInfo = new FileInfo(item, params.collectionpath, currentpath);
+          console.log('fileInfo Item.size'+item.size)
           fileInfo.buffer = entry.getData();
           files.push(fileInfo);
           counter++;
@@ -321,13 +322,14 @@
 
         var item = {
             name: params.name,
-            path: params.filename
+            path: params.filename 
+            // size and type will be created by new FileInfo()
         };
         var fileInfo = new FileInfo(item, params.collectionpath, params.assetpath);
         item.fileInfo = fileInfo;
 
         files.push(fileInfo);
-        asset = {name:params.name, path:params.filename, type:'file'};
+        asset = {name:params.name, path:params.filename, type:fileInfo.type};
 
         fileInfo.donotmove = params.donotmove;
         counter++;

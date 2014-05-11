@@ -3,6 +3,8 @@
   var fs = require('fs');
   var Path = require('path');
 
+  var Mime = require('mime');
+
   var Asset = require('./asset');
   var Collection = require('./collection');
   var Resource = require('./resource')
@@ -33,13 +35,19 @@
   }
 
   var FileInfo = function (file, collectionpath, assetpath) {
-      if (file) {
+      if (file) { // file is undefined if this is a folder
         // file -> name, path, optional:size, type, not used: hash, lastModifiedDate)
         this.name = file.name; // name according to sender
         this.path = file.path; // where is it now?
-         // optional? probably unknown when new FileInfo() is called
-        this.size = file.size; // do we need that? we can ask the file for its size
-        this.type = file.type; // type according to sender
+
+        if (this.path)
+          this.size = fs.statSync(this.path).size;
+        else
+          this.size = -1;
+        if (file.type)
+          this.type = file.type; // type according to sender
+        else
+          this.type = Mime.lookup(file.name);
 
         this.isFolder = false; // true if this is a folder and not a file
       } else
@@ -218,6 +226,14 @@
       }
     };
 
+    if (fileInfo.buffer) {
+      fileInfo.size = fileInfo.buffer.length;
+    } else if (fileInfo.path){
+      fileInfo.size = fs.statSync(fileInfo.path).size;
+    } else {
+      var error = new Error('neither buffer or path was set in fileInfo.upload');
+      return cb(error);
+    }
 
     if (handler.db.name !== 'tmp'){
       // make an asset out of this fileInfo
