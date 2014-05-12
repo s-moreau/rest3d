@@ -17,10 +17,18 @@ server.jobManager.addJob('convert', {
   concurrency: 100, //number of concurrent jobs ran at the same time, default 50 if not specified
   work: function (params) {          //The job
       this.params = params;
-      console.log(params.files);
       this.dirname = uuid.v4(); //generate random/unique repository name
       fs.mkdirSync(this.dirname); //create temporary folder for stocking assets to be converted
       fs.chmodSync(this.dirname, '777'); //set access mode R&W
+      var stock = this;
+      if(params.files[0][0].path.indexOf("tmp/")!==-1){ // if it is a file unziped in tmp, move files
+        params.files[0].forEach(function(fileInfo){
+          fs.createReadStream(fileInfo.path).pipe(fs.createWriteStream(stock.dirname+'/'+fileInfo.name));
+        })
+      }
+      else{  //Must be cache, copy
+
+      }
       this.stderr = "error test"; //test to stock the sderr
       this.stdout = "out test"; //test to stock stdout
       this.finished = true;

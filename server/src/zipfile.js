@@ -235,7 +235,7 @@
         there_was_an_error=true;
         return;
       }
-      rmdirSync("tmp/"+folder);
+      setTimeout(function(){rmdirSync("tmp/"+folder)},4000);
       params.cb(undefined, files);
     };
 
