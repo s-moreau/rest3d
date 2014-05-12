@@ -200,29 +200,27 @@
   // if params does not have a filename, extract filename from headers
   var unzip = function (params) {
 
-    var daefilename = ""; // this will look for a .dae in the zip file
-    if (!params.name) return params.cb(new Error('cannot find name in unzip'))
-
-    if (params.uploadOnly)
-      return params.cb(null, {
-        path: params.filename,
-        name: params.name,
-        type: Mime.lookup(params.name)
-      });
-
-    var asset = {
-      type: 'asset',
-      name: params.name,
-      id: 'params.uid',
-      url: params.url
-    };
-    var folder = params.handler.req.session.sid;
-
     var counter = 0;
 
     var there_was_an_error=false;
 
     var files = []; // retuns an array of fileInfos;
+
+    if (!params.name) return params.cb(new Error('cannot find name in unzip'))
+
+    if (params.uploadOnly) {
+       var item = {
+            name: params.name,
+            path: params.filename 
+            // size and type will be created by new FileInfo()
+        };
+        var fileInfo = new FileInfo(item, params.collectionpath, params.assetpath);
+
+        fileInfo.donotmove = params.donotmove;
+        return params.cb(undefined, fileInfo);
+    }
+
+    var folder = params.handler.req.session.sid;
 
     var finish = function (err, rest3d_asset) {
       if (there_was_an_error) return;
@@ -255,18 +253,15 @@
             // size and type will be created by new FileInfo()
         };
         var fileInfo = new FileInfo(item, params.collectionpath, params.assetpath);
-        item.fileInfo = fileInfo;
+        //item.fileInfo = fileInfo;
         counter ++;
-        asset = {name:params.name, path:params.filename, type:fileInfo.type};
+        //asset = {name:params.name, path:params.filename, type:fileInfo.type};
 
         fileInfo.donotmove = params.donotmove;
         files.push(fileInfo);
 
         if (!params.dryrun) {
-           fileInfo.upload(params.handler, function(err,rest_asset){
-             asset.fileInfo = fileInfo;
-             finish(err,rest_asset);
-           });
+           fileInfo.upload(params.handler, finish);
         } else
           finish(undefined);
       } else if (code) {
@@ -307,14 +302,7 @@
                   files.push(fileInfo);
                   counter++;
                   if (!params.dryrun) {
-                     fileInfo.upload(params.handler, function(err,rest_asset){
-                      if (err) {
-                        finish(err);
-                      } else {
-                        item.fileInfo = fileInfo;
-                        finish(undefined);
-                      }
-                    });
+                     fileInfo.upload(params.handler, finish);
                   } else
                     finish(undefined);
 

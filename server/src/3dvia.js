@@ -281,15 +281,11 @@ module.exports = function (server) {
 
               //proxie with cache
               
-              zipFile.uploadUrl(url,jar, function(error, result){
+              zipFile.uploadUrl(url,jar, function(error, fileInfo){
                 if (error)
                   tdvia.handleError(error);
-                else {
-
-                  tdvia.res.setHeader('Content-Disposition', 'inline; filename='+result.name);
-                  tdvia.sendfile(result.filename);
-                  
-                }
+                else 
+                  tdvia.sendFile(fileInfo.path, fileInfo.name);
               });
               
               // proxie no cache
@@ -363,7 +359,7 @@ module.exports = function (server) {
               return tdvia.handleResult(data.returnresponse.item[0]);
           });
         } else
-          return tdcia.handleError("/3dvia/info invalid id="+id);
+          return tdvia.handleError("/3dvia/info invalid id="+id);
         
      
       } else if (uid.startsWith('copy/')) {
