@@ -203,7 +203,7 @@ module.exports = function (server) {
         // counter++; -> getting all files at once
         //                                                      no jar
         counter++; // one more result to POST
-        zipFile.unzipUrl(handler, collectionpath, assetpath, value, null, function(error,result) {
+        zipFile.unzipUploadUrl(handler, collectionpath, assetpath, value, null, function(error,result) {
           if (error)
             handler.handleError(error);
           else {
@@ -235,7 +235,7 @@ module.exports = function (server) {
 
       counter++; // so that 'end' does not finish
       //                                                              no jar
-      zipFile.unzipFile(handler, collectionpath, assetpath, file.name, file.path, null, function(error,result) {
+      zipFile.unzipUploadFile(handler, collectionpath, assetpath, file.name, file.path, null, function(error,result) {
         if (error)
           finish(error);
         else {

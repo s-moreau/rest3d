@@ -387,7 +387,7 @@ module.exports = function (server) {
             Collection.find('tmp', path.join('/', tdvia.sid), function (err, result) {
               if (err) return tdvia.handlerError(err);
               else {
-                zipFile.unzipUrl(tdvia,result.collection, result.assetpath, url,jar, function(error, result){
+                zipFile.unzipUploadUrl(tdvia,result.collection, result.assetpath, url,jar, function(error, result){
                   if (error)
                     tdvia.handleError(error);
                   else {

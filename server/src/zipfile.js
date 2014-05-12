@@ -30,6 +30,21 @@
     uploadAndUnzip(params);
   }
 
+  zipFile.unzipUrl = function (handler,collectionpath, assetpath,jar,target,cb){
+
+
+
+
+
+  }
+
+  zipFile.unzipFile = function (handler,collectionpath, assetpath,target,cb){
+
+
+
+
+  }
+
   zipFile.getAssetInfoFile = function (handler, name, filename, jar, cb) {
 
     var params = {};
@@ -43,7 +58,7 @@
     uploadAndUnzip(params);
   }
 
-  zipFile.unzipUrl = function (handler, collectionpath, assetpath, url, jar, cb) {
+  zipFile.unzipUploadUrl = function (handler, collectionpath, assetpath, url, jar, cb) {
 
     var params = {};
     params.handler = handler;
@@ -58,7 +73,7 @@
   };
 
 
-  zipFile.unzipFile = function (handler, collectionpath, assetpath, name, filename, jar, cb) {
+  zipFile.unzipUploadFile = function (handler, collectionpath, assetpath, name, filename, jar, cb) {
 
     var params = {};
     params.handler = handler;
