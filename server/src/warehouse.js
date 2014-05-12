@@ -43,7 +43,7 @@ module.exports = function (server) {
     console.log('[warehouse]' + uid);
 
     // just browsing
-    if (!uid || uid==='')
+    if (uid ==='')
     {
     	// this returns a json with all collections
       var start = 1;
@@ -166,8 +166,14 @@ module.exports = function (server) {
 
         // note: this is using diskcache
         // no jar -> undefined -> user=guest
+/*
+        {"database":"eXist","name":"doc.kml","type":"application/vnd.google-earth.kml+xml",
+         "created":{"date":1399877510599,"user":"A5OyPlGHedkrBTbqQUQ1qBscietma84wTGLB9IfW"},
+          "uuid":"e4fced70-d9a1-11e3-a7c9-1d8ed1f8e783","parentId":"a1ad39b0-d967-11e3-b00e-c1e3a1d321cb",
+          "size":1601,"assetpath":"doc.kml","collectionpath":"tmp"}
         
-        var asset = zipFile.getAssetInfoUrl(warehouseHandler,url, undefined, function(error, result){
+        */
+        var asset = zipFile.getAssetInfoUrl(warehouseHandler,url, undefined, function(error, files){
           if (error)
             warehouseHandler.handleError(error);
           else
