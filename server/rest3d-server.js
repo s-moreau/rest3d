@@ -44,8 +44,7 @@ var os = require('os');
 require('shelljs/global');
 
 var fs = require('fs');
-var ncp = require('ncp').ncp;
-var walk = require('walk');
+
 var path = require('path');
 var cache = require('./src/diskcache');
 

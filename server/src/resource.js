@@ -34,11 +34,18 @@ var getuuid = function(resource, callback) {
   resource.save(cb);
 }
 
-// delete this resource 
+/*
+ So, we do not delete resources in normal case
+ Assets get removed from collections, but they can be un-deleted 
+ as removing is in fact pushing a new resource, that does not have 
+ a link to this new resource.
+
+ But we're going to need some way to clean up a database somehow when disk is full?
+ 
 Resource.prototype.del = function(callback) {
-   // TODO -> delete the actual resource file !! if type===Resource
- this.database.delAsset(this.uuid);
+
 }
+*/
 
 Resource.prototype.save = function(callback) {
   this.database.saveAsset(this, callback);

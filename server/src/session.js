@@ -161,12 +161,10 @@ module.exports = function(config) {
    * @param {String} callback.err Error if occurred
    * @param {String} callback.status Result from Redis query
    */
-  session.save = function(sid, data, callback) {
+  session.save = function(sid, data, cb) {
     console.log('session.save sid='+sid)
     if (isNull(sid)) {
-      if (callback) {
-        callback.call(session, 'no sid given', undefined);
-      }
+      cb && cb.call(session, 'no sid given', undefined);
       return;
     }
     session.sessions[sid]=data;
@@ -180,9 +178,9 @@ module.exports = function(config) {
             if (err) {
               console.log('session.save -> refresh error='+err)
             } else {
-              console.log('session.save -> refreshed session='+res);
+              //console.log('session.save -> refreshed session='+res);
             }
-             callback.call(session, undefined, data);
+             cb && cb.call(session, undefined, data);
           })
         }
       })
@@ -191,9 +189,9 @@ module.exports = function(config) {
             if (err) {
               console.log('session.save -> refresh error='+err)
             } else {
-              console.log('session.save -> refreshed session='+res);
+              //console.log('session.save -> refreshed session='+res);
             }
-             callback.call(session, undefined, data);
+             cb && cb.call(session, undefined, data);
           })
     }
 
@@ -208,14 +206,11 @@ module.exports = function(config) {
    * @param {String} callback.err Error if occurred
    * @param {Object} callback.data session data
    */
-  session.load = function(sid, callback) {
+  session.load = function(sid, cb) {
     if (isNull(sid)) {
-      if (callback) {
-        callback.call(session, 'no sid given', undefined);
-      }
+      cb && cb.call(session, 'no sid given', undefined);
       return;
     }
-    var cb=callback;
     var data = session.sessions[sid];
 
     if (data === undefined) {
@@ -223,23 +218,23 @@ module.exports = function(config) {
         cfg.db.loadCookie(sid, function (err,res){
           if (err) {
             console.log('session.load Error load Cookie ['+err+']');
-            return cb.call(session, err, null);
+            cb && cb.call(session, err, null);
           } else if (!res) {
             err = 'session.load load Cookie returned empty cookie';
             console.log(err);
-            return cb.call(session, err, null);
+            cb && cb.call(session, err, null);
           } else {
             console.log('session.load load Cookie returned ['+toJSON(res)+']')
-            
-            cb.call(session, undefined, res);
+            cb && cb.call(session, undefined, res);
           }
         })
       } else {
         var err='session.js cannot load sessionID='+sid; 
-        cb.call(session, err, data);
+        cb && cb.call(session, err, data);
       }
-    } else
-      cb.call(session, undefined, data);
+    } else {
+      cb && cb.call(session, undefined, data);
+    }
   };
 
   /**
@@ -251,29 +246,28 @@ module.exports = function(config) {
    * @param {String} callback.err Error if occurred
    * @param {Boolean} callback.active True if the sid is active (not expired)
    */
-  session.refresh = function(sid, callback) {
+  session.refresh = function(sid, cb) {
     if (isNull(sid)) {
-      if (callback) {
-        callback.call(session, 'no sid given', false);
-      }
-      return;
+      cb && cb.call(session, 'no sid given', false);
+      return null;
     }
     if (cfg.persist) {
-      callback.call(session, undefined, sid);
-      return;
+      cb && cb.call(session, undefined, sid);
+      return null;
     }
 
     var err=undefined;
     if (session.timeouts[sid] != undefined){
       clearTimeout(session.timeouts[sid] )
-      console.log('refresh -> update timeout for sid='+sid)
+      //console.log('refresh -> update timeout for sid='+sid)
     } else {
-      console.log('refresh -> new timeout for sid='+sid)
+      //console.log('refresh -> new timeout for sid='+sid)
     }
-    session.timeouts[sid] = setTimeout(function(){session.destroy(sid)}, cfg.ttl*1000);
+                                        // closure to pass sid value
+    session.timeouts[sid] = setTimeout(function(){session.destroy.call(session,sid)},  cfg.ttl*1000 );
 
-    if (callback) 
-      callback.call(session, err, sid);
+    cb && cb.call(session, err, sid);
+    return session;
   };
 
   /**
@@ -309,31 +303,45 @@ module.exports = function(config) {
    * @param {String} callback.status Returned status code from Redis
    * @private
    */
-  session.destroy = function(sid, callback) {
 
-    var cb = callback;
-    if (isNull(sid)) {
-      cb && cb.call(session, 'no sid given', null);
-      return;
+  // note cb is often null, this function called in a timeOut
+  session.destroy = function(sid, cb) { 
+
+    var self=this;
+    
+    if (isNull(sid)) return done('no sid given');
+
+    if (self.timeouts[sid] !== undefined){
+      clearTimeout(self.timeouts[sid]);
+      delete self.timeouts[sid];
     }
 
-    if (session.timeouts[sid] !== undefined){
-      clearTimeout(session.timeouts[sid]);
-      delete session.timeouts[sid];
+    var session = self.sessions[sid];
+    if (!session) return deleteCookie(undefined); 
+
+    var done = function(error) {
+      self.sessions[sid] && delete self.sessions[sid];
+      cb && cb.call(self, error, undefined);
     }
-    if (cfg.db) {
-      cfg.db.delCookie(sid, function (err,res){
-        if (err) {
-          console.log('Error delete Cookie ='+err);
-          cb && cb.call(session, err, null);
-        } else {
-          console.log('key removed cookie ['+res+']')
-          cb && cb.call(session, undefined, null);
-        }
-      })
-    } else {
-      cb && cb.call(session, undefined, null);
+
+    var deleteCookie = function(error){
+      if (error) return done(error)
+      if (cfg.db) {
+        cfg.db.delCookie(sid, function (err,res){
+          if (err) {
+            console.log('Error delete Cookie ='+err);
+            return done(undefined); // no need to alert client
+          } else {
+            console.log('key removed cookie ['+sid+']')
+             return done(undefined);
+          }
+        })
+      }
     }
+
+   if (session.tmpdir) 
+     return self.delTMP(session.tmpdir, deleteCookie);
+    deleteCookie(undefined);
   };
 
   /**
@@ -400,11 +408,7 @@ module.exports = function(config) {
    * @param {Object} res Response from server
    * @param {Function} next Next function to execute in server
    */
-  session.sessionManager = function (_req, _res, _next) {
-
-    var req=_req;
-    var res=_res;
-    var next=_next;
+  session.sessionManager = function (req, res, next) {
 
     if (cfg.debug) {
 

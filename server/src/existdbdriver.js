@@ -82,6 +82,7 @@ exports.getData = function(asset, cb) {
       });
 };
 
+var lockcb = {};
 // this locks an asset, waiting forever for lock to be available
 var lockAsset = exports.lockAsset = function(asset,cb, _n){
 
@@ -92,6 +93,17 @@ var lockAsset = exports.lockAsset = function(asset,cb, _n){
   lockKey(asset.parentId,'assets',asset.uuid, function(err,res){
     if (err){
       if (err.statusCode === 423){
+        if (!lockcb[asset.uuid]) lockcb[asset.uuid] = [];
+        console.log('asset = '+asset.uuid+' already locked ('+n+')-> adding to queue')
+
+
+        lockcb[asset.uuid].push(function(){
+          console.log('giving control of asset['+asset.uuid+'] lock');
+          lockAsset(asset,cb,n+1);
+        });
+        return;
+/*
+        
         // try again later
         if (n===100){
           // let's give it the lock, and try again
@@ -101,8 +113,11 @@ var lockAsset = exports.lockAsset = function(asset,cb, _n){
           })
         } else {
           console.log('asset ['+asset.uuid+'] ='+asset.name+' is locked - trying again('+(n+1)+')');
-          return setTimeout(lockAsset,1000,asset,cb,n+1);
+          
+          return setImmediate(function() {lockAsset(asset,cb,n+1)});
         }
+        */
+        
       } 
       console.log('database[eXist] cannot find asset id='+asset.uuid);
       return cb(err);
@@ -132,8 +147,19 @@ var unlockAsset = exports.unlockAsset = function(asset,cb){
 
   unlockKey(asset.parentId,'assets',asset.uuid, function(err,garbage){
     if (err) return cb(err);
+    
+      // give lock to next in the list on next process tick
+      
+    if (lockcb[asset.uuid] && lockcb[asset.uuid].length) {
+      console.log(' -- unlock count ='+lockcb[asset.uuid].length)
+      setImmediate(lockcb[asset.uuid].pop());
+    } 
+    
+    // then this callback
     cb(undefined,asset);
+    
   });
+
 }
 
 // If the asset cannot be saved, because it is locked or otherwise
@@ -338,11 +364,6 @@ var loadAsset = exports.loadAsset = function(id,cb){
       cb(err);
     }
   });
-}
-
-// FIXME !!
-var delAsset = exports.delAsset = function(asset,cb){
-  removeKey(asset.parentId,'assets',asset.uuid, cb);
 }
 
 // store an asset
@@ -606,18 +627,19 @@ var unlockKey = function(collection, file, id, cb) {
 }
 
 // delete an object in a key/pair database
+// note: this returns NOTHING
 var removeKey =  function(collection,file,id, cb) {
 
   console.log('removeKey['+id+']')
 
   var xquery = 'xquery version "3.0";\
                 let $db := doc("/db/apps/rest3d/data'+(collection ?  '/'+collection+'/' : '/')+file+'.xml")\
-							  for $item in $db/item[@id="'+id+'"]\
-							   return\
-                 if ($item) then\
-							     update delete $item\
-                 else\
-                   (response:set-status-code(404), "key not found")';
+                for $item in $db/item[@id="'+id+'"]\
+                  return\
+                    if ($item) then\
+                      update delete $item\
+                    else\
+                      (response:set-status-code(404), "key not found")';
 
   query(xquery, cb);
 }
@@ -654,11 +676,11 @@ var getKey = function(file, id, cb) {
 
 var query = exports.query = function(xquery, cb) {
 
-	var query = connection.query(xquery, { chunkSize: 100 });
+  var query = connection.query(xquery, { chunkSize: 100 });
   var data =[];
 
-	query.on("error", function(err) {
-	   if (err.message){
+  query.on("error", function(err) {
+    if (err.message){
       var message = null;
       try {
         message = JSON.parse(err.message);
@@ -677,17 +699,16 @@ var query = exports.query = function(xquery, cb) {
         error.statusCode = err.statusCode;
         return cb(error);
       }
-     } // this will catch all remaining errors
-		cb(new Error(err));
-	});
-	var results=[];
-	query.each(function(item,hits,offset) {
-      results.push(item);
-    });
-	query.on('end',function(){
-		cb(undefined,results)
-	})
-
+    } // this will catch all remaining errors
+    cb(new Error(err));
+  });
+  var results=[];
+  query.each(function(item,hits,offset) {
+    results.push(item);
+  });
+  query.on('end',function(){
+    cb(undefined,results)
+  });
 }
 
 var info = exports.info = function (cb) {

@@ -2,7 +2,8 @@
 
   var fs = require('fs');
   var Path = require('path');
-  var mkdirp = require('mkdirp');
+
+  var Mime = require('mime');
 
   var Asset = require('./asset');
   var Collection = require('./collection');
@@ -34,13 +35,19 @@
   }
 
   var FileInfo = function (file, collectionpath, assetpath) {
-      if (file) {
+      if (file) { // file is undefined if this is a folder
         // file -> name, path, optional:size, type, not used: hash, lastModifiedDate)
         this.name = file.name; // name according to sender
         this.path = file.path; // where is it now?
-         // optional? probably unknown when new FileInfo() is called
-        this.size = file.size; // do we need that? we can ask the file for its size
-        this.type = file.type; // type according to sender
+
+        if (this.path)
+          this.size = fs.statSync(this.path).size;
+        else
+          this.size = -1;
+        if (file.type)
+          this.type = file.type; // type according to sender
+        else
+          this.type = Mime.lookup(file.name);
 
         this.isFolder = false; // true if this is a folder and not a file
       } else
@@ -219,18 +226,22 @@
       }
     };
 
+    if (fileInfo.buffer) {
+      fileInfo.size = fileInfo.buffer.length;
+    } else if (fileInfo.path){
+      fileInfo.size = fs.statSync(fileInfo.path).size;
+    } else {
+      var error = new Error('neither buffer or path was set in fileInfo.upload');
+      return cb(error);
+    }
 
     if (handler.db.name !== 'tmp'){
       // make an asset out of this fileInfo
       // create a uuid
 
-      // We do not accept files in the root
-      if (fileInfo.collectionpath === ''){
-        var error = {};
-        error.message='missing collection path';
-        error.statusCode=403;
-        return cb(error)
-      }
+      if (fileInfo.collectionpath ==='')
+        return cb({message:'forbiddern to store an asset at root of database',statusCode:403});
+
       fileInfo.toAsset(handler.db,handler.sid, function(err,asset) {
         if (err) return cb(err);
 
@@ -252,13 +263,16 @@
 
       fileInfo.toAsset(handler.db,handler.sid,function(err,asset) {
         if (err) return cb(err);
+        var filename = Path.resolve(FileInfo.options.uploadDir, handler.req.session.tmpdir ,asset.uuid);
+
+        // Note: folder was created in upload.js makeTMP
         
         if (fileInfo.buffer) {
-          fs.writeFile(Path.join(FileInfo.options.uploadDir,asset.uuid), fileInfo.buffer, 'binary', finish);
+          fs.writeFile(filename, fileInfo.buffer, 'binary', finish);
         } else if (fileInfo.donotmove){
-          copyFile(fileInfo.path, Path.join(FileInfo.options.uploadDir,asset.uuid), finish);
+          copyFile(fileInfo.path, filename, finish);
         } else {
-          fs.rename(fileInfo.path, Path.join(FileInfo.options.uploadDir,asset.uuid), finish);
+          fs.rename(fileInfo.path, filename, finish);
         }
       })
     }

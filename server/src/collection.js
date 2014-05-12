@@ -54,6 +54,62 @@ Collection.prototype.create = function(path,uid,cb){
   })
 }
 
+// remove a chid collection 
+// its like mkdir, except removing the entry from list of child
+
+Collection.prototype.rmdir = function(uid,cb){
+  var collection = this; // we can return this too
+  // unlock and leave
+  var next = function(err){
+    // always try to unlock
+    collection.unlock(function(err2,asset) {
+      if (err) return cb(err);
+      if (err2) return cb(err2);
+      cb(undefined,collection);
+    })
+  }
+
+  var col=null;
+  var found=null;
+
+  // we need to lock the collection
+   this.lock (
+    function(err,asset,callback){
+      if (err) return cb(err);
+
+      // now that we locked the asset, get its correct value
+      collection = asset;
+
+      col = collection.getResourceSync();
+      // find collection
+      for (var key in col.children) {
+          if (col.children[key] === uid) {
+            found = key;
+            break;
+          }
+      }
+      if (found) {
+        delete col.children[found];
+        return collection.addResource(col,next);
+      }
+
+      for (var key in col.assets) {
+          if (col.assets[key] === uid) {
+            found = key;
+            break;
+          }
+      }
+      if (found) {
+        var error = new Error('rmdir cannot remove an asset = '+name);
+        error.statusCode = 403;
+        return next(error);
+      } else { 
+        var error = new Error('could not find children['+uid+']');
+        error.statusCode = 404;
+        return next(error);
+      }
+  })
+}
 
 // add or return a child collection
 // this will acquire a lock on the collection, so it can either
@@ -94,7 +150,7 @@ Collection.prototype.mkdir = function(name,uid,cb) {
     var error = new Error('conflict with existing asset = '+name);
     error.statusCode = 403;
     return cb(error);
-  } else  this.lock(
+  } else  this.lock (
     function(err,asset,callback){
       if (err) return cb(err);
 
@@ -349,7 +405,7 @@ Collection.prototype.getAsset = function(_path, callback){
         cb(err);
       }
       var resource = asset.getResourceSync();
-      console.log('and resolved to resourceId='+resource.uuid)
+      console.log(' ... and resolved to resourceId='+resource.uuid)
       cb(err,resource);
     })
     

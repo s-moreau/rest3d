@@ -82,4 +82,25 @@ module.exports = function (server) {
   });
 
 
+    // rest3d post upload API
+  server.post(/^\/rest3d\/convert\/db.*/, function(req,res,next){
+    // need destination project and path
+
+    var handler = new Handler(req, res, next);
+    handler.db = existdb; 
+    handler.allowOrigin();
+
+    var params = req.url.stringAfter("db");
+
+    Collection.find(existdb,  params, function (err, result) {
+      // don't do that, especially if we are creating a new collecton
+      //if (result.collection.name==='/') return handler.handleError({message:'cannot put Assets at root',statusCode:400});
+      if (err) return handler.handleError(err);
+      handler.convert(result.path, result.assetpath); // see upload.js
+
+    })
+
+  });
+
+
 }

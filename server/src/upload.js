@@ -5,10 +5,13 @@ module.exports = function (server) {
   var formidable = require('formidable');
   var fs = require('fs');
   var Path = require('path');
-  var imageMagick = require('imagemagick');
 
-  var memoryStream = require('memorystream');
-  var request = require('request');
+  var mkdirp = require('mkdirp');
+
+  //var imageMagick = require('imagemagick');
+
+  //var memoryStream = require('memorystream');
+  //var request = require('request');
 
   var FileInfo = require('./fileinfo');
 
@@ -17,11 +20,13 @@ module.exports = function (server) {
 
   var Collection = require('./collection');
   var Resource = require('./resource');
+  var Asset = require('./asset');
 
   var Mime = require('mime');
 
-  var extend = require('./extend')
-  var toJSON = require('./tojson')
+  var extend = require('./extend');
+  var rmdirSync = require('./rmdir');
+
 
   Mime.define({
     'model/collada+xml': ['dae']
@@ -38,6 +43,7 @@ module.exports = function (server) {
   var tmpdb={};
   tmpdb.assets={};
   tmpdb.name = 'tmp';
+  tmpdb.noversioning = true; // no undo/versioning at all on database tmp
 
   tmpdb.root = null; // where we store each user root collection
 
@@ -47,47 +53,85 @@ module.exports = function (server) {
     tmpdb.assets[asset.uuid] = asset;
     cb(undefined,asset);
   }
-
   tmpdb.loadAsset = function(id,cb){
-    var result = tmpdb.assets[id];
-    result.database=tmpdb;
-    if (result)
-      cb(undefined, result)
+    // need to clone this guy !!
+    var res = tmpdb.assets[id];
+    if (!res) return cb('database[tmp] cannot find asset id='+id);
+
+    if (res.type === Collection.type)
+        res = extend(new Collection(),res);
+    else if (res.type === Asset.type)
+        res = extend(new Asset(),res);
     else
-      cb('database[tmp] cannot find asset id='+id)
+        res = extend(new Resource(),res);
+
+    res.database=tmpdb;
+    cb(undefined, res)
   }
- 
-  tmpdb.delAsset = function(asset,cb){
-    delete tmpdb.assets[asset.uuid];
-    // Garbage collection will collect asset if it is not referenced anywhere
-    cb(undefined, undefined);
+
+  // we don't have real locks on tmpdb
+  tmpdb.lockAsset = function(asset,cb){
+    tmpdb.loadAsset(asset.uuid,cb);
+  }
+
+  tmpdb.unlockAsset = function(asset,cb){
+    cb(undefined,asset);
   }
 
   tmpdb.getRoot = function(cb){
     cb(undefined, tmpdb.root);
   }
   
-  server.tmpBuffer = tmpdb;
+  var createTMP = function(req,res,next){
+    // create tmp folder for user
+    Collection.create(tmpdb,Path.join('/',req.session.sid), req.session.sid, function(err,collection){
+      if (err){
+        console.log('Could NOT create TMP folder for user='+req.session.sid)
+
+        next(err);
+      } 
+      else {
+        req.session.tmpdir=collection.uuid;
+        server.sessionManager.save(req.session.sid, req.session, next)
+
+        var path=Path.resolve(FileInfo.options.uploadDir,req.session.tmpdir);
+        mkdirp.sync(path);
+
+        console.log('Created TMP['+req.session.tmpdir+'] for session='+req.session.sid)
+
+      }
+    })
+  };
+
+  // make this function available to the session manager so it can delete the TMP folder
+  //   when it decides to delete the session
+  server.sessionManager.delTMP = function(uuid,cb) {
+    Collection.getroot(tmpdb,function(err,root){
+      if (err) return cb(err);
+
+       root.rmdir(uuid,function(err,res){
+         if (err) return cb(err);
+         // now for some violence
+         // we know this folder and content is not referenced by anybody, 
+         var path=Path.resolve(FileInfo.options.uploadDir,uuid);
+         rmdirSync(path);
+
+       console.log('Deleted TMP['+uuid+'] for session='+uuid)
+       })
+      
+    })
+  };
+
   // make sure we have a tmp folder for this user
   server.use(function(req,res,next){
     if (!req.session || !req.session.sid)
     return next(new Error('cannot find sid in upload::createTMP'))
-    if (!req.session.tmpdir) {
-      // create tmp folder for user
-      Collection.create(tmpdb,Path.join('/',req.session.sid), req.session.sid, function(err,collection){
-        if (err){
-          console.log('Could NOT create TMP folder for user='+req.session.sid)
-          next(err);
-        } 
-        else {
-          console.log('Created TMP for user='+req.session.sid)
-          req.session.tmpdir=collection.uuid;
-          server.sessionManager.save(req.session.sid, req.session, next)
-        }
-      })
-    } else
-    next();
+    if (!req.session.tmpdir) 
+      createTMP (req,res,next);
+    else
+      next();
   })
+
 
   // upload one or more files
   UploadHandler.prototype.post = function (collectionpath, assetpath) {
@@ -95,15 +139,15 @@ module.exports = function (server) {
     var form = new formidable.IncomingForm();
     var tmpFiles = [];
     var files = [];
-    var map = {}
+    //var map = {}
     var counter = 1;
 
   
     var finish = function (err, asset) {
       if (err) {
-        console.log('ERROR IN FINISH');
-        handler.handleError(err);
+        console.log('ERROR IN UPLOAD FINISH');
         counter = -1;
+        handler.handleError(err);
         return;
       }
       counter -= 1;
@@ -114,13 +158,6 @@ module.exports = function (server) {
         if (!counter)
           return handler.handleError({message:'post did not send any files', statusCode:400})
         files.forEach(function (fileInfo) {
-          //fileInfo.initUrls(handler.req);
-          var timeout = function (db) {
-            fileInfo.delete(db,function(){}); // no callback
-            console.log('timeout !! ' + fileInfo.name + ' was deleted');
-          }
-          setTimeout(timeout, 60 * 60 * 1000, handler.db);
-
           fileInfo.asset.get(function (err, res) {
             if (err) {
               if (counter != -1)
@@ -153,10 +190,11 @@ module.exports = function (server) {
     //form.uploadDir = FileInfo.options.tmpDir;
     form.on('fileBegin', function (name, file) {
 
+      // in case there is an abort, we can delete tmpFiles
       tmpFiles.push(file.path);
-      var fileInfo = new FileInfo(file, collectionpath, assetpath);
+      //var fileInfo = new FileInfo(file, collectionpath, assetpath);
       //fileInfo.safeName();
-      map[file.path] = fileInfo;
+      //map[file.path] = fileInfo;
       //files.push(fileInfo); -> this will happen later
 
     }).on('field', function (name, value) {
@@ -170,18 +208,8 @@ module.exports = function (server) {
             handler.handleError(error);
           else {
             // turn {asset} into fileInfos
-            var getFileInfos = function (results) {
-
-              if (results.fileInfo) 
-                files.push(results.fileInfo);
-
-              if (results.children) {
-                for (var i = 0; i < results.children.length; i++) {
-                  getFileInfos(results.children[i]);
-                }
-              }
-            };
-            getFileInfos(result);
+            files = files.concat(result);
+            
             finish(undefined);
           }
         });
@@ -202,32 +230,17 @@ module.exports = function (server) {
 
       if (file.size ===0) {
         // form did not send a valid file
-        return;
+        return finish({message:'form sent empty file',statusCode:400});
       }
-      var fileInfo = map[file.path];
-      fileInfo.size = file.size;
-      fileInfo.type = Mime.lookup(fileInfo.name);
-
 
       counter++; // so that 'end' does not finish
       //                                                              no jar
-      zipFile.unzipFile(handler, collectionpath, assetpath, fileInfo.name, fileInfo.path, null, function(error,result) {
+      zipFile.unzipFile(handler, collectionpath, assetpath, file.name, file.path, null, function(error,result) {
         if (error)
           finish(error);
         else {
-          // turn {asset} into fileInfos
-          var getFileInfos = function (results) {
-
-            if (results.fileInfo && results.fileInfo.asset) 
-              files.push(results.fileInfo);
-
-            if (results.children) {
-              for (var i = 0; i < results.children.length; i++) {
-                getFileInfos(results.children[i]);
-              }
-            }
-          };
-          getFileInfos(result);
+          files = files.concat(result);
+          
           finish(undefined);
         }
       });
@@ -394,16 +407,15 @@ module.exports = function (server) {
             } else {
 
               // let see if there is an asset there
-              console.log('upload, looking for asset at ' + res.path + ' name=' + res.assetpath);
+              console.log(' ... looking for asset at ' + res.path + ' name=' + res.assetpath);
 
               res.collection.getAsset(res.assetpath, function (err, asset) {
                 if (err) return handler.handleError(err);
                 if (!asset) return handler.handleError('get /tmp/ cannot find asset=' + res.assetpath);
                 
-                // TODO: replace with var url = handler.db.getUrl(asset.uuid);
-                var p = Path.resolve(FileInfo.options.uploadDir, asset.uuid);
-                console.log('sending file=' + p)
-                handler.sendFile(p,asset.type,asset.name);
+                var filename=Path.resolve(FileInfo.options.uploadDir, handler.req.session.tmpdir, asset.uuid);
+
+                handler.sendFile(filename,asset.type,asset.name);
               })
             }
           }
@@ -420,7 +432,7 @@ module.exports = function (server) {
     handler.allowOrigin();
     handler.db = tmpdb;
 
-    var params = req.url.split("/tmp")[1];
+    var params = req.url.stringAfter("/tmp");
 
 
     Collection.find(handler.db, Path.join('/', handler.sid, params), function (err, result) {
@@ -440,18 +452,35 @@ module.exports = function (server) {
     handler.allowOrigin();
     handler.db = tmpdb;
 
-    var params = req.url.split("/tmp")[1];
+    var params = req.url.stringAfter('/tmp');
     if (params.contains('?'))
       params = params.stringBefore('?');
     while (params.slice(-1) === '/') params = params.slice(0, -1);
 
     var uuid = req.query.uuid;
 
-
-
-    console.log('in GET tmp/ for asset=' + params)
-    console.log('in GET tmp/upload with path =' + uuid);
+    console.log('in GET tmp/ for asset=' + params + ' path= '+uuid)
 
     handler.get(params, req.query.uuid);
   });
+
+  // rest3d post upload API
+  server.post(/^\/rest3d\/convert\/tmp.*/, function (req, res, next) {
+
+    var handler = new UploadHandler(req, res, next);
+    handler.allowOrigin();
+    handler.db = tmpdb;
+
+    var params = req.url.stringAfter('/tmp');
+
+    Collection.find(handler.db, Path.join('/', handler.sid, params), function (err, result) {
+
+      console.log('res POST returned match =' + result.path + ' asset =' + result.assetpath);
+
+      handler.convert(result.path, result.assetpath);
+
+    })
+
+  });
+
 };

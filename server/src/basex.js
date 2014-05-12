@@ -307,8 +307,7 @@ module.exports = function (server) {
 
 server.get(/^\/rest3d\/db\/assets.*/,function(req, res, next) {
   
-
-  var asset = req.url.split("/assets/")[1];
+  var asset = req.url.stringAfter('/assets/');
   //if (asset !== undefined) asset = asset.toLowerCase()
   console.log('[assets] =['+asset+']');
 
