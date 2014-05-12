@@ -16,8 +16,9 @@ var rmdirSync =require('./rmdir');
 server.jobManager.addJob('convert', {
   concurrency: 100, //number of concurrent jobs ran at the same time, default 50 if not specified
   work: function (params) {          //The job
-      this.params = params,
-      this.dirname = uuid.v4(), //generate random/unique repository name
+      this.params = params;
+      console.log(params.files);
+      this.dirname = uuid.v4(); //generate random/unique repository name
       fs.mkdirSync(this.dirname); //create temporary folder for stocking assets to be converted
       fs.chmodSync(this.dirname, '777'); //set access mode R&W
       this.stderr = "error test"; //test to stock the sderr

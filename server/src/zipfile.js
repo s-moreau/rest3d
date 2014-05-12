@@ -231,15 +231,12 @@
         
         rmdirSync("tmp/"+folder);
         params.cb(err);
-        counter = -1;
+        counter--;
         there_was_an_error=true;
         return;
       }
-      counter -= 1;
-      if (counter === 0) {
-        rmdirSync("tmp/"+folder);
-        params.cb(undefined, files);
-      }
+      rmdirSync("tmp/"+folder);
+      params.cb(undefined, files);
     };
 
     var folder = params.handler.req.session.sid;
@@ -312,11 +309,11 @@
                         finish(err);
                       } else {
                         item.fileInfo = fileInfo;
-                        finish(undefined);
+                        //finish(undefined);
                       }
                     });
                   } else
-                    finish(undefined);
+                    //finish(undefined);
 
                   next();
            
@@ -324,6 +321,9 @@
             , errors: function (root, nodeStatsArray, next) {
                 next();
               }
+            , end: function(){
+              finish(undefined);
+            }
           }
         };
 
