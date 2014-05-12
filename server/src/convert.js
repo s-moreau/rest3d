@@ -11,9 +11,10 @@ var FileInfo = require('./fileinfo');
 var zipFile = require('./zipfile');
 var uuid = require('node-uuid');
 var fs = require('fs');
+var rmdirSync =require('./rmdir');
 
 server.jobManager.addJob('convert', {
-  concurrency: 25, //number of concurrent jobs ran at the same time, default 50 if not specified
+  concurrency: 100, //number of concurrent jobs ran at the same time, default 50 if not specified
   work: function (params) {          //The job
       this.params = params,
       this.dirname = uuid.v4(), //generate random/unique repository name
@@ -25,23 +26,6 @@ server.jobManager.addJob('convert', {
     }
 });
 server.jobManager.on('finish', function (job, worker) {
-
-    var deleteFolderRecursive = function(path) {
-    if( fs.existsSync(path) ) {
-      fs.readdirSync(path).forEach(function(file,index) {
-        var curPath = path + "/" + file;
-          if(fs.statSync(curPath).isDirectory()) { // recurse
-              deleteFolderRecursive(curPath);
-          } else { // delete file
-              fs.unlinkSync(curPath);
-          }
-      });
-      fs.rmdirSync(path);
-      worker.params.handler.handleResult("test convert done successfuly :D");
-    }
-};
-
-    console.log('finish job',job,worker);
     fs.writeFile(worker.dirname+"/stderr_"+worker.dirname, worker.stderr, function(err) { //create stderr log
     if(err) {
         console.log(err);
@@ -56,7 +40,8 @@ server.jobManager.on('finish', function (job, worker) {
         console.log("Log stdout conversion created");
     }
     });
-    deleteFolderRecursive(worker.dirname); //remove temporary directory
+    worker.params.handler.handleResult("Convert job finished");
+    //rmdirSync(worker.dirname); //remove temporary directory
   });
 
 UploadHandler.prototype.convert = function (collectionpath, assetpath) {
@@ -68,8 +53,7 @@ UploadHandler.prototype.convert = function (collectionpath, assetpath) {
     var counter = 1;
     var copyall = false;
 
-        var finish = function (err, asset) {
-      console.log('FINISH',err,asset,files);
+    var finish = function (err, asset) {
       if (err) {
         console.log('ERROR IN CONVERT FINISH');
         counter = -1;
@@ -80,48 +64,22 @@ UploadHandler.prototype.convert = function (collectionpath, assetpath) {
 
       // // here start conversion, and then call fileInfo.upload on converted files
       // // check copyall
-      if (counter === 0) {
       
         var results = [];
-        counter = files.length;
-        // if (!counter)
-        //   return handler.handleError({message:'post did not send any files', statusCode:400})
+        if (files.length==0){
+          return handler.handleError({message:'post did not send any files', statusCode:400});
+        }
+        files.forEach(function (fileInfo) {
+          //fileInfo.initUrls(handler.req);
+          var timeout = function (db) {
+            fileInfo.delete(db,function(){}); // no callback
+            console.log('timeout !! ' + fileInfo.name + ' was deleted');
+          }
+          setTimeout(timeout, 60 * 60 * 1000, handler.db);
+        });
         server.jobManager.enqueue('convert', {'files':files,'handler':handler}); //Call convert job
-        // files.forEach(function (fileInfo) {
-        //   //fileInfo.initUrls(handler.req);
-        //   var timeout = function (db) {
-        //     fileInfo.delete(db,function(){}); // no callback
-        //     console.log('timeout !! ' + fileInfo.name + ' was deleted');
-        //   }
-        //   setTimeout(timeout, 60 * 60 * 1000, handler.db);
-
-        //   fileInfo.asset.get(function (err, res) {
-        //     if (err) {
-        //       if (counter != -1)
-        //         handler.handleError(err);
-        //       counter = -1;
-        //       return
-        //     } else {
-        //       res.assetpath = fileInfo.assetpath;
-        //       res.collectionpath = fileInfo.collectionpath;
-        //       // remove sid from collectionpath for database tmp
-        //       if (res.database === 'tmp') {
-        //         if (res.collectionpath.contains('/'))
-        //           res.collectionpath = res.collectionpath.stringAfter('/')
-        //         else
-        //           res.collectionpath = "";
-        //       } else 
-        //         res 
-        //       results.push(res)
-        //       counter--;
-        //       if (counter == 0)
-        //         handler.handleResult(results);
-        //     }
-        //   })
-
-        // });
-      
-      }
+        
+    
     };
 
      //form.uploadDir = FileInfo.options.tmpDir;
@@ -141,72 +99,82 @@ UploadHandler.prototype.convert = function (collectionpath, assetpath) {
         // counter++; -> getting all files at once
         //                                                      no jar
         counter++; // one more result to POST
-        zipFile.getAssetInfoUrl(handler, value,null, function(error,result) {
+        zipFile.getAssetInfoUrl(handler, value,undefined, function(error,result) {
           if (error)
             handler.handleError(error);
           else {
-            // turn {asset} into fileInfos
-            var getFileInfos = function (results) {
-
-              if (results.fileInfo) 
-                files.push(results.fileInfo);
-
-              if (results.children) {
-                for (var i = 0; i < results.children.length; i++) {
-                  getFileInfos(results.children[i]);
-                }
-              }
-            };
-            getFileInfos(result);
+            files.push(result);
             finish(undefined);
           }
         });
+        // zipFile.unzipUrl(handler, "", "", value, null, function(error,result) {
+        //   if (error)
+        //     handler.handleError(error);
+        //   else {
+        //     // turn {asset} into fileInfos
+        //     var getFileInfos = function (results) {
+
+        //       if (results.fileInfo) 
+        //         files.push(results.fileInfo);
+
+        //       if (results.children) {
+        //         for (var i = 0; i < results.children.length; i++) {
+        //           getFileInfos(results.children[i]);
+        //         }
+        //       }
+        //     };
+        //     getFileInfos(result);
+        //     finish(undefined);
+        //   }
+        // });
       } 
     }).on('file', function (name, file) {
 
-      if (file.size ===0) {
-        // form did not send a valid file
-        return;
-      }
-      var fileInfo = map[file.path];
-      fileInfo.size = file.size;
-      fileInfo.type = Mime.lookup(fileInfo.name);
+      // if (file.size ===0) {
+      //   // form did not send a valid file
+      //   return;
+      // }
+      // var fileInfo = map[file.path];
+      // fileInfo.size = file.size;
+      // fileInfo.type = Mime.lookup(fileInfo.name);
 
 
-      counter++; // so that 'end' does not finish
-      //                                                              no jar
-      zipFile.getAssetInfoFile(handler, collectionpath, assetpath, fileInfo.name, fileInfo.path, null, function(error,result) {
-        if (error)
-          finish(error);
-        else {
-          // turn {asset} into fileInfos
-          var getFileInfos = function (results) {
+      // counter++; // so that 'end' does not finish
+      // //                                                              no jar
+      // zipFile.getAssetInfoFile(handler, collectionpath, assetpath, fileInfo.name, fileInfo.path, null, function(error,result) {
+      //   if (error)
+      //     finish(error);
+      //   else {
+      //     // turn {asset} into fileInfos
+      //     var getFileInfos = function (results) {
 
-            if (results.fileInfo && results.fileInfo.asset) 
-              files.push(results.fileInfo);
+      //       if (results.fileInfo && results.fileInfo.asset) 
+      //         files.push(results.fileInfo);
 
-            if (results.children) {
-              for (var i = 0; i < results.children.length; i++) {
-                getFileInfos(results.children[i]);
-              }
-            }
-          };
-          getFileInfos(result);
-          // finish(undefined);
-        }
-      });
+      //       if (results.children) {
+      //         for (var i = 0; i < results.children.length; i++) {
+      //           getFileInfos(results.children[i]);
+      //         }
+      //       }
+      //     };
+      //     getFileInfos(result);
+      //     // finish(undefined);
+      //   }
+      // });
 
     }).on('aborted', function () {
       tmpFiles.forEach(function (file) {
         fs.unlinkSync(file);
       });
     }).on('error', function (e) {
-      finish({message:'Could not parse form', statusCode:400});
+      finish({message:'NONO, Could not parse form', statusCode:400});
     }).on('progress', function (bytesReceived, bytesExpected) {
       if (bytesReceived > FileInfo.options.maxPostSize) {
         handler.req.connection.destroy();
       }
-    }).on('end', finish);
+    }).on('end',function(){
+      console.log("form ended")
+    });
     form.parse(handler.req);
   };
 
