@@ -164,7 +164,7 @@ THE SOFTWARE.
             <input type="submit" />send files to db
           </form>
         </li>
-      </ul>
+      
 
 
         <li>
@@ -184,7 +184,7 @@ THE SOFTWARE.
           <input type="submit"/> create new collection at path
         </form>
       </li>
-
+      </ul>
 
       <h3> upload / glFT convert demo </h3>
       <ul>
@@ -298,35 +298,59 @@ THE SOFTWARE.
 
     <h3> Convert </h3>
     <h4> tmp </h4>
+      <ul>
       <li>
-          <form id='convert-tmp-file' action="/rest3d/convert/tmp" enctype="application/x-www-form-urlencoded" method="POST">
-            [POST URL] /rest3d/convert/tmp
+          <form id='convert-tmp-file' action="/rest3d/convert/tmp/" enctype="application/x-www-form-urlencoded" method="POST">
+            [POST URL] /rest3d/convert/tmp/
+            <input type="text" size="40" value="" onkeyup="document.getElementById('convert-tmp-file').action = '/rest3d/convert/tmp/'+this.value;"/>
             <input id="url" size="150" name="url" value="http://timenewsfeed.files.wordpress.com/2013/05/duckband.jpg?w=753" />
             <input type="submit"  />send url to convert(single file example)
           </form>
         </li>
         <li>
-        <form id='convert-tmp-zip' action="/rest3d/convert/tmp" enctype="application/x-www-form-urlencoded" method="POST">
-          [POST URL] /rest3d/convert/tmp
+        <form id='convert-tmp-zip' action="/rest3d/convert/tmp/" enctype="application/x-www-form-urlencoded" method="POST">
+          [POST URL] /rest3d/convert/tmp/
+          <input type="text" size="40" value="" onkeyup="document.getElementById('convert-tmp-zip').action = '/rest3d/convert/tmp/'+this.value;"/>
           <input id="url" size="150" name="url" value="https://3dwarehouse.sketchup.com/3dw/getbinary?subjectId=ac9c3413d59e8e4a7f7fbfb94ac070c5&subjectClass=entity&name=k2" />
           <input type="submit"  />send url to convert(zip file example)
         </form>
        </li>
+        <li>
+          <form id='convert-tmp-file2' action="/rest3d/convert/tmp/" enctype="multipart/form-data" method="POST">
+            [POST files] /rest3d/convert/tmp/
+            <input type="text" size="40" value="" onkeyup="document.getElementById('convert-tmp-file2').action = '/rest3d/convert/tmp/'+this.value;"/>
+            <input type="file" name="upload" multiple="multiple" />
+            <input type="submit"  />send files to upload
+          </form>
+        </li>
+        </ul>
        <h4> db </h4>
+       <ul>
        <li>
         <form id='convert-db-file' action="/rest3d/convert/db" enctype="application/x-www-form-urlencoded" method="POST">
-            [POST URL] /rest3d/convert/db
+            [POST URL] /rest3d/convert/db/
+            <input type="text" size="40" value="" onkeyup="document.getElementById('convert-db-file').action = '/rest3d/convert/db/'+this.value;"/>
             <input id="url" size="150" name="url" value="http://timenewsfeed.files.wordpress.com/2013/05/duckband.jpg?w=753" />
             <input type="submit"  />send url to convert(single file example)
           </form>
         </li>
         <li>
         <form id='convert-db-zip' action="/rest3d/convert/db" enctype="application/x-www-form-urlencoded" method="POST">
-          [POST URL] /rest3d/convert/db
+          [POST URL] /rest3d/convert/db/
+          <input type="text" size="40" value="" onkeyup="document.getElementById('convert-db-zip').action = '/rest3d/convert/db/'+this.value;"/>
           <input id="url" size="150" name="url" value="https://3dwarehouse.sketchup.com/3dw/getbinary?subjectId=ac9c3413d59e8e4a7f7fbfb94ac070c5&subjectClass=entity&name=k2" />
           <input type="submit"  />send url to convert(zip file example)
         </form>
-         </li>
+        </li>
+        <li>
+          <form id='convert-db-file2' action="/rest3d/convert/db/" enctype="multipart/form-data" method="POST">
+            [POST files] /rest3d/convert/tmp/
+            <input type="text" size="40" value="" onkeyup="document.getElementById('convert-db-file2').action = '/rest3d/convert/db/'+this.value;"/>
+            <input type="file" name="upload" multiple="multiple" />
+            <input type="submit"  />send files to upload
+          </form>
+        </li>
+         </ul>
     <div style="display: hidden" />
   </div>
 
