@@ -236,6 +236,10 @@
 
 
     try {
+      // var a = fs.existsSync(params.filename);
+      // fs.chmodSync('cache', '777');
+      // fs.chmodSync('cache/3dw', '777');
+      // fs.chmodSync('cache/3dw/getbinary', '777');
       var data = fs.readFileSync(params.filename);
       var reader = zip.Reader(data);
       var there_was_an_error = false;
@@ -245,8 +249,9 @@
         if (there_was_an_error) return;
         
         var filename = entry.getName();
-        var currentpath = Path.join(params.name,params.assetpath) || "";
-       
+        if(params.assetpath){
+          var currentpath = Path.join(params.name,params.assetpath);}
+        else{var currentpath="";}
         var path = filename;
         var index = path.indexOf('/'); // where to cut
         var file = path; // currenly considered item in the path
@@ -317,7 +322,7 @@
 
     } catch (e) {
  
-        console.log("error in unzip - assuming this is not a zip file");
+        console.log(e,"error in unzip - assuming this is not a zip file");
 
         var item = {
             name: params.name,

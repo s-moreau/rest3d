@@ -291,7 +291,7 @@ server.get(/^\/rest3d\/info/, function (req, res, next) {
                     tmp = tmp[2]; 
                     if(tmp){
                         if(tmp.split("db").length==2&&server.db==null){
-                            route.splice(i, 1);//delete db get routes because the database haven't been detected
+                            route.splice(i, 1);//delete db get routes because the database hasn't been detected
                         }
                         else if(tmp.split(".*").length==2){
                             this.name = tmp.split(".*").join("");
