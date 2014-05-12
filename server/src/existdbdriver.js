@@ -82,6 +82,7 @@ exports.getData = function(asset, cb) {
       });
 };
 
+var lockcb = {};
 // this locks an asset, waiting forever for lock to be available
 var lockAsset = exports.lockAsset = function(asset,cb, _n){
 
@@ -92,6 +93,17 @@ var lockAsset = exports.lockAsset = function(asset,cb, _n){
   lockKey(asset.parentId,'assets',asset.uuid, function(err,res){
     if (err){
       if (err.statusCode === 423){
+        if (!lockcb[asset.uuid]) lockcb[asset.uuid] = [];
+        console.log('asset = '+asset.uuid+' already locked ('+n+')-> adding to queue')
+
+
+        lockcb[asset.uuid].push(function(){
+          console.log('giving control of asset['+asset.uuid+'] lock');
+          lockAsset(asset,cb,n+1);
+        });
+        return;
+/*
+        
         // try again later
         if (n===100){
           // let's give it the lock, and try again
@@ -101,10 +113,11 @@ var lockAsset = exports.lockAsset = function(asset,cb, _n){
           })
         } else {
           console.log('asset ['+asset.uuid+'] ='+asset.name+' is locked - trying again('+(n+1)+')');
-          var delta = Math.random() * (n/10) + 1;
-          console.log('trying again in '+delta+' seconds')
-          return setTimeout(function() {lockAsset(asset,cb,n+1)},1000*delta);
+          
+          return setImmediate(function() {lockAsset(asset,cb,n+1)});
         }
+        */
+        
       } 
       console.log('database[eXist] cannot find asset id='+asset.uuid);
       return cb(err);
@@ -134,8 +147,19 @@ var unlockAsset = exports.unlockAsset = function(asset,cb){
 
   unlockKey(asset.parentId,'assets',asset.uuid, function(err,garbage){
     if (err) return cb(err);
+    
+      // give lock to next in the list on next process tick
+      
+    if (lockcb[asset.uuid] && lockcb[asset.uuid].length) {
+      console.log(' -- unlock count ='+lockcb[asset.uuid].length)
+      setImmediate(lockcb[asset.uuid].pop());
+    } 
+    
+    // then this callback
     cb(undefined,asset);
+    
   });
+
 }
 
 // If the asset cannot be saved, because it is locked or otherwise

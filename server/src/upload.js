@@ -208,18 +208,8 @@ module.exports = function (server) {
             handler.handleError(error);
           else {
             // turn {asset} into fileInfos
-            var getFileInfos = function (results) {
-
-              if (results.fileInfo) 
-                files.push(results.fileInfo);
-
-              if (results.children) {
-                for (var i = 0; i < results.children.length; i++) {
-                  getFileInfos(results.children[i]);
-                }
-              }
-            };
-            getFileInfos(result);
+            files = files.concat(result);
+            
             finish(undefined);
           }
         });
@@ -240,13 +230,8 @@ module.exports = function (server) {
 
       if (file.size ===0) {
         // form did not send a valid file
-        return;
+        return finish({message:'form sent empty file',statusCode:400});
       }
-      //var fileInfo = map[file.path];
-      //var fileInfo = new FileInfo(file, collectionpath, assetpath);
-      //fileInfo.size = file.size;
-      //fileInfo.type = Mime.lookup(fileInfo.name);
-
 
       counter++; // so that 'end' does not finish
       //                                                              no jar
@@ -254,19 +239,8 @@ module.exports = function (server) {
         if (error)
           finish(error);
         else {
-          // turn {asset} into fileInfos
-          var getFileInfos = function (results) {
-
-            if (results.fileInfo && results.fileInfo.asset) 
-              files.push(results.fileInfo);
-
-            if (results.children) {
-              for (var i = 0; i < results.children.length; i++) {
-                getFileInfos(results.children[i]);
-              }
-            }
-          };
-          getFileInfos(result);
+          files = files.concat(result);
+          
           finish(undefined);
         }
       });
@@ -489,4 +463,24 @@ module.exports = function (server) {
 
     handler.get(params, req.query.uuid);
   });
+
+  // rest3d post upload API
+  server.post(/^\/rest3d\/convert\/tmp.*/, function (req, res, next) {
+
+    var handler = new UploadHandler(req, res, next);
+    handler.allowOrigin();
+    handler.db = tmpdb;
+
+    var params = req.url.stringAfter('/tmp');
+
+    Collection.find(handler.db, Path.join('/', handler.sid, params), function (err, result) {
+
+      console.log('res POST returned match =' + result.path + ' asset =' + result.assetpath);
+
+      handler.convert(result.path, result.assetpath);
+
+    })
+
+  });
+
 };

@@ -239,6 +239,9 @@
       // make an asset out of this fileInfo
       // create a uuid
 
+      if (fileInfo.collectionpath ==='')
+        return cb({message:'forbiddern to store an asset at root of database',statusCode:403});
+
       fileInfo.toAsset(handler.db,handler.sid, function(err,asset) {
         if (err) return cb(err);
 

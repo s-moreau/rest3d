@@ -1,8 +1,5 @@
 'use strict';
 
-
-
-  var zip = require('zip');
   var fs = require('fs');
 
   var request = require('request');
@@ -16,6 +13,9 @@
   var zipFile = {};
   zipFile.diskcache = null;
 
+  var walk = require('walk');
+  var rmdirSync = require('./rmdir')
+ 
   // request file from url, with otional jar, 
   // then unzip, and then call cb with assetInfo
   zipFile.getAssetInfoUrl = function (handler, url, jar, cb) {
@@ -216,11 +216,130 @@
       id: 'params.uid',
       url: params.url
     };
+    var folder = params.handler.req.session.sid;
 
     var counter = 0;
+
+    var there_was_an_error=false;
+
+    var files = []; // retuns an array of fileInfos;
+
+    var finish = function (err, rest3d_asset) {
+      if (there_was_an_error) return;
+      if (err) {
+        console.log('ERROR IN ZIPFILE FINISH');
+        
+        rmdirSync("tmp/"+folder);
+        params.cb(err);
+        counter = -1;
+        there_was_an_error=true;
+        return;
+      }
+      counter -= 1;
+      if (counter === 0) {
+        rmdirSync("tmp/"+folder);
+        params.cb(undefined, files);
+      }
+    };
+
+    var folder = params.handler.req.session.sid;
+    var cmd = 'unzip '+params.filename+' -x Thumbs.db .DS_Store .Trashes __MACOSX/* -d tmp/'+folder;
+    console.log('exec ['+cmd+']');
+    exec(cmd, function(code, output){
+      if (code === 9){
+         console.log("error in unzip - assuming this is not a zip file");
+
+        var item = {
+            name: params.name,
+            path: params.filename 
+            // size and type will be created by new FileInfo()
+        };
+        var fileInfo = new FileInfo(item, params.collectionpath, params.assetpath);
+        item.fileInfo = fileInfo;
+        counter ++;
+        asset = {name:params.name, path:params.filename, type:fileInfo.type};
+
+        fileInfo.donotmove = params.donotmove;
+        files.push(fileInfo);
+
+        if (!params.dryrun) {
+           fileInfo.upload(params.handler, function(err,rest_asset){
+             asset.fileInfo = fileInfo;
+             finish(err,rest_asset);
+           });
+        } else
+          finish(undefined);
+      } else if (code) {
+        console.log('Exit code:', code);
+        console.log('Program output:', output);
+        return finish('unzip exit code ='+code+' output='+output);
+      } else {
+      // now march the folder structure and upload files to database
+        var options = {
+          listeners: {
+              names: function (root, nodeNamesArray) {
+                /*
+                nodeNamesArray.sort(function (a, b) {
+                  if (a > b) return 1;
+                  if (a < b) return -1;
+                  return 0;
+                });
+                */
+              }
+            , directories: function (root, dirStatsArray, next) {
+                // dirStatsArray is an array of `stat` objects with the additional attributes
+                // * type
+                // * error
+                // * name
+                
+                next();
+              }
+            , file: function (root, fileStats, next) {
+                
+                  var item = {
+                    name: fileStats.name,
+                    path: Path.join(root,fileStats.name)
+                  };
+                  var currentpath = Path.join(root.stringAfter(folder),fileStats.name);
+                  if (currentpath[0] ==='/') currentpath = currentpath.substring(1);
+                  var fileInfo = new FileInfo(item, params.collectionpath, currentpath);
+
+                  files.push(fileInfo);
+                  counter++;
+                  if (!params.dryrun) {
+                     fileInfo.upload(params.handler, function(err,rest_asset){
+                      if (err) {
+                        finish(err);
+                      } else {
+                        item.fileInfo = fileInfo;
+                        finish(undefined);
+                      }
+                    });
+                  } else
+                    finish(undefined);
+
+                  next();
+           
+              }
+            , errors: function (root, nodeStatsArray, next) {
+                next();
+              }
+          }
+        };
+
+        walk.walkSync("tmp/"+folder, options);
+      }
+        
+    });
+    // I could not make the following work with large ZIP files
+/*
+    var counter = 1; // event 'close' will sent last counter--
     var files=[];
+
+    var there_was_an_error = false;
     
     var finish = function (err, rest3d_asset) {
+      if (there_was_an_error) return;
       if (err) {
         console.log('ERROR IN ZIPFILE FINISH');
         //params.handler.handleError(err);
@@ -234,90 +353,110 @@
 
     };
 
+    var readStream = fs.createReadStream(params.filename);
+    fs.createReadStream(params.filename)
+     .pipe(zip.Parse({verbose:true}))
+     .on('entry', function (entry) {
+        console.log('entry ='+entry.path)
 
-    try {
-      var data = fs.readFileSync(params.filename);
-      var reader = zip.Reader(data);
-      var there_was_an_error = false;
+        if (entry.type === 'Directory') return; // 'Directory' or 'File'
+        var filename = entry.path;
+        // entry.size;
+        if (filename === "I don't care for that file") {
+          entry.autodrain();
+        } else {
 
-      // note: this will throw an error if this is not a zip file
-      reader.forEach(function (entry) {
-        if (there_was_an_error) return;
-        
-        var filename = entry.getName();
-        var currentpath = Path.join(params.name,params.assetpath) || "";
-       
-        var path = filename;
-        var index = path.indexOf('/'); // where to cut
-        var file = path; // currenly considered item in the path
-        var folder = asset; // were we are at in the {asset}
+          var path = filename;
+          var currentpath = Path.join(params.name,params.assetpath) || "";
+          var index = path.indexOf('/'); // where to cut
+          var file = path; // currenly considered item in the path
+          var folder = asset; // were we are at in the {asset}
 
-        while (index > 0) {
-          file = path.substring(0, index);
+          while (index > 0) {
+            file = path.substring(0, index);
 
-          if (currentpath !== '')
-            currentpath += '/' + file;
-          else
-            currentpath = file;
+            if (currentpath !== '')
+              currentpath += '/' + file;
+            else
+              currentpath = file;
 
-          if (!folder.children) folder.children = [];
-          var test = null;
-          for (var i = 0; i < folder.children.length; i++) {
-            if (folder.children[i].name === file) {
-              test = folder.children[i];
-              break;
-            }
-          };
-          if (!test) {
-            test = {
-              name: file,
-              type: 'folder',
-              path: currentpath
-            };
-            folder.children.push(test);
-          }
-          folder = test;
-          path = path.substring(index + 1);
-          index = path.indexOf('/');
-        }
-        if (path.length !== 0) {
-          var fullpath = currentpath + '/' + path;
-          if (currentpath === '') fullpath = path;
-          var item = {
-            name: path
-            //size: entry._header.uncompressed_size,
-            //type: Mime.looku
-          };
-         
-          if (!folder.children) folder.children = [];
-          folder.children.push(item);
-          if (path.toLowerCase().endsWith('.dae'))
-            asset.dae = filename;
-
-          // file -> name, path, optional:size, type, not used: hash, lastModifiedDate)
-
-          var fileInfo = new FileInfo(item, params.collectionpath, currentpath);
-          console.log('fileInfo Item.size'+item.size)
-          fileInfo.buffer = entry.getData();
-          files.push(fileInfo);
-          counter++;
-          if (!params.dryrun) {
-             fileInfo.upload(params.handler, function(err,rest_asset){
-              if (err) {
-                params.cb(err);
-                there_was_an_error=true;
-              } else {
-                item.fileInfo = fileInfo;
-                finish(undefined);
+            if (!folder.children) folder.children = [];
+            var test = null;
+            for (var i = 0; i < folder.children.length; i++) {
+              if (folder.children[i].name === file) {
+                test = folder.children[i];
+                break;
               }
-            });
-          } else
-            finish(undefined);
-        }
-      });
+            };
+            if (!test) {
+              test = {
+                name: file,
+                type: 'folder',
+                path: currentpath
+              };
+              folder.children.push(test);
+            }
+            folder = test;
+            path = path.substring(index + 1);
+            index = path.indexOf('/');
+          }
+          if (path.length !== 0) {
+            var fullpath = currentpath + '/' + path;
+            if (currentpath === '') fullpath = path;
+            var item = {
+              name: path
+              //size: entry._header.uncompressed_size,
+              //type: Mime.looku
+            };
+           
+            if (!folder.children) folder.children = [];
+            folder.children.push(item);
+            if (path.toLowerCase().endsWith('.dae'))
+              asset.dae = filename;
 
-    } catch (e) {
- 
+            // file -> name, path, optional:size, type, not used: hash, lastModifiedDate)
+
+            var fileInfo = new FileInfo(item, params.collectionpath, currentpath);
+            //entry.pipe(fs.createWriteStream('output/path'));
+            fileInfo.buffer = new Buffer(entry.size);
+            //entry.pipe(fileInfo.buffer);
+            
+            var data=[];
+            entry
+            .on('data',function(chuck){
+              data.push(chuck);
+            })
+            .on('error', function(err){
+              var error=new Error('error in reading stream in zipFile')
+              console.log(error);
+              finish(error)
+            })
+            .on('finish', function(a){
+                console.log('got finish event '+a)
+            })
+            .on('end',function(){
+              
+              fileInfo.buffer = Buffer.concat(data);
+
+              files.push(fileInfo);
+              counter++;
+              if (!params.dryrun) {
+                 fileInfo.upload(params.handler, function(err,rest_asset){
+                  if (err) {
+                    there_was_an_error=true;
+                    params.cb(err);
+                  } else {
+                    item.fileInfo = fileInfo;
+                    finish(undefined);
+                  }
+                });
+              } else
+                finish(undefined);
+            })
+          }
+        }
+     })
+     .on('error', function(err){
         console.log("error in unzip - assuming this is not a zip file");
 
         var item = {
@@ -332,7 +471,7 @@
         asset = {name:params.name, path:params.filename, type:fileInfo.type};
 
         fileInfo.donotmove = params.donotmove;
-        counter++;
+
         if (!params.dryrun) {
            fileInfo.upload(params.handler, function(err,rest_asset){
              asset.fileInfo = fileInfo;
@@ -340,7 +479,11 @@
            });
         } else
           finish(undefined);
-    }
+     })
+     .on('close', function(){
+        finish(undefined);
+     });
+*/
   }
 
   module.exports = zipFile;

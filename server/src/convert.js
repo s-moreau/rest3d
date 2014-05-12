@@ -211,44 +211,4 @@ UploadHandler.prototype.convert = function (collectionpath, assetpath) {
   };
 
 
-  // rest3d post upload API
-  server.post(/^\/rest3d\/convert\/tmp.*/, function (req, res, next) {
-
-    var handler = new UploadHandler(req, res, next);
-    handler.allowOrigin();
-    handler.db = server.tmpBuffer;
-
-    var params = req.url.stringAfter('/tmp');
-
-    Collection.find(handler.db, Path.join('/', handler.sid, params), function (err, result) {
-
-      console.log('res POST returned match =' + result.path + ' asset =' + result.assetpath);
-
-      handler.convert(result.path, result.assetpath);
-
-    })
-
-  });
-
-    // rest3d post upload API
-  server.post(/^\/rest3d\/convert\/db.*/, function(req,res,next){
-    // need destination project and path
-
-    var handler = new Handler(req, res, next);
-    handler.db = existdb; 
-    handler.allowOrigin();
-
-    var params = req.url.stringAfter("db");
-
-    Collection.find(existdb,  params, function (err, result) {
-      // don't do that, especially if we are creating a new collecton
-      //if (result.collection.name==='/') return handler.handleError({message:'cannot put Assets at root',statusCode:400});
-      if (err) return handler.handleError(err);
-      handler.convert(result.path, result.assetpath); // see upload.js
-
-    })
-
-  });
-
-
 }
