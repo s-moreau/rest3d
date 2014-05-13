@@ -60,7 +60,6 @@ server.jobManager.addJob('convert', {
                   stock.stderr += error.code + '\n';
                   stock.stderr += error.signal + '\n';
                 }
-                
               });
               ls.on('exit', function (code, output) {
                 console.log('Child process exited with exit code ' + code );
@@ -80,10 +79,12 @@ server.jobManager.addJob('convert', {
                             fileInfoBis.upload(stock.params.handler, function(err,file){
                               if(err){
                                 stock.stderr += "upload "+file.name+" "+err+'\n';
+                                console.log("upload "+file.name+" "+err);
                               }
                               else{
                                 stock.result.push(file);
                                 stock.stdout += "uploaded "+file.name+'\n';
+                                console.log("uploaded "+file.name);
                               }
                             });
                             next();
@@ -102,10 +103,12 @@ server.jobManager.addJob('convert', {
               fileInfo.upload(stock.params.hander,function(err,file){
                 if(err){
                   stock.stderr += "upload "+file.name+" "+err+'\n';
+                  console.log("upload "+file.name+" "+err);
                 }
                 else{
                   stock.result.push(file);
                   stock.stdout += "uploaded "+file.name+'\n';
+                  console.log("uploaded "+file.name);
                 }
               })
             }
