@@ -20,7 +20,7 @@ server.jobManager.addJob('convert', {
   work: function (params) {          //The job
       this.params = params;
       this.dirname = uuid.v4(); //generate random/unique repository name
-      this.stderr = "", this.stdout = "", this.result=[];
+      this.stderr = "", this.stdout = "", this.result=[], this.timeout = 1000*60*5;
       this.writeLogs = function(){
          fs.writeFile(this.dirname+"/stderr_"+this.dirname, this.stderr+".log", function(err) { //create stderr log
           if(err) {
@@ -53,6 +53,10 @@ server.jobManager.addJob('convert', {
               var cmd = server.collada2gltf + " -p -f \"" + fileInfo.path + "\" -o \"" + output_path + "\"";
               console.log( "--> exec "+cmd);
               stock.stdout += "--> exec "+cmd+"\n";
+              var ls1 = childProcess.exec("cd "+output_path);
+              ls1.on('exit', function (code, output) {
+                console.log(code, output);
+              });
               var ls = childProcess.exec(cmd, function (error, stdout, stderr) {
                 if (error) {
                   console.log("error in convert: "+error.stack);
@@ -71,23 +75,23 @@ server.jobManager.addJob('convert', {
                   var options = {
                     listeners: {
                       file: function (root, fileStats, next) {
-                            var item = {
-                              name: fileStats.name,
-                              path: Path.join(root,fileStats.name)
-                            };
-                            var fileInfoBis = new FileInfo(item, stock.params.collectionpath, stock.params.assetpath);
-                            fileInfoBis.upload(stock.params.handler, function(err,file){
-                              if(err){
-                                stock.stderr += "upload "+file.name+" "+err+'\n';
-                                console.log("upload "+file.name+" "+err);
-                              }
-                              else{
-                                stock.result.push(file);
-                                stock.stdout += "uploaded "+file.name+'\n';
-                                console.log("uploaded "+file.name);
-                              }
-                            });
-                            next();
+                        var item = {
+                          name: fileStats.name,
+                          path: Path.join(root,fileStats.name)
+                        };
+                        var fileInfoBis = new FileInfo(item, stock.params.collectionpath, stock.params.assetpath);
+                        fileInfoBis.upload(stock.params.handler, function(err,file){
+                          if(err){
+                            stock.stderr += "upload "+file.name+" "+err+'\n';
+                            console.log("upload "+file.name+" "+err);
+                          }
+                          else{
+                            stock.result.push(file);
+                            stock.stdout += "uploaded "+file.name+'\n';
+                            console.log("uploaded "+file.name);
+                          }
+                        });
+                        next();
                         }
                       , errors: function (root, nodeStatsArray, next) {
                           next();
@@ -99,7 +103,9 @@ server.jobManager.addJob('convert', {
                 
               })
             }
+            console.log("copyall",stock.params.copyall);
             if(stock.params.copyall){
+
               fileInfo.upload(stock.params.hander,function(err,file){
                 if(err){
                   stock.stderr += "upload "+file.name+" "+err+'\n';
@@ -115,7 +121,7 @@ server.jobManager.addJob('convert', {
           });
         }
         stock.params.handler.handleResult(stock.dirname);
-        //stock.finished = true;
+        setTimeout(function(){stock.finished = true;},stock.timeout);
     })
       // var stock = this;
       // if(params.files[0][0].path.indexOf("tmp/")!==-1){ // if it is a file unziped in tmp, move files
