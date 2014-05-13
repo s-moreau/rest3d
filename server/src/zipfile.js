@@ -317,7 +317,8 @@
                     name: fileStats.name,
                     path: Path.join(root,fileStats.name)
                   };
-                  var assetpath = root.split(folder+'/').join("");
+                  var assetpath = root.split(folder).join("");
+                  if (assetpath[0] ==='/') assetpath = assetpath.substring(1);
                   var fileInfo = new FileInfo(item, params.collectionpath,assetpath);
 
                   files.push(fileInfo);
