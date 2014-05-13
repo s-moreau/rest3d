@@ -317,9 +317,8 @@
                     name: fileStats.name,
                     path: Path.join(root,fileStats.name)
                   };
-                  var currentpath = root.stringAfter(folder)+'/'+fileStats.name;
-                  if (currentpath[0] ==='/') currentpath = currentpath.substring(1);
-                  var fileInfo = new FileInfo(item, params.collectionpath, currentpath);
+                  var assetpath = root.split(folder).join("");
+                  var fileInfo = new FileInfo(item, params.collectionpath,assetpath);
 
                   files.push(fileInfo);
                   counter++;
