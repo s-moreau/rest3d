@@ -53,10 +53,6 @@ server.jobManager.addJob('convert', {
               var cmd = "cd "+output_path +" && "+server.collada2gltf + " -p -f \"" + fileInfo.path + "\" -o \"" + output_path + "\"";
               console.log( "--> exec "+cmd);
               stock.stdout += "--> exec "+cmd+"\n";
-              var ls1 = childProcess.exec();
-              ls1.on('exit', function (code, output) {
-                console.log(code, output);
-              });
               var ls = childProcess.exec(cmd, function (error, stdout, stderr) {
                 if (error) {
                   console.log("error in convert: "+error.stack);
