@@ -47,7 +47,7 @@ server.jobManager.addJob('convert', {
         else{
           files.forEach(function(fileInfo){
             if(fileInfo.type == "model/collada+xml"){
-              var output_path = fileInfo.path.stringBefore(".dae");
+              var output_path = fileInfo.path.stringBefore(".dae")+'/';
               fs.mkdirSync(output_path); 
               fs.chmodSync(output_path, '777');
               var cmd = server.collada2gltf + " -p -f \"" + fileInfo.path + "\" -o \"" + output_path + "\"";
@@ -63,7 +63,7 @@ server.jobManager.addJob('convert', {
                 
               });
               ls.on('exit', function (code, output) {
-                console.log('Child process exited with exit code ' + code +" "+output);
+                console.log('Child process exited with exit code ' + code );
                 stock.stdout += 'Child process exited with exit code ' + code+'\n';
                 if (code !== 0) {
                     stock.stderr += 'Child process exited with exit code '+code+'\n';
@@ -76,10 +76,8 @@ server.jobManager.addJob('convert', {
                               name: fileStats.name,
                               path: Path.join(root,fileStats.name)
                             };
-                            var fileInfo = new FileInfo(item, stock.params.collectionpath, stock.params.assetpath);
-                            files.push(fileInfo);
-                            counter++;
-                            fileInfo.upload(stock.params.handler, function(err,file){
+                            var fileInfoBis = new FileInfo(item, stock.params.collectionpath, stock.params.assetpath);
+                            fileInfoBis.upload(stock.params.handler, function(err,file){
                               if(err){
                                 stock.stderr += "upload "+file.name+" "+err+'\n';
                               }
