@@ -93,6 +93,22 @@ server.jobManager.addJob('convert', {
       this.params = params;
       this.dirname = uuid.v4(); //generate random/unique repository name
       this.stderr = "", this.stdout = "";
+      this.writeLogs = function(){
+         fs.writeFile(this.dirname+"/stderr_"+this.dirname, this.stderr+".log", function(err) { //create stderr log
+          if(err) {
+              console.log(err);
+          } else {
+              console.log("Log stderr conversion created");
+          }
+          }); 
+          fs.writeFile(this.dirname+"/stdout_"+this.dirname+".log", this.stdout, function(err) {//create stdout log
+          if(err) {
+              console.log(err);
+          } else {
+              console.log("Log stdout conversion created");
+          }
+          });
+      }
       fs.mkdirSync(this.dirname); //create temporary folder for stocking assets to be converted
       fs.chmodSync(this.dirname, '777'); //set access mode R&W
       var stock = this;
@@ -101,10 +117,10 @@ server.jobManager.addJob('convert', {
           stock.stderr += err + '\n';
         }
         else{
-          var originalFiles = files;
           files.forEach(function(fileInfo){
             if(fileInfo.type == "model/collada+xml"){
-              var output_path = fileInfo.path.split(".dae").join(".gltf");
+              var output_path = fileInfo.path.stringBefore('/'+fileInfo.name);
+              var origin = fs.readdirSync(output_path);
               var cmd = server.collada2gltf + " -p -f \"" + fileInfo.path + "\" -o \"" + output_path + "\"";
               console.log( "--> exec "+cmd);
               stock.stdout += "--> exec "+cmd+"\n";
@@ -119,15 +135,46 @@ server.jobManager.addJob('convert', {
               });
               ls.on('exit', function (code, output) {
                 console.log('Child process exited with exit code ' + code);
-                stock.stdout += 'Child process exited with exit code ' + code;
+                stock.stdout += 'Child process exited with exit code ' + code+'\n';
                 if (code !== 0) {
-                    stock.stderr += 'Child process exited with exit code '+code;
+                    stock.stderr += 'Child process exited with exit code '+code+'\n';
+                }
+                  var result = [];
+                  var over = fs.readdirSync(output_path);
+                  for(var i=0;i<over.length;i++){
+                    for(var j=0;j<origin.length;j++){
+                      if(over[i].name==origin[j].name){
+                        over.splice(i, 1);
+                      }
+                    }
+                  }
+                  over.forEach(function(file){
+                    var fileInfoOver = new FileInfo({name:file,path:output_path+'/'+name},stock.params.collectionpath,stock.params.assetpath);
+                    fileInfoOver.upload(stock.params.hander,function(err,file){
+                      if(err){
+                        stock.stderr += err+'\n';
+                      }
+                      else{
+                        result.push(file);
+                        stock.stdout += "uploaded "+file+'\n';
+                      }
+                    })
+                  })
+              })
+            }
+            if(stock.params.copyall){
+              fileInfo.upload(stock.params.hander,function(err,file){
+                if(err){
+                  stock.stderr += err+'\n';
+                }
+                else{
+                  result.push(file);
+                  stock.stdout += "uploaded "+file+'\n';
                 }
               })
             }
           });
         }
-
         //stock.finished = true;
     })
       // var stock = this;
@@ -141,22 +188,8 @@ server.jobManager.addJob('convert', {
     }
 });
 server.jobManager.on('finish', function (job, worker) {
-    fs.writeFile(worker.dirname+"/stderr_"+worker.dirname, worker.stderr+".log", function(err) { //create stderr log
-    if(err) {
-        console.log(err);
-    } else {
-        console.log("Log stderr conversion created");
-    }
-    }); 
-    fs.writeFile(worker.dirname+"/stdout_"+worker.dirname+".log", worker.stdout, function(err) {//create stdout log
-    if(err) {
-        console.log(err);
-    } else {
-        console.log("Log stdout conversion created");
-    }
-    });
     worker.params.handler.handleResult("Convert job finished");
-    //rmdirSync(worker.dirname); //remove temporary directory
+    rmdirSync(worker.dirname); //remove temporary directory
   });
 
 UploadHandler.prototype.convert = function (collectionpath, assetpath) {
