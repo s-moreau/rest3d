@@ -13,86 +13,14 @@ var uuid = require('node-uuid');
 var fs = require('fs');
 var rmdirSync =require('./rmdir');
 var childProcess = require('child_process');
-
-  // console.log(collada2gltf + " -p -f \"" + params.path + "\" -o \"" + output_path + "\"");
-  //           var cmd = collada2gltf + " -p -f \"" + params.path + "\" -o \"" + output_path + "\"";
-  //           var input_dir = params.path.replace(/[^\/]*$/, '');
-  //           output_dir = output_path.replace(/[^\/]*$/, '');
-  //       }
-  //       else {
-  //           // let's considered the model is stocked under rest3d/upload/ repository in case any path isn't specified
-  //           // the conversion will create a folder for stocking the gltf file
-  //           // CODE NOT TESTED, maybe get some conflicts for copying all textures to the gltf folder.
-  //           console.log("PART NOT TESTED YET")
-  //           var output_dir = params.name.split('\.')[0] + '_gltf';
-  //           var output_file = params.name.replace('.dae', '.json');
-  //           var output_path = 'upload/' + output_dir + '/' + output_file;
-  //           var cmd = collada2gltf + " -p -f \"upload/" + params.name + "\" -o \"" + output_path + "\"";
-  //           var input_dir = "upload/";
-  //           output_dir = output_path.replace(/[^\/]*$/, '');
-  //       }
-  //       console.log('exec ' + cmd);
-  //       // todo -> manage progress !!!
-  //       var outputC2J;
-  //       var codeC2J;
-  //       // todo -> manage progress !!!
-  //       var ls = childProcess.exec(cmd, function (error, stdout, stderr) {
-  //           if (error) {
-  //               console.log(error.stack);
-  //               //console.log('Error code: '+error.code);
-  //               //console.log('Signal received: '+error.signal);
-
-  //               handler.handleError({
-  //                   "code": error.code,
-  //                   "message": stderr
-  //               });
-
-  //           }
-  //           console.log('Child Process STDOUT: ' + stdout);
-  //           console.log('Child Process STDERR: ' + stderr);
-  //       });
-  //       ls.on('exit', function (code, output) {
-  //           console.log('Child process exited with exit code ' + code);
-  //           if (code !== 0) {
-  //               handler.handleError({
-  //                   errorCode: code,
-  //                   message: 'Child process exited with exit code '
-  //               });
-  //               return;
-  //           }
-  //           codeC2J = code;
-  //           outputC2J = output;
-  //           console.log('Exit code:', code);
-  //           console.log('Program output:', output);
-  //           // // hack, copy all images in the output_dir, so the viewer will work
-  //           var list = fs.readdirSync(input_dir);
-  //           list.forEach(function (name) {
-  //               var ext = name.match(/\.[^.]+$/);
-  //               console.log(name, ext);
-  //               if (ext !== null) {
-  //                   if (ext[0] !== '.json' && ext[0] !== '.dae') {
-  //                       copyFileSync(input_dir + name, output_dir + name);
-  //                       console.log(input_dir + name + '  TO  ' + output_dir + name);
-  //                   }
-  //               }
-  //               else {
-  //                   console.log("Folder detected");
-  //                   ncp(input_dir + name, output_dir + name, function (err) {
-  //                       if (err) {
-  //                           return console.error(err);
-  //                       }
-  //                       console.log(input_dir + name + '  TO  ' + output_dir + name);
-  //                   });
-  //               }
-  //           });
-
+var walk = require('walk');
 
 server.jobManager.addJob('convert', {
   concurrency: 100, //number of concurrent jobs ran at the same time, default 50 if not specified
   work: function (params) {          //The job
       this.params = params;
       this.dirname = uuid.v4(); //generate random/unique repository name
-      this.stderr = "", this.stdout = "";
+      this.stderr = "", this.stdout = "", this.result=[];
       this.writeLogs = function(){
          fs.writeFile(this.dirname+"/stderr_"+this.dirname, this.stderr+".log", function(err) { //create stderr log
           if(err) {
@@ -119,8 +47,9 @@ server.jobManager.addJob('convert', {
         else{
           files.forEach(function(fileInfo){
             if(fileInfo.type == "model/collada+xml"){
-              var output_path = fileInfo.path.stringBefore('/'+fileInfo.name);
-              var origin = fs.readdirSync(output_path);
+              var output_path = fileInfo.path.stringBefore(".dae");
+              fs.mkdirSync(output_path); 
+              fs.chmodSync(output_path, '777');
               var cmd = server.collada2gltf + " -p -f \"" + fileInfo.path + "\" -o \"" + output_path + "\"";
               console.log( "--> exec "+cmd);
               stock.stdout += "--> exec "+cmd+"\n";
@@ -139,43 +68,52 @@ server.jobManager.addJob('convert', {
                 if (code !== 0) {
                     stock.stderr += 'Child process exited with exit code '+code+'\n';
                 }
-                  var result = [];
-                  var over = fs.readdirSync(output_path);
-                  for(var i=0;i<over.length;i++){
-                    for(var j=0;j<origin.length;j++){
-                      if(over[i].name==origin[j].name){
-                        over.splice(i, 1);
-                      }
+                else{
+                  var options = {
+                    listeners: {
+                      file: function (root, fileStats, next) {
+                            var item = {
+                              name: fileStats.name,
+                              path: Path.join(root,fileStats.name)
+                            };
+                            var fileInfo = new FileInfo(item, stock.params.collectionpath, stock.params.assetpath);
+                            files.push(fileInfo);
+                            counter++;
+                            fileInfo.upload(stock.params.handler, function(err,file){
+                              if(err){
+                                stock.stderr += "upload "+file.name+" "+err+'\n';
+                              }
+                              else{
+                                stock.result.push(file);
+                                stock.stdout += "uploaded "+file.name+'\n';
+                              }
+                            });
+                            next();
+                        }
+                      , errors: function (root, nodeStatsArray, next) {
+                          next();
+                        }
                     }
-                  }
-                  console.log(over)
-                  over.forEach(function(file){
-                    var fileInfoOver = new FileInfo({name:file,path:output_path+'/'+name},stock.params.collectionpath,stock.params.assetpath);
-                    fileInfoOver.upload(stock.params.hander,function(err,file){
-                      if(err){
-                        stock.stderr += err+'\n';
-                      }
-                      else{
-                        result.push(file);
-                        stock.stdout += "uploaded "+file+'\n';
-                      }
-                    })
-                  })
+                  };
+                  walk.walkSync(output_path, options);
+                }
+                
               })
             }
             if(stock.params.copyall){
               fileInfo.upload(stock.params.hander,function(err,file){
                 if(err){
-                  stock.stderr += err+'\n';
+                  stock.stderr += "upload "+file.name+" "+err+'\n';
                 }
                 else{
-                  result.push(file);
-                  stock.stdout += "uploaded "+file+'\n';
+                  stock.result.push(file);
+                  stock.stdout += "uploaded "+file.name+'\n';
                 }
               })
             }
           });
         }
+        stock.params.handler.handleResult(stock.dirname);
         //stock.finished = true;
     })
       // var stock = this;
