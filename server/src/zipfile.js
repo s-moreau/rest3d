@@ -317,7 +317,7 @@
                     name: fileStats.name,
                     path: Path.join(root,fileStats.name)
                   };
-                  var currentpath = Path.join(root.stringAfter(folder),fileStats.name);
+                  var currentpath = root.stringAfter(folder)+'/'+fileStats.name;
                   if (currentpath[0] ==='/') currentpath = currentpath.substring(1);
                   var fileInfo = new FileInfo(item, params.collectionpath, currentpath);
 
