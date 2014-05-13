@@ -12,37 +12,143 @@ var zipFile = require('./zipfile');
 var uuid = require('node-uuid');
 var fs = require('fs');
 var rmdirSync =require('./rmdir');
+var childProcess = require('child_process');
+
+  // console.log(collada2gltf + " -p -f \"" + params.path + "\" -o \"" + output_path + "\"");
+  //           var cmd = collada2gltf + " -p -f \"" + params.path + "\" -o \"" + output_path + "\"";
+  //           var input_dir = params.path.replace(/[^\/]*$/, '');
+  //           output_dir = output_path.replace(/[^\/]*$/, '');
+  //       }
+  //       else {
+  //           // let's considered the model is stocked under rest3d/upload/ repository in case any path isn't specified
+  //           // the conversion will create a folder for stocking the gltf file
+  //           // CODE NOT TESTED, maybe get some conflicts for copying all textures to the gltf folder.
+  //           console.log("PART NOT TESTED YET")
+  //           var output_dir = params.name.split('\.')[0] + '_gltf';
+  //           var output_file = params.name.replace('.dae', '.json');
+  //           var output_path = 'upload/' + output_dir + '/' + output_file;
+  //           var cmd = collada2gltf + " -p -f \"upload/" + params.name + "\" -o \"" + output_path + "\"";
+  //           var input_dir = "upload/";
+  //           output_dir = output_path.replace(/[^\/]*$/, '');
+  //       }
+  //       console.log('exec ' + cmd);
+  //       // todo -> manage progress !!!
+  //       var outputC2J;
+  //       var codeC2J;
+  //       // todo -> manage progress !!!
+  //       var ls = childProcess.exec(cmd, function (error, stdout, stderr) {
+  //           if (error) {
+  //               console.log(error.stack);
+  //               //console.log('Error code: '+error.code);
+  //               //console.log('Signal received: '+error.signal);
+
+  //               handler.handleError({
+  //                   "code": error.code,
+  //                   "message": stderr
+  //               });
+
+  //           }
+  //           console.log('Child Process STDOUT: ' + stdout);
+  //           console.log('Child Process STDERR: ' + stderr);
+  //       });
+  //       ls.on('exit', function (code, output) {
+  //           console.log('Child process exited with exit code ' + code);
+  //           if (code !== 0) {
+  //               handler.handleError({
+  //                   errorCode: code,
+  //                   message: 'Child process exited with exit code '
+  //               });
+  //               return;
+  //           }
+  //           codeC2J = code;
+  //           outputC2J = output;
+  //           console.log('Exit code:', code);
+  //           console.log('Program output:', output);
+  //           // // hack, copy all images in the output_dir, so the viewer will work
+  //           var list = fs.readdirSync(input_dir);
+  //           list.forEach(function (name) {
+  //               var ext = name.match(/\.[^.]+$/);
+  //               console.log(name, ext);
+  //               if (ext !== null) {
+  //                   if (ext[0] !== '.json' && ext[0] !== '.dae') {
+  //                       copyFileSync(input_dir + name, output_dir + name);
+  //                       console.log(input_dir + name + '  TO  ' + output_dir + name);
+  //                   }
+  //               }
+  //               else {
+  //                   console.log("Folder detected");
+  //                   ncp(input_dir + name, output_dir + name, function (err) {
+  //                       if (err) {
+  //                           return console.error(err);
+  //                       }
+  //                       console.log(input_dir + name + '  TO  ' + output_dir + name);
+  //                   });
+  //               }
+  //           });
+
 
 server.jobManager.addJob('convert', {
   concurrency: 100, //number of concurrent jobs ran at the same time, default 50 if not specified
   work: function (params) {          //The job
       this.params = params;
       this.dirname = uuid.v4(); //generate random/unique repository name
+      this.stderr = "", this.stdout = "";
       fs.mkdirSync(this.dirname); //create temporary folder for stocking assets to be converted
       fs.chmodSync(this.dirname, '777'); //set access mode R&W
       var stock = this;
-      if(params.files[0][0].path.indexOf("tmp/")!==-1){ // if it is a file unziped in tmp, move files
-        params.files[0].forEach(function(fileInfo){
-          fs.createReadStream(fileInfo.path).pipe(fs.createWriteStream(stock.dirname+'/'+fileInfo.name));
-        })
-      }
-      else{  //Must be cache, copy
+      zipFile.unzipUrl(params.handler,params.collectionpath,params.assetpath,params.url,undefined,this.dirname,function(err,files){
+        if(err){
+          stock.stderr += err + '\n';
+        }
+        else{
+          var originalFiles = files;
+          files.forEach(function(fileInfo){
+            if(fileInfo.type == "model/collada+xml"){
+              var output_path = fileInfo.path.split(".dae").join(".gltf");
+              var cmd = server.collada2gltf + " -p -f \"" + fileInfo.path + "\" -o \"" + output_path + "\"";
+              console.log( "--> exec "+cmd);
+              stock.stdout += "--> exec "+cmd+"\n";
+              var ls = childProcess.exec(cmd, function (error, stdout, stderr) {
+                if (error) {
+                  console.log("error in convert: "+error.stack);
+                  stock.stderr += error.stack + '\n';
+                  stock.stderr += error.code + '\n';
+                  stock.stderr += error.signal + '\n';
+                }
+                
+              });
+              ls.on('exit', function (code, output) {
+                console.log('Child process exited with exit code ' + code);
+                stock.stdout += 'Child process exited with exit code ' + code;
+                if (code !== 0) {
+                    stock.stderr += 'Child process exited with exit code '+code;
+                }
+              })
+            }
+          });
+        }
 
-      }
-      this.stderr = "error test"; //test to stock the sderr
-      this.stdout = "out test"; //test to stock stdout
-      this.finished = true;
+        //stock.finished = true;
+    })
+      // var stock = this;
+      // if(params.files[0][0].path.indexOf("tmp/")!==-1){ // if it is a file unziped in tmp, move files
+      //   params.files[0].forEach(function(fileInfo){
+      //     fs.createReadStream(fileInfo.path).pipe(fs.createWriteStream(stock.dirname+'/'+fileInfo.name));
+      //   })
+      // }
+      // else{  //Must be cache, copy
+      //}
     }
 });
 server.jobManager.on('finish', function (job, worker) {
-    fs.writeFile(worker.dirname+"/stderr_"+worker.dirname, worker.stderr, function(err) { //create stderr log
+    fs.writeFile(worker.dirname+"/stderr_"+worker.dirname, worker.stderr+".log", function(err) { //create stderr log
     if(err) {
         console.log(err);
     } else {
         console.log("Log stderr conversion created");
     }
     }); 
-    fs.writeFile(worker.dirname+"/stdout_"+worker.dirname, worker.stdout, function(err) {//create stdout log
+    fs.writeFile(worker.dirname+"/stdout_"+worker.dirname+".log", worker.stdout, function(err) {//create stdout log
     if(err) {
         console.log(err);
     } else {
@@ -62,34 +168,34 @@ UploadHandler.prototype.convert = function (collectionpath, assetpath) {
     var counter = 1;
     var copyall = false;
 
-    var finish = function (err, asset) {
-      if (err) {
-        console.log('ERROR IN CONVERT FINISH');
-        counter = -1;
-        handler.handleError(err);
-        return;
-      }
-      counter -= 1;
+    // var finish = function (err, asset) {
+    //   if (err) {
+    //     console.log('ERROR IN CONVERT FINISH');
+    //     counter = -1;
+    //     handler.handleError(err);
+    //     return;
+    //   }
+    //   counter -= 1;
 
-      // // here start conversion, and then call fileInfo.upload on converted files
-      // // check copyall
+    //   // // here start conversion, and then call fileInfo.upload on converted files
+    //   // // check copyall
       
-        var results = [];
-        if (files.length==0){
-          return handler.handleError({message:'post did not send any files', statusCode:400});
-        }
-        files.forEach(function (fileInfo) {
-          //fileInfo.initUrls(handler.req);
-          var timeout = function (db) {
-            fileInfo.delete(db,function(){}); // no callback
-            console.log('timeout !! ' + fileInfo.name + ' was deleted');
-          }
-          setTimeout(timeout, 60 * 60 * 1000, handler.db);
-        });
-        server.jobManager.enqueue('convert', {'files':files,'handler':handler}); //Call convert job
+    //     var results = [];
+    //     if (files.length==0){
+    //       return handler.handleError({message:'post did not send any files', statusCode:400});
+    //     }
+    //     files.forEach(function (fileInfo) {
+    //       //fileInfo.initUrls(handler.req);
+    //       var timeout = function (db) {
+    //         fileInfo.delete(db,function(){}); // no callback
+    //         console.log('timeout !! ' + fileInfo.name + ' was deleted');
+    //       }
+    //       setTimeout(timeout, 60 * 60 * 1000, handler.db);
+    //     });
+    //     server.jobManager.enqueue('convert', {'files':files,'handler':handler}); //Call convert job
         
     
-    };
+    // };
 
      //form.uploadDir = FileInfo.options.tmpDir;
     form.on('fileBegin', function (name, file) {
@@ -103,39 +209,12 @@ UploadHandler.prototype.convert = function (collectionpath, assetpath) {
     }).on('field', function (name, value) {
        if (name === 'copyall') {
           copyall=true;
-       } else if (name === 'url') {
-        // downloading file and uncompressing if needed
-        // counter++; -> getting all files at once
-        //                                                      no jar
+       } 
+       else if (name === 'url') {                                            
         counter++; // one more result to POST
-        zipFile.getAssetInfoUrl(handler, value,undefined, function(error,result) {
-          if (error)
-            handler.handleError(error);
-          else {
-            files.push(result);
-            finish(undefined);
-          }
-        });
-        // zipFile.unzipUrl(handler, "", "", value, null, function(error,result) {
-        //   if (error)
-        //     handler.handleError(error);
-        //   else {
-        //     // turn {asset} into fileInfos
-        //     var getFileInfos = function (results) {
-
-        //       if (results.fileInfo) 
-        //         files.push(results.fileInfo);
-
-        //       if (results.children) {
-        //         for (var i = 0; i < results.children.length; i++) {
-        //           getFileInfos(results.children[i]);
-        //         }
-        //       }
-        //     };
-        //     getFileInfos(result);
-        //     finish(undefined);
-        //   }
-        // });
+        var params = {};
+        params.handler = handler, params.collectionpath = collectionpath, params.assetpath = assetpath, params.url = value, params.copyall =copyall;
+        server.jobManager.enqueue('convert', params);
       } 
     }).on('file', function (name, file) {
 

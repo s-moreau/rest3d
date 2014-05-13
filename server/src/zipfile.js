@@ -30,12 +30,18 @@
     uploadAndUnzip(params);
   }
 
-  zipFile.unzipUrl = function (handler,collectionpath, assetpath,jar,target,cb){
+  zipFile.unzipUrl = function (handler,collectionpath, assetpath,url,jar,target,cb){  
+    var params = {};
+    params.handler = handler;
+    params.collectionpath = collectionpath;
+    params.assetpath = assetpath;
+    params.url = url;
+    params.target = target;
+    params.dryrun = true;
+    params.jar = jar;
+    params.cb = cb;
 
-
-
-
-
+    uploadAndUnzip(params);
   }
 
   zipFile.unzipFile = function (handler,collectionpath, assetpath,target,cb){
@@ -242,18 +248,22 @@
       if (err) {
         console.log('ERROR IN ZIPFILE FINISH');
         
-        rmdirSync("tmp/"+folder);
+        if(folder.indexOf("tmp/")!==-1)rmdirSync(folder);
         params.cb(err);
         counter = -1;
         there_was_an_error=true;
         return;
       }
-      rmdirSync("tmp/"+folder);
+      if(folder.indexOf("tmp/")!==-1)rmdirSync(folder);
       params.cb(undefined, files);
     };
 
-    var folder = params.handler.req.session.sid;
-    var cmd = 'unzip '+params.filename+' -x Thumbs.db .DS_Store .Trashes __MACOSX/* -d tmp/'+folder;
+    if(params.target){
+      var folder = params.target;
+    }else{
+      var folder = 'tmp/'+params.handler.req.session.sid;
+    }
+    var cmd = 'unzip '+params.filename+' -x Thumbs.db .DS_Store .Trashes __MACOSX/* -d '+folder;
     console.log('exec ['+cmd+']');
     exec(cmd, function(code, output){
       if (code === 9){
@@ -330,7 +340,7 @@
           }
         };
 
-        walk.walkSync("tmp/"+folder, options);
+        walk.walkSync(folder, options);
       }
         
     });
