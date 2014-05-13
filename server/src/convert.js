@@ -148,6 +148,7 @@ server.jobManager.addJob('convert', {
                       }
                     }
                   }
+                  console.log("Content",over)
                   over.forEach(function(file){
                     var fileInfoOver = new FileInfo({name:file,path:output_path+'/'+name},stock.params.collectionpath,stock.params.assetpath);
                     fileInfoOver.upload(stock.params.hander,function(err,file){
