@@ -50,7 +50,7 @@ server.jobManager.addJob('convert', {
               var output_path = fileInfo.path.stringBefore(".dae")+'/';
               fs.mkdirSync(output_path); 
               fs.chmodSync(output_path, '777');
-              var cmd = " ls & "+server.collada2gltf + " -p -f \"" + fileInfo.name + "\" -o \"" + fileInfo.namestringBefore(".dae")+"/"+ "\"";
+              var cmd = " ls & "+server.collada2gltf + " -p -f \"" + fileInfo.name + "\" -o \"" + fileInfo.name.stringBefore(".dae")+"/"+ "\"";
               console.log( "--> exec "+cmd);
               stock.stdout += "--> exec "+cmd+"\n";
               var ls = childProcess.exec(cmd, {cwd: "./"+fileInfo.path.stringBefore(fileInfo.name)} ,function (error, stdout, stderr) {
