@@ -50,7 +50,7 @@ server.jobManager.addJob('convert', {
               var output_path = fileInfo.path.stringBefore(".dae")+'/';
               fs.mkdirSync(output_path); 
               fs.chmodSync(output_path, '777');
-              var cmd = "ls & cd "+output_path+" & "+server.collada2gltf + " -p -f \"" + fileInfo.path + "\" -o \"" + output_path + "\"";
+              var cmd = "ls & cd "+fileInfo.path.stringBefore(fileInfo.name)+" & "+server.collada2gltf + " -p -f \"" + fileInfo.path + "\" -o \"" + output_path + "\"";
               console.log( "--> exec "+cmd);
               stock.stdout += "--> exec "+cmd+"\n";
               childProcess.exec("cd "+output_path)
@@ -63,7 +63,7 @@ server.jobManager.addJob('convert', {
                 }
               });
               ls.on('exit', function (code, output) {
-                console.log('Child process exited with exit code ' + code );
+                console.log('Child process exited with exit code ' + code + " " + output);
                 stock.stdout += 'Child process exited with exit code ' + code+'\n';
                 if (code !== 0) {
                     stock.stderr += 'Child process exited with exit code '+code+'\n';
