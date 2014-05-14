@@ -111,6 +111,7 @@ define("console", function () {
 
 
         window.scriptGo = function () {
+            window.pleaseWait(false);
             CONSOLE.windowFlag = 'all';
             modeConsoleObject.remove();
            // title.remove();
