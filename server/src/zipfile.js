@@ -44,15 +44,20 @@
     uploadAndUnzip(params);
   }
 
-  zipFile.unzipFile = function (handler,collectionpath, assetpath,target,cb){
+  zipFile.unzipFile = function (handler,collectionpath, assetpath,file,target,cb){
     var params = {};
-
-
-
+    params.handler = handler;
+    params.collectionpath = collectionpath;
+    params.assetpath = assetpath;
+    params.file = file;
+    params.target = target;
+    params.cb = cb;
+    params.dryrun = true;
+    
+    uploadAndUnzip(params);
   }
 
   zipFile.getAssetInfoFile = function (handler, name, filename, jar, cb) {
-
     var params = {};
     params.handler = handler;
     params.cb = cb;
@@ -172,6 +177,10 @@
     } else {
       // callers has to set params.name and params.filename
       params.donotmove=false;
+      if(params.file){
+        params.name = params.file.name; 
+        params.filename = params.file.path;
+      }
       unzip(params);
     }
   };

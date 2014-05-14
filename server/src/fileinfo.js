@@ -41,7 +41,7 @@
         this.path = file.path; // where is it now?
 
         if (this.path)
-          this.size = fs.statSync(this.path).size;
+          try{this.size = fs.statSync(this.path).size;}catch(e){this.size = -1}
         else
           this.size = -1;
         if (file.type)

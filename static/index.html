@@ -299,15 +299,6 @@ THE SOFTWARE.
     <h3> Convert </h3>
     <h4> tmp </h4>
       <ul>
-      <li>
-          <form id='convert-tmp-file' action="/rest3d/convert/tmp/" enctype="application/x-www-form-urlencoded" method="POST">
-            [POST URL] /rest3d/convert/tmp/
-            <input type="checkbox" name="copyall"/>Copy all
-            <input type="text" size="40" value="" onkeyup="document.getElementById('convert-tmp-file').action = '/rest3d/convert/tmp/'+this.value;"/>
-            <input id="url" size="100" name="url" value="http://timenewsfeed.files.wordpress.com/2013/05/duckband.jpg?w=753" />
-            <input type="submit"  />send url to convert(single file example)
-          </form>
-        </li>
         <li>
         <form id='convert-tmp-zip' action="/rest3d/convert/tmp/" enctype="application/x-www-form-urlencoded" method="POST">
           [POST URL] /rest3d/convert/tmp/
@@ -329,15 +320,6 @@ THE SOFTWARE.
         </ul>
        <h4> db </h4>
        <ul>
-       <li>
-        <form id='convert-db-file' action="/rest3d/convert/db" enctype="application/x-www-form-urlencoded" method="POST">
-            [POST URL] /rest3d/convert/db/
-           <input type="checkbox" name="copyall" value="true"/>Copy all
-            <input type="text" size="40" value="" onkeyup="document.getElementById('convert-db-file').action = '/rest3d/convert/db/'+this.value;"/>
-            <input id="url" size="100" name="url" value="http://timenewsfeed.files.wordpress.com/2013/05/duckband.jpg?w=753" />
-            <input type="submit"  />send url to convert(single file example)
-          </form>
-        </li>
         <li>
         <form id='convert-db-zip' action="/rest3d/convert/db" enctype="application/x-www-form-urlencoded" method="POST">
           [POST URL] /rest3d/convert/db/
@@ -349,7 +331,7 @@ THE SOFTWARE.
         </li>
         <li>
           <form id='convert-db-file2' action="/rest3d/convert/db/" enctype="multipart/form-data" method="POST">
-            [POST files] /rest3d/convert/tmp/
+            [POST files] /rest3d/convert/db/
             <input type="checkbox" name="copyall" />Copy all
             <input type="text" size="40" value="" onkeyup="document.getElementById('convert-db-file2').action = '/rest3d/convert/db/'+this.value;"/>
             <input type="file" name="upload" multiple="multiple" />

@@ -41,11 +41,8 @@ server.jobManager.addJob('convert', {
       fs.chmodSync(this.dirname, '777'); //set access mode R&W
       var stock = this;
 
-
-
-      // URL 
-      if(params.url){
-        zipFile.unzipUrl(params.handler,params.collectionpath,params.assetpath,params.url,undefined,this.dirname,function(err,files){
+      // CONVERT callback
+      var callbackConvert = function(err,files){
           if(err){
             stock.stderr += err + '\n';
           }
@@ -116,18 +113,19 @@ server.jobManager.addJob('convert', {
                 })
               }
             });
-          }     
-        })
+          }
+        }
+
+      // URL 
+      if(params.url){
+        zipFile.unzipUrl(params.handler,params.collectionpath,params.assetpath,params.url,undefined,this.dirname,callbackConvert)
       }
-      if(params.file){  // if FILE
 
-
-
-
-
-
-
+      // FILE
+      if(params.file){  
+        zipFile.unzipFile(params.handler,params.collectionpath, params.assetpath,params.file,this.dirname,callbackConvert)
       }
+      
       stock.params.handler.handleResult(stock.dirname);
       setTimeout(function(){stock.finished = true;},stock.timeout);
     }
