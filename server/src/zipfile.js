@@ -45,7 +45,7 @@
   }
 
   zipFile.unzipFile = function (handler,collectionpath, assetpath,target,cb){
-
+    var params = {};
 
 
 

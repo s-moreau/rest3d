@@ -50,7 +50,7 @@ define(['rest3d', 'upload', 'viewer','database', 'collada','gltf'], function (re
 
         this.displayGltf = function (node) {
             window.pleaseWait(true);
-            glTF.load("/rest3d/"+this.name + node.attr("path"), viewer.parse_gltf).then(
+            glTF.load("/rest3d/"+stock.name + node.attr("path"), viewer.parse_gltf).then(
                 function (flag) {
                     window.pleaseWait(false);
                     window.notif(node.attr("name"));
