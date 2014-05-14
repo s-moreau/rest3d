@@ -47,10 +47,10 @@ server.jobManager.addJob('convert', {
         else{
           files.forEach(function(fileInfo){
             if(fileInfo.type == "model/collada+xml"){
-              var output_path = fileInfo.path.stringBefore(".dae")+'/';
-              fs.mkdirSync(output_path); 
-              fs.chmodSync(output_path, '777');
-              var cmd = " ls & "+server.collada2gltf + " -p -f \"" + fileInfo.name + "\" -o \"" + fileInfo.name.stringBefore(".dae")+"/"+ "\"";
+              // var output_path = fileInfo.path.stringBefore(".dae")+'/';
+              // fs.mkdirSync(output_path); 
+              // fs.chmodSync(output_path, '777');
+              var cmd = " ls & "+server.collada2gltf + " -p -f \"" + fileInfo.name + "\" ";
               console.log( "--> exec "+cmd);
               stock.stdout += "--> exec "+cmd+"\n";
               var ls = childProcess.exec(cmd, {cwd: "./"+fileInfo.path.stringBefore(fileInfo.name)} ,function (error, stdout, stderr) {
@@ -95,25 +95,23 @@ server.jobManager.addJob('convert', {
                         }
                     }
                   };
-                  walk.walkSync(output_path, options);
+                  walk.walkSync("./"+fileInfo.path.stringBefore(fileInfo.name), options);
                 }
                 
               })
             }
-            console.log("copyall",stock.params.copyall);
             if(stock.params.copyall){
-
-              // fileInfo.upload(stock.params.hander,function(err,file){
-              //   if(err){
-              //     stock.stderr += "upload "+file.name+" "+err+'\n';
-              //     console.log("upload "+file.name+" "+err);
-              //   }
-              //   else{
-              //     stock.result.push(file);
-              //     stock.stdout += "uploaded "+file.name+'\n';
-              //     console.log("uploaded "+file.name);
-              //   }
-              // })
+              fileInfo.upload(stock.params.handler,function(err,file){
+                if(err){
+                  stock.stderr += "upload "+file.name+" "+err+'\n';
+                  console.log("upload "+file.name+" "+err);
+                }
+                else{
+                  stock.result.push(file);
+                  stock.stdout += "uploaded "+file.name+'\n';
+                  console.log("uploaded "+file.name);
+                }
+              })
             }
           });
         }
