@@ -47,9 +47,6 @@ server.jobManager.addJob('convert', {
         else{
           files.forEach(function(fileInfo){
             if(fileInfo.type == "model/collada+xml"){
-              // var output_path = fileInfo.path.stringBefore(".dae")+'/';
-              // fs.mkdirSync(output_path); 
-              // fs.chmodSync(output_path, '777');
               var cmd = " ls & "+server.collada2gltf + " -p -f \"" + fileInfo.name + "\" ";
               console.log( "--> exec "+cmd);
               stock.stdout += "--> exec "+cmd+"\n";
@@ -100,7 +97,7 @@ server.jobManager.addJob('convert', {
                 
               })
             }
-            if(stock.params.copyall){
+            else if(stock.params.copyall){
               fileInfo.upload(stock.params.handler,function(err,file){
                 if(err){
                   stock.stderr += "upload "+file.name+" "+err+'\n';
