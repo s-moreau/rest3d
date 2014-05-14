@@ -77,6 +77,7 @@ define("console", function () {
         };
 
         window.log = function () {
+            window.pleaseWait(false)
             logCounter++;
             window.scriptGo();
             CONSOLE.windowFlag = 'log';
@@ -99,6 +100,8 @@ define("console", function () {
         };
 
         window.error = function () {
+            window.pleaseWait(false)
+
             window.scriptGo();
             errorCounter++;
             CONSOLE.windowFlag = 'error';
@@ -111,7 +114,6 @@ define("console", function () {
 
 
         window.scriptGo = function () {
-            window.pleaseWait(false);
             CONSOLE.windowFlag = 'all';
             modeConsoleObject.remove();
            // title.remove();
@@ -164,6 +166,7 @@ define("console", function () {
         //catch error 
 //
         window.onerror = function (message, url, linenumber) {
+            window.pleaseWait(false)
             //message = decodeJson(message);
             errorCounter ++;
             updateStatus();
