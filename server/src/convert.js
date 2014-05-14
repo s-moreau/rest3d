@@ -17,9 +17,10 @@ var walk = require('walk');
 
 server.jobManager.addJob('convert', {
   concurrency: 100, //number of concurrent jobs ran at the same time, default 50 if not specified
+  id: uuid.v4(),
   work: function (params) {          //The job
       this.params = params;
-      this.dirname = uuid.v4(); //generate random/unique repository name
+      this.dirname = this.id; //generate random/unique repository name
       this.stderr = "", this.stdout = "", this.result=[], this.timeout = 1000*60*5;
       this.writeLogs = function(){
          fs.writeFile(this.dirname+"/stderr_"+this.dirname, this.stderr+".log", function(err) { //create stderr log
@@ -125,7 +126,7 @@ server.jobManager.addJob('convert', {
       if(params.file){  
         zipFile.unzipFile(params.handler,params.collectionpath, params.assetpath,params.file,this.dirname,callbackConvert)
       }
-      
+
       stock.params.handler.handleResult(stock.dirname);
       setTimeout(function(){stock.finished = true;},stock.timeout);
     }
@@ -165,7 +166,7 @@ UploadHandler.prototype.convert = function (collectionpath, assetpath) {
         fs.unlinkSync(file);
       });
     }).on('error', function (e) {
-      finish({message:'NONO, Could not parse form', statusCode:400});
+      finish({message:'Could not parse form', statusCode:400});
     }).on('progress', function (bytesReceived, bytesExpected) {
       if (bytesReceived > FileInfo.options.maxPostSize) {
         handler.req.connection.destroy();

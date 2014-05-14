@@ -339,6 +339,20 @@ THE SOFTWARE.
           </form>
         </li>
          </ul>
+
+        <h3> Jobs </h3>
+          <ul>
+          <li> <a href="javascript:getit('/rest3d/stderr/job/','job');"> /rest3d/stderr/job/</a>
+          <input type="text" size="51" value="" id="job" onkeydown="if (event.keyCode == 13) getit('/rest3d/stderr/job/','job');" />Get job stderr</li>
+          <li> <a href="javascript:getit('/rest3d/stdout/job','job1');"> /rest3d/stdout/job/</a>
+          <input type="text" size="51" value="" id="job1" onkeydown="if (event.keyCode == 13) getit('/rest3d/stdout/job','job1');" />Get job stdout</li>
+          <li> <a href="javascript:getit('/rest3d/pause/job/','job2');"> /rest3d/pause/job/</a>
+          <input type="text" size="51" value="" id="job2" onkeydown="if (event.keyCode == 13) getit('/rest3d/pause/job/','job2');" />Pause job</li>
+          <li> <a href="javascript:getit('/rest3d/resume/job/','job3');">/rest3d/resume/job/</a>
+          <input type="text" size="51" value="" id="job3" onkeydown="if (event.keyCode == 13) getit('/rest3d/resume/job/','job3');" />Resume job</li>
+          <li> <a href="javascript:getit('/rest3d/abort/job/','job4');"> /rest3d/abort/job/</a>
+          <input type="text" size="51" value="" id="job4" onkeydown="if (event.keyCode == 13) getit('/rest3d/abort/job/','job4');" />Abort job</li>
+          </ul>
     <div style="display: hidden" />
   </div>
 

@@ -81,14 +81,13 @@ module.exports = function (server) {
     
   });
 
-
     // rest3d post upload API
   server.post(/^\/rest3d\/convert\/db.*/, function(req,res,next){
     // need destination project and path
 
     var handler = new Handler(req, res, next);
-    handler.db = existdb; 
     handler.allowOrigin();
+    handler.db = existdb; 
 
     var params = req.url.stringAfter("db");
 
