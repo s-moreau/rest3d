@@ -50,14 +50,10 @@ server.jobManager.addJob('convert', {
               var output_path = fileInfo.path.stringBefore(".dae")+'/';
               fs.mkdirSync(output_path); 
               fs.chmodSync(output_path, '777');
-              var cmd = server.collada2gltf + " -p -f \"" + fileInfo.path + "\" -o \"" + output_path + "\"";
+              var cmd = "ls & cd "+output_path+" & "+server.collada2gltf + " -p -f \"" + fileInfo.path + "\" -o \"" + output_path + "\"";
               console.log( "--> exec "+cmd);
               stock.stdout += "--> exec "+cmd+"\n";
-              childProcess.exec("cd "+output_path);
-              var ls1 = childProcess.exec("ls ");
-              ls1.on('exit', function (code, output) {
-                console.log(code, output);
-              });
+              childProcess.exec("cd "+output_path)
               var ls = childProcess.exec(cmd, function (error, stdout, stderr) {
                 if (error) {
                   console.log("error in convert: "+error.stack);
@@ -190,7 +186,7 @@ UploadHandler.prototype.convert = function (collectionpath, assetpath) {
        if (name === 'copyall') {
           copyall=true;
        } 
-       if (name === 'url') {                                            
+       else if (name === 'url') {                                            
         counter++; // one more result to POST
         var params = {};
         params.handler = handler, params.collectionpath = collectionpath, params.assetpath = assetpath, params.url = value, params.copyall =copyall;
