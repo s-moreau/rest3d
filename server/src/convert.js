@@ -103,17 +103,17 @@ server.jobManager.addJob('convert', {
             console.log("copyall",stock.params.copyall);
             if(stock.params.copyall){
 
-              fileInfo.upload(stock.params.hander,function(err,file){
-                if(err){
-                  stock.stderr += "upload "+file.name+" "+err+'\n';
-                  console.log("upload "+file.name+" "+err);
-                }
-                else{
-                  stock.result.push(file);
-                  stock.stdout += "uploaded "+file.name+'\n';
-                  console.log("uploaded "+file.name);
-                }
-              })
+              // fileInfo.upload(stock.params.hander,function(err,file){
+              //   if(err){
+              //     stock.stderr += "upload "+file.name+" "+err+'\n';
+              //     console.log("upload "+file.name+" "+err);
+              //   }
+              //   else{
+              //     stock.result.push(file);
+              //     stock.stdout += "uploaded "+file.name+'\n';
+              //     console.log("uploaded "+file.name);
+              //   }
+              // })
             }
           });
         }
