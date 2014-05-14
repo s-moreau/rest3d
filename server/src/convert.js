@@ -50,10 +50,10 @@ server.jobManager.addJob('convert', {
               var output_path = fileInfo.path.stringBefore(".dae")+'/';
               fs.mkdirSync(output_path); 
               fs.chmodSync(output_path, '777');
-              var cmd = "cd ./"+fileInfo.path.stringBefore(fileInfo.name)+" & ls & "+server.collada2gltf + " -p -f \"" + fileInfo.path + "\" -o \"" + output_path + "\"";
+              var cmd = " ls & "+server.collada2gltf + " -p -f \"" + fileInfo.name + "\" -o \"" + fileInfo.namestringBefore(".dae")+"/"+ "\"";
               console.log( "--> exec "+cmd);
               stock.stdout += "--> exec "+cmd+"\n";
-              var ls = childProcess.exec(cmd,function (error, stdout, stderr) {
+              var ls = childProcess.exec(cmd, {cwd: "./"+fileInfo.path.stringBefore(fileInfo.name)} ,function (error, stdout, stderr) {
                 console.log("Where we convert? "+stdout);
                 if (error) {
                   console.log("error in convert: "+error.stack);
