@@ -90,7 +90,7 @@ JobManager.prototype.enqueue = function (name) {
       args = Array.prototype.slice.call(arguments, 1),
       job = this.jobs[name],
       worker = job.enqueue.apply(job, [this.jobs[name].getId()].concat(args));
-  
+    
   // If a cache is used by this instance, add this worker to it
   if (this.cache) {
     this.cache.add(name, worker.id, args, function (err) {
@@ -230,6 +230,8 @@ var Job = function (name, props) {
   events.EventEmitter.call(this);
   
   this.name = name;
+  this.list= [];
+  this.objectById = {};
   this.running = {};
   this.waiting = {};
   this.queue = [];
@@ -255,9 +257,9 @@ Job.prototype.enqueue = function (id) {
   if (this.running[id] || this.waiting[id]) {
     throw new Error('Worker with id `' + id + '` already exists');
   }
-
   var self = this, worker = new neuron.Worker(id, this, Array.prototype.slice.call(arguments, 1));
-  
+  this.list.push(id);
+  this.objectById[id]=worker;
   worker.on('start', function () {
     self.emit('start', self, worker);
   });

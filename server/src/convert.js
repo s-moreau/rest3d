@@ -17,11 +17,10 @@ var walk = require('walk');
 
 server.jobManager.addJob('convert', {
   concurrency: 100, //number of concurrent jobs ran at the same time, default 50 if not specified
-  id: uuid.v4(),
   work: function (params) {          //The job
       this.params = params;
-      this.dirname = this.id; //generate random/unique repository name
-      this.stderr = "", this.stdout = "", this.result=[], this.timeout = 1000*60*5;
+      this.dirname = this.id; 
+      this.stderr = "", this.stdout = "", this.errorCode = undefined, this.result=[], this.timeout = 1000*60*5;
       this.writeLogs = function(){
          fs.writeFile(this.dirname+"/stderr_"+this.dirname, this.stderr+".log", function(err) { //create stderr log
           if(err) {
@@ -63,6 +62,7 @@ server.jobManager.addJob('convert', {
                   }
                 });
                 ls.on('exit', function (code, output) {
+                  stock.errorCode = code;
                   console.log('Child process exited with exit code ' + code + " " + output);
                   stock.stdout += 'Child process exited with exit code ' + code+'\n';
                   if (code !== 0) {
@@ -127,11 +127,12 @@ server.jobManager.addJob('convert', {
         zipFile.unzipFile(params.handler,params.collectionpath, params.assetpath,params.file,this.dirname,callbackConvert)
       }
 
-      stock.params.handler.handleResult(stock.dirname);
+      stock.params.handler.handleResult({"job id":stock.dirname});
       setTimeout(function(){stock.finished = true;},stock.timeout);
     }
 });
 server.jobManager.on('finish', function (job, worker) {
+    console.log("job "+worker.id+" finished");
     rmdirSync(worker.dirname); //remove temporary directory
   });
 

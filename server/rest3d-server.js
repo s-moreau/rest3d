@@ -59,8 +59,7 @@ var toJSON = require('./src/tojson');
 
 var Handler = require('./src/handler');
 
-// job manager
-var neuron=require('./src/jobs');
+
 
 
 var platform = os.type().match(/^Win/) ? 'win' :
@@ -103,15 +102,8 @@ if (fs.existsSync('./server.pem') && fs.existsSync('./server.key')) {
 
 var server = module.exports.server = restify.createServer(params);
 server.collada2gltf = collada2gltf;
+// job manager
 
-server.jobManager = new neuron.JobManager({
-    
-    // TODO -> option cache is programmed but not tested !!
-    // cache: {
-    //   db: server.db
-    // },
-    
-});
 
 if (params.key) {
     var http_server = restify.createServer();
@@ -161,10 +153,12 @@ var passport = require('./src/passport');
 passport.init(server);
 
 // include routes
+require('./src/jobs_routes')(server);
 require('./src/warehouse')(server);
 require('./src/3dvia')(server);
 require('./src/upload')(server);
 require('./src/convert')(server);
+
 
 // create diskcache (no mem caching, no gzip)
 server.diskcache = new cache('cache', true, false, false);
