@@ -3,6 +3,7 @@
 module.exports = function(server){
 	var neuron=require('./jobs');
 	var Handler = require('./handler');
+	
 	server.jobManager = new neuron.JobManager({
 	    
 	    // TODO -> option cache is programmed but not tested !!

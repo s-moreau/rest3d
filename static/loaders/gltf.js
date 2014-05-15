@@ -834,7 +834,9 @@ define(['q','glmatrixExt'], function (Q) {
             deferred.resolve(document);
           }
         } else {
-          glTF.log("Error Loading " + document.url + " [http request status=" + xhr.status + "]");
+          try{glTF.log("Error Loading " + document.url + " [http request status=" + xhr.status + "]");}catch(e){
+            console.error("Json parse failed, it could be a 404 status")
+          }
           deferred.reject(new Error("Error Loading " + document.url + " [http request status=" + xhr.status + "]"));
         }
       }
