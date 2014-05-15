@@ -836,7 +836,6 @@ define(['q','glmatrixExt'], function (Q) {
           }
         } else {
           glTF.log("Error Loading " + document.url + " [http request status=" + xhr.status + "]");
-          }
           deferred.reject(new Error("Error Loading " + document.url + " [http request status=" + xhr.status + "]"));
         }
       }
