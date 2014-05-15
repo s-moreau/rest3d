@@ -829,13 +829,13 @@ define(['q','glmatrixExt'], function (Q) {
             }
           } else {
             // this create a new object.... so we don't need to make copies
-            document.json = JSON.parse(xhr.responseText);
+            try{document.json = JSON.parse(xhr.responseText);
             document.parse_glTF(cb);
-            deferred.resolve(document);
+            deferred.resolve(document);}catch(e){
+            console.error("Json parse failed, it could be a 404 status")}
           }
         } else {
-          try{glTF.log("Error Loading " + document.url + " [http request status=" + xhr.status + "]");}catch(e){
-            console.error("Json parse failed, it could be a 404 status")
+          glTF.log("Error Loading " + document.url + " [http request status=" + xhr.status + "]");
           }
           deferred.reject(new Error("Error Loading " + document.url + " [http request status=" + xhr.status + "]"));
         }
