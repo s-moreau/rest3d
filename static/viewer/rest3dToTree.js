@@ -37,14 +37,14 @@ define(['rest3d', 'upload', 'viewer','database', 'collada','gltf'], function (re
                 width: '600',
                 height: '500',
                 open: function (ev, ui) {
-                    $('#myIframe').attr('src', '/viewer/easy-viewer.html?file=/rest3d/data/'+stock.name+'/?uuid='+node.attr("uuid"));
+                    $('#myIframe').attr('src', '/viewer/easy-viewer.html?file=/rest3d/data/'+stock.name+'/'+node.attr('path')+'/?uuid='+node.attr("uuid"));
                 },
             });
         }
         var stock = this;
         this.displayCollada = function (node) {
             window.pleaseWait(true);
-            COLLADA.load("/rest3d/data/"+stock.name+'/?uuid='+node.attr("uuid"), viewer.parse_dae).then(
+            COLLADA.load("/rest3d/data/"+stock.name+'/'+node.attr('path')+'/?uuid='+node.attr("uuid"), viewer.parse_dae).then(
                 function (flag) {
                     window.pleaseWait(false);
                     buffer.notif(node.attr("name"));
@@ -53,7 +53,7 @@ define(['rest3d', 'upload', 'viewer','database', 'collada','gltf'], function (re
 
         this.displayGltf = function (node) {
             window.pleaseWait(true);
-            glTF.load("/rest3d/data/"+stock.name+'/?uuid='+node.attr("uuid"), viewer.parse_gltf).then(
+            glTF.load("/rest3d/data/"+stock.name+'/'+node.attr('path')+'/?uuid='+node.attr("uuid"), viewer.parse_gltf).then(
                 function (flag) {
                     window.pleaseWait(false);
                     window.notif(node.attr("name"));
@@ -61,7 +61,7 @@ define(['rest3d', 'upload', 'viewer','database', 'collada','gltf'], function (re
         }
 
         this.download = function(node) {
-            var win = window.open(stock.dataUrl+'/?uuid='+node.attr("uuid"), '_blank');              
+            var win = window.open(stock.dataUrl+node.attr('path')+'/?uuid='+node.attr("uuid"), '_blank');              
         }
 
         this.convertMenu = function (node) {

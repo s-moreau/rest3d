@@ -208,6 +208,7 @@ define("console", function () {
         //catch debug from console firebug API
         //var oldAlert = alert;
         alert = function (message) {
+            window.pleaseWait(false)
             errorCounter ++;
             updateStatus();
             message = decodeJson(message);
@@ -229,6 +230,7 @@ define("console", function () {
         //catch debug from console firebug API
         var oldDebug = console.debug;
         console.debug = function (message) {
+            window.pleaseWait(false)
             debugCounter ++;
             updateStatus();
             message = decodeJson(message);
@@ -249,6 +251,7 @@ define("console", function () {
         //catch log from console firebug API
         var oldLog = console.log;
         console.log = function (message) {
+            window.pleaseWait(false)
             logCounter ++;
             updateStatus();
             message = decodeJson(message);
@@ -270,6 +273,7 @@ define("console", function () {
         //catch error from console firebug API
         var oldError = console.error;
         console.error = function (message) {
+            window.pleaseWait(false)
             errorCounter ++;
             updateStatus();
             message = decodeJson(message);
@@ -292,6 +296,7 @@ define("console", function () {
         //catch warning from console firebug API
         var oldWarn = console.warn;
         console.warn = function (message) {
+            window.pleaseWait(false)
             warnCounter ++;
             updateStatus();
             message = decodeJson(message);
