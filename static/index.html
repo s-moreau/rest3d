@@ -196,16 +196,16 @@ THE SOFTWARE.
       <ul>
         <li><a href="/rest3d/info/warehouse"> /rest3d/info/warehouse </a> Get top level collections </li>
 
-        <li> <a href="javascript:getit('/rest3d/search/warehouse/','q1');"> /rest3d/warehouse/search/</a>
+        <li> <a href="javascript:getit('/rest3d/search/warehouse/','q1');"> /rest3d/info/search/warehouse</a>
           <input type="text" size="51" value="duck" id="q1" onkeydown="if (event.keyCode == 13) getit('/rest3d/search/warehouse/','q1');" />Search for models with string in name</li>
 
-        <li> <a href="javascript:getit('/rest3d/info/warehouse/','qc');"> /rest3d/warehouse/</a>
+        <li> <a href="javascript:getit('/rest3d/info/warehouse/','qc');"> /rest3d/info/warehouse/</a>
           <input type="text" size="51" value="c_f8fc62afb9653d03cbe9bc85eececab4" id="qc" onkeydown="if (event.keyCode == 13) getit('/rest3d/info/warehouse/','qc');" />Get collection composition</li>
 
         <li> <a href="javascript:getit('/rest3d/info/warehouse/','qm');"> /rest3d/info/warehouse/</a>
-          <input type="text" size="51" value="m_ac9c3413d59e8e4a7f7fbfb94ac070c5_k2" id="qm" onkeydown="if (event.keyCode == 13) getit('/rest3d/warehouse/','qm');" />Get  model composition</li>
+          <input type="text" size="51" value="m_ac9c3413d59e8e4a7f7fbfb94ac070c5_k2" id="qm" onkeydown="if (event.keyCode == 13) getit('/rest3d/info/warehouse/','qm');" />Get  model composition</li>
 
-        <li> <a href="javascript:getit('/rest3d/data/warehouse/','qr');"> /rest3d/warehouse/data/</a>
+        <li> <a href="javascript:getit('/rest3d/data/warehouse/','qr');"> /rest3d/data/warehouse/</a>
           <input type="text" size="51" value="m_ac9c3413d59e8e4a7f7fbfb94ac070c5_k2" id="qr" onkeydown="if (event.keyCode == 13) getit('/rest3d/data/warehouse','qr');" />Get a model (kmz or zip)</li>
       </ul>
 
@@ -226,23 +226,23 @@ THE SOFTWARE.
         <li> <a href="javascript:getit('/rest3d/search/3dvia/','te');"> /rest3d/search/3dvia/</a>
           <input type="text" size="51" value="sofa" id="te" onkeydown="if (event.keyCode == 13) getit('/rest3d/search/3dvia/','te');" /> search for assets</li>
 
-        <li> <a href="javascript:getit('/rest3d/data/3dvia/','ta');"> /rest3d/3dvia/data/</a>
+        <li> <a href="javascript:getit('/rest3d/data/3dvia/','ta');"> /rest3d/data/3dvia/</a>
           <input type="text" size="51" value="8A066E8092A4B688" id="ta" onkeydown="if (event.keyCode == 13) getit('/rest3d/data/3dvia/','ta');" /> Get a model (kmz example)</li>
 
-        <li> <a href="javascript:getit('/rest3d/data/3dvia/','tf');"> /rest3d/3dvia/data/</a>
+        <li> <a href="javascript:getit('/rest3d/data/3dvia/','tf');"> /rest3d/data/3dvia/</a>
           <input type="text" size="51" value="B3C79CA9BB8D9FB1" id="tf" onkeydown="if (event.keyCode == 13) getit('/rest3d/data/3dvia/','tf');" /> Get a model (dae example)</li>
 
-        <li> <a href="javascript:getit('/rest3d/data/3dvia','tg');"> /rest3d/3dvia/data/</a>
+        <li> <a href="javascript:getit('/rest3d/data/3dvia','tg');"> /rest3d/data/3dvia/</a>
           <input type="text" size="51" value="363D162C3E102234" id="tg" onkeydown="if (event.keyCode == 13) getit('/rest3d/data/3dvia/','tg');" /> Get a model (3ds example)</li>
 
-        <li> <a href="javascript:getit('/rest3d/info/3dvia','tb');"> /rest3d/3dvia/info/</a>
+        <li> <a href="javascript:getit('/rest3d/info/3dvia','tb');"> /rest3d/info/3dvia/</a>
           <input type="text" size="51" value="8A066E8092A4B688" id="tb" onkeydown="if (event.keyCode == 13) getit('/rest3d/info/3dvia/','tb');" /> Request info about a model</li>
 
 
-        <li> <a href="javascript:getit('/rest3d/info/3dvia/','tc');"> /rest3d/3dvia/</a>
+        <li> <a href="javascript:getit('/rest3d/info/3dvia/','tc');"> /rest3d/info/3dvia/</a>
           <input type="text" size="51" value="8A066E8092A4B688" id="tc" onkeydown="if (event.keyCode == 13) getit('/rest3d/info/3dvia/','tc');" /> Request asset composition</li>
 
-        <li> <a href="javascript:getit('/rest3d/copy/3dvia','td');"> /rest3d/3dvia/copy/</a>
+        <li> <a href="javascript:getit('/rest3d/copy/3dvia','td');"> /rest3d/copy/3dvia/</a>
           <input type="text" size="51" value="8A066E8092A4B688" id="td" onkeydown="if (event.keyCode == 13) getit('/rest3d/copy/3dvia/','td');" /> Copy asset to upload area</li>
 
       </ul>
@@ -351,8 +351,8 @@ THE SOFTWARE.
           <li> <a href="/rest3d/jobs"> /rest3d/jobs</a> Query jobs list</li>
           <li> <a href="javascript:getit('/rest3d/job/status/','job1');"> /rest3d/job/status/</a>
           <input type="text" size="51" value="" id="job1" onkeydown="if (event.keyCode == 13) getit('/rest3d/job/status/','job1');" />Get job status</li>
-          <li> <a href="javascript:getit('/rest3d/job/suspend/','job2');"> /rest3d/suspend/job/</a>
-          <input type="text" size="51" value="" id="job2" onkeydown="if (event.keyCode == 13) getit('/rest3d/job/pause/','job2');" />suspend job</li>
+          <li> <a href="javascript:getit('/rest3d/job/suspend/','job2');"> /rest3d/job/suspend/</a>
+          <input type="text" size="51" value="" id="job2" onkeydown="if (event.keyCode == 13) getit('/rest3d/job/suspend/','job2');" />Suspend job</li>
           <li> <a href="javascript:getit('/rest3d/job/resume','job3');">/rest3d/job/resume</a>
           <input type="text" size="51" value="" id="job3" onkeydown="if (event.keyCode == 13) getit('/rest3d/job/resume','job3');" />Resume job</li>
           <li> <a href="javascript:getit('/rest3d/job/kill','job4');"> /rest3d/job/kill</a>
