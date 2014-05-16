@@ -31,20 +31,38 @@ module.exports = function (server) {
   var cheerio = require('cheerio');
   var toJSON = require('./tojson');
 
-  var handler = require('./handler');
+  var Handler = require('./handler');
   var zipFile = require('./zipfile');
 
   
-  server.get(/^\/rest3d\/warehouse.*/,function(req, res, next) {
+  server.get(/^\/rest3d\/data\/warehouse.*/,function(req, res, next) {
     
-    var warehouseHandler = new handler(req,res,next);
+    var handler = new Handler(req,res,next);
 
-    var uid = req.url.stringAfter('/warehouse/');
-    console.log('[warehouse]' + uid);
+    var uid = req.url.stringAfter('/warehouse');
+
+    while (uid[0]==='/') uid = uid.substring(1);
+
+    console.log('[data/warehouse] id=' + uid);
 
     // just browsing
-    if (uid ==='')
-    {
+    if (!uid || uid ==='')
+      return handler.handleError({message:'sendind data for entire folder is not supported',statusCode:400})
+
+  });
+
+
+  server.get(/^\/rest3d\/info\/warehouse.*/,function(req, res, next) {
+    
+    var handler = new Handler(req,res,next);
+
+    var uid = req.url.stringAfter('/warehouse');
+    
+    while (uid[0]==='/') uid = uid.substring(1);
+
+    console.log('[info/warehouse] id=' + uid);
+
+    if (!uid || uid === '') {
     	// this returns a json with all collections
       var start = 1;
       var end = 300;
@@ -80,84 +98,9 @@ module.exports = function (server) {
           return next();
           }
       );
-
-    } else if (uid.startsWith('data/'))
-    {
-        var ids = uid.split('data/')[1];
-        var id = ids.split('_');
- 
-        if (id && id[0] === 'm' && id.length===3){
-          console.log ('get warehouse asset ID =['+id[1]+']')
-          var url = "https://3dwarehouse.sketchup.com/3dw/getbinary?subjectId="+id[1]+"&subjectClass=entity&name="+id[2];
-
-          // proxie
-          //req.pipe(request(url)).pipe(res);
-          // redirect
-          res.writeHead(302, {'Location': url});
-          res.end();
-          return next();
-
-        } else if (id && id[0] === 'c' && id.length===2){
-
-          var error = { "code": "API call error", "message": "invalid id="+ids+" in /rest3d/warehouse/data/ "};
-          warehouseHandler.handleError(error);
-        } else {
-          error={code:"API call error",message:"transfering a collection is not supported"};
-          warehouseHandler.handleError(error);
-        }
-       
-    } else if (uid.startsWith('search/'))
-    {
-      var search = uid.stringAfter('search/');
-      console.log ('search warehouse for ['+search+']')
-      if (search === '')
-      {
-        console.log('search string cannot be empty')
-        res.writeHead(400);
-        res.write('search string cannot be empty');
-        res.end();
-        return next();
-      } else
-      {
-        // this returns a json
-        var start = 1;
-        var end = 100;
-        var req = "https://3dwarehouse.sketchup.com/3dw/Search"+
-                   "?startRow="+start+
-                   "&endRow="+end+
-                   "&calculateTotal=true"+
-                   "&q="+search+
-                   "&type=SKETCHUP_MODEL"+
-                   "&source"+
-                   "&title"+
-                   "&description&sortBy=title%20ASC"+
-                   "&createUserDisplayName"+
-                   "&createUserId"+
-                   "&modifyUserDisplayName"+
-                   "&class=entity"+
-                   "&Lk=true";
-
-        request({ 
-          url: req
-        }, function(err, resp, body){
-          if (err){
-            console.log('ERROR searching 3dwarehouse for '+search)
-            console.log(err)
-            return next(err);
-          }
-          var result = parsesearch(body);
-
-          result.RequestUri = uid;
-
-          res.writeHead(200, {'Content-Type': 'application/json', 'Access-Control-Allow-Origin' : '*' });
-          res.write(toJSON(result));
-          res.end();
-          return next();
-        });
-      }
-    } else // requesting a specic ID
-    {
-    	// note, id exists, otherwise we would not be there
+    } else {
+      // here return info on a model/collection
+      // note, id exists, otherwise we would not be there
 
       var id = uid.split('_');
       if (id && id[0] === 'm' && id.length===3){
@@ -166,190 +109,280 @@ module.exports = function (server) {
 
         // note: this is using diskcache
         // no jar -> undefined -> user=guest
-/*
+        /*
         {"database":"eXist","name":"doc.kml","type":"application/vnd.google-earth.kml+xml",
          "created":{"date":1399877510599,"user":"A5OyPlGHedkrBTbqQUQ1qBscietma84wTGLB9IfW"},
           "uuid":"e4fced70-d9a1-11e3-a7c9-1d8ed1f8e783","parentId":"a1ad39b0-d967-11e3-b00e-c1e3a1d321cb",
           "size":1601,"assetpath":"doc.kml","collectionpath":"tmp"}
         
         */
-        var asset = zipFile.getAssetInfoUrl(warehouseHandler,url, undefined, function(error, files){
+        var asset = zipFile.getAssetInfoUrl(handler,url, undefined, function(error, files){
           if (error)
-            warehouseHandler.handleError(error);
+            handler.handleError(error);
           else
-            warehouseHandler.handleResult(result);
+            handler.handleResult(result);
         });
 
 
 
-      } else if (id && id[0] === 'c' && id.length===2){
-          console.log ('get warehouse collection ID =['+id[1]+']')
-          var start = 1;
-          var end = 100;
-          var url = "https://3dwarehouse.sketchup.com/3dw/Search"+
-          "?parentCollectionId="+id[1]+
-          "&class=entity"+
-          "&calculateTotal=true"+
-          "&startRow="+start+
-          "&endRow="+end+
-          "&Lk=true";
-          //https://3dwarehouse.sketchup.com/3dw/GetCollection?id=4ef38d3f07220753e9c10e42c8ca6ea7
+      } else if (id && id[0] === 'c' && id.length===2) {
+        console.log ('get warehouse collection ID =['+id[1]+']')
+        var start = 1;
+        var end = 100;
+        var url = "https://3dwarehouse.sketchup.com/3dw/Search"+
+        "?parentCollectionId="+id[1]+
+        "&class=entity"+
+        "&calculateTotal=true"+
+        "&startRow="+start+
+        "&endRow="+end+
+        "&Lk=true";
+        //https://3dwarehouse.sketchup.com/3dw/GetCollection?id=4ef38d3f07220753e9c10e42c8ca6ea7
         // return: collectionCount, entityCount, parentCatalogId, description, title
         //https://3dwarehouse.sketchup.com/3dw/Search?parentCollectionId=690ba0129bb10a958f7918fdf5f5eb1&class=entity&calculateTotal=true&startRow=1&endRow=4&Lk=true
         // returns:  "entries": [{
         //              
-	      request({ // 3d building collections ?
-	        url: url
-	        },function(err, resp, body){
-	          if (err){
-	            console.log('ERROR asking 3dwarehouse ID'=id[0]);
-	            console.log(err)
-	            return next(err);
-	          }
+        request({ // 3d building collections ?
+          url: url
+          },function(err, resp, body){
+            if (err){
+              console.log('ERROR asking 3dwarehouse ID'=id[0]);
+              console.log(err)
+              return next(err);
+            }
 
-	          var result = parsesearch(body);
+            var result = parsesearch(body);
 
-	          // get collections now
-	          var start = 1;
-	          var end = 100;
-	          var url = "https://3dwarehouse.sketchup.com/3dw/Search"+
-			          "?parentCollectionId="+id[1]+
-			          "&class=collection"+
-			          "&calculateTotal=true"+
-			          "&startRow="+start+
-			          "&endRow="+end+
-			          "&Lk=true";
-	          request({ // 3d building collections ?
-			        url: url
-			        },function(err, resp, body){
-			          if (err){
-			            console.log('ERROR asking 3dwarehouse ID'=id[0]);
-			            console.log(err)
-			            return next(err);
-			          }
-			          var result2 = parseroot(body);
-			          // append collections to models
-			          result.assets = result.assets.concat(result2.assets);
-		            result.RequestUri = uid;
-			          res.writeHead(200, {'Content-Type': 'application/json', 'Access-Control-Allow-Origin' : '*' });
-			          res.write(toJSON(result));
-			          res.end();
-			          return next();
-			        }
-			      );
-	          
-	      	}
-	      );
-      } else {
-	      	// TODO call handleError
-	      	var error = { "code": "API call error", "message": "invalid id="+uid+" in /rest3d/warehouse/ "};
-          warehouseHandler.handleError(error);
-	    }
+            // get collections now
+            var start = 1;
+            var end = 100;
+            var url = "https://3dwarehouse.sketchup.com/3dw/Search"+
+                "?parentCollectionId="+id[1]+
+                "&class=collection"+
+                "&calculateTotal=true"+
+                "&startRow="+start+
+                "&endRow="+end+
+                "&Lk=true";
+            request({ // 3d building collections ?
+              url: url
+              },function(err, resp, body){
+                if (err){
+                  console.log('ERROR asking 3dwarehouse ID'=id[0]);
+                  console.log(err)
+                  return next(err);
+                }
+                var result2 = parseroot(body);
+                // append collections to models
+                result.assets = result.assets.concat(result2.assets);
+                result.RequestUri = uid;
+                res.writeHead(200, {'Content-Type': 'application/json', 'Access-Control-Allow-Origin' : '*' });
+                res.write(toJSON(result));
+                res.end();
+                return next();
+              }
+            );
+            
+        });
+      }
+    }
+  });
+
+  server.get(/^\/rest3d\/data\/warehouse.*/,function(req, res, next) {
+    
+    var handler = new Handler(req,res,next);
+
+    var uid = req.url.stringAfter('/warehouse');
+    
+    while (uid[0]==='/') uid = uid.substring(1);
+
+    console.log('[data/warehouse] id=' + uid);
+
+
+    var ids = uid.split('data/')[1];
+    var id = uid.split('_');
+
+    if (id && id[0] === 'm' && id.length===3){
+      console.log ('get warehouse asset ID =['+id[1]+']')
+      var url = "https://3dwarehouse.sketchup.com/3dw/getbinary?subjectId="+id[1]+"&subjectClass=entity&name="+id[2];
+
+      // proxie
+      //req.pipe(request(url)).pipe(res);
+      // redirect
+      res.writeHead(302, {'Location': url});
+      res.end();
+      return next();
+
+    } else if (id && id[0] === 'c' && id.length===2){
+
+      var error = { "code": "API call error", "message": "invalid id="+ids+" in /rest3d/warehouse/data/ "};
+      handler.handleError(error);
+    } else {
+      error={code:"API call error",message:"transfering a collection is not supported"};
+      handler.handleError(error);
+    }
+  });
+
+  server.get(/^\/rest3d\/search\/warehouse.*/,function(req, res, next) {
+    
+    var handler = new Handler(req,res,next);
+
+    var search = req.url.stringAfter('/warehouse');
+    
+    while (search[0]==='/') search = search.substring(1);
+
+    console.log('[search/warehouse] id=' + search);
+
+
+    if (search === '')
+    {
+      console.log('search string cannot be empty')
+      res.writeHead(400);
+      res.write('search string cannot be empty');
+      res.end();
+      return next();
+    } else
+    {
+      // this returns a json
+      var start = 1;
+      var end = 100;
+      var req = "https://3dwarehouse.sketchup.com/3dw/Search"+
+                 "?startRow="+start+
+                 "&endRow="+end+
+                 "&calculateTotal=true"+
+                 "&q="+search+
+                 "&type=SKETCHUP_MODEL"+
+                 "&source"+
+                 "&title"+
+                 "&description&sortBy=title%20ASC"+
+                 "&createUserDisplayName"+
+                 "&createUserId"+
+                 "&modifyUserDisplayName"+
+                 "&class=entity"+
+                 "&Lk=true";
+
+      request({ 
+        url: req
+      }, function(err, resp, body){
+        if (err){
+          console.log('ERROR searching 3dwarehouse for '+search)
+          console.log(err)
+          return next(err);
+        }
+        var result = parsesearch(body);
+
+        result.RequestUri = uid;
+
+        res.writeHead(200, {'Content-Type': 'application/json', 'Access-Control-Allow-Origin' : '*' });
+        res.write(toJSON(result));
+        res.end();
+        return next();
+      });
+
     }
   });
 
 
-    var parsesearch =function(body) {
-      var result={};
-      var json = JSON.parse(body);
 
-      result.success = json.success;
-      if (result.success != true) return;
+  var parsesearch =function(body) {
+    var result={};
+    var json = JSON.parse(body);
 
-      result.start = json.startRow;
-      result.end = json.endRow;
-      result.total = json.total;
+    result.success = json.success;
+    if (result.success != true) return;
 
-      result.assets = [];
+    result.start = json.startRow;
+    result.end = json.endRow;
+    result.total = json.total;
 
-      for (var i=0;i<json.entries.length;i++){
-        var entry = json.entries[i];
-        var kmz = null;
-        var st = false;
-        if (!entry.binaryNames) continue;
+    result.assets = [];
+
+    for (var i=0;i<json.entries.length;i++){
+      var entry = json.entries[i];
+      var kmz = null;
+      var st = false;
+      if (!entry.binaryNames) continue;
+      for (var j=0; j<entry.binaryExts.length;j++){
+        if (entry.binaryNames[j] === 'st') 
+          st = true;
+        if (entry.binaryNames[j] === 'k2' || entry.binaryNames[j] === 'ks' || entry.binaryNames[j] === 'zip')
+        {
+          if (!kmz) kmz = entry.binaryNames[j];
+          else if (entry.binaryNames[j] === 'zip') kmz = entry.binaryNames[j]; // zip are prefered sources
+        }
+      }
+      if (!kmz) continue;
+      var item={};
+      item.name = entry.title;
+      item.description = entry.description;
+      item.id = 'm_'+entry.id+"_"+kmz;
+      item.type="model";
+      item.format="kmz";
+      item.assets=null;
+      item.uri="https://3dwarehouse.sketchup.com/model.html?id="+entry.id;
+      item.creator = {name: entry.creator.displayName, id: entry.creator.id};
+      item.license = "N/A";
+      item.created = entry.createTime;
+      item.modified = entry.modifyTime;
+      item.parents = 'c_'+entry.parent;
+      item.rating = entry.popularity;
+      item.iconUri = (st ? "https://3dwarehouse.sketchup.com/3dw/getbinary?subjectId="+entry.id+"&subjectClass=entity&name=st" : null);
+      item.assetUri = "https://3dwarehouse.sketchup.com/3dw/getbinary?subjectId="+entry.id+"&subjectClass=entity&name="+kmz;
+      item.previewUri = "https://3dwarehouse.sketchup.com/embed.html?entityId="+entry.id;
+      result.assets.push(item);
+    }
+    return result;
+  };    
+  // 
+  var parseroot= function (body) {
+    var result={};
+    var json = JSON.parse(body);
+
+    result.success = json.success;
+    if (result.success != true) return;
+
+    result.start = json.startRow;
+    result.end = json.endRow;
+    result.total = json.total;
+
+    result.assets = [];
+
+    for (var i=0;i<json.entries.length;i++){
+      var entry = json.entries[i];
+      var entityCount = entry.entityCount;
+      var collectionCount = entry.collectionCount;
+
+
+      // remove empty folders at root, there are tons of them
+      if (entityCount===0 && collectionCount===0) continue;
+      // remove entrys that have a bogus name
+      if (entry.title.indexOf('<img src') !== -1) continue;
+
+      var st = false;
+      if (entry.binaryNames) 
         for (var j=0; j<entry.binaryExts.length;j++){
           if (entry.binaryNames[j] === 'st') 
             st = true;
-          if (entry.binaryNames[j] === 'k2' || entry.binaryNames[j] === 'ks' || entry.binaryNames[j] === 'zip')
-          {
-            if (!kmz) kmz = entry.binaryNames[j];
-            else if (entry.binaryNames[j] === 'zip') kmz = entry.binaryNames[j]; // zip are prefered sources
-          }
         }
-        if (!kmz) continue;
-        var item={};
-        item.name = entry.title;
-        item.description = entry.description;
-        item.id = 'm_'+entry.id+"_"+kmz;
-        item.type="model";
-        item.format="kmz";
-        item.assets=null;
-        item.uri="https://3dwarehouse.sketchup.com/model.html?id="+entry.id;
-        item.creator = {name: entry.creator.displayName, id: entry.creator.id};
-        item.license = "N/A";
-        item.created = entry.createTime;
-        item.modified = entry.modifyTime;
-        item.parents = 'c_'+entry.parent;
-        item.rating = entry.popularity;
-        item.iconUri = (st ? "https://3dwarehouse.sketchup.com/3dw/getbinary?subjectId="+entry.id+"&subjectClass=entity&name=st" : null);
-        item.assetUri = "https://3dwarehouse.sketchup.com/3dw/getbinary?subjectId="+entry.id+"&subjectClass=entity&name="+kmz;
-        item.previewUri = "https://3dwarehouse.sketchup.com/embed.html?entityId="+entry.id;
-        result.assets.push(item);
-      }
-      return result;
-    };    
-    // 
-    var parseroot= function (body) {
-      var result={};
-      var json = JSON.parse(body);
 
-      result.success = json.success;
-      if (result.success != true) return;
+      var item={};
+      item.name = entry.title;
+      item.description = entry.description;
+      item.id = 'c_'+entry.id;
+      item.type="collection";
 
-      result.start = json.startRow;
-      result.end = json.endRow;
-      result.total = json.total;
-
-      result.assets = [];
-
-      for (var i=0;i<json.entries.length;i++){
-        var entry = json.entries[i];
-        var entityCount = entry.entityCount;
-        var collectionCount = entry.collectionCount;
-
-
-        // remove empty folders at root, there are tons of them
-        if (entityCount===0 && collectionCount===0) continue;
-        // remove entrys that have a bogus name
-        if (entry.title.indexOf('<img src') !== -1) continue;
-
-        var st = false;
-        if (entry.binaryNames) 
-          for (var j=0; j<entry.binaryExts.length;j++){
-            if (entry.binaryNames[j] === 'st') 
-              st = true;
-          }
-
-        var item={};
-        item.name = entry.title;
-        item.description = entry.description;
-        item.id = 'c_'+entry.id;
-        item.type="collection";
-
-        item.assets=null;
-        item.uri="https://3dwarehouse.sketchup.com/collection.html?id="+entry.id;
-        item.creator = {name: entry.creator.displayName, id: entry.creator.id};
-        item.license = "N/A";
-        item.created = entry.createTime;
-        item.modified = entry.modifyTime;
-        item.parentID = entry.parentCatalogId;
-        item.collectionCount = collectionCount;
-        item.entityCount = entityCount;
-        item.iconUri = (st ? "https://3dwarehouse.sketchup.com/3dw/getbinary?subjectId="+entry.id+"&subjectClass=collection&name=st" : null);
-        result.assets.push(item);
-      }
-      return result;
-    };  
+      item.assets=null;
+      item.uri="https://3dwarehouse.sketchup.com/collection.html?id="+entry.id;
+      item.creator = {name: entry.creator.displayName, id: entry.creator.id};
+      item.license = "N/A";
+      item.created = entry.createTime;
+      item.modified = entry.modifyTime;
+      item.parentID = entry.parentCatalogId;
+      item.collectionCount = collectionCount;
+      item.entityCount = entityCount;
+      item.iconUri = (st ? "https://3dwarehouse.sketchup.com/3dw/getbinary?subjectId="+entry.id+"&subjectClass=collection&name=st" : null);
+      result.assets.push(item);
+    }
+    return result;
+  };  
 
 };
 

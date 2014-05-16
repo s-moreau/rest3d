@@ -65,7 +65,23 @@ module.exports = function (server) {
 
   });
 
-  server.get(/^\/rest3d\/db.*/,function(req, res, next) {
+  server.get(/^\/rest3d\/data\/db.*/,function(req, res, next) {
+
+    var asset = req.url.stringAfter("db");
+
+    var handler = new Handler(req, res, next);
+    handler.allowOrigin();
+    handler.db = existdb;
+    if (asset.contains('?'))
+      asset = asset.stringBefore('?');
+    while (asset.slice(-1) === '/') asset = asset.slice(0, -1);
+
+    handler.getData(asset, req.query.uuid);
+
+    
+  });
+
+  server.get(/^\/rest3d\/info\/db.*/,function(req, res, next) {
 
     var asset = req.url.stringAfter("db");
 

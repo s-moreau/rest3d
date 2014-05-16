@@ -182,6 +182,11 @@ Handler.prototype.handleResult = function (result, code) {
   this.next();
 };
 
+Handler.prototype.getJar = function(cookie){
+  var jar=null;
+  if (this.req.session) jar = this.req.session[cookie];
+  return jar;
+};
 
 module.exports = Handler;
 

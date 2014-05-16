@@ -230,8 +230,12 @@ server.db.init(function (b) {
 
 server.get(/^\/rest3d\/info/, function (req, res, next) {
     var handler = new Handler(req, res, next);
-    // console.log(server.router.routes)
-    /// if sign
+    
+    var params = req.url.stringAfter("info");
+    while(params[0]==='/') params=params.substr(1);
+
+    if (params)
+        return handler.handleError({message:'unknown database '+params, statusCode:400});
 
     function cleanDb(route){
     for (var i=0;i<route.length;i++){
