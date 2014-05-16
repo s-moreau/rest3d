@@ -195,6 +195,10 @@ subclass(Cache, events.EventEmitter, {
 	 * Stores data in cache.
 	 */	
 	store: function(URL, entry, cb) {
+
+		if (entry.statusCode !== 200)
+			cb({message:'http error for URL='+URL,statusCode:entry.statusCode})
+		
 		URL = this._normalizeURL(URL);
 		var keys = this._keysForURL(URL);
 		
