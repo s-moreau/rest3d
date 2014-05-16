@@ -583,28 +583,18 @@ define(['q'],
                 this.parent.append("<br><br>");
                 this.descriptionArea();
                 this.parent.append("<br><hr><br>")
-           if(!this.upload){
-                    this.generateCoreTab();
-                     this.parent.focusTab(function () {
-                        stock.treeCallback();
-                        stock.accor["sample_" + stock.name].openAccordion();
-                        stock.accor["search_" + stock.name].openAccordion();
-                    });
-                                    }
-                else{
-                    var stock = this;
-                    var flag = true;
-                    this.parent.focusTab(function(){
-                        if(flag){
-                        stock.rest3dToTree.createTree();
-                        setTimeout(function(){
-                              stock.rest3dToTree.setUpload();
-                              //stock.rest3dToTree.tree.openAll();
-                        },50);   
-                        }
-                        flag=false;               
-                    });    
-                }
+                var stock = this;
+                var flag = true;
+                this.parent.focusTab(function(){
+                    if(flag){
+                    stock.rest3dToTree.createTree();
+                    // setTimeout(function(){
+                    //       stock.rest3dToTree.setUpload();
+                    //       //stock.rest3dToTree.tree.openAll();
+                    // },50);   
+                    }
+                    flag=false;               
+                });    
                 break;
             case 1:
                 var tmp = $("<a style='color: red;'>(authentification is optional)</a>");

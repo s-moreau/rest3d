@@ -153,7 +153,7 @@ define(['rest3d', 'upload', 'viewer','database', 'collada','gltf'], function (re
                             else {
                                 var url= node.attr('path');
                                 if (url[0] ==='/') url = url.substring(1);
-                                url = stock.dataUrl+url;
+                                url = stock.infoUrl+'?uuid='+node.attr("uuid");
                                 stock.firstFlag = false;
                             }
                             return url;
