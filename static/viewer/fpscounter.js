@@ -24,6 +24,7 @@ viewer.FPSCounter = function() {
             },
             'UpdateFPS': function () {
                 var fpsDiv = document.getElementById(counterID);
+                if (!fpsDiv) return console.error('cannot find Div Element in FPSCounter UpdateFPS')
                 fpsDiv.innerHTML = this.fps + " FPS";
                 this.averageFPS = (this.averageFPS * this.averageCount + this.fps) / (1+this.averageCount);
                 this.averageCount ++;
