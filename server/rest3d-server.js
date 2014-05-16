@@ -286,13 +286,12 @@ server.get(/^\/rest3d\/info/, function (req, res, next) {
             for(var i=0;i<route.length;i++){
                 if(route[i].hasOwnProperty("path")){
                     var tmp = route[i].path.source.split('/');
-                    tmp = tmp[2]; 
-                    if(tmp){
-                        if(tmp.split("db").length==2&&server.db==null){
+                    if(tmp[2]=="data\\"){
+                        if(tmp[3].split("db").length==2&&server.db==null){
                             route.splice(i, 1);//delete db get routes because the database hasn't been detected
                         }
-                        else if(tmp.split(".*").length==2){
-                            this.name = tmp.split(".*").join("");
+                        else if(tmp[3].split(".*").length==2){
+                            this.name = tmp[3].split(".*").join("");
                             this.createDatabase();
                             this.object[this.name]=this.database;
                             this.parse_routes();

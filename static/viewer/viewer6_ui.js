@@ -104,6 +104,7 @@ define(['viewer', 'gui', 'rest3d', 'q', 'collada', 'gltf', 'renderer', 'state', 
                 if (_displayMode == true) {
                     var deferred = Q.defer();
                     mask = GUI.mask("mask-loading", "Please wait ...", $("body"));
+                    mask.css({"top":"40% !important;"});
                     GUI.image($('#mask-loading'), "img-loading", "../gui/images/loading.gif", 30, 30, "before");
                     return deferred;
                 }
@@ -865,7 +866,7 @@ define(['viewer', 'gui', 'rest3d', 'q', 'collada', 'gltf', 'renderer', 'state', 
                     //     tmp.tree.jstree('open_all');
                     // }, 1500); // open all nodes of the tab
                 }              
-            }, "/tmp");
+            }, "/info/tmp");
   function jumpLine() {
                 renderMenu.render.append("<br></br>");
             }

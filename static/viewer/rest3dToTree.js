@@ -19,7 +19,8 @@ define(['rest3d', 'upload', 'viewer','database', 'collada','gltf'], function (re
         this.area = parent;
         this.image = $();
         this.progress = $("<progress value=0 max=100></progress>");
-        this.url = location.protocol + "//" + location.host + "/rest3d/" + this.name;
+        this.url = location.protocol + "//" + location.host + "/rest3d/info/" + this.name +"/";
+        this.dataUrl = location.protocol + "//" + location.host + "/rest3d/data/" + this.name +"/";
 
         this.init = function(){
             var tmp = new databaseTab(this,this.data,this.area);        
@@ -34,14 +35,14 @@ define(['rest3d', 'upload', 'viewer','database', 'collada','gltf'], function (re
                 width: '600',
                 height: '500',
                 open: function (ev, ui) {
-                    $('#myIframe').attr('src', '/viewer/easy-viewer.html?file=/rest3d/'+stock.name + node.attr("path"));
+                    $('#myIframe').attr('src', '/viewer/easy-viewer.html?file=/rest3d/data/'+stock.name + node.attr("path"));
                 },
             });
         }
         var stock = this;
         this.displayCollada = function (node) {
             window.pleaseWait(true);
-            COLLADA.load("/rest3d/"+stock.name + node.attr("path"), viewer.parse_dae).then(
+            COLLADA.load("/rest3d/data/"+stock.name + node.attr("path"), viewer.parse_dae).then(
                 function (flag) {
                     window.pleaseWait(false);
                     buffer.notif(node.attr("name"));
@@ -50,7 +51,7 @@ define(['rest3d', 'upload', 'viewer','database', 'collada','gltf'], function (re
 
         this.displayGltf = function (node) {
             window.pleaseWait(true);
-            glTF.load("/rest3d/"+stock.name + node.attr("path"), viewer.parse_gltf).then(
+            glTF.load("/rest3d/data/"+stock.name + node.attr("path"), viewer.parse_gltf).then(
                 function (flag) {
                     window.pleaseWait(false);
                     window.notif(node.attr("name"));
@@ -206,7 +207,7 @@ define(['rest3d', 'upload', 'viewer','database', 'collada','gltf'], function (re
                             }
                             else {
                                 var url= node.attr('path');
-                                url = stock.url+url;
+                                url = stock.dataUrl+url;
                                 stock.firstFlag = false;
                             }
                             return url;
@@ -237,7 +238,7 @@ define(['rest3d', 'upload', 'viewer','database', 'collada','gltf'], function (re
                                 for(var i=0;i<stock.images.length;i++){
                                     GUI.addTooltip({
                                         parent: $("#"+stock.images[i].id).find('a'),
-                                        content: "<img style='max-height:150px;max-width:150px' src="+stock.url+"/"+stock.images[i].path+" ></img>",
+                                        content: "<img style='max-height:150px;max-width:150px' src="+stock.dataUrl+"/"+stock.images[i].path+" ></img>",
                                     })            
                                 }
                             },1000)

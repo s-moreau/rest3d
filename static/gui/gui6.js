@@ -1127,7 +1127,7 @@ define(['channel', 'codemirror', 'webglUtils', 'WebGLDebugUtils', 'pnotify', 'co
                 modal: true
             });
             $(".ui-dialog-titlebar").hide();
-            $("#" + _id).parent().css("top", "40%");
+            $("#" + _id).parent().css({"top":"40% !important;"});
             $("#" + _id).parent().width("150px");
             return $("#" + _id, _parent);
         };

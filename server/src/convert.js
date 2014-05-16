@@ -22,14 +22,14 @@ server.jobManager.addJob('convert', {
       this.dirname = this.id; 
       this.stderr = "", this.stdout = "", this.errorCode = undefined, this.result=[], this.timeout = 1000*60*5;
       this.writeLogs = function(){
-         fs.writeFile(this.dirname+"/stderr_"+this.dirname, this.stderr+".log", function(err) { //create stderr log
+         fs.writeFile("tmp/"+this.dirname+"/stderr_"+this.dirname, this.stderr+".log", function(err) { //create stderr log
           if(err) {
               console.log(err);
           } else {
               console.log("Log stderr conversion created");
           }
           }); 
-          fs.writeFile(this.dirname+"/stdout_"+this.dirname+".log", this.stdout, function(err) {//create stdout log
+          fs.writeFile("tmp/"+this.dirname+"/stdout_"+this.dirname+".log", this.stdout, function(err) {//create stdout log
           if(err) {
               console.log(err);
           } else {
@@ -37,10 +37,10 @@ server.jobManager.addJob('convert', {
           }
           });
       }
-      fs.mkdirSync(this.dirname); //create temporary folder for stocking assets to be converted
-      fs.chmodSync(this.dirname, '777'); //set access mode R&W
+      fs.mkdirSync("tmp/"+this.dirname); //create temporary folder for stocking assets to be converted
+      fs.chmodSync("tmp/"+this.dirname, '777'); //set access mode R&W
       var stock = this;
-
+      this.flag = true;
       // CONVERT callback
       var callbackConvert = function(err,files){
           if(err){
@@ -49,6 +49,7 @@ server.jobManager.addJob('convert', {
           else{
             files.forEach(function(fileInfo){
               if(fileInfo.type == "model/collada+xml"){
+                stock.flag = false;
                 var cmd = " ls & "+server.collada2gltf + " -p -f \"" + fileInfo.name + "\" ";
                 console.log( "--> exec "+cmd);
                 stock.stdout += "--> exec "+cmd+"\n";
@@ -119,21 +120,24 @@ server.jobManager.addJob('convert', {
 
       // URL 
       if(params.url){
-        zipFile.unzipUrl(params.handler,params.collectionpath,params.assetpath,params.url,undefined,this.dirname,callbackConvert)
+        zipFile.unzipUrl(params.handler,params.collectionpath,params.assetpath,params.url,undefined,"tmp/"+this.dirname,callbackConvert)
       }
 
       // FILE
       if(params.file){  
-        zipFile.unzipFile(params.handler,params.collectionpath, params.assetpath,params.file,this.dirname,callbackConvert)
+        zipFile.unzipFile(params.handler,params.collectionpath, params.assetpath,params.file,"tmp/"+this.dirname,callbackConvert)
       }
-
+      if(stock.flag){
+         stock.stderr += "there aren't any collada files to convert with the url/file specified in the request, job killed \n";
+         stock.finished = true;
+      }
       stock.params.handler.handleResult({"job id":stock.dirname});
       setTimeout(function(){stock.finished = true;},stock.timeout);
     }
 });
 server.jobManager.on('finish', function (job, worker) {
     console.log("job "+worker.id+" finished");
-    rmdirSync(worker.dirname); //remove temporary directory
+    rmdirSync("tmp/"+worker.dirname); //remove temporary directory
   });
 
 UploadHandler.prototype.convert = function (collectionpath, assetpath) {
