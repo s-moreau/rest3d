@@ -8,7 +8,7 @@ body
 }
 
 
-#help, #defaultTextBis, #layout-console{
+#help, #defaultTextBis, #console{
   -moz-user-select: text;
   -khtml-user-select: text;
   -webkit-user-select: text;

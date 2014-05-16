@@ -335,10 +335,11 @@ define(['viewer', 'gui', 'rest3d', 'q', 'collada', 'gltf', 'renderer', 'state', 
             GUI.image(window.renderMenu.scenes.title, "img-render", "../gui/images/scene-root1.png", 12, 14, "before");
             GUI.image(window.renderMenu.consoletab.title, "img-render", "../gui/images/console1.png", 12, 14, "before");
 
-            console_init(window.renderMenu);
+
             scene_init(window.renderMenu);
             viewer.onload = window.refreshScenesTree;
             script_init(window.renderMenu);
+            console_init(window.renderMenu);
             window.renderMenu.refresh();
 
             // GUI.label("ddss", "| hihih",);

@@ -571,6 +571,30 @@ define(['q'],
 
             switch (this.indexLogin) {
             case 0:
+                       if (this.indexLogin == 0) {
+                    var text = '(no authentification required)';
+                }
+                else {
+                    var text = '(authentification not yet implemented)';
+                }
+                var tmp = $("<a style='color: red;'>" + text + "</a>");
+                this.parent.append(tmp);
+                this.parent.append("<br><br>");
+                this.descriptionArea();
+                this.parent.append("<br><hr><br>")
+                var stock = this;
+                var flag = true;
+                this.parent.focusTab(function(){
+                    if(flag){
+                    stock.rest3dToTree.createTree();
+                    setTimeout(function(){
+                          stock.rest3dToTree.setUpload();
+                          //stock.rest3dToTree.tree.openAll();
+                    },50);   
+                    }
+                    flag=false;               
+                });    
+                break;
             case 3:
                 if (this.indexLogin == 0) {
                     var text = '(no authentification required)';

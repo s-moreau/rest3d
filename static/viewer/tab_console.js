@@ -27,6 +27,7 @@ define("console", function () {
     CONSOLE.jqueryObject = "";
     CONSOLE.flagError = false;
     CONSOLE.statusOpen = false;
+    CONSOLE.timer;
     window.test=function(){
         var message = "test";
         console.error(message);
@@ -36,8 +37,21 @@ define("console", function () {
     }
     function console_init(parent){
         if(!parent.hasOwnProperty("consoletab"))parent.consoletab = parent;
+        toggle_button = $('li[aria-controls="consoletab"]')
         parent = parent.consoletab;
-        var timer;
+        parent.focusTab(function(){
+            stopSignal()
+        })
+        window.renderMenu.render.focusTab(function(){
+            CONSOLE.statusOpen = false;
+        })
+        window.renderMenu.scenes.focusTab(function(){
+            CONSOLE.statusOpen = false;
+        })
+        window.renderMenu.script.focusTab(function(){
+            CONSOLE.statusOpen = false;
+        })
+        
 
         parent.append('<div id="console"></div>');
         var errorCounter = 0, logCounter = 0, warnCounter = 0,  debugCounter = 0;
@@ -391,8 +405,8 @@ define("console", function () {
         }
 
         function playSignal(error, debug, log, warn) {
-            if (!consoleObject.is(":visible"))
-                var classColor;
+            if (!CONSOLE.statusOpen)
+            var classColor;
             if (error) {
                 classColor = 'button-error';
             } else if (warn) {
@@ -408,27 +422,27 @@ define("console", function () {
             function Timer() {
                 set = 1;
                 if (x == 0 && set == 1) {
-                    // toggle_button.addClass(classColor);
+                    toggle_button.addClass(classColor);
                     x = 1;
                     set = 0;
                 }
                 if (x == 1 && set == 1) {
-                    // toggle_button.removeClass(classColor);
+                    toggle_button.removeClass(classColor);
                     x = 0;
                     set = 0;
                 }
             }
-            timer = setInterval(function () {
+            CONSOLE.timer = setInterval(function () {
                 Timer()
             }, 350);
         }
 
         function stopSignal() {
-            clearInterval(timer);
-            // toggle_button.removeClass('button-error');
-            // toggle_button.removeClass('button-warn');
-            // toggle_button.removeClass('button-log');
-            // toggle_button.removeClass('button-debug');
+            clearInterval(CONSOLE.timer);
+            toggle_button.removeClass('button-error');
+            toggle_button.removeClass('button-warn');
+            toggle_button.removeClass('button-log');
+            toggle_button.removeClass('button-debug');
         }  
       
         CONSOLE.terminal.echo("rest3d_TEST> test if this sentence is correctly render by the plugin. I get some graphic bugs sometimes :/");

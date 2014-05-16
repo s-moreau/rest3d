@@ -22,6 +22,7 @@ define(['rest3d', 'upload', 'viewer','database', 'collada','gltf'], function (re
         this.infoUrl = location.protocol + "//" + location.host + "/rest3d/info/" + this.name +"/";
         this.uploadUrl = location.protocol + "//" + location.host + "/rest3d/" + this.name +"/";
         this.dataUrl = location.protocol + "//" + location.host + "/rest3d/data/" + this.name +"/";
+        this.convertUrl = location.protocol + "//" + location.host + "/rest3d/convert/" + this.name +"/";
 
         this.init = function(){
             var tmp = new databaseTab(this,this.data,this.area);        
@@ -66,11 +67,9 @@ define(['rest3d', 'upload', 'viewer','database', 'collada','gltf'], function (re
         this.convertMenu = function (node) {
             // result = $("#" + node.attr("id")).data();
             // result.file.relativePath = "";
-            var tmp = {};
-            tmp.files = node.uhgt8ttt7
-            rest3d.convert({}, function(){
-                console.debug("in")
-            });
+            $.post(stock.convertUrl+node.attr("path") , { url: stock.dataUrl+'/?uuid='+node.attr("uuid")}).done(function( data ) {
+                alert( "Job id:" + data );
+              });
         }
         this.images=[];
         this.nodeArray = function(parent,name,id,uuid,type,path,up,close){
@@ -83,7 +82,6 @@ define(['rest3d', 'upload', 'viewer','database', 'collada','gltf'], function (re
                 "uuid": uuid,
                 "rel":type,
                 "path":path,
-                "up":up,
             }
             result.children = [];
             parent.push(result);
