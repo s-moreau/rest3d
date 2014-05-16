@@ -87,6 +87,7 @@ define(['rest3d', 'upload', 'viewer','database', 'collada','gltf'], function (re
             }
             result.children = [];
             parent.push(result);
+            if (path[0] ==='/') path = path.substring(1);
             if(type=="texture"){
                 this.images.push({"id":id,"path":path});
             }
@@ -151,6 +152,7 @@ define(['rest3d', 'upload', 'viewer','database', 'collada','gltf'], function (re
                             }
                             else {
                                 var url= node.attr('path');
+                                if (url[0] ==='/') url = url.substring(1);
                                 url = stock.dataUrl+url;
                                 stock.firstFlag = false;
                             }
@@ -182,7 +184,7 @@ define(['rest3d', 'upload', 'viewer','database', 'collada','gltf'], function (re
                                 for(var i=0;i<stock.images.length;i++){
                                     GUI.addTooltip({
                                         parent: $("#"+stock.images[i].id).find('a'),
-                                        content: "<img style='max-height:150px;max-width:150px' src="+stock.dataUrl+"/"+stock.images[i].path+" ></img>",
+                                        content: "<img style='max-height:150px;max-width:150px' src="+stock.dataUrl+stock.images[i].path+" ></img>",
                                     })            
                                 }
                             },1000)

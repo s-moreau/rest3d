@@ -846,10 +846,10 @@ define(['viewer', 'gui', 'rest3d', 'q', 'collada', 'gltf', 'renderer', 'state', 
             //Linking UI to the rest3d API 
              // welcomePanel();
             rest3d.database({}, function(data){
-                 if (jQuery.isEmptyObject(data.children) && jQuery.isEmptyObject(data.assets)) { // If no activities on the tmp repository exist
-                    welcomePanel();
-                }
-                else { // else check databases enabled from the server and load their tabs
+                //  if (jQuery.isEmptyObject(data.children) && jQuery.isEmptyObject(data.assets)) { // If no activities on the tmp repository exist
+                //     welcomePanel();
+                // }
+                // else { // else check databases enabled from the server and load their tabs
                     // tmp.infoServer(); // lunch request
                     rest3d.info(function(data){
                         for(var key in data){
@@ -865,7 +865,7 @@ define(['viewer', 'gui', 'rest3d', 'q', 'collada', 'gltf', 'renderer', 'state', 
                     // setTimeout(function () {
                     //     tmp.tree.jstree('open_all');
                     // }, 1500); // open all nodes of the tab
-                }              
+                // }              
             }, "/info/tmp");
   function jumpLine() {
                 renderMenu.render.append("<br></br>");
