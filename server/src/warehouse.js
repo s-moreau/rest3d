@@ -105,18 +105,17 @@ module.exports = function (server) {
           if (error)
             handler.handleError(error);
           else { 
-            var result = [];
+            var parentId=0;
+            var result = new Collection('warehouse',parentId,'');
+            result.uuid=uid;
+            delete result.name;
+            var col = result.getResourceSync();
             files.forEach(function (fileInfo) {
-              var parentId = 0;
-              var res = new Resource('warehouse',parentId,fileInfo.name,fileInfo.type)
+              var path = (fileInfo.assetpath ? fileInfo.assetpath+'/' : '');
+              col.assets[path+fileInfo.name] = fileInfo.name;
               
-              res.assetpath = fileInfo.assetpath;
-              res.collectionpath = fileInfo.collectionpath;
-              
-              result.push(res.getSync());
-
             });
-            return handler.handleResult(result);
+            return handler.handleResult(result.getSync());
           }
         });
 
@@ -275,7 +274,7 @@ module.exports = function (server) {
 
         }
         var result = parsesearch(body);
-        result.name = 'search: '+search;
+        result.search = search;
         if (!result) return handler.handleError('3dwarehouse search returned empty result');
 
         //result.RequestUri = uid;
@@ -294,6 +293,7 @@ module.exports = function (server) {
 
     var parentId =0;
     var result = new Collection('warehouse',parentId,'');
+    delete result.name;
     var col = result.getResourceSync();
     var json = JSON.parse(body);
 
@@ -358,6 +358,7 @@ module.exports = function (server) {
     
     var parentId =0;
     var result = new Collection('warehouse',parentId,'');
+    delete result.name;
     var col = result.getResourceSync();
     var json = JSON.parse(body);
 
