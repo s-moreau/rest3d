@@ -19,7 +19,8 @@ define(['rest3d', 'upload', 'viewer','database', 'collada','gltf'], function (re
         this.area = parent;
         this.image = $();
         this.progress = $("<progress value=0 max=100></progress>");
-        this.url = location.protocol + "//" + location.host + "/rest3d/info/" + this.name +"/";
+        this.infoUrl = location.protocol + "//" + location.host + "/rest3d/info/" + this.name +"/";
+        this.uploadUrl = location.protocol + "//" + location.host + "/rest3d/" + this.name +"/";
         this.dataUrl = location.protocol + "//" + location.host + "/rest3d/data/" + this.name +"/";
 
         this.init = function(){
@@ -35,14 +36,14 @@ define(['rest3d', 'upload', 'viewer','database', 'collada','gltf'], function (re
                 width: '600',
                 height: '500',
                 open: function (ev, ui) {
-                    $('#myIframe').attr('src', '/viewer/easy-viewer.html?file=/rest3d/data/'+stock.name + node.attr("path"));
+                    $('#myIframe').attr('src', '/viewer/easy-viewer.html?file=/rest3d/data/'+stock.name+'/?uuid='+node.attr("uuid"));
                 },
             });
         }
         var stock = this;
         this.displayCollada = function (node) {
             window.pleaseWait(true);
-            COLLADA.load("/rest3d/data/"+stock.name + node.attr("path"), viewer.parse_dae).then(
+            COLLADA.load("/rest3d/data/"+stock.name+'/?uuid='+node.attr("uuid"), viewer.parse_dae).then(
                 function (flag) {
                     window.pleaseWait(false);
                     buffer.notif(node.attr("name"));
@@ -51,11 +52,15 @@ define(['rest3d', 'upload', 'viewer','database', 'collada','gltf'], function (re
 
         this.displayGltf = function (node) {
             window.pleaseWait(true);
-            glTF.load("/rest3d/data/"+stock.name + node.attr("path"), viewer.parse_gltf).then(
+            glTF.load("/rest3d/data/"+stock.name+'/?uuid='+node.attr("uuid"), viewer.parse_gltf).then(
                 function (flag) {
                     window.pleaseWait(false);
                     window.notif(node.attr("name"));
                 })
+        }
+
+        this.download = function(node) {
+            var win = window.open(stock.dataUrl+'/?uuid='+node.attr("uuid"), '_blank');              
         }
 
         this.convertMenu = function (node) {
@@ -67,67 +72,6 @@ define(['rest3d', 'upload', 'viewer','database', 'collada','gltf'], function (re
                 console.debug("in")
             });
         }
-
-        this.encodeToId = function(name,uuid){
-            name=name.split(".").join("_");
-            name += "_"+uuid.split("-")[0];
-            while(true){
-                if($("#"+name).length==1){
-                    name+='_1';
-                }else{
-                    break;
-                }
-            }
-            return name;
-        }
-   
-        this.extensionToType=function(ext) {
-            var result;
-            if(ext==null){
-                return "folder";
-            }
-            else{
-                switch (ext[0]) {
-                    case ".dae":
-                        result = "collada";
-                        break;
-                    case ".DAE":
-                        result = "collada";
-                        break;
-                    case ".json":
-                        result = "gltf";
-                        break;
-                    case ".JSON":
-                        result = "gltf";
-                        break;
-                    case ".png":
-                        result = "texture";
-                        break;
-                    case ".jpeg":
-                        result = "texture";
-                        break;
-                    case ".tga":
-                        result = "texture";
-                        break;
-                    case ".jpg":
-                        result = "texture";
-                        break;
-                    case ".glsl":
-                        result = "shader";
-                        break;
-                    case "":
-                        result = "folder";
-                        break;
-                    case ".kmz":
-                        result = "zip";
-                        break;
-                    default:
-                        result = "file";
-                        break;
-                    }
-                    return result;
-                }
-            }
         this.images=[];
         this.nodeArray = function(parent,name,id,uuid,type,path,up,close){
             var result = {};
@@ -202,7 +146,7 @@ define(['rest3d', 'upload', 'viewer','database', 'collada','gltf'], function (re
                             var url = "";
                             stock.nodeBuffer = node;
                             if (node == -1) {
-                                url = stock.url;
+                                url = stock.infoUrl;
                                 stock.firstFlag = true;
                             }
                             else {
@@ -260,33 +204,39 @@ define(['rest3d', 'upload', 'viewer','database', 'collada','gltf'], function (re
                     "items": function (node) {
                         var result = {};
                         var rel = node.attr("rel");
-                        var up = node.attr("up");
-                        result.create = {
-                            'label': 'Create collection',
-                            'action': function (obj) {
-                                // stock.tree["tree_"+stock.name].jstree("rename");
-                               this.rename(obj); 
-                            }
-                        };
+                        var up = node.attr("upload");
+                        // result.create = {
+                        //     'label': 'Create collection',
+                        //     'action': function (obj) {
+                        //         // stock.tree["tree_"+stock.name].jstree("rename");
+                        //        this.rename(obj); 
+                        //     }
+                        // };
                         if (rel == "collection" || rel == "model" || rel == "zip" || rel == "folder") {
                             result.icon = {
                                 'label': 'Add files',
                                 'action': stock.addFiles_contextMenu,
                             };
                         }
-                        if ((rel == "collada" || rel == "gltf")) {
+                        else if (!up){
+                            result.icon = {
+                                'label': 'Download',
+                                'action': stock.download,
+                            };
+                        }
+                        if ((rel == "collada" || rel == "gltf") && !up) {
                             result.preview = {
                                 'label': 'Preview',
                                 'action': stock.preview,
                             };
                         }
-                        if (rel == "gltf" ) {
+                        if (rel == "gltf" && !up) {
                             result.display = {
                                 'label': 'Display',
                                 'action': stock.displayGltf,
                             };
                         }
-                        if (rel == "collada" ) {
+                        if (rel == "collada" && !up) {
                             result.display = {
                                 'label': 'Display',
                                 'action': stock.displayCollada,
@@ -364,9 +314,90 @@ define(['rest3d', 'upload', 'viewer','database', 'collada','gltf'], function (re
             });
             
         }
+
+        this.encodeToId = function(name){  // FUNCTION TO ENCODE ANY STRING TO AN ID HANDLED BY HTML/ REEEAAAALLLY IMPORTANT
+            try{name = name +"_"+this.parentTree.attr("id");}
+            catch(e){name = name +"_"+this.parentTree}
+            name = encodeURI(name);
+            name = name.split('.').join(""); 
+            name = name.split(',').join("");
+            name = name.split('/').join(""); 
+            name = name.split('?').join(""); 
+            name = name.split('@').join(""); 
+            name = name.split('&').join("");
+            name = name.split('=').join("");
+            name = name.split('+').join(""); 
+            name = name.split('$').join(""); 
+            name = name.split('#').join("");
+            return name; 
+        }
+
+        this.checkIfIdExist = function(name){
+            while(true){
+                if($("#"+name).length==1){
+                    name+='_1';
+                }else{
+                    break;
+                }
+            }
+            return name;
+        }
+   
+        this.extensionToType=function(ext) {
+            var result;
+            if(ext==null){
+                return "folder";
+            }
+            else{
+                switch (ext[0]) {
+                    case ".dae":
+                        result = "collada";
+                        break;
+                    case ".DAE":
+                        result = "collada";
+                        break;
+                    case ".json":
+                        result = "gltf";
+                        break;
+                    case ".JSON":
+                        result = "gltf";
+                        break;
+                    case ".png":
+                        result = "texture";
+                        break;
+                    case ".jpeg":
+                        result = "texture";
+                        break;
+                    case ".tga":
+                        result = "texture";
+                        break;
+                    case ".jpg":
+                        result = "texture";
+                        break;
+                    case ".glsl":
+                        result = "shader";
+                        break;
+                    case "":
+                        result = "folder";
+                        break;
+                    case ".kmz":
+                        result = "zip";
+                        break;
+                    default:
+                        result = "file";
+                        break;
+                    }
+                    return result;
+                }
+            }
         this.addNodeRoot = function(object){
              this.tree["tree_"+this.name].jstree("create_node", this.parentTree,'last', object);
         }
+
+        this.addNode = function(object){
+            this.tree["tree_"+this.name].jstree("create_node", this.parentTree, "inside", object, false, true);
+        }
+
         this.setUpload = function () {
             this.nodeRoot = $("#"+this.id)
             var upload = {
@@ -423,18 +454,43 @@ define(['rest3d', 'upload', 'viewer','database', 'collada','gltf'], function (re
                 }
             })
             this.uploadPlugin.jquery.bind('fileuploadadd', function (e, data) {
-                if(stock.image.length==1){var flagRoot = true;}
+                if(stock.image.length==1){stock.parentTree = -1;var flagRoot=true;}
+                var relativePath = data.files[0].relativePath.split("/");
+                relativePath.forEach(function(folder){
+                    if(folder !== ""){
+                        var objectId = stock.encodeToId(folder);
+                        if($('#'+objectId).length!==1){
+                            var object = {};
+                            object.data = folder;
+                            object.attr = {};
+                            object.attr.rel = "folder";
+                            if(stock.parentTree == -1) object.attr.path = folder;
+                            else object.attr.path = stock.parentTree.attr("path")+'/'+folder;
+                            objectId = stock.checkIfIdExist(objectId);
+                            object.attr.id = objectId;
+                            if(stock.parentTree == -1) stock.addNodeRoot(object)
+                            else stock.addNode(object)
+                        } 
+                        stock.parentTree = $("#"+objectId);  
+                    }
+                })
                 var tmp = {};
                 tmp.data = data.files[0].name;
-                var id = stock.encodeToId(tmp.data,"upload-f");
+                var id = stock.encodeToId(tmp.data);
+                id = stock.checkIfIdExist(id);
                 tmp.attr = {};
                 tmp.attr.id = id;
+                tmp.attr.path = stock.parentTree.attr("path")+'/'+tmp.data;
+                tmp.attr.upload = true; 
                 tmp.attr.rel = stock.extensionToType(tmp.data.match(/\.[^.]+$/));
-                if(flagRoot){stock.parentTree = -1}
-                if(stock.parentTree !== -1){
-                    data.url = stock.url + stock.parentTree.attr("path");
+                if(stock.parentTree == -1){
+                    data.url = stock.uploadUrl + tmp.data;
                 }
-                stock.addNodeRoot(tmp);
+                else{
+                    data.url = stock.uploadUrl + stock.parentTree.attr("path");
+                }
+                if(stock.parentTree == -1) stock.addNodeRoot(tmp)
+                else stock.addNode(tmp)
                 var checkbox = $('<input type="checkbox" style="float:right;" checked=true>')
                 $("#"+id).append(checkbox);
                 stock.uploadPlugin.setting.click(function(){
@@ -445,7 +501,8 @@ define(['rest3d', 'upload', 'viewer','database', 'collada','gltf'], function (re
                         }
                     }
                 })
-                if(flagRoot){stock.image.remove();}       
+                if(flagRoot){stock.image.remove();} 
+                stock.tree.openAll();
             })
             this.uploadPlugin.jquery.bind('fileuploadstart', function (e){
                 window.fl4reStatus("UPLOAD",stock.progress);
