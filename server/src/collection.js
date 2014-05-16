@@ -387,8 +387,8 @@ var addChild = function(collection,newcollection, path, cb){
   collection.addResource(newcol,cb);
 }
 
-// return matching asset in collection
-Collection.prototype.getAsset = function(_path, callback){
+// return (copy of) resource at path in collection
+Collection.prototype.getResource = function(_path, callback){
   var path=_path;
   var cb=callback;
   var collection = this;
@@ -404,7 +404,7 @@ Collection.prototype.getAsset = function(_path, callback){
         console.log('could not get asset resource?!')
         cb(err);
       }
-      var resource = asset.getResourceSync();
+      var resource = extend(new Resource(), asset.getResourceSync());
       console.log(' ... and resolved to resourceId='+resource.uuid)
       cb(err,resource);
     })

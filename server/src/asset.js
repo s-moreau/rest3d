@@ -42,6 +42,8 @@ Asset.prototype.unlock = function(callback){
 
 Asset.prototype.getResourceSync = function(){
   // last element is most recent
+  // return a copy
+  //return extend(new Resource(),this.resources[this.resources.length-1])
   return this.resources[this.resources.length-1];
 }
 

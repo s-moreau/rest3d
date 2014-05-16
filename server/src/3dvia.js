@@ -31,7 +31,7 @@ module.exports = function (server) {
   var cheerio = require('cheerio');
   var toJSON = require('./tojson');
 
-  var handler = require('./handler');
+  var Handler = require('./handler');
   var zipFile = require('./zipfile');
   var formidable = require('formidable');
   var Cookies = require('cookies');
@@ -39,15 +39,8 @@ module.exports = function (server) {
 
   var cookies = {};
 
-  var tdviahandler = function(req,res,next){
-    handler.call(this,req,res,next);
-  }
-  tdviahandler.prototype = Object.create(handler.prototype);
-
-  // do not use prototype, login is private to 3dvia
-  tdviahandler.prototype.login = function(){
+  var login = function(handler){
     console.log ("3dvia login requested");
-    var handler = this;
 
     var form = new formidable.IncomingForm();
     var sid = null;
@@ -57,7 +50,7 @@ module.exports = function (server) {
     } else
       sid = handler.req.session.sid;
 
-    form.parse(this.req, function(err, args) {
+    form.parse(handler.req, function(err, args) {
       if (err) return handler.handleError(err);
       if (!args.user || args.user==='' ) {
         return handler.handleError('3dvia login -> need non empty user');
@@ -202,239 +195,250 @@ module.exports = function (server) {
       return result;
     };
 
-  server.post(/^\/rest3d\/3dvia\/login/, function(req,res, next){
-    var tdvia = new tdviahandler(req, res, next);
+  server.post(/^\/rest3d\/login\/3dvia/, function(req,res, next){
+    var handler = new Handler(req, res, next);
 
-    tdvia.login();
+    login(handler);
 
   });
  
-  server.get(/^\/rest3d\/3dvia.*/,function(req, res, next) {
+  server.get(/^\/rest3d\/data\/3dvia.*/,function(req, res, next) {
     
-    var tdvia = new tdviahandler(req,res,next);
+    var handler = new Handler(req,res,next);
 
-    var uid = req.url.stringAfter('/3dvia/');
-    console.log('[3dvia]' + uid);
+    var uid = req.url.stringAfter('/3dvia');
+    while (uuid[0] === '/')  uuid = uuid.substr(1);
+    console.log('[3dvia] info id=' + uid);
 
-    var jar = null;
+    var jar = handler.getJar('3dvia');
 
-    if (req.session && req.session['3dvia']) {
-      jar = req.session['3dvia'];
-      if (!jar || !jar._jar.store.idx || !jar._jar.store.idx['3dvia.com']['/']['3DVIA_SESSION'])
-        return tdvia.handleError("need to login first (no jar)");
+    if (!jar || !jar._jar.store.idx || !jar._jar.store.idx['3dvia.com']['/']['3DVIA_SESSION'])
+      return handler.handleError("need to login first (no 3dvia session)");
 
-      // just browsing
-      if (!uid || uid==='') {
-        // this returns a json with all collections
-        var start = 1;
-        var end = 25;
-        request.post({ // All collections 
-            //url: "http://www.3dvia.com/warehouse/all",
-            url: "http://www.3dvia.com/search/ContentPicker.php",
-            jar: jar,
-            form: {
-              action:'files',
-              query:null,
-              start:start,
-              count:end,
-              page:'file',
-              'types[]':null,
-              groupPrivacy:null
-            }
-          },function(err, resp, body){
-            if (err)
-              return tdvia.handleError(err);
-            var o = JSON.parse(body);
-            if (!o || o.status === undefined)
-              return tdvia.handleError("got no response from 3dvia")
-            if (o.status === undefined || o.status !== 0)
-              return tdvia.handleError({message: body.message, name:body.status});
-            var result=parseall(o.result);
-            result.start = start;
-            result.end = end;
-            return tdvia.handleResult(result);
-        });
 
-      } else if (uid.startsWith('data/')) {
+    // just browsing
+    if (!uid || uid==='') {
 
-        var id = uid.stringAfter('data/')
- 
-        if (id) {
-          var url = "http://www.3dvia.com/3dsearch/FileInfo?FileId="+id+"&_format=json";
+      handler.handleError({statusCode:400,message:"transfering a collection is not supported"});
 
-          request({ 
-            url: url,
-            jar: jar
-            }, function(err, resp, body){
-              if (err) return tdvia.handleError(err);
-              var data =JSON.parse(body);
-              if (!data.returnresponse || !data.returnresponse.item || data.returnresponse.count<1 )
-                return tdvia.handleError('no response from 3dvia FileInfo assetID='+id);
-              if (data.returnresponse.code !== 200 )
-                return tdvia.handleError({name:data.returnresponse.code,message:'error code from 3dvia FileInfo assetID='+id});
+    
+    } else  { // TODO -> check for uuid= or path
 
-              var info = data.returnresponse.item[0];
-              var format = info.Format;
+      var url = "http://www.3dvia.com/3dsearch/FileInfo?FileId="+uid+"&_format=json";
 
-              var url = "http://www.3dvia.com/download.php?media_id="+id+"&file=/3dsearch/Content/"+id+"."+format;
-              //var url= "http://www.3dvia.com/3dsearch/Content/"+uid+".zip";
+      request({ 
+        url: url,
+        jar: jar
+        }, function(err, resp, body){
+          if (err) return handler.handleError(err);
+          var data =JSON.parse(body);
+          if (!data.returnresponse || !data.returnresponse.item || data.returnresponse.count<1 )
+            return handler.handleError('no response from 3dvia FileInfo assetID='+uid);
+          if (data.returnresponse.code !== 200 )
+            return handler.handleError({name:data.returnresponse.code,message:'error code from 3dvia FileInfo assetID='+uid});
 
-              //proxie with cache
-              
-              zipFile.uploadUrl(url,jar, function(error, fileInfo){
-                if (error)
-                  tdvia.handleError(error);
-                else 
-                  tdvia.sendFile(fileInfo.path, fileInfo.name);
-              });
-              
-              // proxie no cache
-              //tdvia.req.pipe(request({url:url, jar:jar})).pipe(tdvia.res);
+          var info = data.returnresponse.item[0];
+          var format = info.Format;
 
-              //tdvia.res.writeHead(302, {'Location': url});
-              //tdvia.res.end();
-              
-              });
+          var url = "http://www.3dvia.com/download.php?media_id="+uid+"&file=/3dsearch/Content/"+uid+"."+format;
+          //var url= "http://www.3dvia.com/3dsearch/Content/"+uid+".zip";
 
-        } else {
-          error={code:"API call error",message:"transfering a collection is not supported"};
-          tdvia.handleError(error);
-        }
-        // return the asset 
-      } else if (uid.startsWith('search/')) {
-
-        var search = uid.stringAfter('search/');
-
-        var query = null;
-        console.log ('search tdvia for ['+search+']')
-        // this returns a json with all collections
-        var start = 1;
-        var end = 25;
-        request.post({ // All collections 
-            //url: "http://www.3dvia.com/warehouse/all",
-            url: "http://www.3dvia.com/search/ContentPicker.php",
-            jar: jar,
-            form: {
-              action:'files',
-              query:query,
-              start:start,
-              count:end,
-              page:'file',
-              'types[]':null,
-              groupPrivacy:null
-            }
-          },function(err, resp, body){
-            if (err)
-              return tdvia.handleError(err);
-            var o = JSON.parse(body);
-            if (!o || o.status === undefined)
-              return tdvia.handleError("got no response from 3dvia")
-            if (o.status === undefined || o.status !== 0)
-              return tdvia.handleError({message: body.message, name:body.status});
-            var result=parseall(o.result);
-            result.start = start;
-            result.end = end;
-            return tdvia.handleResult(result);
-        });
-      } else if (uid.startsWith('info/')) {
-
-        var id = uid.stringAfter('info/')
- 
-        if (id) {
-
-          console.log ('get 3dvia model info ID =['+id+']')
-          var url = "http://www.3dvia.com/3dsearch/FileInfo?FileId="+id+"&_format=json";
-
-          request({ 
-            url: url,
-            jar: jar
-            }, function(err, resp, body){
-              if (err) return tdvia.handleError(err);
-              var data =JSON.parse(body);
-              if (!data.returnresponse || !data.returnresponse.item || data.returnresponse.count<1 )
-                return tdvia.handleError('no response from 3dvia FileInfo '+id);
-              if (data.returnresponse.code !== 200 )
-                return tdvia.handleError({name:data.returnresponse.code,message:'error code from 3dvia FileInfo '+uid});
-
-              return tdvia.handleResult(data.returnresponse.item[0]);
+          //proxie with cache
+          
+          zipFile.uploadUrl(url,jar, function(error, fileInfo){
+            if (error)
+              handler.handleError(error);
+            else 
+              handler.sendFile(fileInfo.path, fileInfo.name);
           });
-        } else
-          return tdvia.handleError("/3dvia/info invalid id="+id);
-        
-     
-      } else if (uid.startsWith('copy/')) {
+          
+          // proxie no cache
+          //handler.req.pipe(request({url:url, jar:jar})).pipe(handler.res);
 
-        var id = uid.stringAfter('copy/');
-        var url = "http://www.3dvia.com/3dsearch/FileInfo?FileId="+id+"&_format=json";
-        console.log ('copy 3dvia asset  ID =['+id+']');
-        request({ 
-          url: url,
-          jar: jar
-          }, function(err, resp, body){
-            if (err) return tdvia.handleError(err);
-            var data =JSON.parse(body);
-            if (!data.returnresponse || !data.returnresponse.item || data.returnresponse.count<1 )
-              return tdvia.handleError('no response from 3dvia fileInfo, assetID='+id);
-            if (data.returnresponse.code !== 200 )
-              return tdvia.handleError({name:data.returnresponse.code,message:'error code from 3dvia FileInfo, assetID='+id});
-
-            var info = data.returnresponse.item[0];
-            var format = info.Format;
-
-            var url = "http://www.3dvia.com/download.php?media_id="+id+"&file=/3dsearch/Content/"+id+"."+format;
-
-            // note: this is using diskcache
-            Collection.find('tmp', path.join('/', tdvia.sid), function (err, result) {
-              if (err) return tdvia.handlerError(err);
-              else {
-                zipFile.unzipUploadUrl(tdvia,result.collection, result.assetpath, url,jar, function(error, result){
-                  if (error)
-                    tdvia.handleError(error);
-                  else {
-                    for (var file in results) 
-                       FileInfo.upload(handler,file.path);
-                    tdvia.handleResult(result);
-                  }
-                });
-              }
-            })
-            
+          //handler.res.writeHead(302, {'Location': url});
+          //handler.res.end();
+          
         });
+    }
+  });
 
-      } else { // request information about asset 
-        console.log ('get 3dvia asset  ID =['+uid+']');
-        
-        var url = "http://www.3dvia.com/3dsearch/FileInfo?FileId="+uid+"&_format=json";
 
-        request({ 
-          url: url,
-          jar: jar
-          }, function(err, resp, body){
-            if (err) return tdvia.handleError(err);
-            var data =JSON.parse(body);
-            if (!data.returnresponse || !data.returnresponse.item || data.returnresponse.count<1 )
-              return tdvia.handleError('no response from 3dvia FileInfo assetID='+id);
-            if (data.returnresponse.code !== 200 )
-              return tdvia.handleError({name:data.returnresponse.code,message:'error code from 3dvia FileInfo assetID='+uid});
+  server.get(/^\/rest3d\/search\/3dvia.*/,function(req, res, next) {
 
-            var info = data.returnresponse.item[0];
-            var format = info.Format;
+    var handler = new Handler(req,res,next);
 
-            var url = "http://www.3dvia.com/download.php?media_id="+uid+"&file=/3dsearch/Content/"+uid+"."+format;
-            //var url= "http://www.3dvia.com/3dsearch/Content/"+uid+".zip";
+    var search = req.url.stringAfter('/3dvia');
+    while (search[0] === '/')  search = search.substr(1);
+    console.log('[3dvia] search id=' + search);
 
-            // note: this is using diskcache
-            var asset = zipFile.getAssetInfoUrl(tdvia,url,jar, function(error, result){
+    var jar = handler.getJar('3dvia');
+
+    if (!jar || !jar._jar.store.idx || !jar._jar.store.idx['3dvia.com']['/']['3DVIA_SESSION'])
+      return handler.handleError("need to login first (no 3dvia session)");
+
+    var query = null;
+
+    // this returns a json with all collections
+    var start = 1;
+    var end = 25;
+    request.post({ // All collections 
+        //url: "http://www.3dvia.com/warehouse/all",
+        url: "http://www.3dvia.com/search/ContentPicker.php",
+        jar: jar,
+        form: {
+          action:'files',
+          query:query,
+          start:start,
+          count:end,
+          page:'file',
+          'types[]':null,
+          groupPrivacy:null
+        }
+      },function(err, resp, body){
+        if (err)
+          return handler.handleError(err);
+        var o = JSON.parse(body);
+        if (!o || o.status === undefined)
+          return handler.handleError("got no response from 3dvia")
+        if (o.status === undefined || o.status !== 0)
+          return handler.handleError({message: body.message, name:body.status});
+        var result=parseall(o.result);
+        result.start = start;
+        result.end = end;
+        return handler.handleResult(result);
+    });
+  });
+
+
+  server.get(/^\/rest3d\/info\/3dvia.*/,function(req, res, next) {
+
+    var handler = new Handler(req,res,next);
+
+    var id = req.url.stringAfter('/3dvia');
+    while (id[0] === '/')  id = id.substr(1);
+    console.log('[3dvia] info id=' + id);
+
+    var jar = handler.getJar('3dvia');
+
+    if (!jar || !jar._jar.store.idx || !jar._jar.store.idx['3dvia.com']['/']['3DVIA_SESSION'])
+      return handler.handleError("need to login first (no 3dvia session)");
+
+    if (id) {
+
+      console.log ('get 3dvia model info ID =['+id+']')
+      var url = "http://www.3dvia.com/3dsearch/FileInfo?FileId="+uid+"&_format=json";
+
+      request({ 
+        url: url,
+        jar: jar
+        }, function(err, resp, body){
+          if (err) return handler.handleError(err);
+          var data =JSON.parse(body);
+          if (!data.returnresponse || !data.returnresponse.item || data.returnresponse.count<1 )
+            return handler.handleError('no response from 3dvia FileInfo assetID='+id);
+          if (data.returnresponse.code !== 200 )
+            return handler.handleError({name:data.returnresponse.code,message:'error code from 3dvia FileInfo assetID='+uid});
+
+          var info = data.returnresponse.item[0];
+          var format = info.Format;
+
+          var url = "http://www.3dvia.com/download.php?media_id="+uid+"&file=/3dsearch/Content/"+uid+"."+format;
+          //var url= "http://www.3dvia.com/3dsearch/Content/"+uid+".zip";
+
+          // note: this is using diskcache
+          var asset = zipFile.getAssetInfoUrl(handler,url,jar, function(error, result){
+            if (error)
+              handler.handleError(error);
+            else
+              handler.handleResult(result);
+          });
+      });
+    } else {
+
+      // this returns a json with all collections
+      var start = 1;
+      var end = 25;
+      request.post({ // All collections 
+          //url: "http://www.3dvia.com/warehouse/all",
+          url: "http://www.3dvia.com/search/ContentPicker.php",
+          jar: jar,
+          form: {
+            action:'files',
+            query:null,
+            start:start,
+            count:end,
+            page:'file',
+            'types[]':null,
+            groupPrivacy:null
+          }
+        },function(err, resp, body){
+          if (err)
+            return handler.handleError(err);
+          var o = JSON.parse(body);
+          if (!o || o.status === undefined)
+            return handler.handleError("got no response from 3dvia")
+          if (o.status === undefined || o.status !== 0)
+            return handler.handleError({message: body.message, name:body.status});
+          var result=parseall(o.result);
+          result.start = start;
+          result.end = end;
+          return handler.handleResult(result);
+      });
+
+    }
+  });
+
+
+
+  server.get(/^\/rest3d\/copy\/3dvia.*/,function(req, res, next) {
+
+    var handler = new Handler(req,res,next);
+
+    var id = req.url.stringAfter('/3dvia');
+    while (id[0] === '/')  id = id.substr(1);
+    console.log('[3dvia] copy id=' + id);
+
+    var jar = handler.getJar('3dvia');
+
+    if (!jar || !jar._jar.store.idx || !jar._jar.store.idx['3dvia.com']['/']['3DVIA_SESSION'])
+      return handler.handleError("need to login first (no 3dvia session)");
+
+   
+    var url = "http://www.3dvia.com/3dsearch/FileInfo?FileId="+id+"&_format=json";
+
+    request({ 
+      url: url,
+      jar: jar
+      }, function(err, resp, body){
+        if (err) return handler.handleError(err);
+        var data =JSON.parse(body);
+        if (!data.returnresponse || !data.returnresponse.item || data.returnresponse.count<1 )
+          return handler.handleError('no response from 3dvia fileInfo, assetID='+id);
+        if (data.returnresponse.code !== 200 )
+          return handler.handleError({name:data.returnresponse.code,message:'error code from 3dvia FileInfo, assetID='+id});
+
+        var info = data.returnresponse.item[0];
+        var format = info.Format;
+
+        var url = "http://www.3dvia.com/download.php?media_id="+id+"&file=/3dsearch/Content/"+id+"."+format;
+
+        // note: this is using diskcache
+        Collection.find('tmp', path.join('/', handler.sid), function (err, result) {
+          if (err) return handler.handlerError(err);
+          else {
+            zipFile.unzipUploadUrl(handler,result.collection, result.assetpath, url,jar, function(error, result){
               if (error)
-                tdvia.handleError(error);
-              else
-                tdvia.handleResult(result);
+                handler.handleError(error);
+              else {
+                for (var file in results) 
+                   FileInfo.upload(handler,file.path);
+                handler.handleResult(result);
+              }
             });
-        });
-       
-      }
-    } else
-    return tdvia.handleError("need to login first (no 3dvia session)");
+          }
+        })
+        
+    });
   });
 };
 

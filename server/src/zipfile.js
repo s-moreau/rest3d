@@ -230,7 +230,7 @@
   // if params does not have a filename, extract filename from headers
   var unzip = function (params) {
 
-    var counter = 0;
+    var counter = 1;
 
     var there_was_an_error=false;
 
@@ -257,14 +257,18 @@
       if (err) {
         console.log('ERROR IN ZIPFILE FINISH');
         
-        if(folder.indexOf("tmp/")!==-1)rmdirSync(folder);
+        rmdirSync('tmp/'+params.handler.req.session.sid);
         params.cb(err);
         counter = -1;
         there_was_an_error=true;
         return;
       }
-      if(folder.indexOf("tmp/")!==-1)rmdirSync(folder);
-      params.cb(undefined, files);
+      counter --;
+      if (counter === 0)
+      {
+        rmdirSync('tmp/'+params.handler.req.session.sid);
+        params.cb(undefined, files);
+      }
     };
 
     if(params.target){
@@ -276,25 +280,27 @@
     console.log('exec ['+cmd+']');
     exec(cmd, function(code, output){
       if (code === 9){
-         console.log("error in unzip - assuming this is not a zip file");
+        if (output.contains('signature not found')){
+     
+          console.log("error in unzip - assuming this is not a zip file");
 
-        var item = {
-            name: params.name,
-            path: params.filename 
-            // size and type will be created by new FileInfo()
-        };
-        var fileInfo = new FileInfo(item, params.collectionpath, params.assetpath);
-        //item.fileInfo = fileInfo;
-        counter ++;
-        //asset = {name:params.name, path:params.filename, type:fileInfo.type};
+          var item = {
+              name: params.name,
+              path: params.filename 
+              // size and type will be created by new FileInfo()
+          };
+          var fileInfo = new FileInfo(item, params.collectionpath, params.assetpath);
 
-        fileInfo.donotmove = params.donotmove;
-        files.push(fileInfo);
+          fileInfo.donotmove = params.donotmove;
+          files.push(fileInfo);
 
-        if (!params.dryrun) {
-           fileInfo.upload(params.handler, finish);
-        } else
-          finish(undefined);
+          if (!params.dryrun) {
+             fileInfo.upload(params.handler, finish);
+          } else
+            finish(undefined);
+        } else { // other error messages are real errors
+          return finish(output);
+        }
       } else if (code) {
         console.log('Exit code:', code);
         console.log('Program output:', output);
@@ -335,7 +341,7 @@
                   if (!params.dryrun) {
                      fileInfo.upload(params.handler, finish);
                   } else
-                    //finish(undefined);
+                    finish(undefined);
 
                   next();
            
@@ -344,6 +350,7 @@
                 next();
               }
             , end: function(){
+              // counter --
               finish(undefined);
             }
           }
