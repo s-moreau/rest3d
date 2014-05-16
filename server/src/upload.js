@@ -158,29 +158,22 @@ module.exports = function (server) {
         if (!counter)
           return handler.handleError({message:'post did not send any files', statusCode:400})
         files.forEach(function (fileInfo) {
-          fileInfo.asset.get(function (err, res) {
-            if (err) {
-              if (counter != -1)
-                handler.handleError(err);
-              counter = -1;
-              return
-            } else {
-              res.assetpath = fileInfo.assetpath;
-              res.collectionpath = fileInfo.collectionpath;
-              // remove sid from collectionpath for database tmp
-              if (res.database === 'tmp') {
-                if (res.collectionpath.contains('/'))
-                  res.collectionpath = res.collectionpath.stringAfter('/')
-                else
-                  res.collectionpath = "";
-              } else 
-                res 
-              results.push(res)
-              counter--;
-              if (counter == 0)
-                handler.handleResult(results);
-            }
-          })
+          var res = fileInfo.asset.getSync();
+
+          res.assetpath = fileInfo.assetpath;
+          res.collectionpath = fileInfo.collectionpath;
+          // remove sid from collectionpath for database tmp
+          if (res.database === 'tmp') {
+            if (res.collectionpath.contains('/'))
+              res.collectionpath = res.collectionpath.stringAfter('/')
+            else
+              res.collectionpath = "";
+          } else 
+            res 
+          results.push(res)
+          counter--;
+          if (counter == 0)
+            handler.handleResult(results);
 
         });
       
@@ -292,15 +285,12 @@ module.exports = function (server) {
       Collection.find(handler.db, Path.join('/', handler.sid), function (err, result) {
         if (err) return handler.handleError(err);
         else {
-          result.collection.get(function (err, result) {
-            if (err) handler.handleError(err);
-            else {
-              // replace sid with '/' in col path, so this is hidden from client
-              if (handler.db === tmpdb)
-                result.name = '/';
-              handler.handleResult(result);
-            }
-          })
+          var result = result.collection.getSync();
+           
+          // replace sid with '/' in col path, so this is hidden from client
+          if (handler.db === tmpdb)
+            result.name = '/';
+          return handler.handleResult(result);
         }
       })
 
@@ -309,14 +299,13 @@ module.exports = function (server) {
       Resource.load(handler.db, uuid, function (err, resource) {
         if (err) handler.handleError(err);
         else {
-          resource.get(function (err, result) {
-            if (err) handler.handleError(err)
-            else {
-              if (handler.db === tmpdb && result.name === handler.sid)
-                result.name = '/';
-              handler.handleResult(result);
-            }
-          })
+          var result = resource.getSync();
+            
+          if (handler.db === tmpdb && result.name === handler.sid)
+            result.name = '/';
+
+          return handler.handleResult(result);
+
         }
       })
     } else /* this is a path */ {
@@ -334,10 +323,9 @@ module.exports = function (server) {
           console.log('res upload returned match =' + res.path + ' asset =' + res.assetpath);
 
           if (!res.assetpath) { // we found a collection
-            res.collection.get(function(err,result){
-              if (err) handler.handleError(err);
-              else handler.handleResult(result);
-            })
+            var result = res.collection.getSync();
+            return handler.handleResult(result);
+
           } else {
 
             // let see if there is an asset there
@@ -347,10 +335,8 @@ module.exports = function (server) {
               if (err) return handler.handleError(err);
               if (!resource) return handler.handleError('get /tmp/ cannot find resource at =' + res.assetpath);
               
-              resource.get(function(err,result){
-                if (err) handler.handleError(err);
-                else handler.handleResult(result);
-              })
+              var result = resource.getSync();
+              return handler.handleResult(result);
              
             })
           }
@@ -408,10 +394,8 @@ module.exports = function (server) {
           console.log('res upload returned match =' + res.path + ' asset =' + res.assetpath);
 
           if (!res.assetpath) { // we found a collection
-            res.collection.get(function(err,result){
-              if (err) handler.handleError(err);
-              else handler.handleResult(result);
-            })
+            var result = res.collection.getSync();
+            return handler.handleResult(result);
           } else {
 
             // let see if there is an asset there

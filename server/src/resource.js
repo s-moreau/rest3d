@@ -56,11 +56,11 @@ Resource.load = function(database,id,callback){
 }
 
 // get resource for REST API output
-Resource.prototype.get = function(callback) {
+Resource.prototype.getSync = function() {
   var result=extend({},this);
   result.database && result.database.name && (result.database = result.database.name);
   delete result.parentId;
-  callback(undefined,result);
+  return result;
 }
 
 Resource.tmpAssets = {};

@@ -195,7 +195,7 @@ module.exports = function (server) {
       return result;
     };
 
-  server.post(/^\/rest3d\/login\/3dvia/, function(req,res, next){
+  server.post(/^\/rest3d\/login\/3dvia.*/, function(req,res, next){
     var handler = new Handler(req, res, next);
 
     login(handler);
@@ -326,7 +326,7 @@ module.exports = function (server) {
     if (id) {
 
       console.log ('get 3dvia model info ID =['+id+']')
-      var url = "http://www.3dvia.com/3dsearch/FileInfo?FileId="+uid+"&_format=json";
+      var url = "http://www.3dvia.com/3dsearch/FileInfo?FileId="+id+"&_format=json";
 
       request({ 
         url: url,
@@ -337,12 +337,12 @@ module.exports = function (server) {
           if (!data.returnresponse || !data.returnresponse.item || data.returnresponse.count<1 )
             return handler.handleError('no response from 3dvia FileInfo assetID='+id);
           if (data.returnresponse.code !== 200 )
-            return handler.handleError({name:data.returnresponse.code,message:'error code from 3dvia FileInfo assetID='+uid});
+            return handler.handleError({name:data.returnresponse.code,message:'error code from 3dvia FileInfo assetID='+id});
 
           var info = data.returnresponse.item[0];
           var format = info.Format;
 
-          var url = "http://www.3dvia.com/download.php?media_id="+uid+"&file=/3dsearch/Content/"+uid+"."+format;
+          var url = "http://www.3dvia.com/download.php?media_id="+id+"&file=/3dsearch/Content/"+id+"."+format;
           //var url= "http://www.3dvia.com/3dsearch/Content/"+uid+".zip";
 
           // note: this is using diskcache

@@ -15,9 +15,10 @@ var Resource = require('./resource')
 
 var mime_type = 'model/rest3d-collection+json';
 
-var Collection = function (database, parentId ,name, resource){
+var Collection = function (database, parentId ,name){
   if (arguments.length) {
-    Asset.call(this,database, parentId ,name,resource);
+    var col = {children:{}, assets:{}};
+    Asset.call(this,database, parentId ,name,col);
     this.type=mime_type;
   }
 }
@@ -165,8 +166,8 @@ Collection.prototype.mkdir = function(name,uid,cb) {
         error.statusCode = 403;
         return cb(error);
       } else { // create new child collection
-        var col2 = {children:{}, assets:{}};
-        collection2 = new Collection(collection.database, collection.uuid, name.slice(name.lastIndexOf('/')+1), col2);
+
+        collection2 = new Collection(collection.database, collection.uuid, name.slice(name.lastIndexOf('/')+1));
         Asset.create(collection2, uid,function(err,collection2){
           if (err) return next(err);
           addChild(collection,collection2,name,next);
@@ -317,16 +318,14 @@ var find = function(collection,match,path,cb) {
 
 
 // return a collection to rest API
-Collection.prototype.get = function(callback) {
+Collection.prototype.getSync = function() {
   var result=extend({},this);
-  var cb=callback;
   delete result.resources;
   delete result.parentId;
   var col = this.getResourceSync();
   extend(result,col);
   result.database && result.database.name && (result.database = result.database.name);
-
-  cb(undefined,result);
+  return result;
 }
 
 // return the root collection for a database
@@ -334,8 +333,8 @@ Collection.getroot = function(db,cb){
 
   db.getRoot(function(err,root){
     if (!root || (err && err.statusCode === 404)) {
-      var col = {children:{}, assets:{}};
-      var collection = new Collection(db, null, '/', col);
+      
+      var collection = new Collection(db, null, '/');
       // 'save' will save the asset, which will be detected as root
       Asset.create(collection, 0, function(err, collection){
           // TODO - it is possible that 2 users will create a root at same time !
