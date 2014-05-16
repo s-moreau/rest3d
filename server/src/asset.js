@@ -48,15 +48,15 @@ Asset.prototype.getResourceSync = function(){
 }
 
 // get resource for REST API output
-Asset.prototype.get = function(callback) {
+Asset.prototype.getSync = function() {
   var result=extend({},this);
-  var cb=callback;
+
   delete result.resources;
   delete result.parentId;
   var col = this.getResourceSync();
   extend(result,col);
   result.database && result.database.name && (result.database = result.database.name);
-  cb(undefined,result);
+  return result;
 
 }
 Asset.tmpAssets = {};

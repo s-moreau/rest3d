@@ -34,31 +34,16 @@ module.exports = function (server) {
   var Handler = require('./handler');
   var zipFile = require('./zipfile');
 
-  
-  server.get(/^\/rest3d\/data\/warehouse.*/,function(req, res, next) {
-    
-    var handler = new Handler(req,res,next);
-
-    var uid = req.url.stringAfter('/warehouse');
-
-    while (uid[0]==='/') uid = uid.substring(1);
-
-    console.log('[data/warehouse] id=' + uid);
-
-    // just browsing
-    if (!uid || uid ==='')
-      return handler.handleError({message:'sendind data for entire folder is not supported',statusCode:400})
-
-  });
+  var Collection = require('./collection');
+  var Asset = require('./asset');
+  var Resource = require('./resource');
 
 
   server.get(/^\/rest3d\/info\/warehouse.*/,function(req, res, next) {
     
     var handler = new Handler(req,res,next);
 
-    var uid = req.url.stringAfter('/warehouse');
-    
-    while (uid[0]==='/') uid = uid.substring(1);
+    var uid = req.query.uuid;
 
     console.log('[info/warehouse] id=' + uid);
 
@@ -88,15 +73,15 @@ module.exports = function (server) {
         },function(err, resp, body){
           if (err){
             console.log('Error asking warehouse to list all collections')
-            console.log(err)
-            return next(err);
+            return handler.handleError(err);
           }
           var result=parseroot(body);
-          res.writeHead(200, {'Content-Type': 'application/json', 'Access-Control-Allow-Origin' : '*'});
-          res.write(toJSON(result));
-          res.end();
-          return next();
-          }
+          if (!result) return handler.handleError('warehouse search returned empty result')
+          result.name = '/';
+          result.uuid = '';
+          handler.handleResult(result.getSync());
+
+        }
       );
     } else {
       // here return info on a model/collection
@@ -119,10 +104,21 @@ module.exports = function (server) {
         var asset = zipFile.getAssetInfoUrl(handler,url, undefined, function(error, files){
           if (error)
             handler.handleError(error);
-          else
-            handler.handleResult(result);
-        });
+          else { 
+            var result = [];
+            files.forEach(function (fileInfo) {
+              var parentId = 0;
+              var res = new Resource('warehouse',parentId,fileInfo.name,fileInfo.type)
+              
+              res.assetpath = fileInfo.assetpath;
+              res.collectionpath = fileInfo.collectionpath;
+              
+              result.push(res.getSync());
 
+            });
+            return handler.handleResult(result);
+          }
+        });
 
 
       } else if (id && id[0] === 'c' && id.length===2) {
@@ -146,12 +142,13 @@ module.exports = function (server) {
           },function(err, resp, body){
             if (err){
               console.log('ERROR asking 3dwarehouse ID'=id[0]);
-              console.log(err)
-              return next(err);
+              return handler.handleError(err);
             }
 
             var result = parsesearch(body);
+            if (!result) return handler.handlerError(new Error('3d warehouse get collection error'));
 
+            result.uuid = uid;
             // get collections now
             var start = 1;
             var end = 100;
@@ -167,17 +164,20 @@ module.exports = function (server) {
               },function(err, resp, body){
                 if (err){
                   console.log('ERROR asking 3dwarehouse ID'=id[0]);
-                  console.log(err)
-                  return next(err);
+                  return handler.handleError(err);
                 }
                 var result2 = parseroot(body);
+
+                if (!result2) return handle.handleError('warehouse returned empty body');
+
                 // append collections to models
-                result.assets = result.assets.concat(result2.assets);
-                result.RequestUri = uid;
-                res.writeHead(200, {'Content-Type': 'application/json', 'Access-Control-Allow-Origin' : '*' });
-                res.write(toJSON(result));
-                res.end();
-                return next();
+                var col1 = result.getResourceSync();
+                var col2 = result2.getResourceSync();
+                col1.children = col2.children;
+
+                //result.RequestUri = uid;
+
+                return handler.handleResult(result.getSync());
               }
             );
             
@@ -186,18 +186,22 @@ module.exports = function (server) {
     }
   });
 
+
+  
   server.get(/^\/rest3d\/data\/warehouse.*/,function(req, res, next) {
     
     var handler = new Handler(req,res,next);
 
-    var uid = req.url.stringAfter('/warehouse');
-    
-    while (uid[0]==='/') uid = uid.substring(1);
+    var uid = req.query.uuid;
 
     console.log('[data/warehouse] id=' + uid);
 
+    // just browsing
+    if (!uid || uid ==='') {
+      error={statusCode:400,message:"missing uuid in GET /data/warehouse request"};
+      return handler.handleError(error);
+    }
 
-    var ids = uid.split('data/')[1];
     var id = uid.split('_');
 
     if (id && id[0] === 'm' && id.length===3){
@@ -207,16 +211,19 @@ module.exports = function (server) {
       // proxie
       //req.pipe(request(url)).pipe(res);
       // redirect
+      handler.redirect(url);
+      /*
       res.writeHead(302, {'Location': url});
       res.end();
       return next();
+      */
 
     } else if (id && id[0] === 'c' && id.length===2){
-
-      var error = { "code": "API call error", "message": "invalid id="+ids+" in /rest3d/warehouse/data/ "};
+      error={statusCode:400,message:"getting data from a collection is not supported"};
+      console.log(eror.message);
       handler.handleError(error);
     } else {
-      error={code:"API call error",message:"transfering a collection is not supported"};
+      error={statusCode:400,message:"invalid id="+uid+" in GET data/warehouse"};
       handler.handleError(error);
     }
   });
@@ -235,10 +242,8 @@ module.exports = function (server) {
     if (search === '')
     {
       console.log('search string cannot be empty')
-      res.writeHead(400);
-      res.write('search string cannot be empty');
-      res.end();
-      return next();
+      return handle.handleError({message:'search string cannot be empty',statusCode:400});
+
     } else
     {
       // this returns a json
@@ -263,18 +268,20 @@ module.exports = function (server) {
         url: req
       }, function(err, resp, body){
         if (err){
-          console.log('ERROR searching 3dwarehouse for '+search)
-          console.log(err)
-          return next(err);
+
+          console.log('ERROR searching 3dwarehouse for '+search);
+
+          return handler.handleError(err);
+
         }
         var result = parsesearch(body);
+        result.name = 'search: '+search;
+        if (!result) return handler.handleError('3dwarehouse search returned empty result');
 
-        result.RequestUri = uid;
+        //result.RequestUri = uid;
 
-        res.writeHead(200, {'Content-Type': 'application/json', 'Access-Control-Allow-Origin' : '*' });
-        res.write(toJSON(result));
-        res.end();
-        return next();
+        return handler.handleResult(result.getSync());
+
       });
 
     }
@@ -283,17 +290,23 @@ module.exports = function (server) {
 
 
   var parsesearch =function(body) {
-    var result={};
+
+
+    var parentId =0;
+    var result = new Collection('warehouse',parentId,'');
+    var col = result.getResourceSync();
     var json = JSON.parse(body);
 
-    result.success = json.success;
-    if (result.success != true) return;
+    if (json.success != true) return null;
 
+/* TODO - handle partial result
     result.start = json.startRow;
     result.end = json.endRow;
     result.total = json.total;
 
     result.assets = [];
+*/
+
 
     for (var i=0;i<json.entries.length;i++){
       var entry = json.entries[i];
@@ -310,6 +323,12 @@ module.exports = function (server) {
         }
       }
       if (!kmz) continue;
+
+      // those are assets
+      var id = 'm_'+entry.id+"_"+kmz;
+      col.assets[entry.title] = id;
+
+      /*
       var item={};
       item.name = entry.title;
       item.description = entry.description;
@@ -328,22 +347,30 @@ module.exports = function (server) {
       item.assetUri = "https://3dwarehouse.sketchup.com/3dw/getbinary?subjectId="+entry.id+"&subjectClass=entity&name="+kmz;
       item.previewUri = "https://3dwarehouse.sketchup.com/embed.html?entityId="+entry.id;
       result.assets.push(item);
+      */
     }
     return result;
   };    
-  // 
-  var parseroot= function (body) {
-    var result={};
+
+  // parse the result and return a root collection and a list of child collections
+
+  var parseroot= function ( body) {
+    
+    var parentId =0;
+    var result = new Collection('warehouse',parentId,'');
+    var col = result.getResourceSync();
     var json = JSON.parse(body);
 
-    result.success = json.success;
-    if (result.success != true) return;
+    if (json.success != true) return null;
+
+    /* TODO -- deal with partial results
 
     result.start = json.startRow;
     result.end = json.endRow;
     result.total = json.total;
 
     result.assets = [];
+    */
 
     for (var i=0;i<json.entries.length;i++){
       var entry = json.entries[i];
@@ -363,6 +390,12 @@ module.exports = function (server) {
             st = true;
         }
 
+
+      var id = 'c_'+entry.id;
+      col.children[entry.title] = id;
+
+
+      /*
       var item={};
       item.name = entry.title;
       item.description = entry.description;
@@ -380,6 +413,7 @@ module.exports = function (server) {
       item.entityCount = entityCount;
       item.iconUri = (st ? "https://3dwarehouse.sketchup.com/3dw/getbinary?subjectId="+entry.id+"&subjectClass=collection&name=st" : null);
       result.assets.push(item);
+      */
     }
     return result;
   };  
