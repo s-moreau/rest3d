@@ -257,7 +257,7 @@
       if (err) {
         console.log('ERROR IN ZIPFILE FINISH');
         
-        rmdirSync('tmp/'+params.handler.req.session.sid);
+        rmdirSync(FileInfo.options.tmpDir+'/'+params.handler.req.session.sid);
         params.cb(err);
         counter = -1;
         there_was_an_error=true;
@@ -266,7 +266,7 @@
       counter --;
       if (counter === 0)
       {
-        rmdirSync('tmp/'+params.handler.req.session.sid);
+        rmdirSync(FileInfo.options.tmpDir+'/'+params.handler.req.session.sid);
         params.cb(undefined, files);
       }
     };
@@ -274,7 +274,7 @@
     if(params.target){
       var folder = params.target;
     }else{
-      var folder = 'tmp/'+params.handler.req.session.sid;
+      var folder = FileInfo.options.tmpDir+'/'+params.handler.req.session.sid;
     }
     var cmd = 'unzip '+params.filename+' -x Thumbs.db .DS_Store .Trashes __MACOSX/* -d '+folder;
     console.log('exec ['+cmd+']');

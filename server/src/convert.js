@@ -19,17 +19,17 @@ server.jobManager.addJob('convert', {
   concurrency: 100, //number of concurrent jobs ran at the same time, default 50 if not specified
   work: function (params) {          //The job
       this.params = params;
-      this.dirname = this.id; 
+      this.dirname = FileInfo.options.uploadDir+"/"+this.id; 
       this.stderr = "", this.stdout = "", this.errorCode = undefined, this.result=[], this.timeout = 1000*60*5;
       this.writeLogs = function(){
-         fs.writeFile("tmp/"+this.dirname+"/stderr_"+this.dirname, this.stderr+".log", function(err) { //create stderr log
+         fs.writeFile(this.dirname+"/stderr_"+this.dirname, this.stderr+".log", function(err) { //create stderr log
           if(err) {
               console.log(err);
           } else {
               console.log("Log stderr conversion created");
           }
           }); 
-          fs.writeFile("tmp/"+this.dirname+"/stdout_"+this.dirname+".log", this.stdout, function(err) {//create stdout log
+          fs.writeFile(this.dirname+"/stdout_"+this.dirname+".log", this.stdout, function(err) {//create stdout log
           if(err) {
               console.log(err);
           } else {
@@ -37,8 +37,8 @@ server.jobManager.addJob('convert', {
           }
           });
       }
-      fs.mkdirSync("tmp/"+this.dirname); //create temporary folder for stocking assets to be converted
-      fs.chmodSync("tmp/"+this.dirname, '777'); //set access mode R&W
+      fs.mkdirSync(this.dirname); //create temporary folder for stocking assets to be converted
+      fs.chmodSync(this.dirname, '777'); //set access mode R&W
       var stock = this;
       this.flag = true;
       // CONVERT callback
@@ -120,24 +120,24 @@ server.jobManager.addJob('convert', {
 
       // URL 
       if(params.url){
-        zipFile.unzipUrl(params.handler,params.collectionpath,params.assetpath,params.url,undefined,"tmp/"+this.dirname,callbackConvert)
+        zipFile.unzipUrl(params.handler,params.collectionpath,params.assetpath,params.url,undefined,this.dirname,callbackConvert)
       }
 
       // FILE
       if(params.file){  
-        zipFile.unzipFile(params.handler,params.collectionpath, params.assetpath,params.file,"tmp/"+this.dirname,callbackConvert)
+        zipFile.unzipFile(params.handler,params.collectionpath, params.assetpath,params.file,this.dirname,callbackConvert)
       }
       if(stock.flag){
          stock.stderr += "there aren't any collada files to convert with the url/file specified in the request, job killed \n";
          stock.finished = true;
       }
-      stock.params.handler.handleResult({"job id":stock.dirname});
+      stock.params.handler.handleResult({"job id":stock.id});
       setTimeout(function(){stock.finished = true;},stock.timeout);
     }
 });
 server.jobManager.on('finish', function (job, worker) {
     console.log("job "+worker.id+" finished");
-    rmdirSync("tmp/"+worker.dirname); //remove temporary directory
+    rmdirSync(worker.dirname); //remove temporary directory
   });
 
 UploadHandler.prototype.convert = function (collectionpath, assetpath) {

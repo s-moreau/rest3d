@@ -27,7 +27,7 @@ THE SOFTWARE.
 
 var restify = require('restify');
 var basex = require('basex');
-
+ var FileInfo = require('./fileinfo');
 
 var basex_port = process.env.DOTCLOUD_DATABASE_SERVERPORT_PORT || 1984;
 var basex_port_server = process.env.DOTCLOUD_DATABASE_SERVERPORT_HOST;
@@ -210,7 +210,7 @@ exports.store = function(asset,filename) {
 			return next(err);
 		}	
 		
-		var data = fs.readFileSync('tmp/'+asset+'/'+filename)
+		var data = fs.readFileSync(FileInfo.options.tmpDir+'/'+asset+'/'+filename)
 		req.write(data);
 		req.end();
 		req.on('result', function (err,res2) {

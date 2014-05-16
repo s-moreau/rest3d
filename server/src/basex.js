@@ -29,9 +29,12 @@ module.exports = function (server) {
 
   var basex = server.db = require('./basexdriver');
  
-  var restify = require('restify')
+  var restify = require('restify');
+  var FileInfo = require('./fileinfo');
 
   exports.name = "baseX"; 
+
+
 
   server.get(/^\/rest3d\/db\/info/,function(req, res, next) {
   
@@ -81,19 +84,19 @@ module.exports = function (server) {
     console.log('put asset='+asset)
     console.log('body=',req.body)
 
-    rmdirSync('tmp');
-    fs.mkdirSync('tmp');
+    rmdirSync(FileInfo.options.tmpDir);
+    fs.mkdirSync(FileInfo.options.tmpDir);
 
-    var zipfile = fs.createWriteStream('tmp/zip.zip');
+    var zipfile = fs.createWriteStream(FileInfo.options.tmpDir+'/zip.zip');
 
     var daefilename = '';
 
 
     zipfile.on('close', function () {
 
-      zipfile = fs.createReadStream('tmp/zip.zip')
+      zipfile = fs.createReadStream(FileInfo.options.tmpDir+'/zip.zip')
       
-      var data = fs.readFileSync('tmp/zip.zip')
+      var data = fs.readFileSync(FileInfo.options.tmpDir+'/zip.zip')
       try {
       //fs.open("tmp/zip.zip", "r", "0666", function(err, fd) {
         //  var reader = zip.Reader(fd);
@@ -106,7 +109,7 @@ module.exports = function (server) {
             console.log('filename=',filename);
 
         try {
-            var tmpfilename = 'tmp/'+asset+'/'+filename;
+            var tmpfilename = FileInfo.options.tmpDir+'/'+asset+'/'+filename;
             if (tmpfilename.endsWith('/')) {
             } else
             {
@@ -223,9 +226,9 @@ module.exports = function (server) {
 
 
 
-        fs.readdir('tmp/'+asset+'/models', function(err, files) {
+        fs.readdir(FileInfo.options.tmpDir+'/'+asset+'/models', function(err, files) {
           if (err) {
-            console.log('cannot readdir '+'tmp/'+asset+'/models')
+            console.log('cannot readdir '+FileInfo.options.tmpDir+'/'+asset+'/models')
           } else
           {
             files.forEach(function (filename) {
@@ -259,9 +262,9 @@ module.exports = function (server) {
         });
 
 
-        fs.readdir('tmp/'+asset+'/images', function(err, files) {
+        fs.readdir(FileInfo.options.tmpDir+'/'+asset+'/images', function(err, files) {
           if (err) {
-            console.log('cannot readdir '+'tmp/'+asset+'/images')
+            console.log('cannot readdir '+FileInfo.options.tmpDir+'/'+asset+'/images')
           } else
           {
             files.forEach(function (filename) {

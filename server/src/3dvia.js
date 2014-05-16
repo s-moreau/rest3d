@@ -423,7 +423,7 @@ module.exports = function (server) {
         var url = "http://www.3dvia.com/download.php?media_id="+id+"&file=/3dsearch/Content/"+id+"."+format;
 
         // note: this is using diskcache
-        Collection.find('tmp', path.join('/', handler.sid), function (err, result) {
+        Collection.find(FileInfo.options.tmpDir, path.join('/', handler.sid), function (err, result) {
           if (err) return handler.handlerError(err);
           else {
             zipFile.unzipUploadUrl(handler,result.collection, result.assetpath, url,jar, function(error, result){
