@@ -7,12 +7,16 @@
 
   var Asset = require('./asset');
   var Collection = require('./collection');
-  var Resource = require('./resource')
+  var Resource = require('./resource');
+
+  var mkdirp = require('mkdirp');
+
 
   var nameCountRegexp = /(?:(?: \(([\d]+)\))?(\.[^.]+))?$/;
   var nameCountFunc = function (s, index, ext) {
         return ' (' + ((parseInt(index, 10) || 0) + 1) + ')' + (ext || '');
       };
+
   var copyFile = function(source, target, cb) {
     var cbCalled = false;
 
@@ -30,6 +34,27 @@
       if (!cbCalled) {
         cb(err);
         cbCalled = true;
+      }
+    }
+  }
+
+   var mvFile = function(source, target, cb) {
+    var cbCalled = false;
+
+    var rd = fs.createReadStream(source);
+    rd.on("error", done);
+
+    var wr = fs.createWriteStream(target);
+    wr.on("error", done);
+    wr.on("close", function(ex) {
+      done();
+    });
+    rd.pipe(wr);
+
+    function done(err) {
+      if (!cbCalled) {
+        cbCalled = true;
+        fs.unlink(source,function() {cb(err)});
       }
     }
   }
@@ -266,15 +291,15 @@
       fileInfo.toAsset(handler.db,handler.sid,function(err,asset) {
         if (err) return cb(err);
         var filename = Path.resolve(FileInfo.options.uploadDir, handler.req.session.tmpdir ,asset.uuid);
-
         // Note: folder was created in upload.js makeTMP
         
         if (fileInfo.buffer) {
+
           fs.writeFile(filename, fileInfo.buffer, 'binary', finish);
         } else if (fileInfo.donotmove){
           copyFile(fileInfo.path, filename, finish);
         } else {
-          fs.rename(fileInfo.path, filename, finish);
+          mvFile(fileInfo.path, filename, finish);
         }
       })
     }
