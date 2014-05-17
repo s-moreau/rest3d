@@ -37,6 +37,10 @@ module.exports = function (server) {
   var Cookies = require('cookies');
   var FileInfo = require('./fileinfo');
 
+  var Collection = require('./collection');
+  var Asset = require('./asset');
+  var Resource = require('./resource');
+
   var cookies = {};
 
   var login = function(handler){
@@ -109,28 +113,28 @@ module.exports = function (server) {
 
   
   var parseall = function(body) {
-      var result={};
-      
-      result.assets = [];
-      result.success = true;
-      result.count = body.count;
-      result.total = body.total;
+
+
+
+      var parentId =0;
+      var result = new Collection('3dvia',parentId,'');
+      delete result.name;
+      var col = result.getResourceSync();
+
+      result.page = {total:body.total};
 
       var $ = cheerio.load(body.content);
 
-      result.start = 0;
-      result.end = 0;
-      result.total = 0;
 
       var search = $('a');
       //result.loaded = true;
-      result.type = 'collection'
+
       $(search).each(function(i, link){
         if (link.attribs.href.startsWith('models'))
         {
 
           var url = link.attribs.href;
-          var uid = url.stringAfter('/');
+          var uid = url.stringAfter('/').stringBefore('/');
 
 
           var file_size = link.parent.parent.children[9].children[0].data;
@@ -163,6 +167,8 @@ module.exports = function (server) {
         </tr>
               
         */
+        col.assets[name] = uid;
+        /*
           item.name = name;
           //item.description = "";
           item.format = format;
@@ -187,6 +193,7 @@ module.exports = function (server) {
           //item.parents = "";
           //item.rating =  "";
           //item.previewUri =
+          */
 
 
 //http://www.3dvia.com/download.php?media_id=8A066E8092A4B688&file=/3dsearch/Content/8A066E8092A4B688.zip
@@ -207,7 +214,7 @@ module.exports = function (server) {
     var handler = new Handler(req,res,next);
 
     var uid = req.url.stringAfter('/3dvia');
-    while (uuid[0] === '/')  uuid = uuid.substr(1);
+    while (uid[0] === '/')  uid = uid.substr(1);
     console.log('[3dvia] info id=' + uid);
 
     var jar = handler.getJar('3dvia');
@@ -303,8 +310,11 @@ module.exports = function (server) {
         if (o.status === undefined || o.status !== 0)
           return handler.handleError({message: body.message, name:body.status});
         var result=parseall(o.result);
-        result.start = start;
-        result.end = end;
+
+        result.page.start=start;
+        result.page.end = end;
+        result.search = search;
+
         return handler.handleResult(result);
     });
   });
@@ -346,12 +356,23 @@ module.exports = function (server) {
           //var url= "http://www.3dvia.com/3dsearch/Content/"+uid+".zip";
 
           // note: this is using diskcache
-          var asset = zipFile.getAssetInfoUrl(handler,url,jar, function(error, result){
+          var asset = zipFile.getAssetInfoUrl(handler,url,jar, function(error, files){
             if (error)
-              handler.handleError(error);
-            else
-              handler.handleResult(result);
-          });
+            handler.handleError(error);
+          else { 
+            var parentId=0;
+            var result = new Collection('warehouse',parentId,'');
+            result.uuid=id;
+            delete result.name;
+            var col = result.getResourceSync();
+            files.forEach(function (fileInfo) {
+              var path = (fileInfo.assetpath ? fileInfo.assetpath+'/' : '');
+              col.assets[path+fileInfo.name] = fileInfo.name;
+              
+            });
+            return handler.handleResult(result.getSync());
+          }
+        });
       });
     } else {
 
@@ -380,8 +401,11 @@ module.exports = function (server) {
           if (o.status === undefined || o.status !== 0)
             return handler.handleError({message: body.message, name:body.status});
           var result=parseall(o.result);
-          result.start = start;
-          result.end = end;
+
+          result.page.start=start;
+          result.page.end = end;
+          result.name = '/';
+
           return handler.handleResult(result);
       });
 

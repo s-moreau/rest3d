@@ -79,6 +79,7 @@ module.exports = function (server) {
           if (!result) return handler.handleError('warehouse search returned empty result')
           result.name = '/';
           result.uuid = '';
+
           handler.handleResult(result.getSync());
 
         }
@@ -299,13 +300,8 @@ module.exports = function (server) {
 
     if (json.success != true) return null;
 
-/* TODO - handle partial result
-    result.start = json.startRow;
-    result.end = json.endRow;
-    result.total = json.total;
 
-    result.assets = [];
-*/
+    result.page={start:json.startRow, end:json.endRow, total:json.total};
 
 
     for (var i=0;i<json.entries.length;i++){
@@ -359,19 +355,13 @@ module.exports = function (server) {
     var parentId =0;
     var result = new Collection('warehouse',parentId,'');
     delete result.name;
+
     var col = result.getResourceSync();
     var json = JSON.parse(body);
 
     if (json.success != true) return null;
 
-    /* TODO -- deal with partial results
-
-    result.start = json.startRow;
-    result.end = json.endRow;
-    result.total = json.total;
-
-    result.assets = [];
-    */
+    result.page={start:json.startRow, end:json.endRow, total:json.total};
 
     for (var i=0;i<json.entries.length;i++){
       var entry = json.entries[i];
