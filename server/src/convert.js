@@ -37,8 +37,6 @@ server.jobManager.addJob('convert', {
           }
           });
       }
-      fs.mkdirSync(this.dirname); //create temporary folder for stocking assets to be converted
-      fs.chmodSync(this.dirname, '777'); //set access mode R&W
       var stock = this;
       this.flag = true;
       // CONVERT callback
@@ -117,20 +115,22 @@ server.jobManager.addJob('convert', {
             });
           }
         }
+      fs.mkdir(this.dirname,function(){ //create temporary folder for stocking assets to be converted
+        fs.chmodSync(this.dirname, '777'); //set access mode R&W
+        // URL 
+        if(params.url){
+          zipFile.unzipUrl(params.handler,params.collectionpath,params.assetpath,params.url,undefined,this.dirname,callbackConvert)
+        }
 
-      // URL 
-      if(params.url){
-        zipFile.unzipUrl(params.handler,params.collectionpath,params.assetpath,params.url,undefined,this.dirname,callbackConvert)
-      }
-
-      // FILE
-      if(params.file){  
-        zipFile.unzipFile(params.handler,params.collectionpath, params.assetpath,params.file,this.dirname,callbackConvert)
-      }
-      if(stock.flag){
-         stock.stderr += "there aren't any collada files to convert with the url/file specified in the request, job killed \n";
-         stock.finished = true;
-      }
+        // FILE
+        if(params.file){  
+          zipFile.unzipFile(params.handler,params.collectionpath, params.assetpath,params.file,this.dirname,callbackConvert)
+        }
+        if(stock.flag){
+           stock.stderr += "there aren't any collada files to convert with the url/file specified in the request, job killed \n";
+           stock.finished = true;
+        }
+      });
       stock.params.handler.handleResult({"job id":stock.id});
       setTimeout(function(){stock.finished = true;},stock.timeout);
     }
