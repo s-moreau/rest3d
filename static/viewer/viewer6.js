@@ -520,6 +520,8 @@ define(['jquery', 'gltf', 'collada', 'renderer', 'camera', 'state', 'channel', '
         var v2 = vec3.create();
         var v3 = vec3.create();
         var axis = vec3.create();
+        var scale = vec3.create();
+        var translate = vec3.create();
 
         // private function
         // call viewer.draw() from outside
@@ -549,12 +551,23 @@ define(['jquery', 'gltf', 'collada', 'renderer', 'camera', 'state', 'channel', '
                                     animation.currentIndex = 0;
                             }
                             var index = animation.currentIndex;
-                            console.log('index=' + index);
-                            vec3.normalize(axis, [animation.output[index * 4], animation.output[index * 4 + 1], animation.output[index * 4 + 2]]);
-                            var angle = animation.output[index * 4 + 3];
-                            console.log('axis=' + vec3.str(axis) + ' angle=' + angle);
-                            console.log('quat=[' + animation.output[index * 4] + ' , ' + animation.output[index * 4 + 1] + ' , ' + animation.output[index * 4 + 2] + ' , ' + animation.output[index * 4 + 3])
-                            quat.setAxisAngle(animation.target.trs.rotation, axis, angle);
+                            //console.log('index=' + index);
+                            if (animation.path === 'rotation') {
+                                vec3.normalize(axis, [animation.output[index * 4], animation.output[index * 4 + 1], animation.output[index * 4 + 2]]);
+                                var angle = animation.output[index * 4 + 3];
+                                //console.log('axis=' + vec3.str(axis) + ' angle=' + angle);
+                                //console.log('quat=[' + animation.output[index * 4] + ' , ' + animation.output[index * 4 + 1] + ' , ' + animation.output[index * 4 + 2] + ' , ' + animation.output[index * 4 + 3])
+                                quat.setAxisAngle(animation.target.trs.rotation, axis, angle);
+                            } else if (animation.path === 'scale') {
+                                vec3.set(scale, animation.output[index], animation.output[index+1],animation.output[index+2]);
+                                vec3.copy(animation.target.trs.scale, scale);
+                            } else if (animation.path === 'translation') {
+                                vec3.set(translate, animation.output[index], animation.output[index+1],animation.output[index+2]);
+                                vec3.copy(animation.target.trs.translation, translate);
+                            } else {
+                                console.log('unknown animation path='+animation.path);
+                                continue;
+                            }
 
                         }
                         else {
@@ -603,8 +616,8 @@ define(['jquery', 'gltf', 'collada', 'renderer', 'camera', 'state', 'channel', '
 
                         mat4.fromTrs(animation.target.local, animation.target.trs);
 
-
                     }
+
                 }
             }
 

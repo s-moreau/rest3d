@@ -647,16 +647,25 @@ define(['q','glmatrixExt'], function (Q) {
         if (count_in !== count_out)
           gltf.logError('inconsistent counters in animation accessor ['+input+'] and accessor ['+output+']');
 
-        var output = {};
-        switch (path) {
-        case 'rotation':
-          var values_out = new Float32Array(buffer_in, offset_in, count_in * 4); // quat
-          break;
-        default:
-          glTF.logError('unknown animation path=' + path + ' in animation=' + _animID);
-          return;
-          break;
+        switch (attr_out.type) {
+          case WebGLRenderingContext.FLOAT_VEC3:
+            // this is a new view (no copy)
+            var values_out = new Float32Array(buffer_out, offset_out, count_out * 3); 
+            //glTF.log('byteStried='+byteStride+' multipler=3');
+            break;
+          case WebGLRenderingContext.FLOAT_VEC2:
+            var values_out = new Float32Array(buffer_out, offset_out, count_out * 2); 
+            //glTF.log('byteStried='+byteStride+' multipler=2');
+            break;
+          case WebGLRenderingContext.FLOAT_VEC4:
+            var values_out = new Float32Array(buffer_out, offset_out, count_out * 4); 
+            //glTF.log('byteStried='+byteStride+' multipler=4');
+            break;
+          default:
+            glTF.logError('attribute ' + attr.type + '[' + glTF.glProperties[attr.type] + ' is not allowed');
+            continue;
         }
+       
 
         anims.push({
           input: values_in,
