@@ -3,7 +3,6 @@ define(['q'],
     function (Q) {
         function databaseTab(rest3dToTree,data,parent) {
             this.rest3dToTree = rest3dToTree;
-            console.debug(this.rest3dToTree)
             this.name = data.name;
             this.indexLogin = data.indexLogin;
             this.picture = data.picture;

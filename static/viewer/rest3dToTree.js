@@ -18,6 +18,7 @@ define(['rest3d', 'upload', 'viewer','database', 'collada','gltf'], function (re
         this.id = GUI.uniqueId();
         this.area = parent;
         this.image = $();
+        this.flagEmpty = true;
         this.progress = $("<progress value=0 max=100></progress>");
         this.infoUrl = location.protocol + "//" + location.host + "/rest3d/info/" + this.name +"/";
         this.uploadUrl = location.protocol + "//" + location.host + "/rest3d/" + this.name +"/";
@@ -44,7 +45,8 @@ define(['rest3d', 'upload', 'viewer','database', 'collada','gltf'], function (re
         var stock = this;
         this.displayCollada = function (node) {
             window.pleaseWait(true);
-            COLLADA.load("/rest3d/data/"+stock.name+'/'+node.attr('path')+'/?uuid='+node.attr("uuid"), viewer.parse_dae).then(
+            var relativePath = node.attr('path').substr(0, node.attr('path').lastIndexOf("/"));
+            COLLADA.load(encodeURI("/rest3d/data/"+stock.name+relativePath+'/?uuid='+node.attr("uuid")), viewer.parse_dae).then(
                 function (flag) {
                     window.pleaseWait(false);
                     buffer.notif(node.attr("name"));
@@ -53,7 +55,8 @@ define(['rest3d', 'upload', 'viewer','database', 'collada','gltf'], function (re
 
         this.displayGltf = function (node) {
             window.pleaseWait(true);
-            glTF.load("/rest3d/data/"+stock.name+'/'+node.attr('path')+'/?uuid='+node.attr("uuid"), viewer.parse_gltf).then(
+            var relativePath = node.attr('path').substr(0, node.attr('path').lastIndexOf("/"));
+            glTF.load(encodeURI("/rest3d/data/"+stock.name+relativePath+'/?uuid='+node.attr("uuid")), viewer.parse_gltf).then(
                 function (flag) {
                     window.pleaseWait(false);
                     window.notif(node.attr("name"));
@@ -79,6 +82,7 @@ define(['rest3d', 'upload', 'viewer','database', 'collada','gltf'], function (re
             else if(name.split(".").length<2){result.state = "open"}
             result.attr = {
                 "id": id,
+                "name": name,
                 "uuid": uuid,
                 "rel":type,
                 "path":path,
@@ -158,14 +162,17 @@ define(['rest3d', 'upload', 'viewer','database', 'collada','gltf'], function (re
                         },
                         "success": function (new_data) {
                             stock.image.remove();
-                            if(stock.image)stock.image.remove();
+                            stock.flagEmpty = false; 
                             if(stock.nodeBuffer==-1&&jQuery.isEmptyObject(new_data.assets)&&jQuery.isEmptyObject(new_data.children)){
                                 stock.image = GUI.image(stock.tree['tree_' + stock.name], "img-emptybox", "../gui/images/empty_box.gif", 60, 60, "before");
+                                stock.flagEmpty = true; 
                                 GUI.addTooltip({
                                     parent: stock.image,
                                     content: "Any files found in "+stock.name+", click on the picture or drag and drop for starting to upload your models",//"Any files found in "+stock.name
                                 });
                                 stock.image.click(function(){
+                                    stock.image.remove();
+                                    stock.parentTree = -1;
                                     stock.addFiles();
                                 })
                             }
@@ -316,10 +323,17 @@ define(['rest3d', 'upload', 'viewer','database', 'collada','gltf'], function (re
         }
 
         this.encodeToId = function(name){  // FUNCTION TO ENCODE ANY STRING TO AN ID HANDLED BY HTML/ REEEAAAALLLY IMPORTANT
-            try{name = name +"_"+this.parentTree.attr("id");}
-            catch(e){name = name +"_"+this.parentTree}
-            name = encodeURI(name);
-            name = name.split('.').join(""); 
+            try{name = this.parentTree.attr("path")+"/"+name;}
+            // SUPPORT HTML
+            catch(e){name = name;}
+            name = "a"+encodeURI(name);
+            name = name.split('(').join(""); 
+            name = name.split(')').join(""); 
+            name = name.split('@').join("");
+            name = name.split('~').join(""); 
+            name = name.split('*').join(""); 
+            name = name.split('!').join("");   
+            name = name.split(' ').join(""); 
             name = name.split(',').join("");
             name = name.split('/').join(""); 
             name = name.split('?').join(""); 
@@ -328,7 +342,11 @@ define(['rest3d', 'upload', 'viewer','database', 'collada','gltf'], function (re
             name = name.split('=').join("");
             name = name.split('+').join(""); 
             name = name.split('$').join(""); 
+            name = name.split('%').join(""); 
             name = name.split('#').join("");
+            // SUPPORT JQUERY
+            name = name.split('.').join(""); 
+            name = name.split(':').join(""); 
             return name; 
         }
 
@@ -415,10 +433,14 @@ define(['rest3d', 'upload', 'viewer','database', 'collada','gltf'], function (re
                 stock.parentTree = node;
                 stock.addFiles();
             }
+                                  
             this.uploadPlugin.refresh.click(function(){
                   stock.tree["tree_"+stock.name].jstree("refresh");
             })
             this.uploadPlugin.jquery.bind('fileuploaddrop', function (e, data) {
+                                if(data.files.length<100){
+                    
+
                 if(e.idToDrop==""){
                     stock.parentTree = false;
                 }
@@ -452,68 +474,88 @@ define(['rest3d', 'upload', 'viewer','database', 'collada','gltf'], function (re
                 else{
                     stock.parentTree = false;
                 }
+                                }else{
+                       e.stopPropagation();
+                    e.preventDefault();
+                    console.log("Too many files draged at once, limit sets at 100")
+                }
             })
             this.uploadPlugin.jquery.bind('fileuploadadd', function (e, data) {
-                if(stock.image.length==1){stock.parentTree = -1;var flagRoot=true;}
-                var relativePath = data.files[0].relativePath.split("/");
-                relativePath.forEach(function(folder){
-                    if(folder !== ""){
-                        var objectId = stock.encodeToId(folder);
-                        if($('#'+objectId).length!==1){
-                            var object = {};
-                            object.data = folder;
-                            object.attr = {};
-                            object.attr.rel = "folder";
-                            if(stock.parentTree == -1) object.attr.path = folder;
-                            else object.attr.path = stock.parentTree.attr("path")+'/'+folder;
-                            objectId = stock.checkIfIdExist(objectId);
-                            object.attr.id = objectId;
-                            if(stock.parentTree == -1) stock.addNodeRoot(object)
-                            else stock.addNode(object)
-                        } 
-                        stock.parentTree = $("#"+objectId);  
+                    if(stock.parentTree == false){
+                        stock.parentTree = -1;
+                        var flagRoot=true;
                     }
-                })
-                var tmp = {};
-                tmp.data = data.files[0].name;
-                var id = stock.encodeToId(tmp.data);
-                id = stock.checkIfIdExist(id);
-                tmp.attr = {};
-                tmp.attr.id = id;
-                tmp.attr.path = stock.parentTree.attr("path")+'/'+tmp.data;
-                tmp.attr.upload = true; 
-                tmp.attr.rel = stock.extensionToType(tmp.data.match(/\.[^.]+$/));
-                if(stock.parentTree == -1){
-                    data.url = stock.uploadUrl + tmp.data;
-                }
-                else{
-                    data.url = stock.uploadUrl + stock.parentTree.attr("path");
-                }
-                if(stock.parentTree == -1) stock.addNodeRoot(tmp)
-                else stock.addNode(tmp)
-                var checkbox = $('<input type="checkbox" style="float:right;" checked=true>')
-                $("#"+id).append(checkbox);
-                stock.uploadPlugin.setting.click(function(){
-                    if($("#"+id).find('input').is(':checked')){
-                        var request = data.submit();
-                        if(stock.parentTree==false){
-                            request.abort();
+                    var origin = stock.parentTree;
+                    //var flagRoot=true;
+                    if(data.files[0].relativePath){
+                        var relativePath = data.files[0].relativePath.split("/");
+                        relativePath.forEach(function(folder){
+                            if(folder !== ""){
+                                var objectId = stock.encodeToId(folder);
+                                if($('#'+objectId).length!==1){
+                                    var object = {};
+                                    object.data = folder;
+                                    object.attr = {};
+                                    object.attr.rel = "folder";
+                                    if(stock.parentTree == -1) object.attr.path = folder;
+                                    else object.attr.path = stock.parentTree.attr("path")+'/'+folder;
+                                    objectId = stock.checkIfIdExist(objectId);
+                                    object.attr.id = objectId;
+                                    if(stock.parentTree == -1) stock.addNodeRoot(object)
+                                    else stock.addNode(object)
+                                } 
+                                stock.parentTree = $("#"+objectId);  
+                            }
+                        })
+                    }
+                    var tmp = {};
+                    tmp.data = data.files[0].name;
+                    var id = stock.encodeToId(tmp.data);
+                    id = stock.checkIfIdExist(id);
+                    tmp.attr = {};
+                    tmp.attr.id = id;
+                    tmp.attr.upload = true; 
+                    tmp.attr.rel = stock.extensionToType(tmp.data.match(/\.[^.]+$/));
+                    if(stock.parentTree == -1){
+                        data.url = stock.uploadUrl + tmp.data;
+                        tmp.attr.path = tmp.data;
+                    }
+                    else{
+                        data.url = stock.uploadUrl + stock.parentTree.attr("path");
+                        tmp.attr.path = stock.parentTree.attr("path")+'/'+tmp.data;
+                    }
+                    if(stock.parentTree == -1) stock.addNodeRoot(tmp)
+                    else stock.addNode(tmp)
+                    var checkbox = $('<input type="checkbox" style="float:right;" checked=true>')
+                    $("#"+id).append(checkbox);
+                    stock.uploadPlugin.setting.click(function(){
+                        if($("#"+id).find('input').is(':checked')){
+                            var request = data.submit();
+                            if(stock.parentTree==false){
+                                request.abort();
+                            }
                         }
-                    }
-                })
-                if(flagRoot){stock.image.remove();} 
-                stock.tree.openAll();
+                    })
+                    if(flagRoot){stock.image.remove();} 
+                    stock.parentTree = origin;
+                    stock.tree.openAll();
             })
             this.uploadPlugin.jquery.bind('fileuploadstart', function (e){
                 window.fl4reStatus("UPLOAD",stock.progress);
             });
-            this.uploadPlugin.jquery.bind('fileuploaddone', function (e) {
-                window.fl4reStatus("READY");
-                stock.tree["tree_"+stock.name].jstree("refresh");
-            })
+            // this.uploadPlugin.jquery.bind('fileuploaddone', function (e) {
+            //     window.fl4reStatus("READY");
+            //     stock.tree["tree_"+stock.name].jstree("refresh");
+            // })
             this.uploadPlugin.jquery.bind('fileuploadprogressall',function (e, data) {
                 var progress = parseInt(data.loaded / data.total * 100, 10);
                 stock.progress.val(progress);
+                if(data.total == data.loaded){
+                    setTimeout(function(){
+                        window.fl4reStatus("READY");
+                        stock.tree["tree_"+stock.name].jstree("refresh");
+                    },100)
+                }
             })
         }
         this.init();

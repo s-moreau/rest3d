@@ -113,6 +113,10 @@ server.jobManager.addJob('convert', {
                 })
               }
             });
+            if(stock.flag==true){
+               stock.stderr += "there aren't any collada files to convert with the url/file specified in the request, job killed \n";
+               stock.finished = true;
+            }
           }
         }
       fs.mkdir(stock.dirname,function(err){ //create temporary folder for stocking assets to be converted
@@ -125,10 +129,6 @@ server.jobManager.addJob('convert', {
         // FILE
         if(stock.params.file){  
           zipFile.unzipFile(stock.params.handler,stock.params.collectionpath, stock.params.assetpath,stock.params.file,stock.dirname,stock.callbackConvert)
-        }
-        if(stock.flag){
-           stock.stderr += "there aren't any collada files to convert with the url/file specified in the request, job killed \n";
-           stock.finished = true;
         }
       });
       stock.params.handler.handleResult({"job id":stock.id});
