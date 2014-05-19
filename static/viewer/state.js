@@ -1343,7 +1343,7 @@ for (var i = _gl.getProgramParameter(glProgram, _gl.ACTIVE_UNIFORMS) - 1; i >= 0
 
 
     pickState.program.vertexShader =  
-          "attribute vec3 aVertex;"+
+          "attribute vec3 aVertex;\n"+
           "uniform mat4 uPMatrix;\n"+
           "uniform mat4 uMVMatrix;\n"+
           "void main(void) {\n"+
