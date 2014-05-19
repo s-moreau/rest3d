@@ -61,11 +61,15 @@ define(['jquery', 'gltf', 'collada', 'renderer', 'camera', 'state', 'channel', '
         viewer.parse_dae = function (dae) {
 
             // set the image load callback to redraw
-            dae.onload = function (e) {
-                e.preventDefault();
-                viewer.draw();
+            try{
+                dae.onload = function (e) {
+                    e.preventDefault();
+                    viewer.draw();
+                }
+            }catch(e){
+                console.error("Collada loader failed to parse the incoming file");
+                return;
             }
-
             // (viewer global) set current uri
             viewer.nowParsing = dae.url;
 

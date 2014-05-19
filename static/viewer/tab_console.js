@@ -450,7 +450,6 @@ define("console", function () {
             toggle_button.removeClass('button-debug');
         }  
       
-        CONSOLE.terminal.echo("rest3d_TEST> test if this sentence is correctly render by the plugin. I get some graphic bugs sometimes :/");
         window.renderMenu.consoletab.css({"padding":0});
         CONSOLE.terminal.addClass("ui-widget-content");
 

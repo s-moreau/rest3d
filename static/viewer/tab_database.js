@@ -146,44 +146,7 @@ define(['q'],
                 };
                 rest3d.urlUpload(uri, call);
             }
-            this.preview = function (node) {
-                $("#dialog").dialog("close");
-                var gitHtml = $('<div id="dialog"><iframe id="myIframe" src="" style="height:100% !important; width:100% !important; border:0px;"></div>');
-                $('body').append(gitHtml);
-                $("#dialog").dialog({
-                    title: node.attr('name'),
-                    width: '600',
-                    height: '500',
-                    open: function () {
-                        $('#myIframe').attr('src', node.attr("previewuri"));
-                    },
-                    close: function () {
-                        gitHtml.remove();
-                    },
-                });
-                $("#dialog").css({
-                    'min-height': 'none !important;'
-                });
-            }
-            this.icon = function (node) {
-                $("#dialog").dialog("close");
-                var gitHtml = $('<div id="dialog"><img src="' + node.attr("iconuri") + '" /></div>');
-                $('body').append(gitHtml);
-                $("#dialog").dialog({
-                    title: node.attr('name'),
-                    width: '300',
-                    height: '300',
-                    open: function () {
-                        $('#myIframe').attr('src', node.attr("iconuri"));
-                    },
-                    close: function () {
-                        gitHtml.remove();
-                    },
-                });
-                $("#dialog").css({
-                    'min-height': 'none !important;'
-                });
-            }
+           
             this.trees;
             this.generateCoreTab = function () {
                 this.parent.append("<a style='text-decoration:underline'>Features:</a><br></br>");
