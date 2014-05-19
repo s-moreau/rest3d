@@ -933,22 +933,6 @@ define(['viewer', 'gui', 'rest3d', 'q', 'collada', 'gltf', 'renderer', 'state', 
             accordion.collada.append("<hr></hr>");
 
 
-            GUI.button('duck rest3d(need database)', accordion.collada, function () {
-                pleaseWait(true);
-                var url = "/rest3d/assets/duck/duck.dae";
-                COLLADA.load(url, viewer.parse_dae).then(
-                    function (flag) {
-                        pleaseWait(false);
-                        window.notif(url);
-                    }, function (error) {
-                        // If there's an error or a non-200 status code, log the error.
-                        console.error("cs " + error);
-                    });
-
-            }).width("90%");
-            accordion.collada.append("<hr></hr>");
-
-
             GUI.button('cat skinned', accordion.gltf, function () {
                 pleaseWait(true);
                 var url = "/models/cat/cat-skin.json";
@@ -999,7 +983,7 @@ define(['viewer', 'gui', 'rest3d', 'q', 'collada', 'gltf', 'renderer', 'state', 
             }).width("90%");
             accordion.collada.append("<hr></hr>");
 
-            GUI.button('skinned creature (fix me!!)', accordion.gltf, function () {
+            GUI.button('skinned creature', accordion.gltf, function () {
                 pleaseWait(true);
                 var url = "/models/Amahani/Amahani.json";
                 glTF.load(url, viewer.parse_gltf).then(
@@ -1144,7 +1128,7 @@ define(['viewer', 'gui', 'rest3d', 'q', 'collada', 'gltf', 'renderer', 'state', 
             }).width("90%");
 
 
-            GUI.button('cat skinned + animation (fix me!', accordion.gltf, function () {
+            GUI.button('cat skinned + animation', accordion.gltf, function () {
                 pleaseWait(true);
                 var url = "/models/cat/20_cat_smooth_bake_channel.json";
                 glTF.load(url, viewer.parse_gltf).then(
