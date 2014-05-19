@@ -514,14 +514,10 @@ define(['jquery', 'gltf', 'collada', 'renderer', 'camera', 'state', 'channel', '
             return cont;
         };
 
-        var q1 = quat.create();
-        var q2 = quat.create();
+        // temporary vectors are pre-alocated
         var v1 = vec3.create();
         var v2 = vec3.create();
         var v3 = vec3.create();
-        var axis = vec3.create();
-        var scale = vec3.create();
-        var translate = vec3.create();
 
         // private function
         // call viewer.draw() from outside
@@ -551,19 +547,17 @@ define(['jquery', 'gltf', 'collada', 'renderer', 'camera', 'state', 'channel', '
                                     animation.currentIndex = 0;
                             }
                             var index = animation.currentIndex;
-                            //console.log('index=' + index);
+  
                             if (animation.path === 'rotation') {
-                                vec3.normalize(axis, [animation.output[index * 4], animation.output[index * 4 + 1], animation.output[index * 4 + 2]]);
+                                vec3.normalize(v1, [animation.output[index * 4], animation.output[index * 4 + 1], animation.output[index * 4 + 2]]);
                                 var angle = animation.output[index * 4 + 3];
-                                //console.log('axis=' + vec3.str(axis) + ' angle=' + angle);
-                                //console.log('quat=[' + animation.output[index * 4] + ' , ' + animation.output[index * 4 + 1] + ' , ' + animation.output[index * 4 + 2] + ' , ' + animation.output[index * 4 + 3])
-                                quat.setAxisAngle(animation.target.trs.rotation, axis, angle);
+                                quat.setAxisAngle(animation.target.trs.rotation, v1, angle);
                             } else if (animation.path === 'scale') {
-                                vec3.set(scale, animation.output[index], animation.output[index+1],animation.output[index+2]);
-                                vec3.copy(animation.target.trs.scale, scale);
+                                vec3.set(v1, animation.output[index*3], animation.output[index*3+1],animation.output[index*3+2]);
+                                vec3.copy(animation.target.trs.scale, v1);
                             } else if (animation.path === 'translation') {
-                                vec3.set(translate, animation.output[index], animation.output[index+1],animation.output[index+2]);
-                                vec3.copy(animation.target.trs.translation, translate);
+                                vec3.set(v1, animation.output[index*3], animation.output[index*3+1],animation.output[index*3+2]);
+                                vec3.copy(animation.target.trs.translation, v1);
                             } else {
                                 console.log('unknown animation path='+animation.path);
                                 continue;
@@ -594,23 +588,30 @@ define(['jquery', 'gltf', 'collada', 'renderer', 'camera', 'state', 'channel', '
 
                             // interpolate output to find result
 
+                            var interp = (animation.input[index_min] - time) / (animation.input[index_min] - animation.input[index_max]);
+
                             // This is axis / angle ...
                             if (animation.path === 'rotation') {
-                                var interp = (animation.input[index_min] - time) / (animation.input[index_min] - animation.input[index_max]);
-
                                 // interpolate axis
                                 vec3.normalize(v1, [animation.output[index_min * 4], animation.output[index_min * 4 + 1], animation.output[index_min * 4 + 2]]);
                                 vec3.normalize(v2, [animation.output[index_max * 4], animation.output[index_max * 4 + 1], animation.output[index_max * 4 + 2]]);
-                                vec3.normalize(axis, vec3.lerp(v3, v1, v2, interp));
+                                vec3.lerp(v3, v1, v2, interp);
 
                                 // interpolate angle
-                                var angle = animation.output[index_min * 4 + 3] + interp * (animation.output[index_max * 4 + 3] - animation.output[index_min * 4 + 3]);
+                                var angle = (animation.output[index_min * 4 + 3] * (1-interp)) + (animation.output[index_max * 4 + 3]*interp);
 
-                                quat.setAxisAngle(animation.target.trs.rotation, axis, angle);
-                                //console.log('delta='+delta+' index_min='+index_min+' inter='+interp+'  axis='+vec3.str(axis)+' angle='+angle);
+                                quat.setAxisAngle(animation.target.trs.rotation, v3, angle);
 
-                            }
-                            else
+                            } else if (animation.path === 'translation') {
+                                vec3.set(v1, animation.output[index_min * 3], animation.output[index_min * 3 + 1], animation.output[index_min *3 +2]);
+                                vec3.set(v2, animation.output[index_max * 3], animation.output[index_max * 3 + 1], animation.output[index_max *3 +2]);
+                                vec3.lerp(animation.target.trs.translation, v1, v2, interp);
+
+                            } else if (animation.path === 'scale') {
+                                vec3.set(v1, animation.output[index_min * 3], animation.output[index_min * 3 + 1], animation.output[index_min *3 +2]);
+                                vec3.set(v2, animation.output[index_max * 3], animation.output[index_max * 3 + 1], animation.output[index_max *3 +2]);
+                                vec3.lerp(animation.target.trs.scale, v1, v2, interp);
+                            } else
                                 console.error('unknown animation type');
                         }
 
