@@ -53,7 +53,7 @@ define(['rest3d', 'upload', 'viewer','database', 'collada','gltf'], function (re
                 width: '600',
                 height: '500',
                 open: function (ev, ui) {
-                    $('#myIframe').attr('src', '/viewer/easy-viewer.html?file='+this.buildUrlData(node));
+                    $('#myIframe').attr('src', '/viewer/easy-viewer.html?file='+stock.buildUrlData(node));
                 },
             });
         }
@@ -109,7 +109,7 @@ define(['rest3d', 'upload', 'viewer','database', 'collada','gltf'], function (re
 
         this.displayGltf = function (node) {
             window.pleaseWait(true);          
-            glTF.load(this.buildUrlData(node), viewer.parse_gltf).then(
+            glTF.load(stock.buildUrlData(node), viewer.parse_gltf).then(
                 function (flag) {
                     window.pleaseWait(false);
                     window.notif(node.attr("name"));

@@ -2387,14 +2387,14 @@ define(['channel', 'codemirror', 'webglUtils', 'WebGLDebugUtils', 'pnotify', 'co
                 GUI.flagResize = true;
 
                 if (GUI.flagResize) {
-                    obj.jqueryObject.sizePane("west", $(window).width() - 550);
+                    obj.jqueryObject.sizePane("west", $(window).width() - 600);
                     GUI.container.resizeAll();
                     GUI.container.initContent("center");
                     GUI.container.initContent("west");
                 }
                 else {}
             }
-            obj.jqueryObject.sizePane("west", $(window).width() - 550);
+            obj.jqueryObject.sizePane("west", $(window).width() - 600);
             obj.jqueryObject.sizePane("north", 37);
             obj.jqueryObject.allowOverflow("north");
             obj.jqueryObject.sizePane("south", 25);

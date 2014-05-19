@@ -507,7 +507,7 @@ define(['viewer', 'gui', 'rest3d', 'q', 'collada', 'gltf', 'renderer', 'state', 
             button1.hide();
 
             setTimeout(function () {
-                layout.jqueryObject.sizePane("west", $(window).width() - 549);
+                layout.jqueryObject.sizePane("west", $(window).width() - 599);
             }, 1000);
 
             layout.jqueryObject.resizeAll();
