@@ -791,7 +791,7 @@ width: 90% !important;
 /*   border: 1px solid !important;*/
  }
 
- #img-emptybox{
+ #img-emptybox, #img-emptyboxScenes{
     position: relative;
     left: 40%;
  }

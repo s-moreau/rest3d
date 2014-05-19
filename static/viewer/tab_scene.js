@@ -327,11 +327,16 @@ define(['viewer'], function (viewer) {
                         },
                         "success": function (new_data) {
                             var result = [];
-                            if (nodeBuffer == -1) {
+                            if(viewer.scenes==undefined){
+                                GUI.image(parent.scenes, "img-emptyboxScenes", "../gui/images/empty_box.gif", 60, 60, "before");
+                            }
+                            else if (nodeBuffer == -1) {
                                 window.main(viewer.scenes, result)
+                                $("#img-emptyboxScenes").remove();
                             }
                             else {
                                 var viewerObject;
+                                $("#img-emptyboxScenes").remove();
                                 switch (nodeBuffer.attr('rel')) {
                                 case "main":
                                     viewerObject = window[nodeBuffer.attr('id')];
@@ -418,7 +423,6 @@ define(['viewer'], function (viewer) {
                     "theme": "apple",
                 },
             });
-             window.treeScene.openAll();
 
             // treeScene.Tree.bind(
             // "select_node.jstree", function(evt, data){
@@ -584,6 +588,10 @@ define(['viewer'], function (viewer) {
                 }, 500);
             }
         }
+            window.renderMenu.scenes.focusTab(function(){
+                window.refreshScenesTree();
+                window.treeScene.openAll();
+            })
     
 
     }

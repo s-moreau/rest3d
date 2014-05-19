@@ -337,7 +337,6 @@ define(['viewer', 'gui', 'rest3d', 'q', 'collada', 'gltf', 'renderer', 'state', 
 
 
             scene_init(window.renderMenu);
-            viewer.onload = window.refreshScenesTree;
             script_init(window.renderMenu);
             console_init(window.renderMenu);
             window.renderMenu.refresh();
