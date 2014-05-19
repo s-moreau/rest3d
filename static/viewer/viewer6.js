@@ -263,8 +263,6 @@ define(['jquery', 'gltf', 'collada', 'renderer', 'camera', 'state', 'channel', '
             $('#loadtimer').text('load time=' + (scene.endtime - scene.starttime));
             viewer.draw();
             viewer.scenes = scenes;
-            if (viewer.onload)
-                viewer.onload.call();
         };
 
         viewer.parse_gltf = function (gltf) {
@@ -392,8 +390,6 @@ define(['jquery', 'gltf', 'collada', 'renderer', 'camera', 'state', 'channel', '
             //$('#loadtimer').html('load time=' + (scene.endtime - scene.starttime));
             scenes.push(scene);
             viewer.draw();
-            if (viewer.onload)
-                viewer.onload.call();
         };
 
         viewer.pushMatrix = function (m) {
