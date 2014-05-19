@@ -454,11 +454,13 @@ define(['jquery', 'gltf', 'collada', 'renderer', 'camera', 'state', 'channel', '
                     inverseBindMatrix[14] = this.skin.inverseBindMatrices[k++];
                     inverseBindMatrix[15] = this.skin.inverseBindMatrices[k++];
 
-                    mat4.multiply(resultMat, nodeWorldMatrix, inverseSkinWorldMatrix);
-                    mat4.multiply(resultMat, resultMat, inverseBindMatrix);
+                    // inverseSkinWorldMatrix * nodeWorldMatrix * inverseBindMatrix * bindShapeMatrix;
+                    // (v * BSM * BSMi * BSMi) * weight
+
+                    mat4.multiply(resultMat, inverseSkinWorldMatrix,nodeWorldMatrix);
+                    mat4.multiply(resultMat, resultMat,inverseBindMatrix);
                     mat4.multiply(resultMat, resultMat, bindShapeMatrix);
 
-                    //mat4.identity(resultMat);
 
                     jointMatrix[j++] = resultMat[0];
                     jointMatrix[j++] = resultMat[1];
