@@ -276,7 +276,7 @@
     }else{
       var folder = FileInfo.options.tmpDir+'/'+params.handler.req.session.sid;
     }
-    var cmd = 'unzip '+params.filename+' -x Thumbs.db .DS_Store .Trashes __MACOSX/* -d '+folder;
+    var cmd = 'unzip -o '+params.filename+' -d '+folder+' -x Thumbs.db .DS_Store .Trashes __MACOSX/*';
     console.log('exec ['+cmd+']');
     exec(cmd, function(code, output){
       if (code === 9){
