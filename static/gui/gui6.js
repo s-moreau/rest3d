@@ -821,6 +821,7 @@ define(['channel', 'codemirror', 'webglUtils', 'WebGLDebugUtils', 'pnotify', 'co
                     }
                     this.html += '</div>';
                     this.content.append(this.html);
+                    this[_json.id] = $('#'+_json.id);
                     this.id.push(_json.id);
                     this.refresh();
                     this.createJqueryObjects();

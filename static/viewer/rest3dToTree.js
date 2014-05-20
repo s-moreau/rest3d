@@ -27,7 +27,7 @@ define(['rest3d', 'upload', 'viewer','database', 'collada','gltf'], function (re
         this.dataUrl = location.protocol + "//" + location.host + "/rest3d/data/" + this.name +"/";
         this.convertUrl = location.protocol + "//" + location.host + "/rest3d/convert/" + this.name +"/";
         this.uploadToTmp = location.protocol + "//" + location.host + "/rest3d/tmp/";
-        window.rest3dToTree[this.name] = this;
+        window.objectRest3d[this.name] = this;
         var stock = this;
 
         this.init = function(){
@@ -104,20 +104,24 @@ define(['rest3d', 'upload', 'viewer','database', 'collada','gltf'], function (re
             if(stock.name == "warehouse"){
                 $.post(stock.uploadToTmp,{url:stock.buildUrlData(node)}).done(function(data){
                     data = jQuery.parseJSON(data);
-                    window.renderMenu.tmp.focusTab();
-                    window.objectRest3d.tab_tmp.tree["tree_"+stock.name].jstree("refresh");
-                    // data.forEach(function(file){
-                    //     if(file.name==node.attr('name')){
-                    //         uuid = file.uuid;
-                    //         window.pleaseWait(true);
-                    //         COLLADA.load(stock.buildUrlData(node), viewer.parse_dae).then(
-                    //             function (flag) {
-                    //                 window.pleaseWait(false);
-                    //                 buffer.notif(node.attr("name"));
-                    //             })
-                    //     }
-                    // })
-                    // }
+                    window.renderMenu.tab_tmp.focusTab();
+                    data.forEach(function(file){
+                        if(file.name==node.attr('name')){
+                            setTimeout(function(){
+                                var selector = $("#tab_tmp li[name='"+file.name+"']");
+                                if(selector.length==1)selector=[selector];
+                                selector.forEach(function(element){
+                                    var uuid = element.attr("uuid");
+                                    // if(uuid==file.uuid){
+                                        window.objectRest3d.tmp.displayCollada(element)
+                                    // }
+                                    // else{
+                                    //     console.log("The model hasn't been correctly uploaded by the API, please try again")
+                                    // }
+                                })
+                            },500);
+                        }
+                    })
                 });
             }
             else{
@@ -650,6 +654,9 @@ define(['rest3d', 'upload', 'viewer','database', 'collada','gltf'], function (re
                         stock.tree["tree_"+stock.name].jstree("refresh");
                     },100)
                 }
+            })
+            window.renderMenu["tab_"+stock.name].focusTab(function(){
+                stock.tree["tree_"+stock.name].jstree("refresh");
             })
         }
         this.init();
