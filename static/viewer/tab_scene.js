@@ -328,6 +328,7 @@ define(['viewer'], function (viewer) {
                         "success": function (new_data) {
                             var result = [];
                             if(viewer.scenes==undefined){
+                                $("#img-emptyboxScenes").remove();
                                 GUI.image(parent.scenes, "img-emptyboxScenes", "../gui/images/empty_box.gif", 60, 60, "before");
                             }
                             else if (nodeBuffer == -1) {

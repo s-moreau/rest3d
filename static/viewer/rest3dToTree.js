@@ -27,6 +27,7 @@ define(['rest3d', 'upload', 'viewer','database', 'collada','gltf'], function (re
         this.dataUrl = location.protocol + "//" + location.host + "/rest3d/data/" + this.name +"/";
         this.convertUrl = location.protocol + "//" + location.host + "/rest3d/convert/" + this.name +"/";
         this.uploadToTmp = location.protocol + "//" + location.host + "/rest3d/tmp/";
+        this.uploadToDb = location.protocol + "//" + location.host + "/rest3d/db/";
         window.objectRest3d[this.name] = this;
         var stock = this;
 
@@ -147,6 +148,18 @@ define(['rest3d', 'upload', 'viewer','database', 'collada','gltf'], function (re
             var path = node.attr('path');
             if (path[0] ==='/') path = path.substring(1);
             var win = window.open(encodeURI(stock.dataUrl+path+'/?uuid='+node.attr("uuid")), '_blank');              
+        }
+
+        this.upToTmp = function(node){
+            $.post(stock.uploadToTmp,{url:stock.buildUrlData(node)}).done(function(){
+                 window.renderMenu.tab_tmp.focusTab();
+            });
+        }
+
+        this.upToDb= function(node){
+            $.post(stock.uploadToDb,{url:stock.buildUrlData(node)}).done(function(){
+                 window.renderMenu.tab_db.focusTab();
+            });
         }
 
         this.convertMenu = function (node) {
@@ -310,17 +323,36 @@ define(['rest3d', 'upload', 'viewer','database', 'collada','gltf'], function (re
                         //     }
                         // };
                         if (upload !=="" && (rel == "collection" || rel == "model" || rel == "zip" || rel == "folder")) {
-                            result.icon = {
+                            result.addfiles = {
                                 'label': 'Add files',
                                 'action': stock.addFiles_contextMenu,
                             };
                         }
-                        else if (!up&& rel !== "collection"){
-                            result.icon = {
+
+                        if (!up&& rel !== "collection" && stock.name !=="warehouse"){
+                            result.download = {
                                 'label': 'Download',
                                 'action': stock.download,
                             };
                         }
+
+                        else if(rel == 'folder'){
+                            result.download = {
+                                'label': 'Download',
+                                'action': stock.download,
+                            };
+                            result.upToTmp = {
+                                'label': 'Upload to tmp',
+                                'action': stock.upToTmp,
+                            };
+                            if(window.objectRest3d.hasOwnProperty("db")){
+                                result.upToDb = {
+                                    'label': 'Upload to db',
+                                    'action': stock.upToDb,
+                                };
+                            }
+                        }
+
                         if ((rel == "collada" || rel == "gltf") && !up) {
                             result.preview = {
                                 'label': 'Preview',
