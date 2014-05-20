@@ -6,6 +6,7 @@
        //  this.signin;///It's an url. if array, redirection with new window. If not, iframe used
        //  this.upload;/// Set whether or not the upload feature is available
 define(['rest3d', 'upload', 'viewer','database', 'collada','gltf'], function (rest3d, setViewer6Upload, viewer,databaseTab,COLLADA,glTF) {
+    window.objectRest3d = {};
     var rest3dToTree = function (data,parent) {
 
         var upload = "";
@@ -25,6 +26,8 @@ define(['rest3d', 'upload', 'viewer','database', 'collada','gltf'], function (re
         this.uploadUrl = location.protocol + "//" + location.host + "/rest3d/" + this.name +"/";
         this.dataUrl = location.protocol + "//" + location.host + "/rest3d/data/" + this.name +"/";
         this.convertUrl = location.protocol + "//" + location.host + "/rest3d/convert/" + this.name +"/";
+        this.uploadToTmp = location.protocol + "//" + location.host + "/rest3d/tmp/";
+        window.rest3dToTree[this.name] = this;
         var stock = this;
 
         this.init = function(){
@@ -33,9 +36,8 @@ define(['rest3d', 'upload', 'viewer','database', 'collada','gltf'], function (re
 
         this.buildUrlData = function(node){
             if(this.name=="warehouse"||this.name=="3dvia"){
-                var path = node.attr('path');
-                if (path[0] ==='/') path = path.substring(1);
-                path = stock.dataUrl+path+'/?uuid='+node.attr("uuid");
+                var relativePath = node.attr('path').substr(0, node.attr('path').lastIndexOf("/"));
+                var path = encodeURI(stock.dataUrl+relativePath+'/?uuid='+node.attr("uuid")); 
             }   
             else{
                 var relativePath = node.attr('path').substr(0, node.attr('path').lastIndexOf("/"));
@@ -58,25 +60,25 @@ define(['rest3d', 'upload', 'viewer','database', 'collada','gltf'], function (re
             });
         }
 
-        this.preview = function (node) {
-            $("#dialog").dialog("close");
-            var gitHtml = $('<div id="dialog"><iframe id="myIframe" src="" style="height:100% !important; width:100% !important; border:0px;"></div>');
-            $('body').append(gitHtml);
-            $("#dialog").dialog({
-                title: node.attr('name'),
-                width: '600',
-                height: '500',
-                open: function () {
-                    $('#myIframe').attr('src', node.attr("previewuri"));
-                },
-                close: function () {
-                    gitHtml.remove();
-                },
-            });
-            $("#dialog").css({
-                'min-height': 'none !important;'
-            });
-        }
+        // this.preview = function (node) {
+        //     $("#dialog").dialog("close");
+        //     var gitHtml = $('<div id="dialog"><iframe id="myIframe" src="" style="height:100% !important; width:100% !important; border:0px;"></div>');
+        //     $('body').append(gitHtml);
+        //     $("#dialog").dialog({
+        //         title: node.attr('name'),
+        //         width: '600',
+        //         height: '500',
+        //         open: function () {
+        //             $('#myIframe').attr('src', node.attr("previewuri"));
+        //         },
+        //         close: function () {
+        //             gitHtml.remove();
+        //         },
+        //     });
+        //     $("#dialog").css({
+        //         'min-height': 'none !important;'
+        //     });
+        // }
 
         this.icon = function (node) {
             $("#dialog").dialog("close");
@@ -99,12 +101,33 @@ define(['rest3d', 'upload', 'viewer','database', 'collada','gltf'], function (re
         }
 
         this.displayCollada = function (node) {
-            window.pleaseWait(true);
-            COLLADA.load(stock.buildUrlData(node), viewer.parse_dae).then(
-                function (flag) {
-                    window.pleaseWait(false);
-                    buffer.notif(node.attr("name"));
-                })
+            if(stock.name == "warehouse"){
+                $.post(stock.uploadToTmp,{url:stock.buildUrlData(node)}).done(function(data){
+                    data = jQuery.parseJSON(data);
+                    window.renderMenu.tmp.focusTab();
+                    window.objectRest3d.tab_tmp.tree["tree_"+stock.name].jstree("refresh");
+                    // data.forEach(function(file){
+                    //     if(file.name==node.attr('name')){
+                    //         uuid = file.uuid;
+                    //         window.pleaseWait(true);
+                    //         COLLADA.load(stock.buildUrlData(node), viewer.parse_dae).then(
+                    //             function (flag) {
+                    //                 window.pleaseWait(false);
+                    //                 buffer.notif(node.attr("name"));
+                    //             })
+                    //     }
+                    // })
+                    // }
+                });
+            }
+            else{
+                window.pleaseWait(true);
+                COLLADA.load(stock.buildUrlData(node), viewer.parse_dae).then(
+                    function (flag) {
+                        window.pleaseWait(false);
+                        buffer.notif(node.attr("name"));
+                    })
+            }
         }
 
         this.displayGltf = function (node) {
