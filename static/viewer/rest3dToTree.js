@@ -111,15 +111,20 @@ define(['rest3d', 'upload', 'viewer','database', 'collada','gltf'], function (re
                             setTimeout(function(){
                                 var selector = $("#tab_tmp li[name='"+file.name+"']");
                                 if(selector.length==1)selector=[selector];
+                                try{
                                 selector.forEach(function(element){
-                                    var uuid = element.attr("uuid");
+                                var uuid = element.attr("uuid");
                                     // if(uuid==file.uuid){
                                         window.objectRest3d.tmp.displayCollada(element)
                                     // }
                                     // else{
                                     //     console.log("The model hasn't been correctly uploaded by the API, please try again")
                                     // }
-                                })
+                                      })
+                                }catch(e){
+                                    console.error("File to load not found among the tmp database")
+                                }
+                              
                             },500);
                         }
                     })

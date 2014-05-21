@@ -7,13 +7,13 @@
   require('./utils');
   var FileInfo = require('./fileinfo');
   var Mime = require('mime');
-  var toJSON = require('./tojson')
-  var Path = require('path')
+  var toJSON = require('./tojson');
+  var Path = require('path');
+  var Readdir = require('./readdir');
 
   var zipFile = {};
   zipFile.diskcache = null;
 
-  var walk = require('walk');
   var rmdirSync = require('./rmdir')
  
   // request file from url, with otional jar, 
@@ -306,57 +306,76 @@
         console.log('Program output:', output);
         return finish('unzip exit code ='+code+' output='+output);
       } else {
-      // now march the folder structure and upload files to database
-        var options = {
-          listeners: {
-              names: function (root, nodeNamesArray) {
-                /*
-                nodeNamesArray.sort(function (a, b) {
-                  if (a > b) return 1;
-                  if (a < b) return -1;
-                  return 0;
-                });
-                */
-              }
-            , directories: function (root, dirStatsArray, next) {
-                // dirStatsArray is an array of `stat` objects with the additional attributes
-                // * type
-                // * error
-                // * name
-                
-                next();
-              }
-            , file: function (root, fileStats, next) {
-                
-                  var item = {
-                    name: fileStats.name,
-                    path: Path.join(root,fileStats.name)
-                  };
-                  var assetpath = root.split(folder).join("");
-                  if (assetpath[0] ==='/') assetpath = assetpath.substring(1);
-                  var fileInfo = new FileInfo(item, params.collectionpath,assetpath);
+        var callback = function (root, name) {
+            var item = {
+              name: name,
+              path: Path.join(root,name)
+            };
+            var assetpath = root.split(folder).join("");
+            if (assetpath[0] ==='/') assetpath = assetpath.substring(1);
+            var fileInfo = new FileInfo(item, params.collectionpath,assetpath);
 
-                  files.push(fileInfo);
-                  counter++;
-                  if (!params.dryrun) {
-                     fileInfo.upload(params.handler, finish);
-                  } else
-                    finish(undefined);
-
-                  next();
-           
-              }
-            , errors: function (root, nodeStatsArray, next) {
-                next();
-              }
-            , end: function(){
-              // counter --
+            files.push(fileInfo);
+            counter++;
+            if (!params.dryrun) {
+               fileInfo.upload(params.handler, finish);
+            } else {
               finish(undefined);
             }
-          }
-        };
+        }
+        Readdir(folder,callback);
+        finish(undefined);
+      // now march the folder structure and upload files to database
+        // var options = {
+        //   listeners: {
+        //       names: function (root, nodeNamesArray) {
+        //         /*
+        //         nodeNamesArray.sort(function (a, b) {
+        //           if (a > b) return 1;
+        //           if (a < b) return -1;
+        //           return 0;
+        //         });
+        //         */
+        //       }
+        //     , directories: function (root, dirStatsArray, next) {
+        //         // dirStatsArray is an array of `stat` objects with the additional attributes
+        //         // * type
+        //         // * error
+        //         // * name
+                
+        //         next();
+        //       }
+        //     , file: function (root, fileStats, next) {
+                
+        //           var item = {
+        //             name: fileStats.name,
+        //             path: Path.join(root,fileStats.name)
+        //           };
+        //           var assetpath = root.split(folder).join("");
+        //           if (assetpath[0] ==='/') assetpath = assetpath.substring(1);
+        //           var fileInfo = new FileInfo(item, params.collectionpath,assetpath);
 
-        walk.walkSync(folder, options);
+        //           files.push(fileInfo);
+        //           counter++;
+        //           if (!params.dryrun) {
+        //              fileInfo.upload(params.handler, finish);
+        //           } else
+        //             finish(undefined);
+
+        //           next();
+           
+        //       }
+        //     , errors: function (root, nodeStatsArray, next) {
+        //         next();
+        //       }
+        //     , end: function(){
+        //       // counter --
+        //       finish(undefined);
+        //     }
+        //   }
+        // };
+
+        // walk.walkSync(folder, options);
       }
         
     });

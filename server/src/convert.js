@@ -13,7 +13,7 @@ var uuid = require('node-uuid');
 var fs = require('fs');
 var rmdirSync =require('./rmdir');
 var childProcess = require('child_process');
-var walk = require('walk');
+var Readdir = require('./readdir');
 
 server.jobManager.addJob('convert', {
   concurrency: 100, //number of concurrent jobs ran at the same time, default 50 if not specified
@@ -68,33 +68,53 @@ server.jobManager.addJob('convert', {
                       stock.stderr += 'Child process exited with exit code '+code+'\n';
                   }
                   else{
-                    var options = {
-                      listeners: {
-                        file: function (root, fileStats, next) {
-                          var item = {
+                    var callback = function(root,name){
+                        var item = {
                             name: fileStats.name,
                             path: Path.join(root,fileStats.name)
-                          };
-                          var fileInfoBis = new FileInfo(item, stock.params.collectionpath, stock.params.assetpath);
-                          fileInfoBis.upload(stock.params.handler, function(err,file){
-                            if(err){
-                              stock.stderr += "upload "+file.name+" "+err+'\n';
-                              console.log("upload "+file.name+" "+err);
-                            }
-                            else{
-                              stock.result.push(file);
-                              stock.stdout += "uploaded "+file.name+'\n';
-                              console.log("uploaded "+file.name);
-                            }
-                          });
-                          next();
+                        };
+                        var fileInfoBis = new FileInfo(item, stock.params.collectionpath, stock.params.assetpath);
+                        fileInfoBis.upload(stock.params.handler, function(err,file){
+                          if(err){
+                            stock.stderr += "upload "+file.name+" "+err+'\n';
+                            console.log("upload "+file.name+" "+err);
                           }
-                        , errors: function (root, nodeStatsArray, next) {
-                            next();
+                          else{
+                            stock.result.push(file);
+                            stock.stdout += "uploaded "+file.name+'\n';
+                            console.log("uploaded "+file.name);
                           }
+                        });
                       }
-                    };
-                    walk.walkSync("./"+fileInfo.path.stringBefore(fileInfo.name), options);
+                      Readdir("./"+fileInfo.path.stringBefore(fileInfo.name),callback)
+                    
+                    // var options = {
+                    //   listeners: {
+                    //     file: function (root, fileStats, next) {
+                    //       var item = {
+                    //         name: fileStats.name,
+                    //         path: Path.join(root,fileStats.name)
+                    //       };
+                    //       var fileInfoBis = new FileInfo(item, stock.params.collectionpath, stock.params.assetpath);
+                    //       fileInfoBis.upload(stock.params.handler, function(err,file){
+                    //         if(err){
+                    //           stock.stderr += "upload "+file.name+" "+err+'\n';
+                    //           console.log("upload "+file.name+" "+err);
+                    //         }
+                    //         else{
+                    //           stock.result.push(file);
+                    //           stock.stdout += "uploaded "+file.name+'\n';
+                    //           console.log("uploaded "+file.name);
+                    //         }
+                    //       });
+                    //       next();
+                    //       }
+                    //     , errors: function (root, nodeStatsArray, next) {
+                    //         next();
+                    //       }
+                    //   }
+                    // };
+                    // walk.walkSync("./"+fileInfo.path.stringBefore(fileInfo.name), options);
                   }
                   
                 })

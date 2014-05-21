@@ -25,7 +25,6 @@
     "secure-rnd":"",
     "basex":"",
     "cookies":"",
-    "walk":"",
     "passport":"",
     "passport-google":"",
     "existdb-node": "git+https://github.com/amd/existdb-node.git"
