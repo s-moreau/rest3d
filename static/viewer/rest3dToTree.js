@@ -123,7 +123,9 @@ define(['rest3d', 'upload', 'viewer','database', 'collada','gltf'], function (re
                             },500);
                         }
                     })
-                });
+                }).fail(function(err) {
+                console.error(err)
+            });
             }
             else{
                 window.pleaseWait(true);
@@ -153,13 +155,17 @@ define(['rest3d', 'upload', 'viewer','database', 'collada','gltf'], function (re
         this.upToTmp = function(node){
             $.post(stock.uploadToTmp,{url:stock.buildUrlData(node)}).done(function(){
                  window.renderMenu.tab_tmp.focusTab();
+            }).fail(function(err) {
+                console.error(err)
             });
         }
 
         this.upToDb= function(node){
             $.post(stock.uploadToDb,{url:stock.buildUrlData(node)}).done(function(){
                  window.renderMenu.tab_db.focusTab();
-            });
+            }).fail(function(err) {
+                console.error(err)
+            })
         }
 
         this.convertMenu = function (node) {
@@ -167,7 +173,9 @@ define(['rest3d', 'upload', 'viewer','database', 'collada','gltf'], function (re
             // result.file.relativePath = "";
             $.post(stock.convertUrl+node.attr("path") , { url: stock.dataUrl+'/?uuid='+node.attr("uuid")}).done(function( data ) {
                 alert( data );
-              });
+              }).fail(function(err) {
+                console.error(err)
+            });
         }
         this.images=[];
         this.bufferUuid = "";
@@ -353,7 +361,7 @@ define(['rest3d', 'upload', 'viewer','database', 'collada','gltf'], function (re
                             }
                         }
 
-                        if ((rel == "collada" || rel == "gltf") && !up) {
+                        if ((rel == "collada" || rel == "gltf") && !up && stock.name !=="warehouse") {
                             result.preview = {
                                 'label': 'Preview',
                                 'action': stock.preview,
