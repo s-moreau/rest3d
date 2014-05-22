@@ -74,38 +74,64 @@ server.jobManager.addJob('convert', {
                           path: Path.join(root,name)
                         };
                         var fileInfoBis = new FileInfo(item, stock.params.collectionpath, stock.params.assetpath);
-                        if(stock.copyall||(fileInfoBis.name!==fileInfo.name)){
-                          fileInfoBis.upload(stock.params.handler, function(err,file){
-                            if(err){
-                              stock.stderr += "upload "+file.name+" "+err+'\n';
-                              console.log("upload "+file.name+" "+err);
-                            }
-                            else{
-                              stock.result.push(file);
-                              stock.stdout += "uploaded "+file.name+'\n';
-                              console.log("uploaded "+file.name);
-                            }
-                          });
-                        }
+                        fileInfoBis.upload(stock.params.handler, function(err,file){
+                          if(err){
+                            stock.stderr += "upload "+file.name+" "+err+'\n';
+                            console.log("upload "+file.name+" "+err);
+                          }
+                          else{
+                            stock.result.push(file);
+                            stock.stdout += "uploaded "+file.name+'\n';
+                            console.log("uploaded "+file.name);
+                          }
+                        });
                       }
-                      Readdir(stock.dirname,callback);
+                      Readdir(fileInfo.path.stringBefore(fileInfo.name),callback)
+                    
+                    // var options = {
+                    //   listeners: {
+                    //     file: function (root, fileStats, next) {
+                    //       var item = {
+                    //         name: fileStats.name,
+                    //         path: Path.join(root,fileStats.name)
+                    //       };
+                    //       var fileInfoBis = new FileInfo(item, stock.params.collectionpath, stock.params.assetpath);
+                    //       fileInfoBis.upload(stock.params.handler, function(err,file){
+                    //         if(err){
+                    //           stock.stderr += "upload "+file.name+" "+err+'\n';
+                    //           console.log("upload "+file.name+" "+err);
+                    //         }
+                    //         else{
+                    //           stock.result.push(file);
+                    //           stock.stdout += "uploaded "+file.name+'\n';
+                    //           console.log("uploaded "+file.name);
+                    //         }
+                    //       });
+                    //       next();
+                    //       }
+                    //     , errors: function (root, nodeStatsArray, next) {
+                    //         next();
+                    //       }
+                    //   }
+                    // };
+                    // walk.walkSync("./"+fileInfo.path.stringBefore(fileInfo.name), options);
                   }
                   
                 })
               }
-              // else if(stock.params.copyall){
-              //   fileInfo.upload(stock.params.handler,function(err,file){
-              //     if(err){
-              //       stock.stderr += "upload "+file.name+" "+err+'\n';
-              //       console.log("upload "+file.name+" "+err);
-              //     }
-              //     else{
-              //       stock.result.push(file);
-              //       stock.stdout += "uploaded "+file.name+'\n';
-              //       console.log("uploaded "+file.name);
-              //     }
-              //   })
-              // }
+              else if(stock.params.copyall){
+                fileInfo.upload(stock.params.handler,function(err,file){
+                  if(err){
+                    stock.stderr += "upload "+file.name+" "+err+'\n';
+                    console.log("upload "+file.name+" "+err);
+                  }
+                  else{
+                    stock.result.push(file);
+                    stock.stdout += "uploaded "+file.name+'\n';
+                    console.log("uploaded "+file.name);
+                  }
+                })
+              }
             });
             if(stock.flag==true){
                stock.stderr += "there aren't any collada files to convert with the url/file specified in the request, job killed \n";
