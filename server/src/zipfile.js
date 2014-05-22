@@ -315,7 +315,7 @@
               var assetpath = root.split(FileInfo.options.tmpDir+"/"+params.handler.req.session.sid).join("");
             }
             else if(root.startsWith(FileInfo.options.uploadDir)){
-              var assetpath = params.assetpath;
+              var assetpath = params.assetpath +'/'+root.split(folder).join("");
             }
             if (assetpath[0] ==='/') assetpath = assetpath.substring(1);
             var fileInfo = new FileInfo(item, params.collectionpath,assetpath);
