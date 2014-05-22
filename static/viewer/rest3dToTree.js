@@ -242,6 +242,7 @@ define(['rest3d', 'upload', 'viewer','database', 'collada','gltf'], function (re
             for(var key1 in data.assets){
                 if(key1.indexOf("\\") != -1){
                     var tmp = key1.split('\\');
+                    tmp.slice(0,1)
                 } else {
                     var tmp = key1.split('/');
                 }
