@@ -311,7 +311,7 @@ server.get(/^\/rest3d\/info/, function (req, res, next) {
             this.database = new Database(this.name);
             switch(this.name){ //set here the REQUIRED paramaters for creating a database. We should find a way to specify those informations directly in routes/header of files
                 case 'warehouse':
-                    this.database.description = "This is your cloud repository, any assets manipulated over this tab is stocked in a node server's job created at your session initialization. Everything will be lost once the session expires.";
+                    this.database.description = "The Google 3D Warehouse is a free, online repository where users can find, share, store, and collaborate on 3D models.";
                     this.database.indexLogin = 3;
                     this.database.picture = "../gui/images/warehouse.jpg";
                     this.database.signin = ["https://3dwarehouse.sketchup.com/?redirect=1"];
