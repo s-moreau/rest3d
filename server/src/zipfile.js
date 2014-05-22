@@ -10,6 +10,7 @@
   var toJSON = require('./tojson');
   var Path = require('path');
   var Readdir = require('./readdir');
+  var mkdirp = require('mkdirp');
 
   var zipFile = {};
   zipFile.diskcache = null;
@@ -250,8 +251,6 @@
         return params.cb(undefined, fileInfo);
     }
 
-    var folder = params.handler.req.session.sid;
-
     var finish = function (err, rest3d_asset) {
       if (there_was_an_error) return;
       if (err) {
@@ -274,7 +273,8 @@
     if(params.target){
       var folder = params.target;
     }else{
-      var folder = FileInfo.options.tmpDir+"/"+params.handler.req.session.sid;
+      var folder = FileInfo.options.tmpDir+"/"+ params.handler.req.session.sid+'/'+params.assetpath;
+      mkdirp(folder);
     }
     var cmd = 'unzip -o '+params.filename+' -d '+folder+' -x Thumbs.db .DS_Store .Trashes __MACOSX/*';
     console.log('exec ['+cmd+']');
@@ -311,7 +311,12 @@
               name: name,
               path: Path.join(root,name)
             };
-            var assetpath = root.split(folder).join("");
+            if(root.startsWith(FileInfo.options.tmpDir)){
+              var assetpath = root.split(FileInfo.options.tmpDir+"/"+params.handler.req.session.sid).join("");
+            }
+            else if(root.startsWith(FileInfo.options.uploadDir)){
+              var assetpath = params.assetpath;
+            }
             if (assetpath[0] ==='/') assetpath = assetpath.substring(1);
             var fileInfo = new FileInfo(item, params.collectionpath,assetpath);
 
