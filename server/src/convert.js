@@ -69,6 +69,7 @@ server.jobManager.addJob('convert', {
                   }
                   else{
                     var callback = function(root,name){
+                      console.log('in',root,name)
                         var item = {
                             name: fileStats.name,
                             path: Path.join(root,fileStats.name)
@@ -86,7 +87,7 @@ server.jobManager.addJob('convert', {
                           }
                         });
                       }
-                      Readdir("./"+fileInfo.path.stringBefore(fileInfo.name),callback)
+                      Readdir(stock.dirname,callback)
                     
                     // var options = {
                     //   listeners: {
