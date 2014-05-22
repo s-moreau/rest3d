@@ -38,6 +38,12 @@ module.exports = function (server) {
   var Asset = require('./asset');
   var Resource = require('./resource');
 
+    if(process.platform.contains('win')){
+    var joinToPath = '\\';
+  } else {
+    var joinToPath = '/';
+  }
+
 
   server.get(/^\/rest3d\/info\/warehouse.*/,function(req, res, next) {
     

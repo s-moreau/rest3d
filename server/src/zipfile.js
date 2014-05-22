@@ -15,6 +15,12 @@
   zipFile.diskcache = null;
 
   var rmdirSync = require('./rmdir')
+
+  if(process.platform.contains('win')){
+    var joinToPath = '\\';
+  } else {
+    var joinToPath = '/';
+  }
  
   // request file from url, with otional jar, 
   // then unzip, and then call cb with assetInfo
@@ -257,7 +263,7 @@
       if (err) {
         console.log('ERROR IN ZIPFILE FINISH');
         
-        rmdirSync(FileInfo.options.tmpDir+'/'+params.handler.req.session.sid);
+        rmdirSync(FileInfo.options.tmpDir+joinToPath+params.handler.req.session.sid);
         params.cb(err);
         counter = -1;
         there_was_an_error=true;
@@ -266,7 +272,7 @@
       counter --;
       if (counter === 0)
       {
-        rmdirSync(FileInfo.options.tmpDir+'/'+params.handler.req.session.sid);
+        rmdirSync(FileInfo.options.tmpDir+joinToPath+params.handler.req.session.sid);
         params.cb(undefined, files);
       }
     };
@@ -274,7 +280,7 @@
     if(params.target){
       var folder = params.target;
     }else{
-      var folder = FileInfo.options.tmpDir+'/'+params.handler.req.session.sid;
+      var folder = FileInfo.options.tmpDir+joinToPath+params.handler.req.session.sid;
     }
     var cmd = 'unzip -o '+params.filename+' -d '+folder+' -x Thumbs.db .DS_Store .Trashes __MACOSX/*';
     console.log('exec ['+cmd+']');

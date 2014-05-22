@@ -103,7 +103,7 @@ define(['rest3d', 'upload', 'viewer','database', 'collada','gltf'], function (re
 
         this.displayCollada = function (node) {
             if(stock.name == "warehouse"){
-                $.post(stock.uploadToTmp,{url:stock.buildUrlData(node)}).done(function(data){
+                $.post(stock.uploadToTmp+'/'+encodeURI(node.attr('name')),{url:stock.buildUrlData(node)}).done(function(data){
                     data = jQuery.parseJSON(data);
                     window.renderMenu.tab_tmp.focusTab();
                     data.forEach(function(file){
@@ -158,7 +158,7 @@ define(['rest3d', 'upload', 'viewer','database', 'collada','gltf'], function (re
         }
 
         this.upToTmp = function(node){
-            $.post(stock.uploadToTmp,{url:stock.buildUrlData(node)}).done(function(){
+            $.post(stock.uploadToTmp+'/'+encodeURI(node.attr('name')),{url:stock.buildUrlData(node)}).done(function(){
                  window.renderMenu.tab_tmp.focusTab();
             }).fail(function(err) {
                 console.error(err)
@@ -166,7 +166,7 @@ define(['rest3d', 'upload', 'viewer','database', 'collada','gltf'], function (re
         }
 
         this.upToDb= function(node){
-            $.post(stock.uploadToDb,{url:stock.buildUrlData(node)}).done(function(){
+            $.post(stock.uploadToDb+'/'+encodeURI(node.attr('name')),{url:stock.buildUrlData(node)}).done(function(){
                  window.renderMenu.tab_db.focusTab();
             }).fail(function(err) {
                 console.error(err)
@@ -240,7 +240,11 @@ define(['rest3d', 'upload', 'viewer','database', 'collada','gltf'], function (re
             var result = {};
             result.children = [];
             for(var key1 in data.assets){
-                var tmp = key1.split('/');
+                if(key1.indexOf("\\") != -1){
+                    var tmp = key1.split('\\');
+                } else {
+                    var tmp = key1.split('/');
+                }
                 this.buildJson(tmp,data.assets[key1],result.children,path);
             }
             for(var key in data.children){
@@ -585,6 +589,8 @@ define(['rest3d', 'upload', 'viewer','database', 'collada','gltf'], function (re
                   stock.tree["tree_"+stock.name].jstree("refresh");
             })
             this.uploadPlugin.jquery.bind('fileuploaddrop', function (e, data) {
+                window.pleaseWait(true);
+                setTimeout(function(){window.pleaseWait(false)},1000)
                                 if(data.files.length<100){
                     
 
@@ -673,7 +679,7 @@ define(['rest3d', 'upload', 'viewer','database', 'collada','gltf'], function (re
                     }
                     if(stock.parentTree == -1) stock.addNodeRoot(tmp)
                     else stock.addNode(tmp)
-                    var checkbox = $('<input type="checkbox" style="float:right;" checked=true>')
+                    var checkbox = $('<input type="checkbox" style="position:absolute;float:right;right:15px !important;" checked=true>')
                     $("#"+id).append(checkbox);
                     stock.uploadPlugin.setting.click(function(){
                         if($("#"+id).find('input').is(':checked')){
