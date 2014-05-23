@@ -38,6 +38,7 @@ define(['rest3d', 'upload', 'viewer','database', 'collada','gltf'], function (re
         this.buildUrlData = function(node){
             if(this.name=="warehouse"||this.name=="3dvia"){
                 var relativePath = node.attr('path').substr(0, node.attr('path').lastIndexOf("/"));
+                if (relativePath[0] ==='/') relativePath = relativePath.substring(1);
                 var path = encodeURI(stock.dataUrl+relativePath+'/?uuid='+node.attr("uuid")); 
             }   
             else{
@@ -158,7 +159,7 @@ define(['rest3d', 'upload', 'viewer','database', 'collada','gltf'], function (re
         }
 
         this.upToTmp = function(node){
-            $.post(stock.uploadToTmp+'/'+encodeURI(node.attr('name')),{url:stock.buildUrlData(node)}).done(function(){
+            $.post(stock.uploadToTmp+encodeURI(node.attr('name')),{url:stock.buildUrlData(node)}).done(function(){
                  window.renderMenu.tab_tmp.focusTab();
             }).fail(function(err) {
                 console.error(err)
@@ -166,7 +167,7 @@ define(['rest3d', 'upload', 'viewer','database', 'collada','gltf'], function (re
         }
 
         this.upToDb= function(node){
-            $.post(stock.uploadToDb+'/'+encodeURI(node.attr('name')),{url:stock.buildUrlData(node)}).done(function(){
+            $.post(stock.uploadToDb+encodeURI(node.attr('name')),{url:stock.buildUrlData(node)}).done(function(){
                  window.renderMenu.tab_db.focusTab();
             }).fail(function(err) {
                 console.error(err)
@@ -186,7 +187,7 @@ define(['rest3d', 'upload', 'viewer','database', 'collada','gltf'], function (re
         this.bufferUuid = "";
         this.nodeArray = function(parent,name,id,uuid,type,path,up,close){
             var result = {};
-            result.data = name.substr(0, 60);
+            result.data = decodeURI(name.substr(0, 60));
             if(close)result.state = "closed";
             else if(type=="folder"&&(this.name=="warehouse"||this.name=="3dvia")){result.state = "closed";}
             else if(name.split(".").length<2){result.state = "open"}
@@ -195,7 +196,7 @@ define(['rest3d', 'upload', 'viewer','database', 'collada','gltf'], function (re
             }
             result.attr = {
                 "id": id,
-                "name": name,
+                "name": decodeURI(name.substr(0, 60)),
                 "uuid": uuid,
                 "rel":type,
                 "path":path,
@@ -218,10 +219,10 @@ define(['rest3d', 'upload', 'viewer','database', 'collada','gltf'], function (re
         }
 
         this.buildJson= function(split,uuid,arbre,path){
-            var true_path=path+"/"+split[0];
+            var true_path=path+"/"+decodeURI(split[0]);
             if(split.length==0){return;}
-            var check = checkIfExist(split[0],arbre);
-            var id = this.encodeToId(split[0],uuid);
+            var check = checkIfExist(decodeURI(split[0]),arbre);
+            var id = this.encodeToId(decodeURI(split[0]),uuid);
             var ext = split[0].match(/\.[^.]+$/);
             var type = this.extensionToType(ext);
             if(check!==-1){
@@ -229,7 +230,7 @@ define(['rest3d', 'upload', 'viewer','database', 'collada','gltf'], function (re
                 this.buildJson(split,uuid,arbre[check].children,true_path);
             }
             else{
-                this.nodeArray(arbre, split[0], id, uuid, type,true_path,true,false);
+                this.nodeArray(arbre, decodeURI(split[0]), id, uuid, type,true_path,true,false);
                 split.shift();
                 this.buildJson(split,uuid,arbre[arbre.length-1].children,true_path);
             }
@@ -309,7 +310,7 @@ define(['rest3d', 'upload', 'viewer','database', 'collada','gltf'], function (re
                                     for(var i=0;i<stock.images.length;i++){
                                         GUI.addTooltip({
                                             parent: $("#"+stock.images[i].id).find('a'),
-                                            content: "<img style='max-height:150px;max-width:150px' src="+stock.dataUrl+stock.images[i].path+" ></img>",
+                                            content: "<img style='max-height:150px;max-width:150px' src="+encodeURI(stock.dataUrl+stock.images[i].path)+" ></img>",
                                         })            
                                     }
                                 },1000)
