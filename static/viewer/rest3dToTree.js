@@ -37,14 +37,18 @@ define(['rest3d', 'upload', 'viewer', 'database', 'collada', 'gltf'], function (
 
         this.preview = function (node) {
             $("#dialog").dialog("close");
-            var gitHtml = '<div id="dialog"><iframe id="myIframe" src="" style="height:99% !important; width:99% !important; border:0px;"></iframe></div>';
+            var gitHtml = $('<div id="dialog"><iframe id="myIframe" src="" style="height:99% !important; width:99% !important; border:0px;"></iframe></div>');
             $('body').append(gitHtml);
             $("#dialog").dialog({
                 title: "Preview",
                 width: '600',
                 height: '500',
                 open: function (ev, ui) {
-                    $('#myIframe').attr('src', '/viewer/easy-viewer.html?file=' + stock.buildUrlData(node));
+                    console.debug(stock.buildUrlData(node))
+                    $('#myIframe').attr('src', '/viewer/easy-viewer.html?file='+stock.dataUrl+node.attr("path"));
+                },
+                close: function () {
+                    gitHtml.remove();
                 },
             });
         }
