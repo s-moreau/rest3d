@@ -26,7 +26,7 @@ define(['rest3d', 'upload', 'viewer', 'database', 'collada', 'gltf'], function (
         this.uploadUrl = location.protocol + "//" + location.host + "/rest3d/" + this.name + "/";
         this.dataUrl = location.protocol + "//" + location.host + "/rest3d/data/" + this.name + "/";
         this.convertUrl = location.protocol + "//" + location.host + "/rest3d/convert/" + this.name + "/";
-        this.uploadToTmp = location.protocol + "//" + location.host + "/rest3d/tmp/";
+        this.uploadToTmp = "/rest3d/tmp/";
         this.uploadToDb = location.protocol + "//" + location.host + "/rest3d/db/";
         window.objectRest3d[this.name] = this;
         var stock = this;
