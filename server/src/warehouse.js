@@ -95,10 +95,10 @@ module.exports = function (server) {
       // note, id exists, otherwise we would not be there
 
       var id = uid.split('_');
-      if (id && id[0] === 'm' && id.length===2){
+      if (id && id[0] === 'm' && id.length===3){
         console.log ('get warehouse model ID =['+id[1]+']')
         // this will give all the binaries uuid
-        var url = "https://3dwarehouse.sketchup.com/3dw/getbinary?subjectId="+id[1]+"&subjectClass=entity&name=ks";
+        var url = "https://3dwarehouse.sketchup.com/3dw/getbinary?subjectId="+id[1]+"&subjectClass=entity&name="+id[2];
 
         
         // note: this is using diskcache
@@ -145,7 +145,7 @@ module.exports = function (server) {
           url: url
           },function(err, resp, body){
             if (err){
-              console.log('ERROR asking 3dwarehouse ID'=id[0]);
+              console.log('ERROR asking 3dwarehouse ID='+id[1]);
               return handler.handleError(err);
             }
 
@@ -167,7 +167,7 @@ module.exports = function (server) {
               url: url
               },function(err, resp, body){
                 if (err){
-                  console.log('ERROR asking 3dwarehouse ID'=id[0]);
+                  console.log('ERROR asking 3dwarehouse ID='+id[1]);
                   return handler.handleError(err);
                 }
                 var result2 = parsesearch(body);
@@ -186,7 +186,8 @@ module.exports = function (server) {
             );
             
         });
-      }
+      } else
+        return handler.handleError({message:'wrong id='+uid,statusCode:400});
     }
   });
 
@@ -1046,11 +1047,16 @@ https://3dwarehouse.sketchup.com/3dw/getpubliccontent?contentId=82ae4808-88f6-4b
         // add a collection to this collection
         var id = 'c_'+entry.id;
         col.children[entry.title] = id;
-      } else
+      } else if (entry.binaryNames !== undefined)
       {
-        // add an asset to this collection
-        var id = 'm_'+entry.id;
-        col.assets[entry.title] = id;
+        var extension=null;
+        if (entry.binaryNames.indexOf('ks')>=0) extension='ks';
+        else if (entry.binaryNames.indexOf('k2')>=0) extension='k2';
+        if (extension) {
+          // add an asset to this collection
+          var id = 'm_'+entry.id+'_'+extension
+          col.assets[entry.title] = id;
+        }
       }
 
       /*
