@@ -44,7 +44,6 @@ define(['rest3d', 'upload', 'viewer', 'database', 'collada', 'gltf'], function (
                 width: '600',
                 height: '500',
                 open: function (ev, ui) {
-                    console.debug(stock.buildUrlData(node))
                     $('#myIframe').attr('src', '/viewer/easy-viewer.html?file='+stock.dataUrl+node.li_attr.path);
                 },
                 close: function () {
@@ -397,7 +396,6 @@ define(['rest3d', 'upload', 'viewer', 'database', 'collada', 'gltf'], function (
                                     }
                                 }, 1000)
                             }
-                            console.debug(result);
                             return result;
                         }
                     },

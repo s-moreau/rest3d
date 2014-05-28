@@ -273,7 +273,9 @@
     if(params.target){
       var folder = params.target;
     }else{
-      var folder = FileInfo.options.tmpDir+"/"+ params.handler.req.session.sid+'/'+params.assetpath;
+
+      var folder = FileInfo.options.tmpDir+"/"+ params.handler.req.session.sid;
+      if(params.assetpath)folder+='/'+params.assetpath;
       mkdirp(folder);
     }
     var cmd = 'unzip -o '+params.filename+' -d '+folder+' -x Thumbs.db .DS_Store .Trashes __MACOSX/*';
