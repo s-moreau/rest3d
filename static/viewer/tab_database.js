@@ -189,7 +189,7 @@ define(['q'],
                 this.parent.append(tmp);
                 this.parent.append("<br><br>");
                 this.descriptionArea();
-                this.parent.append("<br><hr><br>")
+                this.parent.append("<a style='float:right;' href='javascript:window.login_" + stock.name + "()'>+Sign in</a><br><hr><br>");
                 var stock = this;
                 var flag = true;
                 this.parent.focusTab(function(){

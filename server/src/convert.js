@@ -69,9 +69,9 @@ server.jobManager.addJob('convert', {
                   }
                   else{
                     var callback = function(root,name){
-                        var item = {
-                            name: fileStats.name,
-                            path: Path.join(root,fileStats.name)
+                         var item = {
+                          name: name,
+                          path: Path.join(root,name)
                         };
                         var fileInfoBis = new FileInfo(item, stock.params.collectionpath, stock.params.assetpath);
                         fileInfoBis.upload(stock.params.handler, function(err,file){
@@ -86,7 +86,7 @@ server.jobManager.addJob('convert', {
                           }
                         });
                       }
-                      Readdir("./"+fileInfo.path.stringBefore(fileInfo.name),callback)
+                      Readdir(fileInfo.path.stringBefore(fileInfo.name),callback)
                     
                     // var options = {
                     //   listeners: {

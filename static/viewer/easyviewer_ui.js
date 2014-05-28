@@ -144,7 +144,12 @@ define(['viewer', 'rest3d', 'collada', 'gltf', 'channel', 'colorpicker'],
         } else if (ext == ".dae") {
           COLLADA.load(file, viewer.parse_dae)
         } else {
-          console.log(file+" couldn't be loaded. Please make sure the file specified is a dae or json model");
+          try{
+            console.log(arg.file)
+            COLLADA.load(arg.file, viewer.parse_dae)
+          }catch(e){
+          console.log(arg.file+" couldn't be loaded. Please make sure the file specified is a dae or json model");
+          }
         }
       } else {
         console.log("any file specified in url for loading");
