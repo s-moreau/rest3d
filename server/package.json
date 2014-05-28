@@ -7,7 +7,7 @@
   },
   "dependencies" : {
     "mime":"",
-    "restify":"2.7.0",
+    "restify":"",
     "send":"",
     "mkdirp":"",
     "shelljs":"",
