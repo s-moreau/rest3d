@@ -178,7 +178,7 @@ define(['channel', 'codemirror', 'webglUtils', 'WebGLDebugUtils', 'pnotify', 'co
                 this.json = _json;
                 this.id = _json.id;
                 this.parent = _json.parent;
-                if (_json.hasOwnProperty("json")) {
+                if (_json.hasOwnProperty("core")) {
                     this.jsonData = _json.json;
                     this.mode = 1;
                 }
@@ -206,13 +206,13 @@ define(['channel', 'codemirror', 'webglUtils', 'WebGLDebugUtils', 'pnotify', 'co
                         this.jsonInput["plugins"] = this.json.plugin;
                     }
                     else {
-                        this.jsonInput["plugins"] = ["themes", "json_data", "ui", "types", "sort", "contextmenu", "search"];
+                        this.jsonInput["plugins"] = ["json_data", "ui", "types", "sort", "contextmenu", "search", "wholerow"];
                     }
                     if (this.json.hasOwnProperty("themes")) {
                         this.jsonInput["themes"] = this.json.themes;
                     }
-                    if (this.json.hasOwnProperty("type")) {
-                        this.jsonInput["types"] = this.json.type;
+                    if (this.json.hasOwnProperty("types")) {
+                        this.jsonInput["types"] = this.json.types;
                     }
                     if (this.json.hasOwnProperty("contextmenu")) {
                         this.jsonInput["contextmenu"] = this.json.contextmenu;

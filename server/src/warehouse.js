@@ -315,19 +315,24 @@ module.exports = function (server) {
       var kmz = null;
       var st = false;
       if (!entry.binaryNames) continue;
-      for (var j=0; j<entry.binaryExts.length;j++){
-        if (entry.binaryNames[j] === 'st') 
-          st = true;
-        if (entry.binaryNames[j] === 'k2' || entry.binaryNames[j] === 'ks' || entry.binaryNames[j] === 'zip')
-        {
-          if (!kmz) kmz = entry.binaryNames[j];
-          else if (entry.binaryNames[j] === 'zip') kmz = entry.binaryNames[j]; // zip are prefered sources
+      if(entry.binaryExts){
+        for (var j=0; j<entry.binaryExts.length;j++){
+          if (entry.binaryNames[j] === 'st') 
+            st = true;
+          if (entry.binaryNames[j] === 'k2' || entry.binaryNames[j] === 'ks' || entry.binaryNames[j] === 'zip')
+          {
+            if (!kmz) kmz = entry.binaryNames[j];
+            else if (entry.binaryNames[j] === 'zip') kmz = entry.binaryNames[j]; // zip are prefered sources
+          }
         }
-      }
-      if (!kmz) continue;
+        if (!kmz) continue;
 
-      // those are assets
-      var id = 'm_'+entry.id+"_"+kmz;
+        // those are assets
+        var id = 'm_'+entry.id+"_"+kmz;
+      }
+      else{
+        var id = 'm_'+entry.id;
+      }
       col.assets[entry.title] = id;
 
       /*
@@ -381,7 +386,7 @@ module.exports = function (server) {
       if (entry.title.indexOf('<img src') !== -1) continue;
 
       var st = false;
-      if (entry.binaryNames) 
+      if (entry.binaryNames&&entry.binaryExts) 
         for (var j=0; j<entry.binaryExts.length;j++){
           if (entry.binaryNames[j] === 'st') 
             st = true;
