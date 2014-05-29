@@ -177,7 +177,8 @@ module.exports = function (server) {
                 // append collections to models
                 var col1 = result.getResourceSync();
                 var col2 = result2.getResourceSync();
-                col1.children = col2.children;
+                for (var attrname in col2.children) { col1.children[attrname] = col2.children[attrname]; }
+                for (var attrname in col2.assets) { col1.assets[attrname] = col2.assets[attrname]; }
 
                 //result.RequestUri = uid;
 
@@ -1039,14 +1040,17 @@ https://3dwarehouse.sketchup.com/3dw/getpubliccontent?contentId=82ae4808-88f6-4b
 
     for (var i=0;i<json.entries.length;i++){
       var entry = json.entries[i];
+      // get rid of funny business
+      if (entry.title.contains('<img src')) continue;
 
+      var item = null;
       // is this a collection ?
       if (entry.entityCount !== undefined || entry.collectionCount !== undefined){
         // reject empty collections
         if (entry.entityCount === 0 && entry.collectionCount === 0) continue;
         // add a collection to this collection
         var id = 'c_'+entry.id;
-        col.children[entry.title] = id;
+        item = {uuid: id};
       } else if (entry.binaryNames !== undefined)
       {
         var extension=null;
@@ -1055,10 +1059,25 @@ https://3dwarehouse.sketchup.com/3dw/getpubliccontent?contentId=82ae4808-88f6-4b
         if (extension) {
           // add an asset to this collection
           var id = 'm_'+entry.id+'_'+extension
-          col.assets[entry.title] = id;
+          item = {uuid: id, mimetype:'application/vnd.google-earth.kmz'};
+          item.iconUri = "https://3dwarehouse.sketchup.com/3dw/getbinary?subjectId="+entry.id+"&subjectClass=entity&name=st";
+          item.modelUri = "https://3dwarehouse.sketchup.com/model.html?id="+entry.id;
+          item.previewUri = "https://3dwarehouse.sketchup.com/embed.html?entityId="+entry.id;
         }
       }
 
+      if (item !== null){
+        item.description = entry.description;
+        if (entry.creator && entry.createTime)
+          item.created = { date : new Date(entry.createTime).getTime(), 
+                           user : entry.creator.id};
+        if (entry.latitude && entry.longitude)
+          item.latitude = entry.latitude, item.longitude=entry.longitude;
+
+        col.children[entry.title] = item;
+      }
+
+ 
       /*
       var item={};
       item.name = entry.title;
@@ -1107,11 +1126,11 @@ https://3dwarehouse.sketchup.com/3dw/getpubliccontent?contentId=82ae4808-88f6-4b
       // remove empty folders at root, there are tons of them
       if (entityCount===0 && collectionCount===0) continue;
       // remove entrys that have a bogus name
-      if (entry.title.indexOf('<img src') !== -1) continue;
+      if (entry.contains('<img src') ) continue;
 
 
       var id = 'c_'+entry.id;
-      col.children[entry.title] = id;
+      col.children[entry.title] = {uuid:id};
 
 
       /*
