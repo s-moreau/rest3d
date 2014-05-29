@@ -54,7 +54,7 @@ module.exports = function (server) {
     console.log('[info/warehouse] id=' + uid);
 
     if (!uid || uid === '') {
-    	// this returns a json with all collections
+      // this returns a json with all collections
       var start = 1;
       var end = 300;
       request({ // All collections

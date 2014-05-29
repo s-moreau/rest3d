@@ -1072,6 +1072,17 @@ define(['viewer', 'gui', 'rest3d', 'q', 'collada', 'gltf', 'renderer', 'state', 
             }).width("90%");
             accordion.collada.append("<hr></hr>");
 
+            GUI.button('plane', accordion.collada, function () {
+                pleaseWait(true);
+                var url = "/models/plane/seymourplane_angle_linear_animation.dae";
+                COLLADA.load(url, viewer.parse_dae).then(
+                    function (flag) {
+                        pleaseWait(false);
+                        window.notif(url);
+                    })
+            }).width("90%");
+            accordion.collada.append("<hr></hr>");
+
             GUI.button('wine', accordion.gltf, function () {
                 pleaseWait(true);
                 var url = "/models/wine/wine.json";
