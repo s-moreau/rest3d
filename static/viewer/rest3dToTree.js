@@ -52,36 +52,36 @@ define(['rest3d', 'upload', 'viewer', 'database', 'collada', 'gltf'], function (
             });
         }
 
-        // this.preview = function (node) {
-        //     $("#dialog").dialog("close");
-        //     var gitHtml = $('<div id="dialog"><iframe id="myIframe" src="" style="height:100% !important; width:100% !important; border:0px;"></div>');
-        //     $('body').append(gitHtml);
-        //     $("#dialog").dialog({
-        //         title: node.attr('name'),
-        //         width: '600',
-        //         height: '500',
-        //         open: function () {
-        //             $('#myIframe').attr('src', node.attr("previewuri"));
-        //         },
-        //         close: function () {
-        //             gitHtml.remove();
-        //         },
-        //     });
-        //     $("#dialog").css({
-        //         'min-height': 'none !important;'
-        //     });
-        // }
+        this.previewWarehouse = function () {
+            $("#dialog").dialog("close");
+            var gitHtml = $('<div id="dialog"><iframe id="myIframe" src="" style="height:100% !important; width:100% !important; border:0px;"></div>');
+            $('body').append(gitHtml);
+            $("#dialog").dialog({
+                title: stock.nodeContext.name,
+                width: '600',
+                height: '500',
+                open: function () {
+                    $('#myIframe').attr('src', stock.nodeContext.li_attr.previewUri);
+                },
+                close: function () {
+                    gitHtml.remove();
+                },
+            });
+            $("#dialog").css({
+                'min-height': 'none !important;'
+            });
+        }
 
         this.icon = function () {
             $("#dialog").dialog("close");
-            var gitHtml = $('<div id="dialog"><img src="' + stock.nodeContext.li_attr.iconuri + '" /></div>');
+            var gitHtml = $('<div id="dialog"><img src="" /></div>');
             $('body').append(gitHtml);
             $("#dialog").dialog({
                 title: stock.nodeContext.text,
                 width: '300',
                 height: '300',
                 open: function () {
-                    $('#myIframe').attr('src', stock.nodeContext.li_attr.iconuri);
+                    $('#myIframe').find('img').attr('src', stock.nodeContext.li_attr.iconuri);
                 },
                 close: function () {
                     gitHtml.remove();
@@ -244,8 +244,20 @@ define(['rest3d', 'upload', 'viewer', 'database', 'collada', 'gltf'], function (
         }
 
         this.nodeArray = function (parent, name, id, uuid, type, path,close) {
+            if(typeof uuid !== 'string'){
+                if(uuid.uuid[0]=="c")uuid = uuid.uuid;
+                else if(uuid.mimetype=="application/vnd.google-earth.kmz"){
+                    var description = uuid.description;
+                    var modelUri = uuid.modelUri;
+                    var previewUri = uuid.previewUri;
+                    var iconUri = uuid.iconUri;
+                    uuid = uuid.uuid;
+                } else {
+                    return
+                }
+            }
             var result1 = {};
-            result1.text = decodeURI(name).substr(0, 60).split('>').join("");
+            result1.text = name.substr(0, 60).split('>').join("");
             // if (close) result.children = true;
             // else if (type == "folder" && (this.name == "warehouse" || this.name == "3dvia")) {
             if(close==true){
@@ -274,6 +286,22 @@ define(['rest3d', 'upload', 'viewer', 'database', 'collada', 'gltf'], function (
                 "path": path,
                 "type":type,
             }
+            if(description)result1.li_attr.description=description;
+            if(modelUri){
+                result1.li_attr.modelUri=modelUri;
+            }
+            if(previewUri)result1.li_attr.previewUri=previewUri;
+            if(iconUri){
+                result1.li_attr.iconUri=iconUri;
+                result1.icon= iconUri;
+                 setTimeout(function () {
+                    GUI.addTooltip({
+                        parent: $("#" + id).find('a'),
+                        content: "<img style='max-height:150px;max-width:150px' src=" + iconUri + " ></img>",
+                    })
+                },500);
+            }
+            if(description)result1.li_attr.description=description;
             // if(parent==true){parent=[];}
             parent.push(result1);
             if (type == "texture") {
@@ -311,12 +339,6 @@ define(['rest3d', 'upload', 'viewer', 'database', 'collada', 'gltf'], function (
                 this.buildJson(split, uuid, arbre[check].children, true_path);
             }
             else {
-                if(stock.name=='warehouse'&&type=="folder"&&split.length==1){
-                    type = "model"
-                    var close = true;
-                }else{
-                    var close = false;
-                }
                 this.nodeArray(arbre, split[0], id, uuid, type, true_path, close);
                 split.shift();
                 this.buildJson(split, uuid, arbre[arbre.length - 1].children, true_path);
@@ -523,20 +545,50 @@ define(['rest3d', 'upload', 'viewer', 'database', 'collada', 'gltf'], function (
                                 'action': stock.convertMenu,
                             };
                         }
-                        if (node.li_attr.previewuri) {
+                        if(node.li_attr.description) {
+                            result.descript = {
+                                "separator_before": false,
+                                "separator_after": false,
+                                'label': 'Descritpion',
+                                'action' : function(){
+                                    $("#dialog").dialog("close");
+                                    var gitHtml = $('<div id="dialog"></div>');
+                                    $('body').append(gitHtml);
+                                    $("#dialog").dialog({
+                                        title: stock.nodeContext.text,
+                                        width: '300',
+                                        height: '300',
+                                        open: function () {
+                                            gitHtml.append("<img src="+stock.nodeContext.li_attr.iconUri+"/>");
+                                            gitHtml.append("<hr>");
+                                        },
+                                        close: function () {
+                                            gitHtml.remove();
+                                        },
+                                    });
+                                    $("#dialog").css({
+                                        'min-height': 'none !important;'
+                                    });
+                                }
+                            }
+                        }
+                        if (node.li_attr.previewUri) {
                             result.preview = {
                                 "separator_before": false,
                                 "separator_after": false,
                                 'label': 'Preview model',
-                                'action': stock.preview,
+                                'action': stock.previewWarehouse,
                             };
                         }
-                        if (node.li_attr.iconuri) {
-                            result.icon = {
+                        if (node.li_attr.modelUri) {
+                            result.original = {
                                 "separator_before": false,
                                 "separator_after": false,
-                                'label': 'Display icon',
-                                'action': stock.icon,
+                                'label': 'Open original page',
+                                'action': function(){
+                                    var win = window.open(node.li_attr.modelUri, '_blank');
+                                    win.focus();
+                                },
                             };
                         }
                         return result;
