@@ -167,7 +167,7 @@ module.exports = function (server) {
         </tr>
               
         */
-        col.assets[name] = uid;
+        col.children[name] = {uuid: uid};
         /*
           item.name = name;
           //item.description = "";
@@ -367,7 +367,7 @@ module.exports = function (server) {
             var col = result.getResourceSync();
             files.forEach(function (fileInfo) {
               var path = (fileInfo.assetpath ? fileInfo.assetpath+'/' : '');
-              col.assets[path+fileInfo.name] = fileInfo.name;
+              col.assets[path+fileInfo.name] = {}; // no uuid
               
             });
             return handler.handleResult(result.getSync());

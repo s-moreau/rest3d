@@ -13,13 +13,13 @@ var Resource = require('./resource')
 // create collectiion _name inside _database, as a sub collection of _collection
 // this will be an empty collection to begin with
 
-var mime_type = 'model/rest3d-collection+json';
+var mimetype = 'model/rest3d-collection+json';
 
 var Collection = function (database, parentId ,name){
   if (arguments.length) {
     var col = {children:{}, assets:{}};
     Asset.call(this,database, parentId ,name,col);
-    this.type=mime_type;
+    this.mimetype=mimetype;
   }
 }
 
@@ -28,7 +28,7 @@ Collection.prototype = Object.create(Asset.prototype);
 Collection.prototype.constructor = Collection;
 
 
-Collection.type = mime_type;
+Collection.mimetype = mimetype;
 
 Collection.create = function(database,path,uid,cb){
 
@@ -349,7 +349,7 @@ Collection.getroot = function(db,cb){
 // this is not using locks
 // does not even check if asset already exists
   var addAsset = function(collection, asset, path, cb){
-  if (asset.type === mime_type) 
+  if (asset.mimetype === mimetype) 
     return callback("collection.addAsset -> cannot add collection, use addChild")
 
   if (!asset.uuid)
@@ -370,7 +370,7 @@ Collection.getroot = function(db,cb){
 // does not even checks if asset already exists
 var addChild = function(collection,newcollection, path, cb){
 
-  if (newcollection.type !== mime_type) 
+  if (newcollection.mimetype !== mimetype) 
     return callback("collection.addChild -> cannot only add collection, use addAsset instead")
 
   if (!newcollection.uuid)
