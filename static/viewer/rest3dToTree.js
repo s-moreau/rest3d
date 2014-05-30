@@ -245,7 +245,7 @@ define(['rest3d', 'upload', 'viewer', 'database', 'collada', 'gltf'], function (
 
         this.nodeArray = function (parent, name, id, uuid, type, path,close) {
             var result1 = {};
-            result1.text = decodeURI(name.substr(0, 60)).split('>').join("");
+            result1.text = decodeURI(name).substr(0, 60).split('>').join("");
             // if (close) result.children = true;
             // else if (type == "folder" && (this.name == "warehouse" || this.name == "3dvia")) {
             if(close==true){
@@ -285,7 +285,7 @@ define(['rest3d', 'upload', 'viewer', 'database', 'collada', 'gltf'], function (
         }
 
         var checkIfExist = function (value, arbre) {
-            value = decodeURI(value.substr(0, 60)).split('>').join("");
+            value = decodeURI(value).substr(0, 60).split('>').join("");
             for (var i = 0; i < arbre.length; i++) {
                 if (value == arbre[i].text) {
                     return i;
