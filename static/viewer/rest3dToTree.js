@@ -74,7 +74,7 @@ define(['rest3d', 'upload', 'viewer', 'database', 'collada', 'gltf'], function (
 
         this.icon = function () {
             $("#dialog").dialog("close");
-            var gitHtml = $('<div id="dialog"><img src="" /></div>');
+            var gitHtml = $('<div id="dialog"><img src=""/></div>');
             $('body').append(gitHtml);
             $("#dialog").dialog({
                 title: stock.nodeContext.text,
