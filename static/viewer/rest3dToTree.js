@@ -162,6 +162,18 @@ define(['rest3d', 'upload', 'viewer', 'database', 'collada', 'gltf'], function (
             return path;
         }
 
+        this.createCollection = function (data) {
+            var inst = $.jstree.reference(data.reference),
+            obj = inst.get_node(data.reference);
+            var result = {};
+            result.icon = "../gui/images/menu-scenes.png";
+            result.text = "New Collection";
+            result.li_attr = {};
+            result.li_attr.type = "collection";
+            inst.create_node(obj, result, "last", function (new_node) {
+                setTimeout(function () { inst.edit(new_node); },0);
+            });
+        }
 
         this.setParentToUpload = function () {
             if (stock.nodeContext.li_attr.type === "collada" || stock.nodeContext.li_attr.type === "gltf") {
@@ -466,10 +478,7 @@ define(['rest3d', 'upload', 'viewer', 'database', 'collada', 'gltf'], function (
                         if(up==undefined)up=false;
                         result.create = {
                             'label': 'Create collection',
-                            'action': function (obj) {
-                                var ref = stock.tree["tree_" + stock.name].jstree('create_node', stock.nodeContext , { 'icon' : "../gui/images/menu-scenes.png",'li_attr' : {"type":"collection"}}, 'last');
-                                stock.tree["tree_" + stock.name].jstree('edit', ref);
-                            }
+                            "action": stock.createCollection,
                         };
                         if (upload !== "" && (rel == "collection" || rel == "model" || rel == "zip" || rel == "folder")) {
                             result.addfiles = {
@@ -602,8 +611,14 @@ define(['rest3d', 'upload', 'viewer', 'database', 'collada', 'gltf'], function (
                         return result;
                     }
                 },
-            });
-
+            })
+    if(stock.name !== "warehouse"){
+        stock.tree["tree_" + stock.name].bind("rename_node.jstree", function(e, data){
+            $('#'+data.node.id).attr('name',data.text);
+            if (stock.nodeContext == "#") data.node.li_attr.li_attr.path = data.text;
+            else $('#'+data.node.id).attr('path',stock.nodeContext.li_attr.path + '/' + data.text);
+        });
+    }
         }
 
         this.encodeToId = function (name,path) { // FUNCTION TO ENCODE ANY STRING TO AN ID HANDLED BY HTML/ REEEAAAALLLY IMPORTANT
@@ -728,6 +743,9 @@ define(['rest3d', 'upload', 'viewer', 'database', 'collada', 'gltf'], function (
 
             this.uploadPlugin.refresh.click(function () {
                 stock.tree["tree_" + stock.name].jstree("refresh");
+            })
+            this.uploadPlugin.rootcollection.click(function () {
+                stock.createCollection();
             })
             this.uploadPlugin.jquery.bind('fileuploaddrop', function (e, data) {
                 window.pleaseWait(true);
