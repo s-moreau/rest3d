@@ -476,11 +476,12 @@ define(['rest3d', 'upload', 'viewer', 'database', 'collada', 'gltf'], function (
                         var up = node.li_attr.upload;
                         stock.nodeContext = node;
                         if(up==undefined)up=false;
-                        result.create = {
-                            'label': 'Create collection',
-                            "action": stock.createCollection,
-                        };
-                        if (upload !== "" && (rel == "collection" || rel == "model" || rel == "zip" || rel == "folder")) {
+                        if(stock.name!=="warehouse"&&(rel == "collection" || rel == "model" || rel == "zip" || rel == "folder") ){
+                            result.create = {
+                                'label': 'Create collection',
+                                'icon': '../gui/images/createcollection.png',
+                                "action": stock.createCollection,
+                            };
                             result.addfiles = {
                                 "separator_before": false,
                                 "separator_after": false,
@@ -744,7 +745,7 @@ define(['rest3d', 'upload', 'viewer', 'database', 'collada', 'gltf'], function (
             this.uploadPlugin.refresh.click(function () {
                 stock.tree["tree_" + stock.name].jstree("refresh");
             })
-            this.uploadPlugin.rootcollection.click(function () {
+            this.uploadPlugin.rootCollection.click(function () {
                 stock.createCollection();
             })
             this.uploadPlugin.jquery.bind('fileuploaddrop', function (e, data) {
