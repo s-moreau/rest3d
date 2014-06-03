@@ -95,20 +95,22 @@ define(['rest3d', 'upload', 'viewer', 'database', 'collada', 'gltf'], function (
         this.displayCollada = function () {
             if (stock.name == "warehouse") {
                 $.post(stock.setParentToUpload(stock.nodeContext), {
-                    url: stock.buildUrlData(stock.nodeContext)
+                    url: stock.dataUrl +'/?uuid='+ stock.nodeContext.li_attr.uuid
                 }).done(function (data) {
                     data = jQuery.parseJSON(data);
                     window.renderMenu.tab_tmp.focusTab();
                     data.forEach(function (file) {
                         if (file.name == stock.nodeContext.text) {
                             setTimeout(function () {
-                                var select = $("#tab_tmp li[path*='" + stock.tmpParent + "'][name*='" + file.name + "']");
-                                if (select.length == 1) {
-                                    window.objectRest3d.tmp.displayCollada(select);
-                                }
-                                else {
-                                    console.error("file to display not found among the temporary folder");
-                                }
+                                window.pleaseWait(true);
+                                var path = stock.nodeContext.li_attr.path.split('/');
+                                path.shift();
+                                path = path.join('/');
+                                COLLADA.load(location.protocol + "//" + location.host + "/rest3d/data/tmp/"+encodeURI(path), viewer.parse_dae).then(
+                                    function (flag) {
+                                        window.pleaseWait(false);
+                                        buffer.notif(stock.nodeContext.text);
+                                    })
                             }, 700);
                         }
                     })
@@ -118,7 +120,7 @@ define(['rest3d', 'upload', 'viewer', 'database', 'collada', 'gltf'], function (
             }
             else {
                 window.pleaseWait(true);
-                COLLADA.load(stock.buildUrlData(stock.nodeContext), viewer.parse_dae).then(
+                COLLADA.load(stock.dataUrl+stock.nodeContext.li_attr.path, viewer.parse_dae).then(
                     function (flag) {
                         window.pleaseWait(false);
                         buffer.notif(stock.nodeContext.text);
@@ -128,7 +130,7 @@ define(['rest3d', 'upload', 'viewer', 'database', 'collada', 'gltf'], function (
 
         this.displayGltf = function () {
             window.pleaseWait(true);
-            glTF.load(stock.buildUrlData(stock.nodeContext), viewer.parse_gltf).then(
+            glTF.load(stock.buildUrlData(), viewer.parse_gltf).then(
                 function (flag) {
                     window.pleaseWait(false);
                     window.notif(stock.nodeContext.text);
@@ -138,7 +140,11 @@ define(['rest3d', 'upload', 'viewer', 'database', 'collada', 'gltf'], function (
         this.download = function () {
             var path = stock.nodeContext.li_attr.path;
             if (path[0] === '/') path = path.substring(1);
-            var win = window.open(encodeURI(stock.dataUrl + path + '/?uuid=' + stock.nodeContext.li_attr.uuid), '_blank');
+            if(stock.name == "warehouse"){
+                var win = window.open(stock.dataUrl + 'q?uuid=' + stock.nodeContext.li_attr.uuid, '_blank');
+            } else {
+                var win = window.open(stock.dataUrl+stock.nodeContext.li_attr.path, '_blank');
+            }
         }
 
         this.buildUrlData = function () {
@@ -149,7 +155,7 @@ define(['rest3d', 'upload', 'viewer', 'database', 'collada', 'gltf'], function (
             }
             else {
                 var relativePath = stock.nodeContext.li_attr.path.substr(0, stock.nodeContext.li_attr.path.lastIndexOf("/"));
-                var path = encodeURI("/rest3d/data/" + stock.name + relativePath + '/?uuid=' + stock.nodeContext.li_attr.uuid);
+                var path = encodeURI("/rest3d/data/" + stock.name +'/'+ relativePath + '/?uuid=' + stock.nodeContext.li_attr.uuid);
             }
             path = path.split("(").join("");
             path = path.split(")").join("");
@@ -167,8 +173,7 @@ define(['rest3d', 'upload', 'viewer', 'database', 'collada', 'gltf'], function (
                         stock.tmpParent = name;
                     }
                 }
-            }
-            else {
+            } else {
                 var name = stock.nodeContext.text;
             }
             name = stock.uploadToTmp + encodeURI(name);
@@ -179,7 +184,7 @@ define(['rest3d', 'upload', 'viewer', 'database', 'collada', 'gltf'], function (
 
         this.upToTmp = function () {
             $.post(stock.setParentToUpload(stock.nodeContext), {
-                url: stock.buildUrlData(stock.nodeContext)
+                url: stock.dataUrl +'/?uuid='+ stock.nodeContext.li_attr.uuid
             }).done(function () {
                 window.renderMenu.tab_tmp.focusTab();
             }).fail(function (err) {
@@ -201,7 +206,7 @@ define(['rest3d', 'upload', 'viewer', 'database', 'collada', 'gltf'], function (
             // result = $("#" + node.attr("id")).data();
             // result.file.relativePath = "";
             $.post(stock.convertUrl + stock.nodeContext.li_attr.path, {
-                url: stock.dataUrl + '/?uuid=' + stock.nodeContext.li_attr.uuid
+                url: stock.dataUrl + '?uuid=' + stock.nodeContext.li_attr.uuid
             }).done(function (data) {
                 console.debug(data);
             }).fail(function (err) {
@@ -220,7 +225,7 @@ define(['rest3d', 'upload', 'viewer', 'database', 'collada', 'gltf'], function (
                 case "collada": 
                     type = "../favicon.ico";break;
                 case "gltf": 
-                    type = "../favicon.ico";break;
+                    type = "../gui/images/3d_model.png";break;
                 case 'shader': 
                     type = "../gui/images/geometry.png";break;
                 case "file": 
@@ -257,7 +262,7 @@ define(['rest3d', 'upload', 'viewer', 'database', 'collada', 'gltf'], function (
                 }
             }
             var result1 = {};
-            result1.text = name.substr(0, 60).split('>').join("");
+            result1.text = decodeURI(name).substr(0, 60).split('>').join("");
             // if (close) result.children = true;
             // else if (type == "folder" && (this.name == "warehouse" || this.name == "3dvia")) {
             if(close==true){
@@ -281,7 +286,7 @@ define(['rest3d', 'upload', 'viewer', 'database', 'collada', 'gltf'], function (
             result1.icon = stock.setIcon(type);
             if (path[0] === '/') path = path.substring(1);
             result1.li_attr = {
-                "name": decodeURI(name.substr(0, 60)),
+                "name": decodeURI(name).substr(0, 60),
                 "uuid": uuid,
                 "path": path,
                 "type":type,
@@ -294,6 +299,7 @@ define(['rest3d', 'upload', 'viewer', 'database', 'collada', 'gltf'], function (
             if(iconUri){
                 result1.li_attr.iconUri=iconUri;
                 result1.icon= iconUri;
+                result1.li_attr.type = 'model';
                  setTimeout(function () {
                     GUI.addTooltip({
                         parent: $("#" + id).find('a'),
@@ -330,7 +336,7 @@ define(['rest3d', 'upload', 'viewer', 'database', 'collada', 'gltf'], function (
             // var check = checkIfExist(decodeURI(split[0]), arbre);
             // var id = this.encodeToId(decodeURI(split[0]));
             var check = checkIfExist(split[0], arbre);
-            var id = stock.encodeToId(decodeURI(split[0]));
+            var id = stock.encodeToId(split[0],path);
             id = stock.checkIfIdExist(id);
             var ext = split[0].match(/\.[^.]+$/);
             var type = this.extensionToType(ext);
@@ -458,13 +464,13 @@ define(['rest3d', 'upload', 'viewer', 'database', 'collada', 'gltf'], function (
                         var up = node.li_attr.upload;
                         stock.nodeContext = node;
                         if(up==undefined)up=false;
-                        // result.create = {
-                        //     'label': 'Create collection',
-                        //     'action': function (obj) {
-                        //         // stock.tree["tree_"+stock.name].jstree("rename");
-                        //        this.rename(obj); 
-                        //     }
-                        // };
+                        result.create = {
+                            'label': 'Create collection',
+                            'action': function (obj) {
+                                var ref = stock.tree["tree_" + stock.name].jstree('create_node', stock.nodeContext , { 'icon' : "../gui/images/menu-scenes.png",'li_attr' : {"type":"collection"}}, 'last');
+                                stock.tree["tree_" + stock.name].jstree('edit', ref);
+                            }
+                        };
                         if (upload !== "" && (rel == "collection" || rel == "model" || rel == "zip" || rel == "folder")) {
                             result.addfiles = {
                                 "separator_before": false,
@@ -475,7 +481,7 @@ define(['rest3d', 'upload', 'viewer', 'database', 'collada', 'gltf'], function (
                             };
                         }
 
-                        if (!up && rel !== "collection" && stock.name !== "warehouse") {
+                        if (!up && rel !== "collection" && rel !== "folder" && stock.name !== "warehouse") {
                             result.download = {
                                 "separator_before": false,
                                 "separator_after": false,
@@ -485,7 +491,7 @@ define(['rest3d', 'upload', 'viewer', 'database', 'collada', 'gltf'], function (
                             };
                         }
 
-                        else if (rel == 'folder'||rel == 'model') {
+                        else if ((rel == 'folder'||rel == 'model')&& stock.name == "warehouse" ) {
                             result.download = {
                                 "separator_before": false,
                                 "separator_after": false,
@@ -549,18 +555,18 @@ define(['rest3d', 'upload', 'viewer', 'database', 'collada', 'gltf'], function (
                             result.descript = {
                                 "separator_before": false,
                                 "separator_after": false,
-                                'label': 'Descritpion',
+                                'label': 'Description',
+                                'icon': '../gui/images/info.png',
                                 'action' : function(){
                                     $("#dialog").dialog("close");
                                     var gitHtml = $('<div id="dialog"></div>');
                                     $('body').append(gitHtml);
                                     $("#dialog").dialog({
-                                        title: stock.nodeContext.text,
-                                        width: '300',
-                                        height: '300',
+                                        title: stock.nodeContext.text, 
                                         open: function () {
-                                            gitHtml.append("<img src="+stock.nodeContext.li_attr.iconUri+"/>");
+                                            gitHtml.append("<img src="+stock.nodeContext.li_attr.iconUri+" style='text-align: center !important; vertical-align: middle !important; display: table-cell;'/>");
                                             gitHtml.append("<hr>");
+                                            gitHtml.append(node.li_attr.description);
                                         },
                                         close: function () {
                                             gitHtml.remove();
@@ -577,6 +583,7 @@ define(['rest3d', 'upload', 'viewer', 'database', 'collada', 'gltf'], function (
                                 "separator_before": false,
                                 "separator_after": false,
                                 'label': 'Preview model',
+                                'icon': '../gui/images/preview.png',
                                 'action': stock.previewWarehouse,
                             };
                         }
@@ -585,6 +592,7 @@ define(['rest3d', 'upload', 'viewer', 'database', 'collada', 'gltf'], function (
                                 "separator_before": false,
                                 "separator_after": false,
                                 'label': 'Open original page',
+                                'icon': '../gui/images/warehouse_icon.png',
                                 'action': function(){
                                     var win = window.open(node.li_attr.modelUri, '_blank');
                                     win.focus();
@@ -598,12 +606,12 @@ define(['rest3d', 'upload', 'viewer', 'database', 'collada', 'gltf'], function (
 
         }
 
-        this.encodeToId = function (name) { // FUNCTION TO ENCODE ANY STRING TO AN ID HANDLED BY HTML/ REEEAAAALLLY IMPORTANT
-            try {
-                name = this.parentTree.li_attr.path + "/" + name;
+        this.encodeToId = function (name,path) { // FUNCTION TO ENCODE ANY STRING TO AN ID HANDLED BY HTML/ REEEAAAALLLY IMPORTANT
+            if(stock.name=="tmp") {
+                name = path+'/'+name;
             }
             // SUPPORT HTML
-            catch (e) {
+            else {
                 name = name;
             }
             name = "a" + encodeURI(name);
@@ -780,7 +788,11 @@ define(['rest3d', 'upload', 'viewer', 'database', 'collada', 'gltf'], function (
                     var relativePath = data.files[0].relativePath.split("/");
                     relativePath.forEach(function (folder) {
                         if (folder !== "") {
-                            var objectId = stock.encodeToId(folder);
+                            if(stock.parentTree!=="#"){
+                                var objectId = stock.encodeToId(folder,stock.parentTree.attr("path"));
+                            } else {
+                                var objectId = stock.encodeToId(folder);
+                            }
                             if ($('#' + objectId).length !== 1) {
                                 var object = {};
                                 object.text = folder;

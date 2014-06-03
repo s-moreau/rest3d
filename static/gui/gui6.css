@@ -810,4 +810,5 @@ width: 90% !important;
 .vakata-context { 
  z-index:999999 !important; 
  font-size: 9px!important;
+ font-weight: bold;
 } 
