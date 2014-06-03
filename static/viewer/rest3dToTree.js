@@ -163,16 +163,21 @@ define(['rest3d', 'upload', 'viewer', 'database', 'collada', 'gltf'], function (
         }
 
         this.createCollection = function (data) {
-            var inst = $.jstree.reference(data.reference),
-            obj = inst.get_node(data.reference);
             var result = {};
             result.icon = "../gui/images/menu-scenes.png";
             result.text = "New Collection";
             result.li_attr = {};
             result.li_attr.type = "collection";
-            inst.create_node(obj, result, "last", function (new_node) {
-                setTimeout(function () { inst.edit(new_node); },0);
-            });
+            if(!data){
+                var ref = this.tree["tree_" + this.name].jstree('create_node', '#', result, 'last');
+                this.tree["tree_" + this.name].jstree('edit', ref);
+            } else {
+                var inst = $.jstree.reference(data.reference),
+                obj = inst.get_node(data.reference);
+                inst.create_node(obj, result, "last", function (new_node) {
+                    setTimeout(function () { inst.edit(new_node); },0);
+                });
+            }
         }
 
         this.setParentToUpload = function () {
@@ -616,8 +621,16 @@ define(['rest3d', 'upload', 'viewer', 'database', 'collada', 'gltf'], function (
     if(stock.name !== "warehouse"){
         stock.tree["tree_" + stock.name].bind("rename_node.jstree", function(e, data){
             $('#'+data.node.id).attr('name',data.text);
-            if (stock.nodeContext == "#") data.node.li_attr.li_attr.path = data.text;
-            else $('#'+data.node.id).attr('path',stock.nodeContext.li_attr.path + '/' + data.text);
+            if (stock.nodeContext == undefined){
+                data.node.li_attr.path = data.text;
+                var path = '';
+            } else {
+                $('#'+data.node.id).attr('path',stock.nodeContext.li_attr.path + '/' + data.text);
+                var path = stock.nodeContext.li_attr.path;
+            }
+            $.post(stock.uploadUrl+path,{'collection':data.text}).done(function(){
+                stock.tree["tree_" + stock.name].jstree("refresh");
+            });
         });
     }
         }
@@ -754,8 +767,6 @@ define(['rest3d', 'upload', 'viewer', 'database', 'collada', 'gltf'], function (
                     window.pleaseWait(false)
                 }, 1000)
                 if (data.files.length < 100) {
-
-
                     if (e.idToDrop == "") {
                         stock.parentTree = false;
                     }
@@ -787,7 +798,9 @@ define(['rest3d', 'upload', 'viewer', 'database', 'collada', 'gltf'], function (
                         }
                     }
                     else {
-                        stock.parentTree = false;
+                        e.stopPropagation();
+                        e.preventDefault();
+                        console.log("Couldn't add files directly to the root, please create a root collection before uploading");
                     }
                 }
                 else {

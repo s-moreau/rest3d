@@ -48,24 +48,24 @@ define(['viewer'], function (viewer) {
                         var id = attr + "_" + (Math.floor(Math.random() * 1000000) + 1);
                     }
 
-                    // {"data":attr,"attr":{"id":id}}
                     var data = {};
-                    data.data = attr;
+                    data.text = attr;
+                    data.id = id;
                     if (attr == "znear" || attr == "zfar" || attr == "yfov" || attr == "projection" || attr == "aspect_ratio") {
-                        data.attr = {
-                            "id": id,
+                        data.icon = "../gui/images/camera.png";
+                        data.li_attr = {
                             'rel': 'camera_child'
                         }
                     }
                     else if (attr == "local") {
-                        data.attr = {
-                            "id": id,
+                        data.icon = "../gui/images/Photoshop3DAxis.png";
+                        data.li_attr = {
                             'rel': 'local'
                         }
                     }
                     else {
-                        data.attr = {
-                            "id": id,
+                        data.icon = "../gui/images/material.png";
+                        data.li_attr = {
                             'rel': 'material'
                         }
                     }
@@ -90,17 +90,17 @@ define(['viewer'], function (viewer) {
                 if (stock.hasOwnProperty('materials')) {
                     for (var z = 0; z < stock.materials.length; z++) {
                         var subsel_material = stock.materials[z];
-                        material.data = subsel_material.name || subsel_material.id || subsel_material.symbol || subsel_material.target;
+                        material.text = subsel_material.name || subsel_material.id || subsel_material.symbol || subsel_material.target;
                         if (pickId) {
-                            var id = material.data + "_" + (Math.floor(Math.random() * 1000000) + 1) + "__" + pickId;
+                            var id = material.text + "_" + (Math.floor(Math.random() * 1000000) + 1) + "__" + pickId;
                         }
                         else {
-                            var id = material.data + "_" + (Math.floor(Math.random() * 1000000) + 1);
+                            var id = material.text + "_" + (Math.floor(Math.random() * 1000000) + 1);
                         }
-                        material.state = "open";
-                        material.attr = {
+                        material.state = {'opened':true};
+                        material.id = id;
+                        material.li_attr = {
                             "rel": "children",
-                            "id": id
                         };
                         material.children = [];
                         var material_parameter = subsel_material.overrides || subsel_material.parameters;
@@ -138,18 +138,18 @@ define(['viewer'], function (viewer) {
                         }
                         var id = title + "__" + pickID;
                         var subchild = {
-                            "data": title,
-                            "state": "open",
-                            "attr": {
+                            "text": title,
+                            "state": {'opened':true},
+                            "id": id,
+                            "li_attr": {
                                 "rel": "geometry",
-                                "id": id
                             },
                             "children": [{
-                                "data": "materials",
-                                "state": "open",
-                                "attr": {
+                                "text": "materials",
+                                "state": {'opened':true},
+                                "id": "material" + "__" + pickID,
+                                "li_attr": {
                                     "rel": "children",
-                                    "id": "material" + "__" + pickID
                                 },
                                 "children": [material],
                             }, ],
@@ -196,18 +196,19 @@ define(['viewer'], function (viewer) {
                         }
                         var child = {};
                         var title = sel.id || sel.name || "undefined_" + Math.floor(Math.random() * 1000000) + 1;
-                        child.data = sel.id || sel.name || title;
-                        child.state = 'closed';
-                        var id = child.data;
+                        child.text = sel.id || sel.name || title;
+                        child.state = {'closed':true};
+                        var id = child.text;
                         if (pickId) {
                             id = id + "__" + pickId
                         }
                         window[id] = sel;
-                        child.attr = {
-                            "id": id,
+                        child.id = id;
+                        child.li_attr = {
                             "rel": "child"
                         };
-                        child.attr["type"] = sel.id;
+                        child.li_attr["type"] = sel.id;
+                        child.children = true;
                         param_out.push(child);
                     }
                 }
@@ -217,14 +218,15 @@ define(['viewer'], function (viewer) {
                 for (var i = 0; i < param_in.length; i++) { //{
                     var sel = param_in[i]
                     var scene = {};
-                    scene.data = sel.url.replace(/^.*[\\\/]/, ''); //data:
-                    scene.state = 'closed';
-                    var id = scene.data + "_" + Math.floor(Math.random() * 1000000) + 1;
+                    scene.text = sel.url.replace(/^.*[\\\/]/, ''); //data:
+                    scene.state = {'closed':true};
+                    var id = scene.text + "_" + Math.floor(Math.random() * 1000000) + 1;
                     window[id] = sel;
-                    scene.attr = {
-                        "id": id,
+                    scene.id = id;
+                    scene.li_attr = {
                         "rel": "main"
                     }
+                    scene.children=true;
                     param_out.push(scene);
                 }
                 return param_out;
@@ -241,7 +243,7 @@ define(['viewer'], function (viewer) {
                     var position = target[j];
                     var sub = {};
 
-                    sub.data = position.id || position.name;
+                    sub.text = position.id || position.name;
                     if (position.hasOwnProperty("geometries")) {
                         var pickId = position.geometries[0].glprimitives[0].pickID;
                         position.pickid = pickId;
@@ -254,27 +256,24 @@ define(['viewer'], function (viewer) {
                             }
                         }
                     }
-                    var id = sub.data;
+                    var id = sub.text;
                     if (pickId) {
                         id = id + "__" + pickId;
                     }
-                    sub.state = 'open';
-
+                    sub.state = {'opened':true};
+                    sub.id = id;
                     if (position.hasOwnProperty("camera")) {
-                        sub.attr = {
-                            "id": id,
-                            "rel": "camera"
+                        sub.li_attr = {
+                            "rel": "camera",
                         };
                     }
                     if (position.hasOwnProperty("geometries")) {
-                        sub.attr = {
-                            "id": id,
+                        sub.li_attr = {
                             "rel": "geometry"
                         };
                     }
                     if (position.hasOwnProperty("children")) {
-                        sub.attr = {
-                            "id": id,
+                        sub.li_attr = {
                             "rel": "children"
                         };
                     }
@@ -282,8 +281,7 @@ define(['viewer'], function (viewer) {
                     //      sub.attr = {"id":id,"rel":"local"};
                     // }
                     else {
-                        sub.attr = {
-                            "id": id,
+                        sub.li_attr = {
                             "rel": "sub"
                         };
                     }
@@ -298,8 +296,8 @@ define(['viewer'], function (viewer) {
                 return param_out;
             }
 
-            function removeModel(node) {
-                var id = node.attr("id").split("_")[0];
+            function removeModel() {
+                var id = window.nodeStocked.id.split("_")[0];
                 for (var i = 0; i < viewer.scenes.length; i++) {
                     if (viewer.scenes[i].hasOwnProperty("url")) {
                         if (viewer.scenes[i].url.replace(/^.*[\\\/]/, '') == id) {
@@ -309,15 +307,16 @@ define(['viewer'], function (viewer) {
                         }
                     }
                 }
-                $(node).remove();
+                $("#Treedef").jstree('delete_node', window.nodeStocked);
+                $('#Treedef').jstree("refresh");
             }
 
             var nodeBuffer;
             window.treeScene = GUI.treeBis({
-                id: 'Tree',
+                id: 'Treedef',
                 parent: parent.scenes,
-                json: {
-                    "ajax": {
+                core: {
+                    "data": {
                         "type": 'GET',
                         "url": function (node) {
                             nodeBuffer = node;
@@ -325,26 +324,26 @@ define(['viewer'], function (viewer) {
                             var url = "/rest3d/info/";
                             return url;
                         },
-                        "success": function (new_data) {
+                        "dataFilter": function (new_data) {
                             var result = [];
-                            if(viewer.scenes==undefined){
+                            if(viewer.scenes==undefined||viewer.scenes.length == 0){
                                 $("#img-emptyboxScenes").remove();
                                 GUI.image(parent.scenes, "img-emptyboxScenes", "../gui/images/empty_box.gif", 60, 60, "before");
                             }
-                            else if (nodeBuffer == -1) {
+                            else if (nodeBuffer.id == "#") {
                                 window.main(viewer.scenes, result)
                                 $("#img-emptyboxScenes").remove();
                             }
                             else {
                                 var viewerObject;
                                 $("#img-emptyboxScenes").remove();
-                                switch (nodeBuffer.attr('rel')) {
+                                switch (nodeBuffer.li_attr.rel) {
                                 case "main":
-                                    viewerObject = window[nodeBuffer.attr('id')];
+                                    viewerObject = window[nodeBuffer.id];
                                     window.sub(viewerObject, result);
                                     break;
                                 case "child":
-                                    viewerObject = window[nodeBuffer.attr('id')];
+                                    viewerObject = window[nodeBuffer.id];
                                     window.sub(viewerObject, result);
                                     break;
                                 }
@@ -353,11 +352,18 @@ define(['viewer'], function (viewer) {
                             return result;
                         },
                     },
+                    'check_callback' : true,
+                    'themes' : {
+                            'responsive' : false,
+                            'variant' : 'small',
+                            'stripes' : true
+                        },
                 },
                 "contextmenu": {
                     "items": function (node) {
                         var result = {};
-                        if (node.attr("rel") == "main") {
+                        window.nodeStocked = node;
+                        if (node.li_attr.rel == "main") {
                             result.icon = {
                                 'label': 'Remove',
                                 'action': removeModel,
@@ -365,63 +371,6 @@ define(['viewer'], function (viewer) {
                         }
                         return result;
                     }
-                },
-                type: {
-                    "types": {
-                        "main": {
-                            "icon": {
-                                "image": "../favicon.ico",
-                            },
-                        },
-                        "camera": {
-                            "icon": {
-                                "image": "../gui/images/camera-anim.gif",
-                            },
-                        },
-                        "children": {
-                            "icon": {
-                                "image": "../gui/images/folder.png",
-                            },
-                        },
-                        "local": {
-                            "icon": {
-                                "image": "../gui/images/Photoshop3DAxis.png",
-                            },
-                        },
-                        "geometry": {
-                            "icon": {
-                                "image": "../gui/images/geometry.png",
-                            },
-                        },
-                        "sub": {
-                            "icon": {
-                                "image": "../gui/images/folder.png",
-                            },
-                        },
-                        "child": {
-                            "icon": {
-                                "image": "../gui/images/folder.png",
-                            },
-                        },
-                        "empty": {
-                            "icon": {
-                                "image": "../gui/images/cross.jpg",
-                            },
-                        },
-                        "material": {
-                            "icon": {
-                                "image": "../gui/images/material.png",
-                            },
-                        },
-                        "camera_child": {
-                            "icon": {
-                                "image": "../gui/images/camera.png",
-                            },
-                        },
-                    }
-                },
-                themes: {
-                    "theme": "apple",
                 },
             });
 
@@ -464,6 +413,7 @@ define(['viewer'], function (viewer) {
                         var id = array[index].id;
                         var value = array[index].value;
                         $("#" + id).click(function () {
+                            $('#localNotif').remove()
                             var tmp = trs.create();
                             trs.fromMat4(tmp, value);
                             var e = euler.create();
@@ -478,6 +428,8 @@ define(['viewer'], function (viewer) {
                                 type: "notice",
                             });
                             html = $("#infplay" + id);
+                            html.parent().parent().parent().attr("id","localNotif");
+
 
                             function createSliders(parent, type, element) {
                                 switch (type) {
@@ -589,9 +541,10 @@ define(['viewer'], function (viewer) {
                 }, 500);
             }
         }
+        window.refreshScenesTree();
             window.renderMenu.scenes.focusTab(function(){
-                window.refreshScenesTree();
-                window.treeScene.openAll();
+                $('#Treedef').jstree("refresh");
+                if(window.treeScene)window.treeScene.openAll();
             })
     
 
