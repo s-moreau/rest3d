@@ -365,6 +365,7 @@ define(['viewer'], function (viewer) {
                         window.nodeStocked = node;
                         if (node.li_attr.rel == "main") {
                             result.icon = {
+                                'icon': '../gui/images/trash.png',
                                 'label': 'Remove',
                                 'action': removeModel,
                             };

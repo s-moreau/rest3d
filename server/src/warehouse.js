@@ -1023,6 +1023,10 @@ kmz model
 https://3dwarehouse.sketchup.com/3dw/getpubliccontent?contentId=d5795719-f99c-4b4d-85e4-3865dddfe7c1&fn=TOTO_Soir_e_Handshower_Set_with_Lever_Handle.kmz
 https://3dwarehouse.sketchup.com/3dw/getpubliccontent?contentId=82ae4808-88f6-4bf7-ad56-36e4b4d6a0bd&fn=Untitled.skp
 */
+  var cleanTitle = function(title){
+    title = title.split('>').join("")
+    return title;
+  }
 
   var parsesearch =function(body) {
 
@@ -1074,7 +1078,7 @@ https://3dwarehouse.sketchup.com/3dw/getpubliccontent?contentId=82ae4808-88f6-4b
         if (entry.latitude && entry.longitude)
           item.latitude = entry.latitude, item.longitude=entry.longitude;
 
-        col.children[entry.title] = item;
+        col.children[cleanTitle(entry.title)] = item;
       }
 
  
@@ -1126,11 +1130,11 @@ https://3dwarehouse.sketchup.com/3dw/getpubliccontent?contentId=82ae4808-88f6-4b
       // remove empty folders at root, there are tons of them
       if (entityCount===0 && collectionCount===0) continue;
       // remove entrys that have a bogus name
-      if (entry.contains('<img src') ) continue;
+      // if (entry.contains('<img src') ) continue;
 
 
       var id = 'c_'+entry.id;
-      col.children[entry.title] = {uuid:id};
+      col.children[cleanTitle(entry.title)] = {uuid:id};
 
 
       /*

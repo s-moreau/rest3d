@@ -788,7 +788,12 @@ define(['channel', 'codemirror', 'webglUtils', 'WebGLDebugUtils', 'pnotify', 'co
                             $('.CodeMirror').each(function (i, el) {
                                 el.CodeMirror.refresh();
                             });
-                        }
+                        },
+                        beforeActivate : function( event, ui ) {
+                            if(ui.oldTab.parent().parent().attr("id") != ui.newTab.parent().parent().attr("id")) {
+                                return false; ;//alert(html())
+                            }                  
+                        }     
                     });
                 }
 
@@ -803,6 +808,7 @@ define(['channel', 'codemirror', 'webglUtils', 'WebGLDebugUtils', 'pnotify', 'co
                         this[this.id[nbId]]["title"] = $('#' + this.idObject + '_header').find("li[aria-controls='" + this.id[nbId] + "'] a");
                         this.listJqueryObjectElement[nbItem] = this[this.id[nbId]];
                     }
+                    this.jqueryObjectRoot.data({object:this});
                 }
 
                 this.refresh = function () {
@@ -866,10 +872,44 @@ define(['channel', 'codemirror', 'webglUtils', 'WebGLDebugUtils', 'pnotify', 'co
                 }
 
                 this.sortable = function () {
-                    this.jqueryObjectRoot.find(".ui-tabs-nav").sortable({
-                        axis: "x",
-                        stop: function () {
-                            stock.refresh();
+                    // this.jqueryObjectRoot.find(".ui-tabs-nav").sortable({
+                    //     axis: "x",
+                    //     stop: function () {
+                    //         stock.refresh();
+                    //     }
+                    // });
+                    this.jqueryObjectRoot.find( ".ui-tabs-nav" ).sortable({
+                        zIndex: 99999999999,
+                        connectWith: '.ui-tabs-nav',
+                        start: function(event, ui){
+                            var tab = $(ui.item[0]).parent().children().first();
+                            if(tab.is($(ui.item[0])))tab = tab.parent().children().last();
+                            tab.find('a').click();
+                             // window.renderMenu.consoletab.focusTab();
+                            // $('#mainLayout-west').tabs('refresh');
+                            // $('#mainLayout-center').tabs('refresh');
+                        },
+                        receive: function (event, ui) {
+                            //var tabReceiver = receiver.data().object;
+                            var receiver = $(this).parent().find(".ui-widget-content")[0];
+                            var sender = $(ui.sender[0]).parent();
+                            var tab = $(ui.item[0]);
+
+                            tab.next().click();
+                            // Find the id of the associated panel
+                            var panelId = tab.attr( "aria-controls" );
+                            // Remove the panel
+                            var tmp = $( "#" + panelId ).detach().appendTo(receiver);
+                            // $('#mainLayout-west').tabs('refresh');
+                            // $('#mainLayout-center').tabs('refresh');
+                        },
+                        stop: function(event, ui) {
+                            var tab = $(ui.item[0]);
+                            // Find the id of the associated panel
+                            var panelId = tab.attr( "aria-controls" );
+                            $('#mainLayout-west').tabs('refresh');
+                            $('#mainLayout-center').tabs('refresh');
+                            $('li[aria-controls="' + panelId + '"] a').click();
                         }
                     });
                 }

@@ -328,10 +328,24 @@ define(['viewer', 'gui', 'rest3d', 'q', 'collada', 'gltf', 'renderer', 'state', 
                     },
                 ]
             })
+
+              var westTab = GUI.tab({
+                id: "westTab",
+                parent: layout.jqueryObjectWest,
+                item: [
+                       {
+                        id: "viewer",
+                        text: " Viewer",
+                    },
+                ]
+            })
+        
+            westTab.sortable();
             renderMenu.sortable();
             renderMenu.tabManager();
             window.renderMenu = renderMenu;
 
+            GUI.image(westTab.viewer.title, "img-render", "../gui/images/3d_model.png", 12, 14, "before");
             GUI.image(window.renderMenu.scenes.title, "img-render", "../gui/images/scene-root1.png", 12, 14, "before");
             GUI.image(window.renderMenu.consoletab.title, "img-render", "../gui/images/console1.png", 12, 14, "before");
 
@@ -345,8 +359,21 @@ define(['viewer', 'gui', 'rest3d', 'q', 'collada', 'gltf', 'renderer', 'state', 
 
             // -------------------  -----------------------------------------------------------------------------------------------------------------
 
-            var canvas = GUI.canvas(layout.jqueryObjectWest);
-            // layout.resetOverflow('west');
+            var canvas = GUI.canvas(westTab.viewer);
+            //layout.resetOverflow('west');
+            setTimeout(function(){
+                var max = $('#westTab_content').height();
+                westTab.viewer.height(max+2);
+                $('#tmp').height(max+2);
+            },500)
+            $(window).on('resize orientationChanged', function () {
+                 setTimeout(function(){
+                var max = $('#westTab_content').height();
+                westTab.viewer.height(max);
+                $('#tmp').height(max);
+            },500)
+
+            });
 
             // initialize webGL
             viewer.channel = Channel.create(canvas, false); // true for debug context
@@ -516,7 +543,7 @@ define(['viewer', 'gui', 'rest3d', 'q', 'collada', 'gltf', 'renderer', 'state', 
             window.loadCss("excite-bike");
 
             // $("#mainLayout-west").append('<div id="colorSelector"  style="z-index:9999!important;"><div style="background-color: #0000ff"></div></div>');
-            GUI.button("undefined", $("#mainLayout-west")).prop("id", "colorSelector");
+            GUI.button("undefined", westTab.viewer).prop("id", "colorSelector");
             var tmpPicker;
             var flagColorPicker = 'show';
             $('#colorSelector div').css('backgroundColor', '#ffffff');
@@ -536,8 +563,8 @@ define(['viewer', 'gui', 'rest3d', 'q', 'collada', 'gltf', 'renderer', 'state', 
                 },
                 onSubmit: function (hsb, hex, rgb) {
                     $('#colorSelector div').css('backgroundColor', '#' + hex);
-                    $('#mainLayout-west').css('backgroundColor', '#' + hex);
-                    $("#mainLayout-west").css({
+                    westTab.viewer.css('backgroundColor', '#' + hex);
+                    westTab.viewer.css({
                         "background-image": "none"
                     });
                     tmpPicker.fadeOut(200);
@@ -553,10 +580,10 @@ define(['viewer', 'gui', 'rest3d', 'q', 'collada', 'gltf', 'renderer', 'state', 
 
             // VIEWER TOOLS SETTING UP
             var htmlFps = '<div class="yasuo" style="z-index: 999 !important;"><a id="fps" class="ui-widget-content" style="float:right;" >? FPS</a></div>';
-            $("#mainLayout-west").append(htmlFps);
-            var but1 = GUI.button('fullscreen', $("#mainLayout-west"), function () {
+            westTab.viewer.append(htmlFps);
+            var but1 = GUI.button('fullscreen', westTab.viewer, function () {
                 if (screenfull.enabled) {
-                    screenfull.request($("#mainLayout-west")[0]);
+                    screenfull.request(westTab.viewer[0]);
                 }
             }).prop("id", "fullCanvas");
             but1.html('');
@@ -581,7 +608,7 @@ define(['viewer', 'gui', 'rest3d', 'q', 'collada', 'gltf', 'renderer', 'state', 
                 extension: "image/*",
                 mode: "displayImage",
             });
-            var button = GUI.button('', $("#mainLayout-west"), function () {
+            var button = GUI.button('', westTab.viewer, function () {
                 inputImage.click();
             }).prop("id", "imageCanvas");
             button.html('');
@@ -823,7 +850,7 @@ define(['viewer', 'gui', 'rest3d', 'q', 'collada', 'gltf', 'renderer', 'state', 
             $("#fps").hide();
             viewer.tick();
             //set background color to green
-            layout.jqueryObjectWest.css('backgroundColor', '#b9f09e');
+            westTab.viewer.css('backgroundColor', '#b9f09e');
             //init bar status
             window.fl4reStatus("READY");
             //Init Tabs
