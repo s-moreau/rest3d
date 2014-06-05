@@ -885,6 +885,9 @@ define(['channel', 'codemirror', 'webglUtils', 'WebGLDebugUtils', 'pnotify', 'co
                             var tab = $(ui.item[0]).parent().children().first();
                             if(tab.is($(ui.item[0])))tab = tab.parent().children().last();
                             tab.find('a').click();
+                            // $(ui.sender[0]).parent().css({"overflow":"visible"});
+                            $(this).parent().css({"overflow":"visible","z-index":999});
+                            // $('#mainLayout-west').
                              // window.renderMenu.consoletab.focusTab();
                             // $('#mainLayout-west').tabs('refresh');
                             // $('#mainLayout-center').tabs('refresh');
@@ -910,6 +913,7 @@ define(['channel', 'codemirror', 'webglUtils', 'WebGLDebugUtils', 'pnotify', 'co
                             $('#mainLayout-west').tabs('refresh');
                             $('#mainLayout-center').tabs('refresh');
                             $('li[aria-controls="' + panelId + '"] a').click();
+                            $(this).parent().css({"overflow":"hidden","z-index":3});
                         }
                     });
                 }
@@ -2437,7 +2441,7 @@ define(['channel', 'codemirror', 'webglUtils', 'WebGLDebugUtils', 'pnotify', 'co
             }
             obj.jqueryObject.sizePane("west", $(window).width() - 600);
             obj.jqueryObject.sizePane("north", 37);
-            obj.jqueryObject.allowOverflow("north");
+            obj.jqueryObject.allowOverflow("north");    
             obj.jqueryObject.sizePane("south", 25);
             return obj;
         }
