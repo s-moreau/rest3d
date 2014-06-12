@@ -709,6 +709,22 @@ define(['channel', 'codemirror', 'webglUtils', 'WebGLDebugUtils', 'pnotify', 'co
             return tmp;
         };
 
+        GUI.getDivByXY = function (x,y) {
+           var alldivs = document.getElementsByTagName('div');
+
+           var d;
+
+           for(d = 0; d < alldivs.length; d++) {
+              if((alldivs[d].offsetLeft == x) && (alldivs[d].offsetTop == y)) {
+                 return alldivs[d];
+              }
+           }
+
+           return false;
+
+        }
+
+
         GUI.script = function (_json) {
             function Script(_json) {
                 this.idObject = _json.id;
@@ -758,26 +774,37 @@ define(['channel', 'codemirror', 'webglUtils', 'WebGLDebugUtils', 'pnotify', 'co
                 this.listJqueryObjectElement = [];
                 this.id = [];
                 this.listTab = [];
-                for (var nbItem = 0; nbItem < _json.item.length; nbItem++) {
-                    this.id[nbItem] = _json.item[nbItem].id;
+                if(_json.hasOwnProperty("item")){
+                    for (var nbItem = 0; nbItem < _json.item.length; nbItem++) {
+                        this.id[nbItem] = _json.item[nbItem].id;
+                    }
                 }
                 var stock = this;
                 this.listUnchecked = [];
                 this.optionManager = false;
 
                 this.init = function () {
-                    this.html = '<ul id="' + this.idObject + '_header" ><li><a href="#' + this.item[0].id + '">' + this.item[0].text + '</a></li></ul>';
-                    this.html += '<div id="' + this.idObject + '_content" class="ui-widget-content ui-layout-content ui-corner-top" >';
-                    this.html += '<div id="' + this.item[0].id + '" class="content">';
-                    if (this.item[0].hasOwnProperty('content')) {
-                        this.html += this.item[0].content;
+                    this.html = '<ul id="' + this.idObject + '_header" >';
+                    if(this.item){
+                        this.html += '<li><a href="#' + this.item[0].id + '">' + this.item[0].text + '</a></li>'
                     }
-                    this.html += '</div></div>'
+                    this.html += '</ul>';
+                    this.html += '<div id="' + this.idObject + '_content" class="ui-widget-content ui-layout-content ui-corner-top" >';
+                    if(this.item){
+                        this.html += '<div id="' + this.item[0].id + '" class="content">';
+                        if (this.item&&this.item[0].hasOwnProperty('content')) {
+                            this.html += this.item[0].content;
+                        }
+                        this.html += '</div>';
+                    }
+                    this.html += '</div>';
                 }
 
                 this.children = function () {
-                    for (var nbItem = 1; nbItem < _json.item.length; nbItem++) {
-                        this.addTab(_json.item[nbItem])
+                    if(this.item){
+                        for (var nbItem = 1; nbItem < _json.item.length; nbItem++) {
+                            this.addTab(_json.item[nbItem])
+                        }
                     }
                 }
 
@@ -814,6 +841,12 @@ define(['channel', 'codemirror', 'webglUtils', 'WebGLDebugUtils', 'pnotify', 'co
                 this.refresh = function () {
                     this.jqueryObjectRoot.tabs("refresh");
                     stock = this;
+                }
+
+                this.refreshSize = function() {
+                    var parentHeight = this.parent.height();
+                    var trueHeight = parentHeight - this.header.height();
+                    this.content.height(trueHeight-3);
                 }
 
                 this.addTab = function (_json) {
@@ -887,10 +920,89 @@ define(['channel', 'codemirror', 'webglUtils', 'WebGLDebugUtils', 'pnotify', 'co
                             tab.find('a').click();
                             // $(ui.sender[0]).parent().css({"overflow":"visible"});
                             $(this).parent().css({"overflow":"visible","z-index":999});
+                            if(!window.west)window.westLayout.jqueryObjectSouth.addClass("ui-state-highlight");
+                            else window.westSouthTab.header.addClass("ui-state-highlight")
+                            if(!window.center)window.centerLayout.jqueryObjectSouth.addClass("ui-state-highlight");
+                            else window.centerSouthTab.header.addClass("ui-state-highlight")
+                            window.westLayout.jqueryObject.show("south");
+                            window.centerLayout.jqueryObject.show("south");
+
+                            window.centerLayout.jqueryObjectCenter.css({"overflow":"visible","z-index":0 })
+                            window.westLayout.jqueryObjectCenter.css({"overflow":"visible","z-index":0})
+                            window.centerLayout.jqueryObjectSouth.css({"overflow":"visible","z-index":0})
+                            window.westLayout.jqueryObjectSouth.css({"overflow":"visible","z-index":0})
+                            window.westTab.header.addClass("ui-state-highlight");
+                            window.renderMenu.header.addClass("ui-state-highlight");
+                            window.westTab.header.addClass("ui-state-highlight");
+
+                            $('.ui-state-highlight').hover(function(){
+                                $(this).removeClass("ui-state-highlight")
+                                $(this).addClass("ui-state-hover")
+                                $(this).mouseleave(function(){
+                                    $(this).removeClass("ui-state-hover")
+                                    $(this).addClass("ui-state-highlight")
+                                })
+                            })
+
+                            $(this).data({target:$(ui.item[0]).parent()});
+
+
                             // $('#mainLayout-west').
                              // window.renderMenu.consoletab.focusTab();
-                            // $('#mainLayout-west').tabs('refresh');
-                            // $('#mainLayout-center').tabs('refresh');
+                        },
+                        update: function(event,ui){
+                            var id = document.elementFromPoint(event.pageX,event.pageY);
+                            var tab = $(ui.item[0]);
+                            var panelId = tab.attr( "aria-controls" );
+                            var receiver = $( "#" + panelId )
+                            var data = $(this).data();
+                            var tmp = $("<div></div>");
+                            if(id.id=="westLayout-south"){
+                                window.west = true;
+                                var westSouthTab = GUI.tab({
+                                    id: "westSouthTab",
+                                    parent: $('#westLayout-south'),
+                                    item:[
+                                        {id:"yop",text:"youp"},
+                                    ]
+                                })
+                                westSouthTab.sortable();
+                                window.westSouthTab = westSouthTab;
+                                westSouthTab.refreshSize();
+                                $('#westLayout-south').css({"overflow":"hidden"})
+                                $(ui.item[0]).detach().appendTo(westSouthTab.header)
+                                receiver.detach().appendTo(westSouthTab.content)
+                                 window.westLayout.jqueryObject.south.options.onresize = function(){
+                                    westSouthTab.refreshSize();
+                                };
+                                setTimeout(function(){
+                                westSouthTab.yop.removeTab();
+                                westSouthTab.refreshSize();
+                                westSouthTab.refresh();
+                                },100)
+                            } else if(id.id=="centerLayout-south") {
+                                window.center = true;
+                                var centerSouthTab = GUI.tab({
+                                    id: "centerSouthTab",
+                                    parent: $('#centerLayout-south'),
+                                    item:[
+                                        {id:"yop",text:"youp"},
+                                    ]
+                                })
+                                centerSouthTab.sortable();
+                                window.centerSouthTab = centerSouthTab;
+                                // $('#centerLayout-south').css({"overflow":"hidden"})
+                                $(ui.item[0]).detach().appendTo(centerSouthTab.header)
+                                receiver.detach().appendTo(centerSouthTab.content)
+                               
+                                centerSouthTab.refresh();
+                                setTimeout(function(){centerSouthTab.yop.removeTab();centerSouthTab.refresh();centerSouthTab.refreshSize()},500);
+                                centerSouthTab.refreshSize();
+                                window.centerLayout.jqueryObject.south.options.onresize = function(){
+                                    centerSouthTab.refreshSize();
+                                };
+                            }
+
                         },
                         receive: function (event, ui) {
                             //var tabReceiver = receiver.data().object;
@@ -899,21 +1011,54 @@ define(['channel', 'codemirror', 'webglUtils', 'WebGLDebugUtils', 'pnotify', 'co
                             var tab = $(ui.item[0]);
 
                             tab.next().click();
+
                             // Find the id of the associated panel
                             var panelId = tab.attr( "aria-controls" );
                             // Remove the panel
                             var tmp = $( "#" + panelId ).detach().appendTo(receiver);
+
                             // $('#mainLayout-west').tabs('refresh');
                             // $('#mainLayout-center').tabs('refresh');
                         },
                         stop: function(event, ui) {
                             var tab = $(ui.item[0]);
+                            var data = $(this).data();
+                            $('.ui-state-highlight').unbind('mouseenter mouseleave');
+                            $('.ui-state-hover').unbind('mouseenter mouseleave').removeClass('ui-state-hover');
+                            data.target.removeClass("ui-state-highlight");
+                            window.westLayout.jqueryObjectSouth.removeClass("ui-state-highlight");
+                            window.centerLayout.jqueryObjectSouth.removeClass("ui-state-highlight");
+                            if(!window.west){
+                                window.westLayout.jqueryObjectSouth.removeClass("ui-state-highlight");
+                                window.westLayout.jqueryObject.hide("south");
+                            }
+                            else window.westSouthTab.header.removeClass("ui-state-highlight")
+                            if(!window.center){
+                                window.centerLayout.jqueryObjectSouth.removeClass("ui-state-highlight");
+                                window.centerLayout.jqueryObject.hide("south");
+                            }
+                            else window.centerSouthTab.header.removeClass("ui-state-highlight")
+                            
+                            window.westTab.header.removeClass("ui-state-highlight");
+                            window.renderMenu.header.removeClass("ui-state-highlight");
+
+                            //window.layout.jqueryObject.resizeAll();
                             // Find the id of the associated panel
                             var panelId = tab.attr( "aria-controls" );
                             $('#mainLayout-west').tabs('refresh');
                             $('#mainLayout-center').tabs('refresh');
+                            if(window.west)$('#westLayout-south').tabs('refresh');
+                            if(window.center)$('#centerLayout-south').tabs('refresh');
+                            // data.west.jqueryObject.resizeAll();
+                            //data.center.jqueryObject.resizeAll();
                             $('li[aria-controls="' + panelId + '"] a').click();
-                            $(this).parent().css({"overflow":"hidden","z-index":3});
+                            window.renderMenu.refreshSize();
+                            window.westTab.refreshSize();
+                            if(window.centerLayout)window.centerLayout.jqueryObject.resizeAll();
+                            if(window.westLayout)window.westLayout.jqueryObject.resizeAll();
+                            // $(this).parent().css({"overflow":"hidden","z-index":3});
+                            if(window.west)window.westSouthTab.refreshSize();
+                            if(window.center)window.centerSouthTab.refreshSize();
                         }
                     });
                 }
@@ -2127,9 +2272,9 @@ define(['channel', 'codemirror', 'webglUtils', 'WebGLDebugUtils', 'pnotify', 'co
             GUI.killCssRule('body *::-webkit-scrollbar-track');
             GUI.addCssRule('body *::-webkit-scrollbar-track', '-webkit-box-shadow: inset 0 0 6px rgba(0,0,0,0.3) !important; border-radius: 10px; background-color: ' + GUI.colorTheme + ' !important;');
             GUI.killCssRule("body *::-webkit-scrollbar");
-            GUI.addCssRule("body *::-webkit-scrollbar", "width: 10px; height: 10px; background-color:" + GUI.colorTheme + "!important;");
+            GUI.addCssRule("body *::-webkit-scrollbar", "width: 5px; height: 5px; background-color:" + GUI.colorTheme + "!important;");
             GUI.killCssRule("body *::-webkit-scrollbar-thumb");
-            GUI.addCssRule("body *::-webkit-scrollbar-thumb", "border-radius: 10px;-webkit-box-shadow: inset 0 0 6px rgba(0,0,0,.3);background-color:" + GUI.borderTheme + "!important;");
+            GUI.addCssRule("body *::-webkit-scrollbar-thumb", "border-radius: 5px;-webkit-box-shadow: inset 0 0 6px rgba(0,0,0,.3);background-color:" + GUI.borderTheme + "!important;");
             GUI.killCssRule(".ui-accordion-content");
             GUI.addCssRule(".ui-accordion-content", "border-bottom-color: " + GUI.borderTheme + " !important;border-left-color: " + GUI.borderTheme + " !important;border-right-color: " + GUI.borderTheme + " !important;");
             GUI.killCssRule(".ui-layout-resizer-west");
@@ -2315,6 +2460,7 @@ define(['channel', 'codemirror', 'webglUtils', 'WebGLDebugUtils', 'pnotify', 'co
                         if (this.position == 1) {
                             selector = "#" + this.id + "-west,#" + this.id + "-center";
                         }
+                        if(this.hidden)this.html= this.html.split('<div id="'+this.id+'-center" class="ui-layout-center"></div>').join('');
                         this.jqueryObject = $(this.html);
                         if (this.position == 1) {
                             this.parent = $('body');
@@ -2327,11 +2473,28 @@ define(['channel', 'codemirror', 'webglUtils', 'WebGLDebugUtils', 'pnotify', 'co
                         this.jqueryObjectSouth = $('#' + this.id + '-south');
                         this.jqueryObjectEst = $('#' + this.id + '-est');
                         this.jqueryObjectCenter = $('#' + this.id + '-center');
+
                     }
                     else {
                         console.error("Can't create " + this.checkOut());
                     }
                 }
+
+                // this.destroy = function(){
+                //     // this.jqueryObject.hide("south");
+                //     // this.parent.find(".ui-layout-resizer").remove();
+                //     // this.jqueryObjectWest.children().unwrap();
+                //     // this.jqueryObjectWest.remove();
+                //     // this.jqueryObjectNorth.children().unwrap();
+                //     // this.jqueryObjectNorth.remove();
+                //     // this.jqueryObjectSouth.children().unwrap();
+                //     // this.jqueryObjectSouth.remove();
+                //     // this.jqueryObjectEst.children().unwrap();
+                //     // this.jqueryObjectEst.remove();
+                //     // this.jqueryObjectCenter.children().unwrap();
+                //     //  this.jqueryObjectCenter.remove();
+                //     //  this.parent.layout();
+                // }
 
                 this.randomColor = function () {
                     for (var i = 0; i < this.pane.length; i++) {
@@ -2359,17 +2522,19 @@ define(['channel', 'codemirror', 'webglUtils', 'WebGLDebugUtils', 'pnotify', 'co
                     var positionOrigin = position;
                     this.wrap(id, idSearch);
                     var tmp = new Frame(id, this.position + 1);
-                    tmp.north = {
+                    tmp.south = {
                         size: position + "%"
                     };
                     position = 100 - position;
                     tmp.center = {
-                        size: position + "%"
+                        size: position + "%",
+                        type: "hidden",
                     };
                     tmp.parent = $('#' + idSearch);
+                    tmp.hidden = true;
                     tmp.create();
-                    tmp.randomColor();
-                    tmp.parent = this;
+
+                    return tmp;
                 }
 
                 this.cutV = function (id, position, idSearch) {
@@ -2384,9 +2549,11 @@ define(['channel', 'codemirror', 'webglUtils', 'WebGLDebugUtils', 'pnotify', 'co
                         size: position + "%"
                     };
                     tmp.parent = $('#' + idSearch);
+                     tmp.hidden = true;
                     tmp.create();
                     tmp.randomColor();
                     tmp.parent = this;
+                    return tmp;
                 }
             }
 

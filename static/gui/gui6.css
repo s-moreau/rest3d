@@ -467,7 +467,8 @@ display: table-row-group!important;
 }
 
 .ui-layout-resizer.ui-layout-resizer-south.ui-layout-resizer-open.ui-layout-resizer-south-open{
-    display: none !important;
+    border-bottom: 1px solid rgb(0, 0, 0);
+    border-top: 1px solid rgb(0, 0, 0);
 }
 
 .radio_contain {
@@ -720,7 +721,11 @@ right: 0px !important;
 }
 
 #settings-menu{
-    width: 150px !important;
+    width: 165px !important;
+}
+
+#theme-menu{
+    width: 100px !important;
 }
 
 #fullCanvas{
@@ -766,7 +771,7 @@ width: 90% !important;
 }
 
 #script form{
-    height: 85% ;
+    height: 70%;
     box-shadow: 5px 5px 2px #888888 !important;
 }
 
@@ -817,4 +822,12 @@ width: 90% !important;
 
 #mainLayout-north{
     z-index: 99999!important;
+}
+
+.ui-focus{
+    background-color: : yellow !important;
+
+}
+
+.ui-pnotify{
 }

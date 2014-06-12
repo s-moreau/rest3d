@@ -102,7 +102,6 @@ if (fs.existsSync('./server.pem') && fs.existsSync('./server.key')) {
 
 var server = module.exports.server = restify.createServer(params);
 server.collada2gltf = collada2gltf;
-// job manager
 
 
 if (params.key) {

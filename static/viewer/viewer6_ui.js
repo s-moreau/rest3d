@@ -119,10 +119,28 @@ define(['viewer', 'gui', 'rest3d', 'q', 'collada', 'gltf', 'renderer', 'state', 
             window.layout = layout;
 
 
+            function jobmanager() {
+                $("#dialog").dialog("close");
+                var gitHtml = $('<div id="dialog"></div>');
+                gitPanel = $('body').append(gitHtml);
+                $("#dialog").dialog({
+                    width: 300,
+                    height: 300,
+                    position: ['middle', 90],
+                    title: 'Job manager',
+                    open: function (ev, ui) {
+                        // $('#myIframe').attr('src', url);
+                    },
+                    close: function () {
+                        gitHtml.remove();
+                    },
+                });
+            }
+
             var titleLabel = GUI.label("auteur", "@ rest3d.org", layout.jqueryObjectSouth);
             titleLabel.click(function () {
                 $("#dialog").dialog("close");
-                var gitHtml = '<div id="dialog"><iframe id="myIframe" src="" style="height:100% !important; width:100% !important; border:0px;"></iframe></div>';
+                var gitHtml = $('<div id="dialog"><iframe id="myIframe" src="" style="height:100% !important; width:100% !important; border:0px;"></iframe></div>');
                 gitPanel = $('body').append(gitHtml);
                 $("#dialog").dialog({
                     width: '600',
@@ -130,9 +148,9 @@ define(['viewer', 'gui', 'rest3d', 'q', 'collada', 'gltf', 'renderer', 'state', 
                     open: function (ev, ui) {
                         $('#myIframe').attr('src', "http://rest3d.wordpress.com/");
                     },
-                    // close: function(){
-                    //     gitHtml.empty();
-                    // },
+                    close: function () {
+                        gitHtml.remove();
+                    },
                 });
                 $("#dialog").css({
                     "padding": "0",
@@ -162,6 +180,9 @@ define(['viewer', 'gui', 'rest3d', 'q', 'collada', 'gltf', 'renderer', 'state', 
                     text: "Welcome guest!",
                     id: "welcomeMenu"
                 }, {
+                    text: "Management",
+                    id: "management"
+                }, {
                     text: "Settings",
                     id: "settings"
                 }, {
@@ -183,6 +204,27 @@ define(['viewer', 'gui', 'rest3d', 'q', 'collada', 'gltf', 'renderer', 'state', 
 
 
             // --------------------------------------------------------- support and help ----------------------------------
+            var settingMenu = GUI.menu({
+                id: "management-menu",
+                parent: menu.management,
+                item: [{
+                    id: "jobManage",
+                    text: 'Convert jobs',
+                    callback: function () {
+                        jobmanager();
+                    }
+                }, {
+                    type: "separator"
+                }, {
+                    id: "databases",
+                    text: "Databases",
+                    callback: function () {
+                        welcomePanel();
+                    }
+                }]
+            });
+
+
             //Setting menu
             var settingMenu = GUI.menu({
                 id: "settings-menu",
@@ -248,13 +290,16 @@ define(['viewer', 'gui', 'rest3d', 'q', 'collada', 'gltf', 'renderer', 'state', 
             var gitPanel = $([]);
             window.onGithub = function () {
                 $("#dialog").dialog("close");
-                var gitHtml = '<div id="dialog"><iframe id="myIframe" src="" style="height:100% !important; width:100% !important; border:0px;"></iframe></div>';
+                var gitHtml = $('<div id="dialog"><iframe id="myIframe" src="" style="height:100% !important; width:100% !important; border:0px;"></iframe></div>');
                 gitPanel = $('body').append(gitHtml);
                 $("#dialog").dialog({
                     width: 600,
                     height: 500,
                     open: function (ev, ui) {
                         $('#myIframe').attr('src', url);
+                    },
+                    close: function () {
+                        gitHtml.remove();
                     },
                     //  close: function(){
                     //     gitHtml.empty();
@@ -298,8 +343,10 @@ define(['viewer', 'gui', 'rest3d', 'q', 'collada', 'gltf', 'renderer', 'state', 
             GUI.image(menu.settings.text, "img-settings", "../gui/images/icon-cog.png", 14, 14, "before");
             GUI.image(menu.support.text, "img-help", "../gui/images/menu-help.png", 13, 13, "before");
             GUI.image(menu.themes.text, "img-themes", "../gui/images/jquery.png", 13, 13, "before");
+            GUI.image(menu.management.text, "img-themes", "../gui/images/console_debug.png", 13, 13, "before");
             GUI.addIcon(menu.fullscreen.text, "ui-icon-arrow-4-diag", "position: relative !important; right:10px !important;bottom: 10px !important;", "before");
             menu.fullscreen.moveToRightFromLeft();
+            //menu.management.moveToRightFromLeft(40);
             menu.support.moveToRightFromLeft(40);
             menu.themes.moveToRightFromLeft(150);
             menu.settings.moveToRightFromLeft(275);
@@ -329,7 +376,7 @@ define(['viewer', 'gui', 'rest3d', 'q', 'collada', 'gltf', 'renderer', 'state', 
                 ]
             })
 
-              var westTab = GUI.tab({
+            var westTab = GUI.tab({
                 id: "westTab",
                 parent: layout.jqueryObjectWest,
                 item: [
@@ -344,6 +391,8 @@ define(['viewer', 'gui', 'rest3d', 'q', 'collada', 'gltf', 'renderer', 'state', 
             renderMenu.sortable();
             renderMenu.tabManager();
             window.renderMenu = renderMenu;
+            window.westTab = westTab;
+            window.westTab.viewer.css({'height':'100%'});
 
             GUI.image(westTab.viewer.title, "img-render", "../gui/images/3d_model.png", 12, 14, "before");
             GUI.image(window.renderMenu.scenes.title, "img-render", "../gui/images/scene-root1.png", 12, 14, "before");
@@ -354,26 +403,25 @@ define(['viewer', 'gui', 'rest3d', 'q', 'collada', 'gltf', 'renderer', 'state', 
             script_init(window.renderMenu);
             console_init(window.renderMenu);
             window.renderMenu.refresh();
-
-            // GUI.label("ddss", "| hihih",);
-
             // -------------------  -----------------------------------------------------------------------------------------------------------------
 
             var canvas = GUI.canvas(westTab.viewer);
+            $("#tmp").css({'height':'100%'});
+            westTab.refreshSize();
             //layout.resetOverflow('west');
-            setTimeout(function(){
-                var max = $('#westTab_content').height();
-                westTab.viewer.height(max+2);
-                $('#tmp').height(max+2);
-            },500)
-            $(window).on('resize orientationChanged', function () {
-                 setTimeout(function(){
-                var max = $('#westTab_content').height();
-                westTab.viewer.height(max);
-                $('#tmp').height(max);
-            },500)
+            // setTimeout(function(){
+            //     var max = $('#westTab_content').height();
+            //     westTab.viewer.height(max+2);
+            //     $('#tmp').height(max+2);
+            // },500)
+            // $(window).on('resize orientationChanged', function () {
+            //      setTimeout(function(){
+            //     var max = $('#westTab_content').height();
+            //     westTab.viewer.height(max);
+            //     $('#tmp').height(max);
+            // },500)
 
-            });
+            // });
 
             // initialize webGL
             viewer.channel = Channel.create(canvas, false); // true for debug context
@@ -826,7 +874,7 @@ define(['viewer', 'gui', 'rest3d', 'q', 'collada', 'gltf', 'renderer', 'state', 
                 $("#dialog").dialog({
                     width: '500',
                     height: 'auto',
-                    position: ['middle', 20],
+                    position: ['middle', 90],
                     title: 'Welcome to rest3d!',
                     modal: true,
                     create: function () {
@@ -894,7 +942,7 @@ define(['viewer', 'gui', 'rest3d', 'q', 'collada', 'gltf', 'renderer', 'state', 
                     // }, 1500); // open all nodes of the tab
                 // }              
             }, "/info/tmp");
-  function jumpLine() {
+            function jumpLine() {
                 renderMenu.render.append("<br></br>");
             }
 
@@ -919,6 +967,13 @@ define(['viewer', 'gui', 'rest3d', 'q', 'collada', 'gltf', 'renderer', 'state', 
             GUI.image(window.renderMenu.render.title, "img-render", "../gui/images/menu-render.png", 12, 14, "before");
             
             // accordion.collada.header.append()
+
+            window.westLayout = window.layout.cutH("westLayout",40,"mainLayout-west");
+            window.westLayout.parent.find(".ui-layout-resizer").addClass("ui-widget-header");
+            window.centerLayout = window.layout.cutH("centerLayout",30,"mainLayout-center");
+            window.centerLayout.parent.find(".ui-layout-resizer").addClass("ui-widget-header");
+            window.centerLayout.jqueryObject.hide("south");
+            window.westLayout.jqueryObject.hide("south");
 
             jumpLine();
 
