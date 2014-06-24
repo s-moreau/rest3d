@@ -919,21 +919,24 @@ define(['channel', 'codemirror', 'webglUtils', 'WebGLDebugUtils', 'pnotify', 'co
                             if(tab.is($(ui.item[0])))tab = tab.parent().children().last();
                             tab.find('a').click();
                             // $(ui.sender[0]).parent().css({"overflow":"visible"});
-                            $(this).parent().css({"overflow":"visible","z-index":999});
+                            $(this).parent().css({"overflow":"visible","z-index":0});
                             if(!window.west)window.westLayout.jqueryObjectSouth.addClass("ui-state-highlight");
                             else window.westSouthTab.header.addClass("ui-state-highlight")
                             if(!window.center)window.centerLayout.jqueryObjectSouth.addClass("ui-state-highlight");
                             else window.centerSouthTab.header.addClass("ui-state-highlight")
                             window.westLayout.jqueryObject.show("south");
                             window.centerLayout.jqueryObject.show("south");
+                            window.centerLayout.parent.css({"overflow":"visible","z-index":99})
+                            window.westLayout.parent.css({"overflow":"visible","z-index":99})
 
-                            window.centerLayout.jqueryObjectCenter.css({"overflow":"visible","z-index":0 })
-                            window.westLayout.jqueryObjectCenter.css({"overflow":"visible","z-index":0})
-                            window.centerLayout.jqueryObjectSouth.css({"overflow":"visible","z-index":0})
-                            window.westLayout.jqueryObjectSouth.css({"overflow":"visible","z-index":0})
                             window.westTab.header.addClass("ui-state-highlight");
                             window.renderMenu.header.addClass("ui-state-highlight");
                             window.westTab.header.addClass("ui-state-highlight");
+
+                            window.centerLayout.jqueryObjectCenter.css({"overflow":"visible","z-index":99 })
+                            window.westLayout.jqueryObjectCenter.css({"overflow":"visible","z-index":99})
+                            window.centerLayout.jqueryObjectSouth.css({"overflow":"visible","z-index":99})
+                            window.westLayout.jqueryObjectSouth.css({"overflow":"visible","z-index":99})
 
                             $('.ui-state-highlight').hover(function(){
                                 $(this).removeClass("ui-state-highlight")
@@ -1056,7 +1059,13 @@ define(['channel', 'codemirror', 'webglUtils', 'WebGLDebugUtils', 'pnotify', 'co
                             window.westTab.refreshSize();
                             if(window.centerLayout)window.centerLayout.jqueryObject.resizeAll();
                             if(window.westLayout)window.westLayout.jqueryObject.resizeAll();
-                            // $(this).parent().css({"overflow":"hidden","z-index":3});
+                            window.centerLayout.parent.css({"overflow":"hidden","z-index":0})
+                            window.westLayout.parent.css({"overflow":"hidden","z-index":0})
+                            $(this).parent().css({"overflow":"hidden","z-index":3});
+                            window.centerLayout.jqueryObjectCenter.css({"overflow":"hidden","z-index":0 })
+                            window.westLayout.jqueryObjectCenter.css({"overflow":"hidden","z-index":0 })
+                            window.centerLayout.jqueryObjectSouth.css({"overflow":"hidden","z-index":0 })
+                            window.westLayout.jqueryObjectSouth.css({"overflow":"hidden","z-index":0 })
                             if(window.west)window.westSouthTab.refreshSize();
                             if(window.center)window.centerSouthTab.refreshSize();
                         }
