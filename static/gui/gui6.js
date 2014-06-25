@@ -848,8 +848,9 @@ define(['channel', 'codemirror', 'webglUtils', 'WebGLDebugUtils', 'pnotify', 'co
                     var trueHeight = parentHeight - this.header.height();
                     this.content.height(trueHeight-3);
                 }
-
+                window.tab = [];
                 this.addTab = function (_json) {
+                    window.tab.push(_json);
                     this.html = '';
                     this.html += '<li><a href="#' + _json.id + '">' + _json.text + '</a></li>';
                     this.header.append(this.html);
@@ -919,33 +920,52 @@ define(['channel', 'codemirror', 'webglUtils', 'WebGLDebugUtils', 'pnotify', 'co
                             if(tab.is($(ui.item[0])))tab = tab.parent().children().last();
                             tab.find('a').click();
                             // $(ui.sender[0]).parent().css({"overflow":"visible"});
-                            $(this).parent().css({"overflow":"visible","z-index":0});
+                            $(this).parent().css({"overflow":"visible","z-index":999});
                             if(!window.west)window.westLayout.jqueryObjectSouth.addClass("ui-state-highlight");
                             else window.westSouthTab.header.addClass("ui-state-highlight")
                             if(!window.center)window.centerLayout.jqueryObjectSouth.addClass("ui-state-highlight");
-                            else window.centerSouthTab.header.addClass("ui-state-highlight")
+                            else{
+                                window.centerSouthTab.parent.css({"overflow":"visible","z-index":999}); 
+                                window.centerSouthTab.header.addClass("ui-state-highlight")
+                            } 
                             window.westLayout.jqueryObject.show("south");
                             window.centerLayout.jqueryObject.show("south");
-                            window.centerLayout.parent.css({"overflow":"visible","z-index":99})
-                            window.westLayout.parent.css({"overflow":"visible","z-index":99})
 
                             window.westTab.header.addClass("ui-state-highlight");
                             window.renderMenu.header.addClass("ui-state-highlight");
                             window.westTab.header.addClass("ui-state-highlight");
 
-                            window.centerLayout.jqueryObjectCenter.css({"overflow":"visible","z-index":99 })
-                            window.westLayout.jqueryObjectCenter.css({"overflow":"visible","z-index":99})
-                            window.centerLayout.jqueryObjectSouth.css({"overflow":"visible","z-index":99})
-                            window.westLayout.jqueryObjectSouth.css({"overflow":"visible","z-index":99})
+                            if($(this).parent().attr('id')=='centerLayout-center'){
+                                window.centerLayout.jqueryObjectSouth.css({"overflow":"visible","z-index":99})
+                                window.centerLayout.parent.css({"overflow":"visible","z-index":999})
+                                window.westLayout.parent.css({"overflow":"visible","z-index":99})
+                            }
+                            if($(this).parent().attr('id')=='centerLayout-south'){
+                                window.centerLayout.jqueryObjectCenter.css({"overflow":"visible","z-index":99})
+                                window.centerLayout.parent.css({"overflow":"visible","z-index":999})
+                                window.westLayout.parent.css({"overflow":"visible","z-index":99})
+                            }
+                            if($(this).parent().attr('id')=='westLayout-center'){
+                                window.westLayout.jqueryObjectSouth.css({"overflow":"visible","z-index":99})
+                                window.centerLayout.parent.css({"overflow":"visible","z-index":99})
+                                window.westLayout.parent.css({"overflow":"visible","z-index":999})
+                            }
+                             if($(this).parent().attr('id')=='westLayout-sout'){
+                                window.westLayout.jqueryObjectSouth.css({"overflow":"visible","z-index":99})
+                                window.centerLayout.parent.css({"overflow":"visible","z-index":99})
+                                window.westLayout.parent.css({"overflow":"visible","z-index":999})
+                            }
+                            
+                            window.westTab.parent.css({"overflow":"visible","z-index":999});
 
-                            $('.ui-state-highlight').hover(function(){
-                                $(this).removeClass("ui-state-highlight")
-                                $(this).addClass("ui-state-hover")
-                                $(this).mouseleave(function(){
-                                    $(this).removeClass("ui-state-hover")
-                                    $(this).addClass("ui-state-highlight")
-                                })
-                            })
+                            // $('.ui-state-highlight').bind('mouseover',function(){
+                            //     $(this).removeClass("ui-state-highlight")
+                            //     $(this).addClass("ui-state-hover")
+                            //     $(this).mouseleave(function(){
+                            //         $(this).removeClass("ui-state-hover")
+                            //         $(this).addClass("ui-state-highlight")
+                            //     })
+                            // })
 
                             $(this).data({target:$(ui.item[0]).parent()});
 
@@ -1026,8 +1046,8 @@ define(['channel', 'codemirror', 'webglUtils', 'WebGLDebugUtils', 'pnotify', 'co
                         stop: function(event, ui) {
                             var tab = $(ui.item[0]);
                             var data = $(this).data();
-                            $('.ui-state-highlight').unbind('mouseenter mouseleave');
-                            $('.ui-state-hover').unbind('mouseenter mouseleave').removeClass('ui-state-hover');
+                            $('.ui-state-highlight').unbind('mouseover mouseleave');
+                            $('.ui-state-hover').unbind('mouseover mouseleave').removeClass('ui-state-hover');
                             data.target.removeClass("ui-state-highlight");
                             window.westLayout.jqueryObjectSouth.removeClass("ui-state-highlight");
                             window.centerLayout.jqueryObjectSouth.removeClass("ui-state-highlight");
@@ -1087,14 +1107,13 @@ define(['channel', 'codemirror', 'webglUtils', 'WebGLDebugUtils', 'pnotify', 'co
                 }
 
                 this.manager = function () {
-                    $('#tabManager').remove();
-                    var html = '<div id="tabManager"><div>';
+                    $('#tabManager_'+this.id).remove();
+                    var html = '<div id="tabManager_"'+this.id+'><div>';
                     $('body').append(html);
-                    this.refreshTabList();
                     var buffer = this;
                     var indexII = -1;
                     var check = '';
-                    for (var i = 0; i < this.listTab.length; i++) {
+                    for (var i = 0; i <  window.tab.length; i++) {
                         var indexII = this.listTab[i].index;
                         var check = GUI.addCheckBox("tabindex_" + indexII, this.listTab[i].text.trim(), $('#tabManager')).find('input').prop('checked', true);
                         check.on('change', function (e) {
@@ -1129,64 +1148,64 @@ define(['channel', 'codemirror', 'webglUtils', 'WebGLDebugUtils', 'pnotify', 'co
                 }
 
                 this.hidePanel = function () {
-                    var disabled = this.jqueryObjectRoot.tabs("option", "disabled");
-                    var buffer = this;
-                    if (disabled.toString() == "true") {
-                        $("#tab").remove();
-                        $('#mainLayout-center').hide();
-                        $('.ui-layout-resizer-west').hide();
-                        GUI.flagResize = false;
-                        $('#tabManager').hide();
-                        GUI.mainMenu.addElement({
-                            id: 'tab',
-                            text: 'Tabs',
-                            position: 'settings'
-                        });
-                        var array = [];
-                        var json = {};
-                        for (var i = 0; i < this.listTab.length; i++) {
-                            var json = {};
-                            json['id'] = this.listTab[i].text.trim() + "_check";
-                            json['text'] = this.listTab[i].text.trim();
-                            json['type'] = "checkbox";
-                            array.push(json);
-                        }
-                        var menu = GUI.menu({
-                            id: 'tabs-menu',
-                            parent: GUI.mainMenu.tab,
-                            item: array
-                        });
-                        GUI.image(GUI.mainMenu.tab.text, "img-tab", "../gui/images/icon-cog.png", 15, 15, "before");
-                        menu.jqueryObjectRoot.find("li").each(function (index) {
-                            $(this).on('change', 'input[type=checkbox]', function (e) {
-                                var position = $(this).parent().prop("id").replace('_check', '');
-                                $('#tabManager').find("li").each(function (index) {
-                                    if ($(this).text() == position) {
-                                        $(this).find('input').click();
-                                        buffer.showPanel();
-                                        GUI.container.resizeAll();
-                                        GUI.container.initContent("center");
-                                        GUI.container.initContent("west");
-                                    }
-                                })
-                            });
-                        });
-                    }
-                    GUI.flagResize = false;
+                    // var disabled = this.jqueryObjectRoot.tabs("option", "disabled");
+                    // var buffer = this;
+                    // if (disabled.toString() == "true") {
+                    //     $("#tab").remove();
+                    //     $('#mainLayout-center').hide();
+                    //     $('.ui-layout-resizer-west').hide();
+                    //     GUI.flagResize = false;
+                    //     $('#tabManager').hide();
+                    //     GUI.mainMenu.addElement({
+                    //         id: 'tab',
+                    //         text: 'Tabs',
+                    //         position: 'settings'
+                    //     });
+                    //     var array = [];
+                    //     var json = {};
+                    //     for (var i = 0; i < this.listTab.length; i++) {
+                    //         var json = {};
+                    //         json['id'] = this.listTab[i].text.trim() + "_check";
+                    //         json['text'] = this.listTab[i].text.trim();
+                    //         json['type'] = "checkbox";
+                    //         array.push(json);
+                    //     }
+                    //     var menu = GUI.menu({
+                    //         id: 'tabs-menu',
+                    //         parent: GUI.mainMenu.tab,
+                    //         item: array
+                    //     });
+                    //     GUI.image(GUI.mainMenu.tab.text, "img-tab", "../gui/images/icon-cog.png", 15, 15, "before");
+                    //     menu.jqueryObjectRoot.find("li").each(function (index) {
+                    //         $(this).on('change', 'input[type=checkbox]', function (e) {
+                    //             var position = $(this).parent().prop("id").replace('_check', '');
+                    //             $('#tabManager').find("li").each(function (index) {
+                    //                 if ($(this).text() == position) {
+                    //                     $(this).find('input').click();
+                    //                     buffer.showPanel();
+                    //                     GUI.container.resizeAll();
+                    //                     GUI.container.initContent("center");
+                    //                     GUI.container.initContent("west");
+                    //                 }
+                    //             })
+                    //         });
+                    //     });
+                    // }
+                    // GUI.flagResize = false;
                 }
 
                 this.showPanel = function () {
-                    var disabled = this.jqueryObjectRoot.tabs("option", "disabled");
-                    if (disabled.toString() != "true") {
-                        $('#tab').remove();
-                        $('#mainLayout-center').show();
-                        $('.ui-layout-resizer-west').show();
-                        for (var j = 0; j < 6; j++) {
-                            this.jqueryObjectRoot.tabs("option", "active", j);
-                        }
-                        GUI.resize();
-                        GUI.flagResize = true;
-                    }
+                    // var disabled = this.jqueryObjectRoot.tabs("option", "disabled");
+                    // if (disabled.toString() != "true") {
+                    //     $('#tab').remove();
+                    //     $('#mainLayout-center').show();
+                    //     $('.ui-layout-resizer-west').show();
+                    //     for (var j = 0; j < 6; j++) {
+                    //         this.jqueryObjectRoot.tabs("option", "active", j);
+                    //     }
+                    //     GUI.resize();
+                    //     GUI.flagResize = true;
+                    // }
                 }
 
                 this.tabManager = function () {
@@ -1210,11 +1229,11 @@ define(['channel', 'codemirror', 'webglUtils', 'WebGLDebugUtils', 'pnotify', 'co
                     var flagPanel = false;
                     this.menuButton = GUI.button("menuTab", this.header, function () {
                         if (!flagPanel) {
-                            $('#tabManager').show();
+                            $('#tabManager_'+this.id).show();
                             flagPanel = true;
                         }
                         else if (flagPanel) {
-                            $('#tabManager').hide();
+                            $('#tabManager_'+this.id).hide();
                             flagPanel = false;
                         }
 
