@@ -42,7 +42,10 @@
                 profile.sid = handler.sid;
 
                 handler.db.createUser(profile.sid,'google',identifier,profile, function (err,user){
-                  if (err) return handler.handlerError(err);
+                  if (err) {
+                    console.log('google login error='+err)
+                    return handler.handleError(err);
+                  }
                   done(null,user);
                 })
               })

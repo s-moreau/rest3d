@@ -733,10 +733,12 @@ var info = exports.info = function (cb) {
 
 // test and initiallize database
 var init = exports.init = function (cb){
-
+  var url='http://'+connection.config.host+':'+connection.config.port+connection.config.rest;
+    
   request({ // 3d building collections ?
-		url: 'http://'+connection.config.host+':'+connection.config.port+'/'+connection.config.rest
+		url: url
 		},function(err, resp, body){
+      console.log('exist init url='+url)
 		  if (err){
 		    console.log('ERROR asking exist rest url');
 		    console.log(err)
@@ -760,24 +762,36 @@ var init = exports.init = function (cb){
         console.log('assets.xml already exists')
 				return check_existdb_1(cb);
 			} else {
-        /*
-				console.log('creating assets.xml');
-				xquery = 'xquery version "3.0";\
-                  let $my-doc := <items/> \
-                  return\
-                  xmldb:store("/apps/rest3d/data", "assets.xml", $my-doc)';
+        // make sure 'data' collection exists
+        var xquery = 'xquery version "3.0";\
+                xmldb:create-collection("/db/apps/rest3d/", "data")';
         query(xquery, function(err,res) {
-        	if (err) {
-        		console.log('Error creating assets.xml');
-        		console.log(err);
-        		return cb(false);
-        	} else {
-        		console.log('assets.xml created')
-        		return check_existdb_1(cb);
-        	}
+          if (err){
+            console.log('Error creating /data/ collection');
+            console.log(err)
+            return cb(false);
+          }
+          else {
+            /*
+    				console.log('creating assets.xml');
+    				xquery = 'xquery version "3.0";\
+                      let $my-doc := <items/> \
+                      return\
+                      xmldb:store("/apps/rest3d/data", "assets.xml", $my-doc)';
+            query(xquery, function(err,res) {
+            	if (err) {
+            		console.log('Error creating assets.xml');
+            		console.log(err);
+            		return cb(false);
+            	} else {
+            		console.log('assets.xml created')
+            		return check_existdb_1(cb);
+            	}
+            })
+            */
+            console.log('assets.xml does not exists');
+          }
         })
-        */
-        console.log('assets.xml does not exists');
 			}
 		})
 	})
