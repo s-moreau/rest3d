@@ -51,7 +51,7 @@ define(['q'],
                             var defer = Q.defer();
                             $.ajax({
                                 type: "POST",
-                                url: '/rest3d/' + stock.name + '/login',
+                                url: '/rest3d/login/' + stock.name ,
                                 data: {
                                     "user": username.val(),
                                     "passwd": pwd.val()
@@ -62,18 +62,23 @@ define(['q'],
                                     loginButton.prop('disabled', true);
                                     GUI.addTooltip({
                                         parent: loginButton,
-                                        content: data.message,
+                                        content: data,
                                     });
                                     tmp2.prop('disabled', true);
                                     notif.remove();
                                     GUI.notification({
                                         title: stock.name + " login",
-                                        text: data.message,
+                                        text: data,
                                         type: "info",
                                     });
-                                    $("#header_" + stock.name).text("Welcome " + data.message.split(" ").pop() + "!");
-                                    stock.generateCoreTab();
-                                    window.treeCallback
+                                    $("#header_" + stock.name).text("Welcome " + data.split(" ").pop() + "!");
+                                    stock.rest3dToTree.createTree();
+                                    // setTimeout(function(){
+                                    //       stock.rest3dToTree.setUpload();
+                                    //       //stock.rest3dToTree.tree.openAll();
+                                    // },50); 
+                                    //stock.generateCoreTab();
+                                    //window.treeCallback
                                     defer.resolve();
                                 },
                                 error: function (data) {
@@ -211,7 +216,7 @@ define(['q'],
                 this.descriptionArea();
                 this.parent.append("<a style='float:right;' href='javascript:window.login_" + stock.name + "()'>+Sign in</a><br><hr></br>");
                 if(!this.upload){
-                    this.generateCoreTab();
+                    // this.generateCoreTab();
                     this.parent.focusTab(function () {
                         stock.treeCallback();
                         stock.accor["sample_" + stock.name].openAccordion();

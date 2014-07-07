@@ -274,6 +274,8 @@ define(['rest3d', 'upload', 'viewer', 'database', 'collada', 'gltf'], function (
                     var previewUri = uuid.previewUri;
                     var iconUri = uuid.iconUri;
                     uuid = uuid.uuid;
+                } else if(stock.canJSON(uuid)){
+                    uuid = uuid.uuid;
                 } else {
                     return
                 }
@@ -391,6 +393,15 @@ define(['rest3d', 'upload', 'viewer', 'database', 'collada', 'gltf'], function (
             return result.children;
         }
 
+        this.canJSON = function(value) {
+            try {
+                JSON.stringify(value);
+                return true;
+            } catch (ex) {
+                return false;
+            }
+        }
+
         this.createTree = function () {
             var stock = this;
             this.nodeBuffer;
@@ -419,6 +430,7 @@ define(['rest3d', 'upload', 'viewer', 'database', 'collada', 'gltf'], function (
                         },
                         "dataFilter": function (new_data) {
                             new_data = jQuery.parseJSON(new_data);
+                            if(stock.name=='3dvia')new_data=new_data.resources[0];
                             stock.image.remove();
                             stock.flagEmpty = false;
                             if (stock.nodeBuffer.id == "#" && jQuery.isEmptyObject(new_data.assets) && jQuery.isEmptyObject(new_data.children)) {
@@ -657,7 +669,6 @@ define(['rest3d', 'upload', 'viewer', 'database', 'collada', 'gltf'], function (
             name = name.split('\'').join("");
             name = name.split(';').join("");
             name = name.split('?').join("");
-            name = name.split('@').join("");
             name = name.split('&').join("");
             name = name.split('=').join("");
             name = name.split('+').join("");

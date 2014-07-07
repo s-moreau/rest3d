@@ -298,11 +298,11 @@ width:100%;
 float: left;
 font-size: 12px;}
 
-#layout-console{ 
+/*#layout-console{ 
 height:88%;
 width:580px !important;
 overflow:auto !important;
-overflow-x:hidden !important;}
+overflow-x:hidden !important;}*/
 
 #time {
 float:left; } 
