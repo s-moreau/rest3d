@@ -966,7 +966,7 @@ define(['channel', 'codemirror', 'webglUtils', 'WebGLDebugUtils', 'pnotify', 'co
                                     id: "westSouthTab",
                                     parent: $('#westLayout-south'),
                                     item:[
-                                        {id:"yop",text:"youp"},
+                                        {id:"yop",text:" "},
                                     ]
                                 })
                                 westSouthTab.sortable();
@@ -989,7 +989,7 @@ define(['channel', 'codemirror', 'webglUtils', 'WebGLDebugUtils', 'pnotify', 'co
                                     id: "centerSouthTab",
                                     parent: $('#centerLayout-south'),
                                     item:[
-                                        {id:"yop",text:"youp"},
+                                        {id:"yop",text:" "},
                                     ]
                                 })
                                 centerSouthTab.sortable();
@@ -999,7 +999,7 @@ define(['channel', 'codemirror', 'webglUtils', 'WebGLDebugUtils', 'pnotify', 'co
                                 receiver.detach().appendTo(centerSouthTab.content)
                                
                                 centerSouthTab.refresh();
-                                setTimeout(function(){centerSouthTab.yop.removeTab();centerSouthTab.refresh();centerSouthTab.refreshSize()},500);
+                                setTimeout(function(){centerSouthTab.yop.removeTab();centerSouthTab.refresh();centerSouthTab.refreshSize()},200);
                                 centerSouthTab.refreshSize();
                                 window.centerLayout.jqueryObject.south.options.onresize = function(){
                                     centerSouthTab.refreshSize();

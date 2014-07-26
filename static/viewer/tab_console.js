@@ -239,9 +239,6 @@ define("console", function () {
                 consoleObject.show();
             }
             CONSOLE.terminal.echo("rest3d_DEBUG> " + GUI.time() + ": " + message);
-            if (checkVisible) {
-                // consoleObject.hide();
-            }
             linesToColor();
             check();
             if(!CONSOLE.statusOpen){playSignal(0, 1, 0, 0)};
