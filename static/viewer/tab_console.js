@@ -42,9 +42,9 @@ define("console", function () {
         parent.focusTab(function(){
             stopSignal()
         })
-        window.renderMenu.render.focusTab(function(){
-            CONSOLE.statusOpen = false;
-        })
+        // window.renderMenu.render.focusTab(function(){
+        //     CONSOLE.statusOpen = false;
+        // }) //TEST TAB
         window.renderMenu.scenes.focusTab(function(){
             CONSOLE.statusOpen = false;
         })

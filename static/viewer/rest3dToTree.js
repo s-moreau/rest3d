@@ -21,9 +21,11 @@ define(['rest3d', 'upload', 'viewer', 'database', 'collada', 'gltf'], function (
         this.area = parent;
         this.image = $();
         this.flagEmpty = true;
+        this.search = false;
         this.progress = $("<progress value=0 max=100></progress>");
         this.infoUrl = location.protocol + "//" + location.host + "/rest3d/info/" + this.name + "/";
         this.uploadUrl = location.protocol + "//" + location.host + "/rest3d/" + this.name + "/";
+        this.searchUrl = location.protocol + "//" + location.host + "/rest3d/search/" + this.name + "/";
         this.dataUrl = location.protocol + "//" + location.host + "/rest3d/data/" + this.name + "/";
         this.convertUrl = location.protocol + "//" + location.host + "/rest3d/convert/" + this.name + "/";
         this.uploadToTmp = location.protocol + "//" + location.host + "/rest3d/tmp/";
@@ -402,11 +404,42 @@ define(['rest3d', 'upload', 'viewer', 'database', 'collada', 'gltf'], function (
             }
         }
 
+        this.buildContent = function(){
+            this.accordion = GUI.accordion({
+                id: 'accordion_'+stock.name,
+                parent: this.area,
+                item: [{
+                    id: "sample_"+stock.name,
+                    text: "Sample of collections"
+                },
+                {
+                    id: "search_"+stock.name,
+                    text: "Search"
+                },
+                ]
+             })
+            this.area = this.accordion["sample_"+stock.name];
+            this.createTree();
+            this.searchInput = GUI.addInput("searchInputWarehouse", "Sofa", this.accordion["search_"+stock.name]).width("77%");
+            this.searchInput.keypress(
+              function(e){
+              if (e.keyCode==13){
+                stock["tree_search"]['tree_search_' + stock.name].jstree("refresh");
+                } 
+            });
+            this.submitSearch = GUI.button("search", this.accordion["search_"+stock.name], function(){
+                stock["tree_search"]['tree_search_' + stock.name].jstree("refresh");
+            });
+            this.area = stock.accordion["search_"+stock.name];
+            this.search=true;
+            this.createTree();
+        }
+
         this.createTree = function () {
             var stock = this;
             this.nodeBuffer;
-            this.tree = GUI.treeBis({
-                id: 'tree_' + this.name,
+            this[this.search ? "tree_search":"tree"] = GUI.treeBis({
+                id: this.search ? 'tree_search_' + this.name : 'tree_' + this.name,
                 parent: this.area,
                 "plugin": ["themes", "json_data", "ui", "types", "sort", "search", "contextmenu"],
                 core: {
@@ -416,7 +449,11 @@ define(['rest3d', 'upload', 'viewer', 'database', 'collada', 'gltf'], function (
                             var url = "";
                             stock.nodeBuffer = node;
                             if (node.id == "#") {
-                                url = stock.infoUrl;
+                                if(!stock.search){
+                                    url = stock.infoUrl;
+                                } else {
+                                    url = stock.searchUrl+stock.searchInput.val();
+                                }
                                 stock.firstFlag = true;
                             }
                             else {

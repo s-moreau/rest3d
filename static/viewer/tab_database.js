@@ -72,7 +72,7 @@ define(['q'],
                                         type: "info",
                                     });
                                     $("#header_" + stock.name).text("Welcome " + data.split(" ").pop() + "!");
-                                    stock.rest3dToTree.createTree();
+                                    stock.rest3dToTree.buildContent();
                                     // setTimeout(function(){
                                     //       stock.rest3dToTree.setUpload();
                                     //       //stock.rest3dToTree.tree.openAll();
@@ -199,7 +199,7 @@ define(['q'],
                 var flag = true;
                 this.parent.focusTab(function(){
                     if(flag){
-                    stock.rest3dToTree.createTree();
+                    stock.rest3dToTree.buildContent();
                     // setTimeout(function(){
                     //       stock.rest3dToTree.setUpload();
                     //       //stock.rest3dToTree.tree.openAll();

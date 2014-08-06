@@ -357,10 +357,6 @@ define(['viewer', 'gui', 'rest3d', 'q', 'collada', 'gltf', 'renderer', 'state', 
                 id: "renderMenus",
                 parent: layout.jqueryObjectCenter,
                 item: [
-                       {
-                        id: "render",
-                        text: " TEST",
-                    },
                     {
                         id: "scenes",
                         text: " Scenes",
@@ -942,29 +938,7 @@ define(['viewer', 'gui', 'rest3d', 'q', 'collada', 'gltf', 'renderer', 'state', 
                     // }, 1500); // open all nodes of the tab
                 // }              
             }, "/info/tmp");
-            function jumpLine() {
-                renderMenu.render.append("<br></br>");
-            }
 
-            renderMenu.render.append("<h4>Test tab for displaying models</h4>");
-
-            jumpLine();
-
-            var accordion = GUI.accordion({
-                id: "menu-render",
-                parent: window.renderMenu.render,
-                item: [{
-                    id: "collada",
-                    text: ""
-                }, {
-                    id: "gltf",
-                    text: ""
-                }, ]
-            })
-            accordion.autoScrollDown();
-            GUI.image(accordion.collada.header, "img-settings", "../gui/images/collada.png", 40, 80, "before");
-            GUI.image(accordion.gltf.header, "img-settissngs1", "../gui/images/glTF.png", 40, 35, "before");
-            GUI.image(window.renderMenu.render.title, "img-render", "../gui/images/menu-render.png", 12, 14, "before");
             
             // accordion.collada.header.append()
 
@@ -974,9 +948,6 @@ define(['viewer', 'gui', 'rest3d', 'q', 'collada', 'gltf', 'renderer', 'state', 
             window.centerLayout.parent.find(".ui-layout-resizer").addClass("ui-widget-header");
             window.centerLayout.jqueryObject.hide("south");
             window.westLayout.jqueryObject.hide("south");
-
-            jumpLine();
-
             window.notif = function (object) {
                 win.parent().parent().find(".ui-icon-close").click();
                 win.remove();
@@ -999,236 +970,260 @@ define(['viewer', 'gui', 'rest3d', 'q', 'collada', 'gltf', 'renderer', 'state', 
                 GUI.label('rdm13', 'Use mouse wheel to zoom', win);
             }
 
-            GUI.button('cat skinned (work in progress)', accordion.collada, function () {
-                pleaseWait(true);
-                var url = "/models/cat/cat-skin.dae";
-                COLLADA.load(url, viewer.parse_dae).then(
-                    function (flag) {
-                        pleaseWait(false);
-                        window.notif(url);
-                    }, function (error) {
-                        // If there's an error or a non-200 status code, log the error.
-                        console.error("cs " + error);
-                    });
-            }).width("90%");
-            accordion.collada.append("<hr></hr>");
+         ///jumpLine();
+            // function jumpLine() {
+            //     renderMenu.render.append("<br></br>");
+            // }
+
+            // renderMenu.render.append("<h4>Test tab for displaying models</h4>");
+
+            // jumpLine();
+
+            // var accordion = GUI.accordion({
+            //     id: "menu-render",
+            //     parent: window.renderMenu.render,
+            //     item: [{
+            //         id: "collada",
+            //         text: ""
+            //     }, {
+            //         id: "gltf",
+            //         text: ""
+            //     }, ]
+            // })
+            // accordion.autoScrollDown();
+            // GUI.image(accordion.collada.header, "img-settings", "../gui/images/collada.png", 40, 80, "before");
+            // GUI.image(accordion.gltf.header, "img-settissngs1", "../gui/images/glTF.png", 40, 35, "before");
+            // GUI.image(window.renderMenu.render.title, "img-render", "../gui/images/menu-render.png", 12, 14, "before");
+            // GUI.button('cat skinned (work in progress)', accordion.collada, function () {
+            //     pleaseWait(true);
+            //     var url = "/models/cat/cat-skin.dae";
+            //     COLLADA.load(url, viewer.parse_dae).then(
+            //         function (flag) {
+            //             pleaseWait(false);
+            //             window.notif(url);
+            //         }, function (error) {
+            //             // If there's an error or a non-200 status code, log the error.
+            //             console.error("cs " + error);
+            //         });
+            // }).width("90%");
+            // accordion.collada.append("<hr></hr>");
 
 
-            GUI.button('cat skinned', accordion.gltf, function () {
-                pleaseWait(true);
-                var url = "/models/cat/cat-skin.json";
-                glTF.load(url, viewer.parse_gltf).then(
-                    function (flag) {
-                        pleaseWait(false);
-                        window.notif(url);
-                    })
-            }).width("90%");
-            accordion.gltf.append("<hr></hr>");
+            // GUI.button('cat skinned', accordion.gltf, function () {
+            //     pleaseWait(true);
+            //     var url = "/models/cat/cat-skin.json";
+            //     glTF.load(url, viewer.parse_gltf).then(
+            //         function (flag) {
+            //             pleaseWait(false);
+            //             window.notif(url);
+            //         })
+            // }).width("90%");
+            // accordion.gltf.append("<hr></hr>");
 
 
-            GUI.button('gradient', accordion.gltf, function () {
-                pleaseWait(true);
-                var url = "/models/gradient/gradient.json";
-                glTF.load(url, viewer.parse_gltf).then(
-                    function (flag) {
-                        pleaseWait(false);
-                        window.notif(url);
-                    })
-            }).width("90%");
-            accordion.gltf.append("<hr></hr>");
+            // GUI.button('gradient', accordion.gltf, function () {
+            //     pleaseWait(true);
+            //     var url = "/models/gradient/gradient.json";
+            //     glTF.load(url, viewer.parse_gltf).then(
+            //         function (flag) {
+            //             pleaseWait(false);
+            //             window.notif(url);
+            //         })
+            // }).width("90%");
+            // accordion.gltf.append("<hr></hr>");
 
 
-            GUI.button('duck', accordion.collada, function () {
-                pleaseWait(true);
-                var url = "/models/duck/duck.dae"
-                COLLADA.load(url, viewer.parse_dae).then(
-                    function (flag) {
-                        pleaseWait(false);
-                        window.notif(url);
-                    }, function (error) {
-                        // If there's an error or a non-200 status code, log the error.
-                        pleaseWait(false);
-                        console.error("cs " + error);
-                    });
-            }).width("90%");
-            accordion.collada.append("<hr></hr>");
+            // GUI.button('duck', accordion.collada, function () {
+            //     pleaseWait(true);
+            //     var url = "/models/duck/duck.dae"
+            //     COLLADA.load(url, viewer.parse_dae).then(
+            //         function (flag) {
+            //             pleaseWait(false);
+            //             window.notif(url);
+            //         }, function (error) {
+            //             // If there's an error or a non-200 status code, log the error.
+            //             pleaseWait(false);
+            //             console.error("cs " + error);
+            //         });
+            // }).width("90%");
+            // accordion.collada.append("<hr></hr>");
 
-            GUI.button('creature', accordion.collada, function () {
-                pleaseWait(true);
-                var url = "/models/Amahani/Amahani.dae";
-                COLLADA.load(url, viewer.parse_dae).then(
-                    function (flag) {
-                        pleaseWait(false);
-                        window.notif(url);
-                    })
-            }).width("90%");
-            accordion.collada.append("<hr></hr>");
+            // GUI.button('creature', accordion.collada, function () {
+            //     pleaseWait(true);
+            //     var url = "/models/Amahani/Amahani.dae";
+            //     COLLADA.load(url, viewer.parse_dae).then(
+            //         function (flag) {
+            //             pleaseWait(false);
+            //             window.notif(url);
+            //         })
+            // }).width("90%");
+            // accordion.collada.append("<hr></hr>");
 
-            GUI.button('skinned creature', accordion.gltf, function () {
-                pleaseWait(true);
-                var url = "/models/Amahani/Amahani.json";
-                glTF.load(url, viewer.parse_gltf).then(
-                    function (flag) {
-                        pleaseWait(false);
-                        window.notif(url);
-                    })
-            }).width("90%");
-            accordion.gltf.append("<hr></hr>");
+            // GUI.button('skinned creature', accordion.gltf, function () {
+            //     pleaseWait(true);
+            //     var url = "/models/Amahani/Amahani.json";
+            //     glTF.load(url, viewer.parse_gltf).then(
+            //         function (flag) {
+            //             pleaseWait(false);
+            //             window.notif(url);
+            //         })
+            // }).width("90%");
+            // accordion.gltf.append("<hr></hr>");
 
-            GUI.button('duck', accordion.gltf, function () {
-                pleaseWait(true);
-                var url = "/models/duck-glft/duck_triangulate.json"
-                glTF.load(url, viewer.parse_gltf).then(
-                    function (flag) {
-                        pleaseWait(false);
-                        window.notif(url);
-                    })
-            }).width("90%");
-            accordion.gltf.append("<hr></hr>");
+            // GUI.button('duck', accordion.gltf, function () {
+            //     pleaseWait(true);
+            //     var url = "/models/duck-glft/duck_triangulate.json"
+            //     glTF.load(url, viewer.parse_gltf).then(
+            //         function (flag) {
+            //             pleaseWait(false);
+            //             window.notif(url);
+            //         })
+            // }).width("90%");
+            // accordion.gltf.append("<hr></hr>");
 
-            GUI.button('rambler', accordion.gltf, function () {
-                pleaseWait(true);
-                var url = "/models/rambler/Rambler.json";
-                glTF.load(url, viewer.parse_gltf).then(
-                    function (flag) {
-                        pleaseWait(false);
-                        window.notif(url);
-                    })
+            // GUI.button('rambler', accordion.gltf, function () {
+            //     pleaseWait(true);
+            //     var url = "/models/rambler/Rambler.json";
+            //     glTF.load(url, viewer.parse_gltf).then(
+            //         function (flag) {
+            //             pleaseWait(false);
+            //             window.notif(url);
+            //         })
 
-            }).width("90%");
-            accordion.gltf.append("<hr></hr>");
+            // }).width("90%");
+            // accordion.gltf.append("<hr></hr>");
 
-            GUI.button('rambler-min', accordion.collada, function () {
-                pleaseWait(true);
-                var url = "/models/rambler/Rambler-min.dae";
-                COLLADA.load(url, viewer.parse_dae).then(
-                    function (flag) {
-                        pleaseWait(false);
-                        window.notif(url);
-                    })
+            // GUI.button('rambler-min', accordion.collada, function () {
+            //     pleaseWait(true);
+            //     var url = "/models/rambler/Rambler-min.dae";
+            //     COLLADA.load(url, viewer.parse_dae).then(
+            //         function (flag) {
+            //             pleaseWait(false);
+            //             window.notif(url);
+            //         })
 
-            }).width("90%");
-            accordion.collada.append("<hr></hr>");
+            // }).width("90%");
+            // accordion.collada.append("<hr></hr>");
 
-            GUI.button('rambler', accordion.collada, function () {
-                pleaseWait(true);
-                var url = "/models/rambler/Rambler.dae";
-                COLLADA.load(url, viewer.parse_dae).then(
-                    function (flag) {
-                        pleaseWait(false);
-                        window.notif(url);
-                    })
-            }).width("90%");
-            accordion.collada.append("<hr></hr>");
+            // GUI.button('rambler', accordion.collada, function () {
+            //     pleaseWait(true);
+            //     var url = "/models/rambler/Rambler.dae";
+            //     COLLADA.load(url, viewer.parse_dae).then(
+            //         function (flag) {
+            //             pleaseWait(false);
+            //             window.notif(url);
+            //         })
+            // }).width("90%");
+            // accordion.collada.append("<hr></hr>");
 
-            GUI.button('supermurdoch', accordion.collada, function () {
-                pleaseWait(true);
-                var url = "/models/SuperMurdoch/SuperMurdoch.dae";
-                COLLADA.load(url, viewer.parse_dae).then(
-                    function (flag) {
-                        pleaseWait(false);
-                        window.notif(url);
-                    })
-            }).width("90%");
-            accordion.collada.append("<hr></hr>");
+            // GUI.button('supermurdoch', accordion.collada, function () {
+            //     pleaseWait(true);
+            //     var url = "/models/SuperMurdoch/SuperMurdoch.dae";
+            //     COLLADA.load(url, viewer.parse_dae).then(
+            //         function (flag) {
+            //             pleaseWait(false);
+            //             window.notif(url);
+            //         })
+            // }).width("90%");
+            // accordion.collada.append("<hr></hr>");
 
-            GUI.button('supermurdoch', accordion.gltf, function () {
-                pleaseWait(true);
-                var url = "/models/SuperMurdoch/SuperMurdoch.json";
-                glTF.load(url, viewer.parse_gltf).then(
-                    function (flag) {
-                        pleaseWait(false);
-                        window.notif(url);
-                    })
-            }).width("90%");
-            accordion.gltf.append("<hr></hr>");
+            // GUI.button('supermurdoch', accordion.gltf, function () {
+            //     pleaseWait(true);
+            //     var url = "/models/SuperMurdoch/SuperMurdoch.json";
+            //     glTF.load(url, viewer.parse_gltf).then(
+            //         function (flag) {
+            //             pleaseWait(false);
+            //             window.notif(url);
+            //         })
+            // }).width("90%");
+            // accordion.gltf.append("<hr></hr>");
 
-            GUI.button('wine', accordion.collada, function () {
-                pleaseWait(true);
-                var url = "/models/wine/wine.dae";
-                COLLADA.load(url, viewer.parse_dae).then(
-                    function (flag) {
-                        pleaseWait(false);
-                        window.notif(url);
-                    })
-            }).width("90%");
-            accordion.collada.append("<hr></hr>");
+            // GUI.button('wine', accordion.collada, function () {
+            //     pleaseWait(true);
+            //     var url = "/models/wine/wine.dae";
+            //     COLLADA.load(url, viewer.parse_dae).then(
+            //         function (flag) {
+            //             pleaseWait(false);
+            //             window.notif(url);
+            //         })
+            // }).width("90%");
+            // accordion.collada.append("<hr></hr>");
 
-            GUI.button('plane', accordion.collada, function () {
-                pleaseWait(true);
-                var url = "/models/plane/seymourplane_angle_linear_animation.dae";
-                COLLADA.load(url, viewer.parse_dae).then(
-                    function (flag) {
-                        pleaseWait(false);
-                        window.notif(url);
-                    })
-            }).width("90%");
-            accordion.collada.append("<hr></hr>");
+            // GUI.button('plane', accordion.collada, function () {
+            //     pleaseWait(true);
+            //     var url = "/models/plane/seymourplane_angle_linear_animation.dae";
+            //     COLLADA.load(url, viewer.parse_dae).then(
+            //         function (flag) {
+            //             pleaseWait(false);
+            //             window.notif(url);
+            //         })
+            // }).width("90%");
+            // accordion.collada.append("<hr></hr>");
 
-            GUI.button('wine', accordion.gltf, function () {
-                pleaseWait(true);
-                var url = "/models/wine/wine.json";
-                glTF.load(url, viewer.parse_gltf).then(
-                    function (flag) {
-                        pleaseWait(false);
-                        window.notif(url);
-                    })
-            }).width("90%");
-            accordion.gltf.append("<hr></hr>");
-
-
-            GUI.button('uh-1n', accordion.collada, function () {
-                pleaseWait(true);
-                var url = "/models/uh-1n/uh-1n.dae"
-                COLLADA.load(url, viewer.parse_dae).then(
-                    function (flag) {
-                        pleaseWait(false);
-                        window.notif(url);
-                    })
-            }).width("90%");
-            accordion.collada.append("<hr></hr>");
-
-            GUI.button('uh-1n', accordion.gltf, function () {
-                pleaseWait(true);
-                var url = "/models/uh-1n/uh-1n.json";
-                glTF.load(url, viewer.parse_gltf).then(
-                    function (flag) {
-                        pleaseWait(false);
-                        window.notif(url);
-                    })
-            }).width("90%");
-            accordion.gltf.append("<hr></hr>");
-
-            GUI.button('cow', accordion.collada, function () {
-                pleaseWait(true);
-                var url = "/models/cow/cow.dae"
-                COLLADA.load(url, viewer.parse_dae).then(
-                    function (flag) {
-                        pleaseWait(false);
-                        window.notif(url);
-                    })
-            }).width("90%");
-
-            GUI.button('cow', accordion.gltf, function () {
-                pleaseWait(true);
-                var url = "/models/cow/cow.json";
-                glTF.load(url, viewer.parse_gltf).then(
-                    function (flag) {
-                        pleaseWait(false);
-                        window.notif(url);
-                    })
-            }).width("90%");
+            // GUI.button('wine', accordion.gltf, function () {
+            //     pleaseWait(true);
+            //     var url = "/models/wine/wine.json";
+            //     glTF.load(url, viewer.parse_gltf).then(
+            //         function (flag) {
+            //             pleaseWait(false);
+            //             window.notif(url);
+            //         })
+            // }).width("90%");
+            // accordion.gltf.append("<hr></hr>");
 
 
-            GUI.button('cat skinned + animation', accordion.gltf, function () {
-                pleaseWait(true);
-                var url = "/models/cat/20_cat_smooth_bake_channel.json";
-                glTF.load(url, viewer.parse_gltf).then(
-                    function (flag) {
-                        pleaseWait(false);
-                        window.notif(url);
-                    })
-            }).width("90%");
+            // GUI.button('uh-1n', accordion.collada, function () {
+            //     pleaseWait(true);
+            //     var url = "/models/uh-1n/uh-1n.dae"
+            //     COLLADA.load(url, viewer.parse_dae).then(
+            //         function (flag) {
+            //             pleaseWait(false);
+            //             window.notif(url);
+            //         })
+            // }).width("90%");
+            // accordion.collada.append("<hr></hr>");
+
+            // GUI.button('uh-1n', accordion.gltf, function () {
+            //     pleaseWait(true);
+            //     var url = "/models/uh-1n/uh-1n.json";
+            //     glTF.load(url, viewer.parse_gltf).then(
+            //         function (flag) {
+            //             pleaseWait(false);
+            //             window.notif(url);
+            //         })
+            // }).width("90%");
+            // accordion.gltf.append("<hr></hr>");
+
+            // GUI.button('cow', accordion.collada, function () {
+            //     pleaseWait(true);
+            //     var url = "/models/cow/cow.dae"
+            //     COLLADA.load(url, viewer.parse_dae).then(
+            //         function (flag) {
+            //             pleaseWait(false);
+            //             window.notif(url);
+            //         })
+            // }).width("90%");
+
+            // GUI.button('cow', accordion.gltf, function () {
+            //     pleaseWait(true);
+            //     var url = "/models/cow/cow.json";
+            //     glTF.load(url, viewer.parse_gltf).then(
+            //         function (flag) {
+            //             pleaseWait(false);
+            //             window.notif(url);
+            //         })
+            // }).width("90%");
+
+
+            // GUI.button('cat skinned + animation', accordion.gltf, function () {
+            //     pleaseWait(true);
+            //     var url = "/models/cat/20_cat_smooth_bake_channel.json";
+            //     glTF.load(url, viewer.parse_gltf).then(
+            //         function (flag) {
+            //             pleaseWait(false);
+            //             window.notif(url);
+            //         })
+            // }).width("90%");
         }
 
         return viewer;
