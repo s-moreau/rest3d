@@ -357,14 +357,30 @@ THE SOFTWARE.
         <h3> Jobs </h3>
           <ul>
           <li> <a href="/rest3d/jobs"> /rest3d/jobs</a> Query jobs list</li>
-          <li> <a href="javascript:getit('/rest3d/job/status/','job1');"> /rest3d/job/status/</a>
+
+          <li> <a href="javascript:getit('/rest3d/jobs/status?jobid=','job1');"> /rest3d/jobs/status?jobid=</a>
           <input type="text" size="51" value="" id="job1" onkeydown="if (event.keyCode == 13) getit('/rest3d/job/status/','job1');" />Get job status</li>
-          <li> <a href="javascript:getit('/rest3d/suspend/job/','job2');"> /rest3d/suspend/job/</a>
-          <input type="text" size="51" value="" id="job2" onkeydown="if (event.keyCode == 13) getit('/rest3d/job/suspend/','job2');" />Suspend job</li>
-          <li> <a href="javascript:getit('/rest3d/resume/job/','job3');">/rest3d/resume/job/</a>
-          <input type="text" size="51" value="" id="job3" onkeydown="if (event.keyCode == 13) getit('/rest3d/job/resume','job3');" />Resume job</li>
-          <li> <a href="javascript:getit('/rest3d/kill/job/','job4');"> /rest3d/kill/job/</a>
-          <input type="text" size="51" value="" id="job4" onkeydown="if (event.keyCode == 13) getit(/rest3d/kill/job/','job4');" />Kill job</li>
+          <li>
+          <form id='suspend-job' action="/rest3d/jobs/suspend/" enctype="multipart/form-data" method="POST">
+            [POST jobid] /rest3d/jobs/suspend/
+            <input type="text" size="40" value="" onkeyup="document.getElementById('suspend-job').action = '/rest3d/jobs/suspend/'+this.value;"/>
+            <input type="submit"/> suspend job 
+          </form>
+         </li>
+          <li>
+          <form id='resume-job' action="/rest3d/jobs/resume/" enctype="multipart/form-data" method="POST">
+            [POST jobid] /rest3d/jobs/resume/
+            <input type="text" size="40" value="" onkeyup="document.getElementById('resume-job').action = '/rest3d/jobs/resume/'+this.value;"/>
+            <input type="submit"/> resume job 
+          </form>
+         </li>
+                <li>
+          <form id='kill-job' action="/rest3d/jobs/kill/" enctype="multipart/form-data" method="POST">
+            [POST jobid] /rest3d/jobs/kill/
+            <input type="text" size="40" value="" onkeyup="document.getElementById('kill-job').action = '/rest3d/jobs/kill/'+this.value;"/>
+            <input type="submit"/> kill job 
+          </form>
+         </li>
           </ul>
     <div style="display: hidden" />
   </div>
