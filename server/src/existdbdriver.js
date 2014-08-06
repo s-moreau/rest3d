@@ -123,9 +123,9 @@ var lockAsset = exports.lockAsset = function(asset,cb, _n){
       return cb(err);
     }
     if (res) {
-      if (res.type === Collection.type)
+      if (res.mimetype === Collection.mimetype)
         res = extend(new Collection(),res);
-      else if (res.type === Asset.type)
+      else if (res.mimetype === Asset.mimetype)
         res = extend(new Asset(),res);
       else
         res = extend(new Resource(),res);
@@ -350,9 +350,9 @@ var loadAsset = exports.loadAsset = function(id,cb){
   getKey(null,id, function (err,res){
     if (err) return cb(err);
     if (res) {
-      if (res.type === Collection.type)
+      if (res.mimetype === Collection.mimetype)
         res = extend(new Collection(),res);
-      else if (res.type === Asset.type)
+      else if (res.mimetype === Asset.mimetype)
         res = extend(new Asset(),res);
       else
         res = extend(new Resource(),res);
