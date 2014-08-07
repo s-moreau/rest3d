@@ -534,7 +534,7 @@ define(['jquery', 'gltf', 'collada', 'renderer', 'camera', 'state', 'channel', '
                 animation_timer += delta;
                 if (delta > 1000) // one frame per second
                 {
-                    delta = 1000; // jump in time, breakpoint?
+                    delta = 0; // jump in time, breakpoint?
                 }
                 for (var key in animations) {
                     //var keys = Object.keys(animations); var key=keys[1]; {
