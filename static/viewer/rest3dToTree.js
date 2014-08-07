@@ -27,7 +27,7 @@ define(['rest3d', 'upload', 'viewer', 'database', 'collada', 'gltf'], function (
         this.uploadUrl = location.protocol + "//" + location.host + "/rest3d/" + this.name + "/";
         this.searchUrl = location.protocol + "//" + location.host + "/rest3d/search/" + this.name + "/";
         this.dataUrl = location.protocol + "//" + location.host + "/rest3d/data/" + this.name + "/";
-        this.convertUrl = location.protocol + "//" + location.host + "/rest3d/convert/" + this.name + "/";
+        this.convertUrl = location.protocol + "//" + location.host + "/rest3d/convert/tmp/";
         this.uploadToTmp = location.protocol + "//" + location.host + "/rest3d/tmp/";
         this.uploadToDb = location.protocol + "//" + location.host + "/rest3d/db/";
         window.objectRest3d[this.name] = this;
@@ -227,8 +227,8 @@ define(['rest3d', 'upload', 'viewer', 'database', 'collada', 'gltf'], function (
         this.convertMenu = function () {
             // result = $("#" + node.attr("id")).data();
             // result.file.relativePath = "";
-            $.post(stock.convertUrl + stock.nodeContext.li_attr.path, {
-                url: stock.dataUrl + '?uuid=' + stock.nodeContext.li_attr.uuid
+            $.post(stock.convertUrl + stock.nodeContext.li_attr.path.split(stock.nodeContext.li_attr.name).join(''), {
+                url: stock.dataUrl + '/' + stock.nodeContext.li_attr.path
             }).done(function (data) {
                 console.debug(data);
             }).fail(function (err) {
