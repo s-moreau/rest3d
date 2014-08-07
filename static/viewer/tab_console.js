@@ -190,15 +190,7 @@ define("console", function () {
             if (!linenumber) {
                 linenumber = "undefined";
             }
-            var checkVisible = false;
-            if (consoleObject.is(':hidden')) {
-                checkVisible = true;
-                consoleObject.show();
-            }
             CONSOLE.terminal.echo("rest3d_ERROR> " + GUI.time() + ", line: " + linenumber + ", " + message + " url: " + url);
-            if (checkVisible) {
-                // consoleObject.hide();
-            }
             linesToColor();
             CONSOLE.flagError = true;
             if(!CONSOLE.statusOpen){playSignal(1, 0, 0, 0);}
@@ -212,15 +204,7 @@ define("console", function () {
             errorCounter ++;
             updateStatus();
             message = decodeJson(message);
-            var checkVisible = false;
-            if (consoleObject.is(':hidden')) {
-                checkVisible = true;
-                consoleObject.show();
-            }
             CONSOLE.terminal.echo("rest3d_ALERT> " + GUI.time() + ": " + message);
-            if (checkVisible) {
-                // consoleObject.hide();
-            }
             linesToColor();
             check();
             if(!CONSOLE.statusOpen){playSignal(1, 0, 0, 0)};
@@ -234,10 +218,6 @@ define("console", function () {
             debugCounter ++;
             updateStatus();
             message = decodeJson(message);
-            if (consoleObject.is(':hidden')) {
-                checkVisible = true;
-                consoleObject.show();
-            }
             CONSOLE.terminal.echo("rest3d_DEBUG> " + GUI.time() + ": " + message);
             linesToColor();
             check();
@@ -252,15 +232,7 @@ define("console", function () {
             logCounter ++;
             updateStatus();
             message = decodeJson(message);
-            var checkVisible = false;
-            if (consoleObject.is(':hidden')) {
-                checkVisible = true;
-                consoleObject.show();
-            }
             CONSOLE.terminal.echo("rest3d_LOG> " + GUI.time() + ": " + message);
-            if (checkVisible) {
-                // consoleObject.hide();
-            }
             linesToColor();
             check();
             if(!CONSOLE.statusOpen){playSignal(0, 0, 1, 0)};
@@ -274,15 +246,7 @@ define("console", function () {
             errorCounter ++;
             updateStatus();
             message = decodeJson(message);
-            var checkVisible = false;
-            if (consoleObject.is(':hidden')) {
-                checkVisible = true;
-                consoleObject.show();
-            }
             CONSOLE.terminal.echo("rest3d_ERROR> " + GUI.time() + ": " + message);
-            if (checkVisible) {
-                // consoleObject.hide();
-            }
             linesToColor();
             check();
             CONSOLE.flagError = true;
@@ -297,14 +261,7 @@ define("console", function () {
             warnCounter ++;
             updateStatus();
             message = decodeJson(message);
-            if (consoleObject.is(':hidden')) {
-                checkVisible = true;
-                consoleObject.show();
-            }
             CONSOLE.terminal.echo("rest3d_WARNING> " + GUI.time() + ": " + message);
-            if (checkVisible) {
-                // consoleObject.hide();
-            }
             linesToColor();
             check();
             if(!CONSOLE.statusOpen){playSignal(0, 0, 0, 1)};
