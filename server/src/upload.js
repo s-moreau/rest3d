@@ -58,9 +58,9 @@ module.exports = function (server) {
     var res = tmpdb.assets[id];
     if (!res) return cb('database[tmp] cannot find asset id='+id);
 
-    if (res.type === Collection.type)
+    if (res.mimetype === Collection.mimetype)
         res = extend(new Collection(),res);
-    else if (res.type === Asset.type)
+    else if (res.mimetype === Asset.mimetype)
         res = extend(new Asset(),res);
     else
         res = extend(new Resource(),res);

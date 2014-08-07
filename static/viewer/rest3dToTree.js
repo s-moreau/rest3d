@@ -157,7 +157,7 @@ define(['rest3d', 'upload', 'viewer', 'database', 'collada', 'gltf'], function (
             }
             else {
                 var relativePath = stock.nodeContext.li_attr.path.substr(0, stock.nodeContext.li_attr.path.lastIndexOf("/"));
-                var path = encodeURI("/rest3d/data/" + stock.name +'/'+ relativePath + '/?uuid=' + stock.nodeContext.li_attr.uuid);
+                var path = encodeURI("/rest3d/data/" + stock.name +'/?uuid=' + stock.nodeContext.li_attr.uuid);
             }
             path = path.split("(").join("");
             path = path.split(")").join("");
