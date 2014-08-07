@@ -1230,15 +1230,15 @@ define(['viewer', 'gui', 'rest3d', 'q', 'collada', 'gltf', 'renderer', 'state', 
             //         })
             // }).width("90%");
 
-            // GUI.button('tim_camera_monster', accordion.gltf, function () {
-            //     pleaseWait(true);
-            //     var url = "/models/tim_cymbalsMonster_chip/cymbalsMonster_chip_camera.json";
-            //     glTF.load(url, viewer.parse_gltf).then(
-            //         function (flag) {
-            //             pleaseWait(false);
-            //             window.notif(url);
-            //         })
-            // }).width("90%");
+            GUI.button('tim_camera_monster', accordion.gltf, function () {
+                pleaseWait(true);
+                var url = "/models/tim_cymbalsMonster_chip/cymbalsMonster_chip_camera.json";
+                glTF.load(url, viewer.parse_gltf).then(
+                    function (flag) {
+                        pleaseWait(false);
+                        window.notif(url);
+                    })
+            }).width("90%");
 
 
             GUI.button('cat skinned + animation', accordion.gltf, function () {

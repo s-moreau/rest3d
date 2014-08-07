@@ -22,7 +22,7 @@ module.exports = function(server){
 	    return true;
 	}
 
-	server.get(/^\/rest3d\/jobs/, function (req, res, next) {
+	server.get('/rest3d/jobs/', function (req, res, next) {
 		var handler = new Handler(req, res, next);
 		var result = {};
 		for(var job in server.jobManager.jobs){

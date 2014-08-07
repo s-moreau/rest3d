@@ -197,7 +197,8 @@ define(['rest3d', 'upload', 'viewer', 'database', 'collada', 'gltf'], function (
             } else {
                 var name = stock.nodeContext.text;
             }
-            name = stock.uploadToTmp + encodeURI(name);
+            if(stock.name=='tmp')name = stock.uploadToTmp + encodeURI(name);
+            else{name = stock.uploadToDb + encodeURI(name);}
             name = name.split("(").join("");
             name = name.split(")").join("");
             return name;
