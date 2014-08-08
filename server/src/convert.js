@@ -151,7 +151,7 @@ server.jobManager.addJob('convert', {
           zipFile.unzipFile(stock.params.handler,stock.params.collectionpath, stock.params.assetpath,stock.params.file,stock.dirname,stock.callbackConvert)
         }
       });
-      stock.params.handler.handleResult({"job id":stock.id});
+      stock.params.handler.handleResult({"jobid":stock.id});
       setTimeout(function(){stock.finished = true;},stock.timeout);
     }
 });

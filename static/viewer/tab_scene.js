@@ -302,9 +302,13 @@ define(['viewer'], function (viewer) {
                     if (viewer.scenes[i].hasOwnProperty("url")) {
                         if (viewer.scenes[i].url.replace(/^.*[\\\/]/, '') == id) {
                             viewer.scenes[i] = [];
+                            viewer.flagTick=false;
                             viewer.draw();
                             viewer.scenes.splice(i, 1);
-                            setTimeout(viewer.draw,400)
+                            setTimeout(function(){
+                                viewer.draw},200)
+                            setTimeout(function(){
+                                viewer.draw},400)
                         }
                     }
                 }
@@ -420,9 +424,9 @@ define(['viewer'], function (viewer) {
                             trs.fromMat4(tmp, value);
                             var e = euler.create();
                             euler.fromQuat(e, tmp.rotation);
-                            console.debug("translation", tmp.translation);
-                            console.debug("scale", tmp.scale);
-                            console.debug("rotation", e);
+                            // console.debug("translation", tmp.translation);
+                            // console.debug("scale", tmp.scale);
+                            // console.debug("rotation", e);
                             var html = "<div id='infplay" + id + "'></div>";
                             GUI.notification({
                                 title: id,
@@ -438,7 +442,7 @@ define(['viewer'], function (viewer) {
                                 case "Translation":
                                     var min = -1000,
                                         max = 1000,
-                                        step = 1;
+                                        step = 0.01;
                                     break;
                                 case "Scale":
                                     var min = 0.1,

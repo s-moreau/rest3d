@@ -228,12 +228,25 @@ define(['rest3d', 'upload', 'viewer', 'database', 'collada', 'gltf'], function (
         this.convertMenu = function () {
             // result = $("#" + node.attr("id")).data();
             // result.file.relativePath = "";
+            pleaseWait(true);
             $.post(stock.convertUrl + stock.nodeContext.li_attr.path.split(stock.nodeContext.li_attr.name).join(''), {
                 url: stock.dataUrl + '/' + stock.nodeContext.li_attr.path
             }).done(function (data) {
-                console.debug(data);
+                data=jQuery.parseJSON(data)
                 window.renderMenu.tab_tmp.focusTab();
                 setTimeout(function(){window.objectRest3d.tmp.tree.tree_tmp.jstree("refresh")},1000);
+                setTimeout(function(){
+                    $.get(location.protocol + "//" + location.host + "/rest3d/jobs/status?jobid="+data.jobid).done(function(data){
+                    data=jQuery.parseJSON(data)
+                    var html = '<ul><li><a style="font-weight:bold">Status: </a>'+data.status+'</li><li><a style="font-weight:bold">stderr: </a>'+data.stderr+'</li><li><a style="font-weight:bold">stdout: </a>'+data.stdout+'</li></ul>'
+                    GUI.notification({
+                            title: 'Convert job:',
+                            text: html,
+                            type: "notice",
+                        });
+                     pleaseWait(false);
+                })
+                },1500);
             }).fail(function (err) {
                 console.error(err)
             });
@@ -913,9 +926,6 @@ define(['rest3d', 'upload', 'viewer', 'database', 'collada', 'gltf'], function (
                             stock.parentTree = $("#" + objectId);
                         }
                     })
-                }
-                if(stock.parentTree!=='#'){
-                    while(stock.parentTree.length==0){}
                 }
                 var tmp = {};
                 tmp.text = data.files[0].name;
