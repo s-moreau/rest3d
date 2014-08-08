@@ -501,7 +501,10 @@ define(['viewer', 'gui', 'rest3d', 'q', 'collada', 'gltf', 'renderer', 'state', 
                                 // treeScene.Tree.jstree("select_node", "#" + realId + '__' + id);
                                 viewer.channel.selected[id] = true;
                                 window.fl4reStatus("", "selected " + viewer.pickName[id]);
+                                console.log(realId)
+                                $('#Treedef').jstree('select_node',realId);
                             }
+                            
                         }
                         else {
                             window.fl4reStatus("READY");
@@ -1228,6 +1231,7 @@ define(['viewer', 'gui', 'rest3d', 'q', 'collada', 'gltf', 'renderer', 'state', 
                     function (flag) {
                         pleaseWait(false);
                         window.notif(url);
+                        setTimeout(function(){$('#Treedef').jstree("refresh")},1000);
                     })
             }).width("90%");
             accordion.gltf.append("<hr></hr>");

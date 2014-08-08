@@ -18,7 +18,6 @@
       };
 
   var copyFile = require('./copyFile');
-  
 
    var mvFile = function(source, target, cb) {
     var cbCalled = false;

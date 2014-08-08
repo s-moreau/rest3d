@@ -8,7 +8,7 @@
 define(['rest3d', 'upload', 'viewer', 'database', 'collada', 'gltf'], function (rest3d, setViewer6Upload, viewer, databaseTab, COLLADA, glTF) {
     window.objectRest3d = {};
     var rest3dToTree = function (data, parent) {
-
+        this.tmp = false;
         var upload = "";
         this.data = data;
         this.login = data.login;
@@ -197,7 +197,7 @@ define(['rest3d', 'upload', 'viewer', 'database', 'collada', 'gltf'], function (
             } else {
                 var name = stock.nodeContext.text;
             }
-            if(stock.name=='tmp')name = stock.uploadToTmp + encodeURI(name);
+            if(stock.tmp)name = stock.uploadToTmp + encodeURI(name);
             else{name = stock.uploadToDb + encodeURI(name);}
             name = name.split("(").join("");
             name = name.split(")").join("");
@@ -205,6 +205,7 @@ define(['rest3d', 'upload', 'viewer', 'database', 'collada', 'gltf'], function (
         }
 
         this.upToTmp = function () {
+            stock.tmp = true;
             $.post(stock.setParentToUpload(stock.nodeContext), {
                 url: stock.dataUrl +'/?uuid='+ stock.nodeContext.li_attr.uuid
             }).done(function () {

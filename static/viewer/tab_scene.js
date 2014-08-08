@@ -304,6 +304,7 @@ define(['viewer'], function (viewer) {
                             viewer.scenes[i] = [];
                             viewer.draw();
                             viewer.scenes.splice(i, 1);
+                            setTimeout(viewer.draw,400)
                         }
                     }
                 }

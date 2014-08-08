@@ -405,8 +405,8 @@ define("console", function () {
         }  
       
         window.renderMenu.consoletab.css({"padding":0});
-        CONSOLE.terminal.addClass("ui-widget-content");
-
+        // CONSOLE.terminal.addClass("ui-widget-content");
+        CONSOLE.terminal.css({'background-color':'white'})
         window.renderMenu.consoletab.focusTab(function(){
             CONSOLE.terminal.removeClass("ui-widget-header");
             setTimeout(function(){CONSOLE.terminal.resize();linesToColor();},100);
