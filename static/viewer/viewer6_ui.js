@@ -695,7 +695,12 @@ define(['viewer', 'gui', 'rest3d', 'q', 'collada', 'gltf', 'renderer', 'state', 
                                 content: "Add your own features",
                             });
                             plus.click(function () {
-                                GUI.messageDialog("yes", "", "Not yet implemented")
+                                var tmp = GUI.messageDialog("yes", "UpFeatures", "");
+                                tmp.parent().width(400);
+                                tmp.css({'text-align':'center'});
+                                tmp.dialog('option', 'position', 'center');
+                                var tmp1 = GUI.image(tmp, "img-welcome", '../gui/images/under_construction.gif', 100, 100);
+                                tmp1.css({'position':'center'});
                             })
                         }
                     }
@@ -842,6 +847,8 @@ define(['viewer', 'gui', 'rest3d', 'q', 'collada', 'gltf', 'renderer', 'state', 
                     // if (data.hasOwnProperty("db")) {
                     //     setDraggable(what.createButton("db", data), guest.draggableZone, what.draggableZone);
                     // }
+                    guest.button.css({'font-size':'12px'});
+                    guest.button.css({'font-weight':'bold'});
                     guest.button.click(function () {
                         viewer.databases["tmp"]=data.tmp;
                         for(var key in viewer.databases){
@@ -853,6 +860,7 @@ define(['viewer', 'gui', 'rest3d', 'q', 'collada', 'gltf', 'renderer', 'state', 
                             var rest3dToTree = new window.rest3dToTree(viewer.databases[key],window.renderMenu["tab_"+name]);
                             $("#dialog").dialog("close");
                         }
+
                         // rest3dToTree.
                         $("#dialog").dialog("close");
                         window.renderMenu = renderMenu;
@@ -874,11 +882,10 @@ define(['viewer', 'gui', 'rest3d', 'q', 'collada', 'gltf', 'renderer', 'state', 
                     })
                 }
 
-
                 $("#dialog").dialog({
                     width: '500',
                     height: 'auto',
-                    position: ['middle', 90],
+                    position: ['middle', 160],
                     title: 'Welcome to rest3d!',
                     modal: true,
                     create: function () {
@@ -891,7 +898,6 @@ define(['viewer', 'gui', 'rest3d', 'q', 'collada', 'gltf', 'renderer', 'state', 
                         gitHtml.remove();
                     },
                 });
-
                 rest3d.info().then(callback);
             }
             //FPS counter

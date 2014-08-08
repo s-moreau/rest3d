@@ -1347,8 +1347,12 @@ define(['channel', 'codemirror', 'webglUtils', 'WebGLDebugUtils', 'pnotify', 'co
                 resizable: true,
                 height: 'auto',
                 width: 'auto',
+                position: 'center',
                 modalType: Boolean,
-                Default: false
+                Default: false,
+                close: function () {
+                    $("#" + _id).remove();
+                },
             });
             return $("#" + _id);
         };
