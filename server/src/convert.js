@@ -19,7 +19,7 @@ server.jobManager.addJob('convert', {
   concurrency: 100, //number of concurrent jobs ran at the same time, default 50 if not specified
   work: function (params) {          //The job
       this.params = params;
-      this.dirname = FileInfo.options.uploadDir+"/"+this.id; 
+      this.dirname = FileInfo.options.tmpDir+"/"+this.id; 
       this.stderr = "", this.stdout = "", this.errorCode = undefined, this.result=[], this.timeout = 1000*60*5;
       this.writeLogs = function(){
          fs.writeFile(this.dirname+"/stderr_"+this.dirname, this.stderr+".log", function(err) { //create stderr log
@@ -48,7 +48,7 @@ server.jobManager.addJob('convert', {
             files.forEach(function(fileInfo){
               if(fileInfo.type == "model/collada+xml"){
                 stock.flag = false;
-                var cmd = " ls & "+server.collada2gltf + " -p -f \"" + fileInfo.name + "\" ";
+                var cmd = server.collada2gltf + " -p -f \"" + fileInfo.name + "\" ";
                 console.log( "--> exec "+cmd);
                 stock.stdout += "--> exec "+cmd+"\n";
                 var ls = childProcess.exec(cmd, {cwd: "./"+fileInfo.path.stringBefore(fileInfo.name)} ,function (error, stdout, stderr) {

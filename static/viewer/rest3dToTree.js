@@ -231,6 +231,8 @@ define(['rest3d', 'upload', 'viewer', 'database', 'collada', 'gltf'], function (
                 url: stock.dataUrl + '/' + stock.nodeContext.li_attr.path
             }).done(function (data) {
                 console.debug(data);
+                window.renderMenu.tab_tmp.focusTab();
+                window.objectRest3d.tmp.tree.tree_tmp.jstree("refresh");
             }).fail(function (err) {
                 console.error(err)
             });

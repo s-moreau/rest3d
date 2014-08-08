@@ -11,6 +11,7 @@
   var Path = require('path');
   var Readdir = require('./readdir');
   var mkdirp = require('mkdirp');
+  var copyfile = require('./copyfile');
 
   var zipFile = {};
   zipFile.diskcache = null;
@@ -299,7 +300,11 @@
           if (!params.dryrun) {
              fileInfo.upload(params.handler, finish);
           } else
-            finish(undefined);
+            copyfile(fileInfo.path, folder+'/'+fileInfo.name, function() {
+              fileInfo.path=folder+'/'+fileInfo.name;
+              finish(undefined);
+            });
+
         } else { // other error messages are real errors
           return finish(output);
         }
