@@ -42,10 +42,10 @@ define(['viewer'], function (viewer) {
             function displayConfig(parent, object, attr) {
                 if (parent.hasOwnProperty(attr)) {
                     if (parent.hasOwnProperty('pickid')) {
-                        var id = attr + "_" + (Math.floor(Math.random() * 1000000) + 1) + "__" + parent.pickid;
+                        var id = attr + "___" + (Math.floor(Math.random() * 1000000) + 1) + "__" + parent.pickid;
                     }
                     else {
-                        var id = attr + "_" + (Math.floor(Math.random() * 1000000) + 1);
+                        var id = attr + "___" + (Math.floor(Math.random() * 1000000) + 1);
                     }
 
                     var data = {};
@@ -92,10 +92,10 @@ define(['viewer'], function (viewer) {
                         var subsel_material = stock.materials[z];
                         material.text = subsel_material.name || subsel_material.id || subsel_material.symbol || subsel_material.target;
                         if (pickId) {
-                            var id = material.text + "_" + (Math.floor(Math.random() * 1000000) + 1) + "__" + pickId;
+                            var id = material.text + "___" + (Math.floor(Math.random() * 1000000) + 1) + "__" + pickId;
                         }
                         else {
-                            var id = material.text + "_" + (Math.floor(Math.random() * 1000000) + 1);
+                            var id = material.text + "___" + (Math.floor(Math.random() * 1000000) + 1);
                         }
                         material.state = {'opened':true};
                         material.id = id;
@@ -220,7 +220,7 @@ define(['viewer'], function (viewer) {
                     var scene = {};
                     scene.text = sel.url.replace(/^.*[\\\/]/, ''); //data:
                     scene.state = {'closed':true};
-                    var id = scene.text + "_" + Math.floor(Math.random() * 1000000) + 1;
+                    var id = scene.text + "___" + Math.floor(Math.random() * 1000000) + 1;
                     window[id] = sel;
                     scene.id = id;
                     scene.li_attr = {
@@ -297,7 +297,7 @@ define(['viewer'], function (viewer) {
             }
 
             function removeModel() {
-                var id = window.nodeStocked.id.split("_")[0];
+                var id = window.nodeStocked.id.split("___")[0];
                 for (var i = 0; i < viewer.scenes.length; i++) {
                     if (viewer.scenes[i].hasOwnProperty("url")) {
                         if (viewer.scenes[i].url.replace(/^.*[\\\/]/, '') == id) {

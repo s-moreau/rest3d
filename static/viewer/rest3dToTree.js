@@ -132,7 +132,7 @@ define(['rest3d', 'upload', 'viewer', 'database', 'collada', 'gltf'], function (
 
         this.displayGltf = function () {
             window.pleaseWait(true);
-            glTF.load(stock.buildUrlData(), viewer.parse_gltf).then(
+            glTF.load("/rest3d/data/" + stock.name +'/'+stock.nodeContext.li_attr.path, viewer.parse_gltf).then(
                 function (flag) {
                     window.pleaseWait(false);
                     window.notif(stock.nodeContext.text);
@@ -232,7 +232,7 @@ define(['rest3d', 'upload', 'viewer', 'database', 'collada', 'gltf'], function (
             }).done(function (data) {
                 console.debug(data);
                 window.renderMenu.tab_tmp.focusTab();
-                window.objectRest3d.tmp.tree.tree_tmp.jstree("refresh");
+                setTimeout(function(){window.objectRest3d.tmp.tree.tree_tmp.jstree("refresh")},1000);
             }).fail(function (err) {
                 console.error(err)
             });

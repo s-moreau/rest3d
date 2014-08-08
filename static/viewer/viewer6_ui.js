@@ -1200,16 +1200,6 @@ define(['viewer', 'gui', 'rest3d', 'q', 'collada', 'gltf', 'renderer', 'state', 
             }).width("90%");
             accordion.gltf.append("<hr></hr>");
 
-            GUI.button('cow', accordion.collada, function () {
-                pleaseWait(true);
-                var url = "/models/cow/cow.dae"
-                COLLADA.load(url, viewer.parse_dae).then(
-                    function (flag) {
-                        pleaseWait(false);
-                        window.notif(url);
-                    })
-            }).width("90%");
-
             GUI.button('cow', accordion.gltf, function () {
                 pleaseWait(true);
                 var url = "/models/cow/cow.json";
@@ -1219,6 +1209,7 @@ define(['viewer', 'gui', 'rest3d', 'q', 'collada', 'gltf', 'renderer', 'state', 
                         window.notif(url);
                     })
             }).width("90%");
+            accordion.gltf.append("<hr></hr>");
 
             // GUI.button('monster', accordion.gltf, function () {
             //     pleaseWait(true);
@@ -1239,6 +1230,8 @@ define(['viewer', 'gui', 'rest3d', 'q', 'collada', 'gltf', 'renderer', 'state', 
                         window.notif(url);
                     })
             }).width("90%");
+            accordion.gltf.append("<hr></hr>");
+
 
 
             GUI.button('cat skinned + animation', accordion.gltf, function () {
