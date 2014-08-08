@@ -95,6 +95,7 @@ define(['rest3d', 'upload', 'viewer', 'database', 'collada', 'gltf'], function (
         }
 
         this.displayCollada = function () {
+            stock.tmp=true;
             if (stock.name == "warehouse") {
                 $.post(stock.setParentToUpload(stock.nodeContext), {
                     url: stock.dataUrl +'/?uuid='+ stock.nodeContext.li_attr.uuid
