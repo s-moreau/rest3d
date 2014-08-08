@@ -197,7 +197,10 @@ define(['rest3d', 'upload', 'viewer', 'database', 'collada', 'gltf'], function (
             } else {
                 var name = stock.nodeContext.text;
             }
-            if(stock.tmp)name = stock.uploadToTmp + encodeURI(name);
+            if(stock.tmp){
+                name = stock.uploadToTmp + encodeURI(name);
+                stock.tmp=false;
+            }
             else{name = stock.uploadToDb + encodeURI(name);}
             name = name.split("(").join("");
             name = name.split(")").join("");
@@ -206,23 +209,31 @@ define(['rest3d', 'upload', 'viewer', 'database', 'collada', 'gltf'], function (
 
         this.upToTmp = function () {
             stock.tmp = true;
-            $.post(stock.setParentToUpload(stock.nodeContext), {
-                url: stock.dataUrl +'/?uuid='+ stock.nodeContext.li_attr.uuid
-            }).done(function () {
-                window.renderMenu.tab_tmp.focusTab();
-            }).fail(function (err) {
-                console.error(err)
+            var tmp = window.objectRest3d.tmp;
+            var name =  stock.setParentToUpload(stock.nodeContext);
+            $.post(tmp.uploadUrl,{'collection':name.split(stock.uploadToTmp).join('')}).done(function(){
+                $.post(name, {
+                    url: stock.buildUrlData(stock.nodeContext)
+                }).done(function () {
+                    window.renderMenu.tab_tmp.focusTab();
+                }).fail(function (err) {
+                    console.error(err)
+                });                
             });
         }
 
         this.upToDb = function () {
-            $.post(stock.setParentToUpload(stock.nodeContext), {
-                url: stock.buildUrlData(stock.nodeContext)
-            }).done(function () {
-                window.renderMenu.tab_db.focusTab();
-            }).fail(function (err) {
-                console.error(err)
-            })
+            var db = window.objectRest3d.db;
+            var name = stock.setParentToUpload(stock.nodeContext);
+            $.post(db.uploadUrl,{'collection':name.split(stock.uploadToDb).join('')}).done(function(){
+                $.post(stock.setParentToUpload(stock.nodeContext), {
+                    url: stock.buildUrlData(stock.nodeContext)
+                }).done(function () {
+                    window.renderMenu.tab_db.focusTab();
+                }).fail(function (err) {
+                    console.error(err)
+                });
+            });
         }
 
         this.convertMenu = function () {
