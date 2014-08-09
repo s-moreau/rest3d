@@ -297,7 +297,9 @@ define(['viewer'], function (viewer) {
             }
 
             function removeModel() {
-                $('.ui-pnotify-container').remove();
+                for(var i=0;i<$('.ui-pnotify-container').length;i++){
+                    $($('.ui-pnotify-container')[i]).find(".ui-icon-close").click();
+                };
                 var id = window.nodeStocked.id.split("___")[0];
                 for (var i = 0; i < viewer.scenes.length; i++) {
                     if (viewer.scenes[i].hasOwnProperty("url")) {
