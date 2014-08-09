@@ -297,6 +297,7 @@ define(['viewer'], function (viewer) {
             }
 
             function removeModel() {
+                $('.ui-pnotify-container').remove();
                 var id = window.nodeStocked.id.split("___")[0];
                 for (var i = 0; i < viewer.scenes.length; i++) {
                     if (viewer.scenes[i].hasOwnProperty("url")) {
@@ -538,7 +539,7 @@ define(['viewer'], function (viewer) {
                             return callbackArray[g].parent[callbackArray[g].type] = value;
                         };
                         if (callbackArray[g].type == "local") {
-                            local(callbackArray, g)
+                            local(callbackArray, g);
                         }
                         else {
                             display(callbackArray, g);

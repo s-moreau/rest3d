@@ -501,8 +501,7 @@ define(['viewer', 'gui', 'rest3d', 'q', 'collada', 'gltf', 'renderer', 'state', 
                                 // treeScene.Tree.jstree("select_node", "#" + realId + '__' + id);
                                 viewer.channel.selected[id] = true;
                                 window.fl4reStatus("", "selected " + viewer.pickName[id]);
-                                console.log(realId)
-                                $('#Treedef').jstree('select_node',realId);
+                                //$('#Treedef').jstree('select_node',realId); (select node in scene tree)
                             }
                             
                         }
@@ -1236,7 +1235,7 @@ define(['viewer', 'gui', 'rest3d', 'q', 'collada', 'gltf', 'renderer', 'state', 
                 glTF.load(url, viewer.parse_gltf).then(
                     function (flag) {
                         pleaseWait(false);
-                        window.notif(url);
+                        window.notif(url.split('/').pop());
                         setTimeout(function(){$('#Treedef').jstree("refresh")},1000);
                     })
             }).width("90%");
