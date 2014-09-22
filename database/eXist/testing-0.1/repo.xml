@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<meta xmlns="http://exist-db.org/xquery/repo">
+    <description>toying with eXist for the rest3d project</description>
+    <author>rémi arnaud</author>
+    <author>simon moreau</author>
+    <author>simon moreau</author>
+    <website/>
+    <status>alpha</status>
+    <license>GNU-LGPL</license>
+    <copyright>true</copyright>
+    <type>application</type>
+    <target>testing</target>
+    <prepare>pre-install.xql</prepare>
+    <finish/>
+</meta>

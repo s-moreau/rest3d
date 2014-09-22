@@ -1,0 +1,259 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<div xmlns="http://www.w3.org/1999/xhtml" data-template="templates:surround" data-template-with="templates/page.html" data-template-at="content">
+    <head>
+        <script type="text/javascript" src="dropzone.js"/>
+        <script>
+        // script to see if the loading of an external script worked or failed, ! incompatible with IE or safari maybe
+        var script_tag = document.createElement('script');
+        script_tag.setAttribute('type', 'text/javascript');
+        script_tag.setAttribute('src', 'dropzone.js');
+        script_tag.onerror = function() { alert("Loading failed!"); }
+        document.getElementsByTagName('head')[0].appendChild(script_tag);
+        </script>
+        
+<!--        to open links in new tabs-->
+<!--        <base target="_blank"/>-->
+        <script>
+    var Dropzone = require("enyo-dropzone");
+    Dropzone.autoDiscover = false;
+</script>
+        <style>
+    html, body {
+      height: 100%;
+    }
+    #actions {
+      margin: 2em 0;
+    }
+
+
+    /* Mimic table appearance */
+    div.table {
+      display: table;
+    }
+    div.table .file-row {
+      display: table-row;
+    }
+    div.table .file-row &gt; div {
+      display: table-cell;
+      vertical-align: top;
+      border-top: 1px solid #ddd;
+      padding: 8px;
+    }
+    div.table .file-row:nth-child(odd) {
+      background: #f9f9f9;
+    }
+
+
+
+    /* The total progress gets shown by event listeners */
+    #total-progress {
+      opacity: 0;
+      transition: opacity 0.3s linear;
+    }
+
+    /* Hide the progress bar when finished */
+    #previews .file-row.dz-success .progress {
+      opacity: 0;
+      transition: opacity 0.3s linear;
+    }
+
+    /* Hide the delete button initially */
+    #previews .file-row .delete {
+      display: none;
+    }
+
+    /* Hide the start and cancel buttons and show the delete button */
+
+    #previews .file-row.dz-success .start,
+    #previews .file-row.dz-success .cancel {
+      display: none;
+    }
+    #previews .file-row.dz-success .delete {
+      display: block;
+    }
+</style>
+    </head>
+    <body>
+        <div class="container" id="container">
+            <h1>Dropzone.js</h1>
+            <h2 class="lead">Configuration Demo</h2>
+            <ul class="nav nav-tabs">
+                <li>
+                    <a href="http://www.dropzonejs.com">Back to www.dropzonejs.com</a>
+                </li>
+                <li class="active">
+                    <a href="#">Bootstrap theme</a>
+                </li>
+            </ul>
+            <br/>
+            <blockquote>
+                <p>
+        This is a bootstrap theme of Dropzone.js with a completely different user experience.<br/>
+        It is a demonstration of the powerful configuration possibilities of <a href="http://www.dropzonejs.com">Dropzone.js</a>.
+        You can make Dropzone.js look exactly how you want it to look and it's very easy to do so.
+      </p>
+            </blockquote>
+            <br/>
+            <div id="actions" class="row">
+                <div class="col-lg-7">
+        <!-- The fileinput-button span is used to style the file input field as button -->
+                    <span class="btn btn-success fileinput-button dz-clickable">
+                        <i class="glyphicon glyphicon-plus"/>
+                        <span>Add files...</span>
+                    </span>
+                    <button type="submit" class="btn btn-primary start">
+                        <i class="glyphicon glyphicon-upload"/>
+                        <span>Start upload</span>
+                    </button>
+                    <button type="reset" class="btn btn-warning cancel">
+                        <i class="glyphicon glyphicon-ban-circle"/>
+                        <span>Cancel upload</span>
+                    </button>
+                </div>
+                <div class="col-lg-5">
+        <!-- The global file processing state -->
+                    <span class="fileupload-process">
+                        <div id="total-progress" class="progress progress-striped active" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0">
+                            <div class="progress-bar progress-bar-success" style="width:0%;" data-dz-uploadprogress=""/>
+                        </div>
+                    </span>
+                </div>
+            </div>
+            <div class="table table-striped" id="previews"/>
+            <script>
+      // Get the template HTML and remove it from the doument
+      var previewNode = document.querySelector("#template");
+      previewNode.id = "";
+      var previewTemplate = previewNode.parentNode.innerHTML;
+      previewNode.parentNode.removeChild(previewNode);
+
+      var myDropzone = new Dropzone(document.body, { // Make the whole body a dropzone
+        url: "http://www.torrentplease.com/dropzone.php", // Set the url
+        thumbnailWidth: 80,
+        thumbnailHeight: 80,
+        parallelUploads: 20,
+        previewTemplate: previewTemplate,
+        autoQueue: false, // Make sure the files aren't queued until manually added
+        previewsContainer: "#previews", // Define the container to display the previews
+        clickable: ".fileinput-button" // Define the element that should be used as click trigger to select files.
+      });
+
+      myDropzone.on("addedfile", function(file) {
+        // Hookup the start button
+        file.previewElement.querySelector(".start").onclick = function() { myDropzone.enqueueFile(file); };
+      });
+
+      // Update the total progress bar
+      myDropzone.on("totaluploadprogress", function(progress) {
+        document.querySelector("#total-progress .progress-bar").style.width = progress + "%";
+      });
+
+      myDropzone.on("sending", function(file) {
+        // Show the total progress bar when upload starts
+        document.querySelector("#total-progress").style.opacity = "1";
+        // And disable the start button
+        file.previewElement.querySelector(".start").setAttribute("disabled", "disabled");
+      });
+
+      // Hide the total progress bar when nothing's uploading anymore
+      myDropzone.on("queuecomplete", function(progress) {
+        document.querySelector("#total-progress").style.opacity = "0";
+      });
+
+      // Setup the buttons for all transfers
+      // The "add files" button doesn't need to be setup because the config
+      // `clickable` has already been specified.
+      document.querySelector("#actions .start").onclick = function() {
+        myDropzone.enqueueFiles(myDropzone.getFilesWithStatus(Dropzone.ADDED));
+      };
+      document.querySelector("#actions .cancel").onclick = function() {
+        myDropzone.removeAllFiles(true);
+      };
+    </script>
+            <div class="panel panel-default">
+                <div class="panel-heading">
+                    <h3 class="panel-title">Advantages</h3>
+                </div>
+                <div class="panel-body">
+                    <ul>
+                        <li>No jQuery dependency</li>
+                        <li>Extremely easy configuration so it looks exactly how you want it to look</li>
+                        <li>Fast fast fast.</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+        <div>
+            <button id="clickable">Click me to select files</button>
+            <br/>
+            <script> window.Dropzone </script>
+            <form id="my-awesome-dropzone" action="/target" class="dropzone"/>
+            <br/>
+        </div>
+        <div>
+            <p id="demo"/>
+            <script>    
+                document.getElementById("demo").innerHTML = "Hello JavaScript!";    
+            </script>
+            <noscript>  Sorry, your browser does not support JavaScript!</noscript>
+            <p>A browser without support for JavaScript will show the text written inside the noscript element.</p>
+        </div>
+        <div class="row-fluid">
+            <div class="span8">
+                <div class="page-header">
+                    <h1 data-template="config:app-title">Generated page</h1>
+                </div>
+                <div class="alert alert-success">
+                    <p>
+                        <a data-template="templates:load-source" href="index.html">This</a> is the entry page into your application 
+                and was generated by eXide. It uses HTML templates for a clean separation of HTML views and application logic.</p>
+                    <p>To add your own template functions, start by editing the XQuery module
+                <a data-template="templates:load-source" href="modules/app.xql">app.xql</a>.</p>
+                </div>
+                <div class="row-fluid">
+                    <div class="span6">
+                        <p>The page template uses the <a href="http://twitter.github.com/bootstrap/">Bootstrap</a>
+                    CSS library for the page layout.</p>
+                    </div>
+                    <div class="span6">
+                        <div data-template="app:test"/>
+                    </div>
+                </div>
+            </div>
+            <div class="span4">
+                <h2>Application Info</h2>
+                <div data-template="config:app-info"/>
+            </div>
+        </div>
+        <div>
+            <form enctype="multipart/form-data" method="post" action="modules/upload.xql">
+                <fieldset>
+                    <legend>Upload Document:</legend>
+                    <input type="file" name="file"/>
+                    <input type="submit" value="Upload"/>
+                </fieldset>
+            </form>
+        </div>
+        <div>
+        
+        
+<!--     need to find a way to populate the list       -->
+            <form action="">
+                <legend>Delete Document:</legend>
+                <select name="document">
+                    <option value="test1">test1</option>
+                    <option value="tes2">test2</option>
+                </select>
+            </form>
+            <form enctype="multipart/form-data" method="get" action="modules/deleteConfirmation.xql">
+                <legend>Delete Document:</legend>
+                <input type="text" name="file"/>
+                <input type="submit" value="Delete"/>
+            </form>
+        </div>
+        <div class="page-header">
+            <summary>Database files in /db/test/</summary>
+            <iframe src="modules/getDatabase.xql" name="targetframe" allowTransparency="true" scrolling="no" frameborder="0"/>
+        </div>
+    </body>
+</div>
