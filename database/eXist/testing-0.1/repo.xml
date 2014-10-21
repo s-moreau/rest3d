@@ -12,4 +12,5 @@
     <target>testing</target>
     <prepare>pre-install.xql</prepare>
     <finish/>
+    <deployed>2014-09-22T16:32:41.174-07:00</deployed>
 </meta>

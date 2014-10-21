@@ -6,11 +6,10 @@ declare option exist:serialize "method=html5 media-type=text/html";
 (:declare option exist:serialize "method=javascript media-type=text/javascript";:)
 
 
+
+
 let $collection := '/db/test/'
 let $filename := request:get-uploaded-file-name('file')
-
-let $redirect-uri := "../index.html"
-let $hash-alg := 'sha1'
 
 (: make sure you use the right user permissions that has write access to this collection :) 
 let $login := xmldb:login($collection, 'admin', 'simon')

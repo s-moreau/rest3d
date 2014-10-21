@@ -21,9 +21,28 @@ let $file-path := concat($file-dir,$file)
         
 (: delete the file :)
 let $result :=
-if (doc-available($file-path)) 
+if (util:binary-doc-available($file-path)) 
 then(
         let $deletion := xmldb:remove($file-dir, $file)
+        return
+        if (util:binary-doc-available($file-path))
+        then(
+            <error>
+            Deletion failed
+            <details>file deletion failure</details>
+            </error>
+            )
+        else(
+            <message>
+            File deleted
+            <details>file deleted with sucess</details>
+            </message>
+            ) 
+    )
+else(
+if (doc-available($file-path)) 
+then(
+        let $deletion := file:delete('random')
         return
         if (doc-available($file-path))
         then(
@@ -44,7 +63,13 @@ else(
         <message>File doesn't exists</message>
         <details>No file with that name found</details>
     </error>
+)
     )
 return
-<message> { $result }<a href="../index.html">Return to main page</a> </message>
+<div xmlns="http://www.w3.org/1999/xhtml" data-template="templates:surround" data-template-with="templates/page.html" data-template-at="content">
+<message>{$result }<a href="../index.html">Return to main page</a> </message>
+
+
+
+</div>
 

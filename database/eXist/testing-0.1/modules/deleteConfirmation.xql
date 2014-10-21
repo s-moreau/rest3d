@@ -2,6 +2,8 @@ xquery version "3.0";
 
 declare option exist:serialize "method=xhtml media-type=text/html indent=yes";
 
+
+
 let $file := request:get-parameter("file", "")
 
 let $data-collection := '/db/test/'
@@ -9,7 +11,8 @@ let $extension := '.xml'
 let $filePath := concat($data-collection, $file)
 
 return
-<html>
+
+<div xmlns="http://www.w3.org/1999/xhtml" data-template="templates:surround" data-template-with="templates/page.html" data-template-at="content">
     <head>
         <title>Delete Confirmation</title>
         <style>
@@ -28,4 +31,4 @@ return
         <br/>
         <a  class="warn" href="../index.html">Cancel</a>
     </body>
-</html>
+</div>

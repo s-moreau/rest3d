@@ -1,126 +1,270 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <div xmlns="http://www.w3.org/1999/xhtml" data-template="templates:surround" data-template-with="templates/page.html" data-template-at="content">
     <head>
-        <script type="text/javascript" src="dropzone.js"/>
+        <div id="warning"/>
+    
+    <!-- Latest compiled and minified CSS -->
+        <link rel="stylesheet" href="http://netdna.bootstrapcdn.com/bootstrap/3.1.1/css/bootstrap.min.css"/>
+    <!-- Optional theme -->
+        <link rel="stylesheet" href="http://netdna.bootstrapcdn.com/bootstrap/3.1.1/css/bootstrap-theme.min.css"/>
+    
+    <!-- jquery-->
+        <script type="text/javascript" src="resources/js/jquery-1.11.1.js"/>
+    
+    <!-- to encrypt data in the database-->
+        // projet rusha.js  https://github.com/srijs/rusha
+        <script type="text/javascript" src="resources/js/rusha.js"/>
+        <script type="text/javascript" src="resources/js/hash.js"/>
+        
+        // used to make own sha1 hashing worker (not useful anymore)
+        //<script type="text/javascript" src="resources/js/sha1.js"/>
+        //<script type="text/javascript" src="resources/js/sha1_file.js"/>
+        //<script type="text/javascript" src="resources/js/file_get_contents.js"/>
+        
+    <!-- Dropzone -->
+        <script src="resources/js/dropzone.js"/>
+        <link rel="stylesheet" type="text/css" href="resources/css/dropzone.css"/>
+        
+        
+        
+    <!-- Optional Script to see if the loading of an external script worked or failed, ! incompatible with IE or safari maybe  -->
         <script>
-        // script to see if the loading of an external script worked or failed, ! incompatible with IE or safari maybe
-        var script_tag = document.createElement('script');
-        script_tag.setAttribute('type', 'text/javascript');
-        script_tag.setAttribute('src', 'dropzone.js');
-        script_tag.onerror = function() { alert("Loading failed!"); }
-        document.getElementsByTagName('head')[0].appendChild(script_tag);
+        //     var script_tag = document.createElement('script');
+        //     script_tag.setAttribute('type', 'text/javascript');
+        //     script_tag.setAttribute('src', 'resources/js/dropzone.js');
+        //     script_tag.onerror = function() { alert("Loading failed!"); }
+        //     document.getElementsByTagName('head')[0].appendChild(script_tag);
+         </script>
+    
+    <!-- Optional script to check for the various File API support.-->
+        <script>
+        
+            if(window.File &amp;&amp; window.FileReader &amp;&amp;  window.FileList &amp;&amp; window.Blob){
+            // Great success! All the File APIs are supported.
+            } 
+            else{
+            alert('The File APIs are not fully supported in this browser.');
+            }
+        
         </script>
         
-<!--        to open links in new tabs-->
-<!--        <base target="_blank"/>-->
-        <script>
-    var Dropzone = require("enyo-dropzone");
-    Dropzone.autoDiscover = false;
-</script>
+    <!--        to open links in new tabs-->
+    <!--        <base target="_blank"/>-->
+
+
+    <!--   style for the customed dropzone-->
         <style>
-    html, body {
-      height: 100%;
-    }
-    #actions {
-      margin: 2em 0;
-    }
+        html, body {
+          height: 100%;
+        }
+        #actions {
+          margin: 2em 0;
+        }
+    
+        /* Mimic table appearance */
+        div.table {
+          display: table;
+        }
+        div.table .file-row {
+          display: table-row;
+        }
+        div.table .file-row &gt; div {
+          display: table-cell;
+          vertical-align: top;
+          border-top: 1px solid #ddd;
+          padding: 8px;
+        }
+        div.table .file-row:nth-child(odd) {
+          background: #f9f9f9;
+        }
 
+        /* The total progress gets shown by event listeners */
+        #total-progress {
+          opacity: 0;
+          transition: opacity 0.3s linear;
+        }
+    
+        /* Hide the progress bar when finished */
+        #previews .file-row.dz-success .progress {
+          opacity: 0;
+          transition: opacity 0.3s linear;
+        }
+    
+        /* Hide the delete button initially */
+        #previews .file-row .delete {
+          display: none;
+        }
+    
+        /* Hide the start and cancel buttons and show the delete button */
+    
+        #previews .file-row.dz-success .start,
+        #previews .file-row.dz-success .cancel {
+          display: none;
+        }
+        #previews .file-row.dz-success .delete {
+          display: block;
+        }
+        
+    </style>
+    
+    <!--   some customed style-->
+        <style>
+        .btn{
+            margin: 2px;
+        }
 
-    /* Mimic table appearance */
-    div.table {
-      display: table;
-    }
-    div.table .file-row {
-      display: table-row;
-    }
-    div.table .file-row &gt; div {
-      display: table-cell;
-      vertical-align: top;
-      border-top: 1px solid #ddd;
-      padding: 8px;
-    }
-    div.table .file-row:nth-child(odd) {
-      background: #f9f9f9;
-    }
-
-
-
-    /* The total progress gets shown by event listeners */
-    #total-progress {
-      opacity: 0;
-      transition: opacity 0.3s linear;
-    }
-
-    /* Hide the progress bar when finished */
-    #previews .file-row.dz-success .progress {
-      opacity: 0;
-      transition: opacity 0.3s linear;
-    }
-
-    /* Hide the delete button initially */
-    #previews .file-row .delete {
-      display: none;
-    }
-
-    /* Hide the start and cancel buttons and show the delete button */
-
-    #previews .file-row.dz-success .start,
-    #previews .file-row.dz-success .cancel {
-      display: none;
-    }
-    #previews .file-row.dz-success .delete {
-      display: block;
-    }
-</style>
+        .glyphicon{
+            margin-right: 5px;
+        }
+        
+        .center-block {
+          /*display: block;*/
+          margin-left: auto;
+          margin-right: auto;
+        }  
+          
+        #drop_zone {
+          border: 2px dashed #81d8d0;
+          -moz-border-radius: 5px;
+          -webkit-border-radius: 5px;
+          border-radius: 5px;
+          padding: 25px;
+          text-align: center;
+          font: 20pt bold 'Helvetica';
+          color: #bbbbbb;
+        }`
+             
+        #byte_content {
+            margin: 5px 0;
+            max-height: 100px;
+            overflow-y: auto;
+            overflow-x: hidden;
+        }
+          
+        #byte_range { 
+            margin-top: 5px; 
+        }
+    </style>
     </head>
     <body>
-        <div class="container" id="container">
-            <h1>Dropzone.js</h1>
-            <h2 class="lead">Configuration Demo</h2>
-            <ul class="nav nav-tabs">
-                <li>
-                    <a href="http://www.dropzonejs.com">Back to www.dropzonejs.com</a>
-                </li>
-                <li class="active">
-                    <a href="#">Bootstrap theme</a>
-                </li>
-            </ul>
-            <br/>
-            <blockquote>
-                <p>
-        This is a bootstrap theme of Dropzone.js with a completely different user experience.<br/>
-        It is a demonstration of the powerful configuration possibilities of <a href="http://www.dropzonejs.com">Dropzone.js</a>.
-        You can make Dropzone.js look exactly how you want it to look and it's very easy to do so.
-      </p>
-            </blockquote>
-            <br/>
-            <div id="actions" class="row">
-                <div class="col-lg-7">
-        <!-- The fileinput-button span is used to style the file input field as button -->
-                    <span class="btn btn-success fileinput-button dz-clickable">
-                        <i class="glyphicon glyphicon-plus"/>
-                        <span>Add files...</span>
-                    </span>
-                    <button type="submit" class="btn btn-primary start">
-                        <i class="glyphicon glyphicon-upload"/>
-                        <span>Start upload</span>
-                    </button>
-                    <button type="reset" class="btn btn-warning cancel">
-                        <i class="glyphicon glyphicon-ban-circle"/>
-                        <span>Cancel upload</span>
-                    </button>
+        <div class="row-fluid">
+            <div class="span8">
+                <div class="page-header">
+                    <h1 data-template="config:app-title">Generated page</h1>
                 </div>
-                <div class="col-lg-5">
-        <!-- The global file processing state -->
-                    <span class="fileupload-process">
-                        <div id="total-progress" class="progress progress-striped active" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0">
-                            <div class="progress-bar progress-bar-success" style="width:0%;" data-dz-uploadprogress=""/>
-                        </div>
-                    </span>
+                <div class="alert alert-success">
+                    <p>
+                        <a data-template="templates:load-source" href="index.html">This</a> is the entry page into your application 
+                and was generated by eXide. It uses HTML templates for a clean separation of HTML views and application logic.</p>
+                    <p>To add your own template functions, start by editing the XQuery module
+                <a data-template="templates:load-source" href="modules/app.xql">app.xql</a>.</p>
+                </div>
+                <div class="row-fluid">
+                    <div class="span6">
+                        <p>The page template uses the <a href="http://twitter.github.com/bootstrap/">Bootstrap</a>
+                    CSS library for the page layout.</p>
+                    </div>
+                    <div class="span6">
+                        <div data-template="app:test"/>
+                    </div>
                 </div>
             </div>
-            <div class="table table-striped" id="previews"/>
-            <script>
+            <div class="span4">
+                <h2>Application Info</h2>
+                <div data-template="config:app-info"/>
+            </div>
+        </div>
+        <br/>
+        <br/>
+        <br/>
+        <ul class="nav nav-tabs">
+            <li>
+                <a href="#manual_upload" data-toggle="tab">manual upload</a>
+            </li>
+            <li>
+                <a href="#default_dropzone" data-toggle="tab">default dropzone</a>
+            </li>
+            <li class="active">
+                <a href="#customed_dropzone" data-toggle="tab">customed dropzone</a>
+            </li>
+        </ul>
+        <div class="tab-content">
+            <br/>
+            <div id="manual_upload" class="tab-pane fade in">
+                <form enctype="multipart/form-data" method="post" action="modules/upload.xql">
+                    <fieldset>
+                        <legend>Upload Document:</legend>
+                        <input type="file" name="file"/>
+                        <input type="submit" value="Upload"/>
+                    </fieldset>
+                </form>
+            </div>
+            <div id="default_dropzone" class="tab-pane fade in">
+                <div id="dropzone">
+                    <form action="modules/upload.xql" class="dropzone" id="demo-upload"/>
+                </div>
+            </div>
+            <div id="customed_dropzone" class="tab-pane fade in active">
+                <div id="actions" class="row-fluid">
+                    <div class="span6">
+        <!-- The fileinput-button span is used to style the file input field as button -->
+                        <span class="btn btn-success fileinput-button">
+                            <i class="glyphicon glyphicon-plus"/>
+                            <span>Add files...</span>
+                        </span>
+                        <button type="submit" class="btn btn-primary start">
+                            <i class="glyphicon glyphicon-upload"/>
+                            <span>Start upload</span>
+                        </button>
+                        <button type="reset" class="btn btn-warning cancel">
+                            <i class="glyphicon glyphicon-ban-circle"/>
+                            <span>Cancel upload</span>
+                        </button>
+                    </div>
+                    <div class="span6">
+        <!-- The global file processing state -->
+                        <span class="fileupload-process">
+                            <div id="total-progress" class="progress progress-striped active" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0">
+                                <div class="progress-bar progress-bar-success" style="width:0%;" data-dz-uploadprogress=""/>
+                            </div>
+                        </span>
+                    </div>
+                </div>
+                <div class="table table-striped files" id="previews">
+                    <div id="template" class="file-row row">
+                    <!-- This is used as the file preview template -->
+                        <div class="span1">
+                            <span class="preview">
+                                <img data-dz-thumbnail=""/>
+                            </span>
+                        </div>
+                        <div class="span2">
+                            <p class="name" data-dz-name=""/>
+                            <strong class="error text-danger" data-dz-errormessage=""/>
+                        </div>
+                        <div class="span2">
+                            <p class="size" data-dz-size=""/>
+                            <div class="progress progress-striped active" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0">
+                                <div class="progress-bar progress-bar-success" style="width:0%;" data-dz-uploadprogress=""/>
+                            </div>
+                        </div>
+                        <div class="span4">
+                            <button class="btn btn-primary start">
+                                <i class="glyphicon glyphicon-upload"/>
+                                <span>Start</span>
+                            </button>
+                            <button data-dz-remove="" class="btn btn-warning cancel">
+                                <i class="glyphicon glyphicon-ban-circle"/>
+                                <span>Cancel</span>
+                            </button>
+                            <button data-dz-remove="" class="btn btn-danger delete">
+                                <i class="glyphicon glyphicon-trash"/>
+                                <span>Delete</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                <script>
       // Get the template HTML and remove it from the doument
       var previewNode = document.querySelector("#template");
       previewNode.id = "";
@@ -128,7 +272,7 @@
       previewNode.parentNode.removeChild(previewNode);
 
       var myDropzone = new Dropzone(document.body, { // Make the whole body a dropzone
-        url: "http://www.torrentplease.com/dropzone.php", // Set the url
+        url: "modules/upload.xql", // Set the url
         thumbnailWidth: 80,
         thumbnailHeight: 80,
         parallelUploads: 20,
@@ -170,90 +314,120 @@
         myDropzone.removeAllFiles(true);
       };
     </script>
-            <div class="panel panel-default">
-                <div class="panel-heading">
-                    <h3 class="panel-title">Advantages</h3>
-                </div>
-                <div class="panel-body">
-                    <ul>
-                        <li>No jQuery dependency</li>
-                        <li>Extremely easy configuration so it looks exactly how you want it to look</li>
-                        <li>Fast fast fast.</li>
-                    </ul>
-                </div>
             </div>
-        </div>
-        <div>
-            <button id="clickable">Click me to select files</button>
-            <br/>
-            <script> window.Dropzone </script>
-            <form id="my-awesome-dropzone" action="/target" class="dropzone"/>
             <br/>
         </div>
-        <div>
-            <p id="demo"/>
-            <script>    
-                document.getElementById("demo").innerHTML = "Hello JavaScript!";    
-            </script>
-            <noscript>  Sorry, your browser does not support JavaScript!</noscript>
-            <p>A browser without support for JavaScript will show the text written inside the noscript element.</p>
-        </div>
+        <br/>
         <div class="row-fluid">
             <div class="span8">
-                <div class="page-header">
-                    <h1 data-template="config:app-title">Generated page</h1>
-                </div>
-                <div class="alert alert-success">
-                    <p>
-                        <a data-template="templates:load-source" href="index.html">This</a> is the entry page into your application 
-                and was generated by eXide. It uses HTML templates for a clean separation of HTML views and application logic.</p>
-                    <p>To add your own template functions, start by editing the XQuery module
-                <a data-template="templates:load-source" href="modules/app.xql">app.xql</a>.</p>
-                </div>
-                <div class="row-fluid">
-                    <div class="span6">
-                        <p>The page template uses the <a href="http://twitter.github.com/bootstrap/">Bootstrap</a>
-                    CSS library for the page layout.</p>
+                <ul class="nav nav-tabs">
+                    <li>
+                        <a href="#delete1" data-toggle="tab">delete1</a>
+                    </li>
+                    <li>
+                        <a href="#delete2" data-toggle="tab">delete2</a>
+                    </li>
+                    <li class="active">
+                        <a href="#delete3" data-toggle="tab">delete3</a>
+                    </li>
+                </ul>
+                <div class="tab-content">
+                    <br/>
+                    <div id="delete1" class="tab-pane fade in">
+                        <form enctype="multipart/form-data" method="get" action="modules/deleteConfirmation.xql">
+                            <legend>Delete Document:</legend>
+                            <input type="text" name="file"/>
+                            <input type="submit" value="Delete"/>
+                        </form>
                     </div>
-                    <div class="span6">
-                        <div data-template="app:test"/>
+                    <div id="delete2" class="tab-pane fade in">
+            <!--     need to find a way to populate the list       -->
+                        <form action="">
+                            <legend>Delete Document:</legend>
+                            <select name="document">
+                                <option value="test1">test1</option>
+                                <option value="tes2">test2</option>
+                            </select>
+                        </form>
                     </div>
+                    <div id="delete3" class="tab-pane fade in active">
+                        <input type="file" id="filej"/>
+                        <p id="log"/>
+                        <script>
+                            $(document).ready(function(){
+                            var input = document.getElementById("filej");
+                            
+                            input.onclick = function () {
+                                this.value = null;
+                            };
+       
+                            input.onchange = function () {
+                                var sha1 = sha1_file(input.value);
+    
+                                document.getElementById("log").innerHTML = sha1;
+                            };
+                            
+                            
+                            
+                            // // script to get the name of the file entered in the path
+                            // input.onchange = function () {
+                            //     var path = input.value;
+                            //     var filename = "";
+                            //     if(path.lastIndexOf("\\") != -1)
+                            //         filename = path.substring(path.lastIndexOf("\\") + 1,path.length);
+                            //     else
+                            //         filename = path.substring(path.lastIndexOf("/") + 1,path.length);
+                            //     document.getElementById("log").innerHTML = filename;
+                            // };
+                            });
+                        </script>
+                        <div id="drop_zone">Drop files here</div>
+                        <output id="list"/>
+                        <script>
+                                  function handleFileSelect(evt) {
+                                    evt.stopPropagation();
+                                    evt.preventDefault();
+                                
+                                    var files = evt.dataTransfer.files; // FileList object.
+                                
+                                    // files is a FileList of File objects. List some properties.
+                                    var output = [];
+                                    for (var i = 0, f; f = files[i]; i++) {
+                                      output.push('<li>
+                                <strong>', escape(f.name), '</strong> (', f.type || 'n/a', ') - ',
+                                                  f.size, ' bytes, last modified: ',
+                                                  f.lastModifiedDate ? f.lastModifiedDate.toLocaleDateString() : 'n/a',
+                                                  '</li>');
+                                    }
+                                    document.getElementById('list').innerHTML = '<ul>' + output.join('') + '</ul>';
+                                  }
+                                
+                                  function handleDragOver(evt) {
+                                    evt.stopPropagation();
+                                    evt.preventDefault();
+                                    evt.dataTransfer.dropEffect = 'copy'; // Explicitly show this is a copy.
+                                  }
+                                
+                                  // Setup the dnd listeners.
+                                  var dropZone = document.getElementById('drop_zone');
+                                  dropZone.addEventListener('dragover', handleDragOver, false);
+                                  dropZone.addEventListener('drop', handleFileSelect, false);
+                            </script>
+                        <input type="file" id="filesToHash"/>
+                        <button id="HashButton" onclick="HashFile()"> Entire file </button>
+                        <div id="byte_range"/>
+                        <div id="byte_sha1"/>
+                        <div id="byte_content"/>
+                    </div>
+                    <br/>
                 </div>
             </div>
             <div class="span4">
-                <h2>Application Info</h2>
-                <div data-template="config:app-info"/>
+                <div class="page-header">
+                    <summary>Database files in /db/test/</summary>
+                    <iframe src="modules/getDatabase.xql" name="targetframe" allowTransparency="true" scrolling="yes" frameborder="0" height="1500" width=""/>
+                </div>
             </div>
-        </div>
-        <div>
-            <form enctype="multipart/form-data" method="post" action="modules/upload.xql">
-                <fieldset>
-                    <legend>Upload Document:</legend>
-                    <input type="file" name="file"/>
-                    <input type="submit" value="Upload"/>
-                </fieldset>
-            </form>
-        </div>
-        <div>
-        
-        
-<!--     need to find a way to populate the list       -->
-            <form action="">
-                <legend>Delete Document:</legend>
-                <select name="document">
-                    <option value="test1">test1</option>
-                    <option value="tes2">test2</option>
-                </select>
-            </form>
-            <form enctype="multipart/form-data" method="get" action="modules/deleteConfirmation.xql">
-                <legend>Delete Document:</legend>
-                <input type="text" name="file"/>
-                <input type="submit" value="Delete"/>
-            </form>
-        </div>
-        <div class="page-header">
-            <summary>Database files in /db/test/</summary>
-            <iframe src="modules/getDatabase.xql" name="targetframe" allowTransparency="true" scrolling="no" frameborder="0"/>
         </div>
     </body>
 </div>
